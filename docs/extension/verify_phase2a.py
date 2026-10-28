@@ -263,3 +263,18 @@ for r, c, lab in [(0, 1, "loyalty P->P"), (0, 2, "defection P->O"), (0, 0, "demo
     dd = (np.sum(Nn * np.maximum(0, X[:, r] + Tc - 1)) / mu_r[r], np.sum(Nn * np.minimum(X[:, r], Tc)) / mu_r[r])
     print(f"       {lab:27s} truth {Bstar_true[r, c]:.3f}   outer [{const + L:.3f}, {const + U:.3f}]   DD [{dd[0]:.3f}, {dd[1]:.3f}]")
     ok(f"3x3 example: truth inside outer bound for {lab}", const + L - 1e-9 <= Bstar_true[r, c] <= const + U + 1e-9)
+
+# ---------- Proposition 7: coefficient gamma of a linear target ----------
+bad = 0
+for _ in range(100):
+    R, C = int(rng.integers(2, 5)), int(rng.integers(2, 5))
+    a = rng.normal(size=(R, C))
+    m = rng.uniform(0.1, 1, (R, R)); m = (m + m.T) / 2; mr = rng.uniform(0.5, 2, R)
+    nk = (C - 1) * len(pairs(R))
+    for j in range(nk):
+        e = np.zeros(nk); e[j] = 1; Kc = K_from_vec(e, R, C)
+        direct = sum(a[r, c] / mr[r] * (Kc[c][r] @ m[r]) for r in range(R) for c in range(C))
+        c = j // len(pairs(R)); r, s = pairs(R)[j % len(pairs(R))]
+        formula = m[r, s] * ((a[r, c] - a[r, C - 1]) / mr[r] - (a[s, c] - a[s, C - 1]) / mr[s])
+        bad += abs(direct - formula) > 1e-12
+ok("Prop 7: closed-form gamma coefficients match direct computation (100 random targets)", bad == 0)

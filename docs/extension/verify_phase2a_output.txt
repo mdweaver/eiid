@@ -24,3 +24,4 @@ PASS 3x3 example: truth inside outer bound for defection P->O
 PASS 3x3 example: truth inside outer bound for demobilisation P->abstain
        mobilisation N->P           truth 0.169   outer [0.048, 0.569]   DD [0.000, 0.890]
 PASS 3x3 example: truth inside outer bound for mobilisation N->P
+PASS Prop 7: closed-form gamma coefficients match direct computation (100 random targets)

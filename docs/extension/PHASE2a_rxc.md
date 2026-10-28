@@ -1,6 +1,6 @@
 # Phase 2a: R×C bounds, derivations and proofs
 
-*Builds on `PHASE1_foundations.md` (cited as P1). Every proof step ends with a justification tag in brackets; the tag legend is in §0.3. Every closed form and every inclusion claimed here is also checked numerically or symbolically in `verify_phase2a.py` (output in `verify_phase2a_output.txt`; 21/21 PASS). §10 lists the corrections this phase makes to P1.*
+*Builds on `PHASE1_foundations.md` (cited as P1). Every proof step ends with a justification tag in brackets; the tag legend is in §0.3. Every closed form and every inclusion claimed here is also checked numerically or symbolically in `verify_phase2a.py` (output in `verify_phase2a_output.txt`; 22/22 PASS). §10 lists the corrections this phase makes to P1.*
 
 ---
 
@@ -514,7 +514,7 @@ All four contain the truth, and all are narrower than DD. They are still wide, b
 
 ## 9. Verification log
 
-`python3 -I verify_phase2a.py` (21 PASS, 0 FAIL; full output in `verify_phase2a_output.txt`) checks:
+`python3 -I verify_phase2a.py` (22 PASS, 0 FAIL; full output in `verify_phase2a_output.txt`) checks:
 * Lemma 1: the dimension $(C-1)R(R-1)/2$ by rank computation for 2×2, 2×3, 3×3 and 4×3; $x^\top Kx=0$ and uniqueness of $Q$ symbolically for $R=3$.
 * Prop. 4: the JKST Prop. 3 constraints symbolically; Prop. 2 numerically (P1 script).
 * Prop. 5 against an LP solver (200 tables).
@@ -522,6 +522,7 @@ All four contain the truth, and all are narrower than DD. They are still wide, b
 * Cor. 6.1: inclusion, the equality case, and strict cases.
 * Prop. 1: $\Theta_X\subseteq\Theta_O$ in 400 random valid 2×2 designs, strict in 46.
 * Theorem 1 "⇒": a known feasible structure lies in $\Theta_X$ (227/227).
+* Prop. 7: the closed-form $\gamma$ against direct computation (100 targets).
 * The 3×3 example: the truth lies inside the bounds.
 
 Not verified by computer: the measure-theoretic steps of Theorem 1, which rest on the cited theorems, and the theorem numbers marked †.

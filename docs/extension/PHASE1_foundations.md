@@ -325,3 +325,26 @@ The script uses a 2×2 setup for transparency: 93 ridings × 10 polls, riding ba
 * $Q_{c,rs}=\tfrac12(H_{c,rs}+H_{c,sr})$ is identified. $K_{c,rs}=\tfrac12(H_{c,rs}-H_{c,sr})$, half the difference between "$r$-voters in $s$-territory" and "$s$-voters in $r$-territory", is not. $K$ is therefore the **unidentified part of the contextual effect, not the whole of it**.
 * **M1 shares all of $H$ except an additive riding shift:** $E[\beta_{rc}\mid x,d]=\zeta_{c,d,r}+\sum_sH_{c,rs}x_s$. Equivalently, there is no interaction between riding and poll composition on the probability scale. The shared symmetric part is testable (D2); the shared $K$ is not, and it is the substantive leap.
 * Additivity on the probability scale is least plausible near 0 or 1 (ceiling and floor compression). A weaker option for Phase 2b is to let $Q^{(d)}$ be free and share only $K$, or to allow $\|K^{(d)}-K\|\le\delta$ as a sensitivity parameter. The free-$Q^{(d)}$ version needs 6 coefficients per column per riding in 3×3, which 10 polls cannot support.
+
+### 7.3 Worked 2×2 example: M0 vs M1 (`example_2x2_ridings.py`)
+
+Rows: $P$ = voted P last time (share $x$), $O$ = everyone else. Outcome: votes P now. *Loyalty* is the rate for P-voters; *crossover* is the rate for O-voters. The example is noise-free, so it shows identification only.
+
+| | M0: one model for the province | M1: riding dummies |
+|---|---|---|
+| Loyalty in a poll | $a_P+g_Px$ | $a_{P,d}+g_Px$ |
+| Crossover in a poll | $a_O+g_Ox$ | $a_{O,d}+g_Ox$ |
+| Same everywhere | all four numbers | the slopes $g_P,g_O$ only |
+| Riding matters | only through its polls' $x$ | shifts each group's baseline |
+| Data reveal | $T=a_O+(a_P-a_O+g_O)x+(g_P-g_O)x^2$, pooled | the same, riding by riding, with common $x^2$ term |
+| Unknown | $g_O$ (one number) | $g_O$ (one number, shared) |
+| Testable | cubic term, empty bound | plus: $x^2$ term equal across ridings |
+| Not testable | how the curvature splits into $g_P,g_O$ | that the split is the same in every riding |
+
+In words, M1 says that **the gap between two ridings' loyalty is the same in every kind of poll** (parallel lines), and likewise for crossover.
+
+Truth: $g_P=g_O=0.10$. Riding 1 (P stronghold, polls $x\in[0.5,0.9]$): loyalty $0.89+0.1x$, crossover $0.20+0.1x$. Riding 2 (P weak, $x\in[0.1,0.5]$): loyalty $0.45+0.1x$, crossover $0.02+0.1x$.
+
+* Riding 1's polls reveal $T=0.20+0.79x$. Loyalty at $x=0.5$ cannot exceed 1, so $g\ge-0.02$. Riding 2's polls reveal $T=0.02+0.53x$. Loyalty at $x=0.1$ cannot fall below 0, so $g\le0.611$.
+* **M1:** $g\in[-0.020,0.611]$, with riding 1 setting the lower limit and riding 2 the upper. This gives $B\in[0.618,0.866]$ (truth $0.819$; DD $[0.453,0.879]$).
+* **M0** fits one curve through both ridings: $T=-0.095+0.936x+0.305x^2$. It reads the stronghold's higher baselines as a contextual effect, and the implied bound on the slope is empty ($[1.160,0.969]$). The package's rule then reverts to DD. Here M0's failure was *detectable*; it need not always be.

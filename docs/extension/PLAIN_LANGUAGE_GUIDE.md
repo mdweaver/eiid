@@ -114,3 +114,18 @@ Pinned in `ASSUMPTION_MENU.md` and not yet derived: structural zeros (a party no
 * **An empty bound is information:** the assumption, or a foundation, is contradicted by the data (or, in small samples, it may be noise; Phase 3 separates the two).
 * **"Trusting the line to the extremes":** using the whole range 0–1 rather than the observed range narrows bounds, but it assumes the straight lines remain valid where no units exist (e.g. a pure out-party poll) [2a Prop 5]. Use the observed range unless you can defend extrapolation.
 * **Suggested table:** rungs as rows, quantities of interest as columns. Each cell shows the bound, its confidence interval (Phase 3), and whether the bound was empty.
+
+---
+
+## 6. From bounds to confidence intervals (Phase 3, in plain terms)
+
+* **The estimated bound is not a confidence interval.** It is computed from estimated regression coefficients, so it moves with the sample.
+* **The estimated bound tends to be too narrow, not too wide.** Each end of the bound is the tightest of many candidate limits. With noisy data, the tightest-looking candidate is often tight partly by chance. So the plug-in range is biased inward, and badly so when there are many ridings with few polls each. In simulation with 93 ridings × 10 polls, it almost never contained the truth and was often empty [P3 Thm 4, §6].
+* **The confidence interval fixes this.** It widens each candidate limit by its own uncertainty before taking the tightest. Noisy ridings are therefore unlikely to set the limit [P3 Thm 5]. It contained the truth in every simulation design.
+* **The price.** With few units per riding, the valid interval can be about as wide as Duncan–Davis. That is honest: there is too little information per riding to exploit the riding assumption. More polls per riding, coarser groups, or the δ dial help [P3 §6].
+* **Two quantities, two intervals.**
+  * The *actual* rate in this electorate includes poll-level luck that can never be estimated, so its interval carries an extra allowance.
+  * The *model-implied* rate at the observed compositions (the "behavioural" rate) does not, so its interval is narrower.
+  * Say which one you report.
+* **An empty confidence set is a real rejection.** If even the widened constraints cannot be satisfied, the assumptions are rejected at the stated level [P3 Prop 6].
+* **Sensitivity in one number.** For a headline claim (e.g. "loyalty above 30%"), report the *breakdown value*: how far average rates could depart from straight lines, undetectably, before the claim fails [P3 §7].

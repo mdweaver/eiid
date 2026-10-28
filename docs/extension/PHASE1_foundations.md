@@ -318,3 +318,10 @@ The script uses a 2×2 setup for transparency: 93 ridings × 10 polls, riding ba
 * **Identification gain (row 3 vs row 2):** about a 20% narrower width, because each riding constrains the common contextual effect from its own baseline.
 * **Estimation problem (row 4):** taking the max/min over 93 noisy riding-level constraints makes the bounds *too narrow* and they miss the truth 28% of the time. The plain plug-in intersection must not be used at 10 polls per riding; this is what Phase 3 has to fix.
 * With step-shaped riding effects (pooled model misspecified), the pooled bound still covered the truth here (0.997). The robustness argument (D4) is a theoretical guarantee, but in these designs its practical value was small compared with the tightening.
+
+### 7.2 What $H$ and $K$ mean, and what M1 shares (refines A8)
+
+* $E[\beta_{rc}\mid x]=\sum_sH_{c,rs}x_s$, so $H_{c,rs}$ is the rate at which row-$r$ voters go to column $c$ **in a (hypothetical) poll made up entirely of row-$s$ voters**. Diagonal entries are "own-territory" rates. Off-diagonal entries are rates of $r$-voters in $s$-territory, and the contextual effect for row $r$ is how $H_{c,r\cdot}$ varies across $s$.
+* $Q_{c,rs}=\tfrac12(H_{c,rs}+H_{c,sr})$ is identified. $K_{c,rs}=\tfrac12(H_{c,rs}-H_{c,sr})$, half the difference between "$r$-voters in $s$-territory" and "$s$-voters in $r$-territory", is not. $K$ is therefore the **unidentified part of the contextual effect, not the whole of it**.
+* **M1 shares all of $H$ except an additive riding shift:** $E[\beta_{rc}\mid x,d]=\zeta_{c,d,r}+\sum_sH_{c,rs}x_s$. Equivalently, there is no interaction between riding and poll composition on the probability scale. The shared symmetric part is testable (D2); the shared $K$ is not, and it is the substantive leap.
+* Additivity on the probability scale is least plausible near 0 or 1 (ceiling and floor compression). A weaker option for Phase 2b is to let $Q^{(d)}$ be free and share only $K$, or to allow $\|K^{(d)}-K\|\le\delta$ as a sensitivity parameter. The free-$Q^{(d)}$ version needs 6 coefficients per column per riding in 3×3, which 10 polls cannot support.

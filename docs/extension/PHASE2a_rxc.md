@@ -539,3 +539,30 @@ Not verified by computer: the measure-theoretic steps of Theorem 1, which rest o
 * **2b:** riding dummies (M1/M2), including $A\subsetneq\operatorname{supp}$ per district (Remark 2.1), and the 3×3 counterpart of P1 §7.3.
 * **3:** inference for LP value functions (Prop. 7) with non-unique bases; the finite-population term $B-B^*$; the many-ridings intersection; sensitivity through $\sup\lVert\Delta\rVert$ (Prop. 9).
 * **Open question:** characterise strict joint-vs-collapsed gains for $R\ge3$.
+
+---
+
+## 12. Relation to Cho & Manski (2008) and Cross & Manski (2002)
+
+JKST's conclusion suggests extending to R×C tables "perhaps generalizing Cho and Manski 2008". That chapter surveys EI and summarises Cross & Manski (2002, *Econometrica* 70:357–368). The correspondence with this document:
+
+| Cross–Manski / Cho–Manski | Here |
+|---|---|
+| outcome $Y$, group $Z$, precinct $X$ | column $c$, row $r$, unit $i$ |
+| data: $P(Y\mid X)$, $P(Z\mid X)$ | $T_i$, $X_i$ |
+| target: $P(Y\mid X,Z)$ | $\beta_i$; aggregated, $B$ |
+| "data alone": feasible $P(Y\mid X=x,Z)$ = solutions of the finite-mixture problem $\sum_z\eta_zP(Z=z\mid x)=P(Y\mid x)$ | the unit DD polytope $S(x,t)$ (Lemma 0) |
+| that region is convex with finitely many extreme points | $S(x,t)$ is a transportation polytope |
+| region across precincts is a Cartesian product (no cross-precinct restriction) | DD for $B$ is a weighted sum of unit polytopes; P1 (D0) |
+| identifying assumption: $V$ (part of the precinct identifier) as an instrument, $E(Y\mid V,W,Z)=E(Y\mid W,Z)$; Goodman's constancy is the case with no $W$ | the special case of LCE with **zero contextual effects**, $H_c=\alpha_c\mathbf 1^\top$. Then $K$ is pinned down and $B$ is point-identified |
+| sharp region $H^*_w$ under that assumption; outer region $C^*_w$ from iterated expectations only, with $H^*_w\subseteq C^*_w$ | $\Theta_I\subseteq\Theta_O$; $\Theta_O$ is exactly what iterated expectations of the accounting identity deliver (Props 1–2) |
+| rank of $\Pi$ = $\lvert Z\rvert$ gives point identification | A5 (rank of the quadratic design) |
+| an empty region refutes the assumption | Prop. 8 |
+| "layer assumptions in decreasing order of plausibility" | DD ⊇ LCE bounds ⊇ Goodman point (and P1 §6, M2 ⊇ M1 ⊇ within-riding constancy) |
+
+**What is new relative to Cross–Manski:**
+1. **The assumption is weaker than constancy.** Rates may vary linearly with composition. This leaves the $(C-1)R(R-1)/2$-dimensional $K$ unidentified, so the result is a set rather than a point. JKST's 2×2 bounds and our R×C bounds sit *between* their data-alone region and their Goodman point.
+2. **It is a mean restriction on a superpopulation.** Cross–Manski treat each precinct's population as fixed, so constancy means $\beta_i=\beta_j$ exactly. LCE restricts only $E[\beta\mid X]$, and each poll may deviate. This is why the bounds are for aggregates only, why individual polls stay at DD, and why the finite-population gap $B-B^*$ must be handled in Phase 3.
+3. **Composition is continuous.** Their instrument $V$ is a discrete precinct attribute with several precincts per cell. Here the "instrument" is the composition $X$ itself, entering through the linear model.
+
+**Bearing on Phase 2b.** Their $W$-conditioned assumption (constancy across precincts *within* cells of $W$) is, with $W$ = riding, "Goodman within each riding". It is a stronger layer than M1, which lets rates vary linearly with composition inside each riding. It is a natural extra layer to report, and its point estimate offers a check: does it fall inside the M1 bounds?

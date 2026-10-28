@@ -291,3 +291,30 @@ The three-phase structure works, but goal 2 and the code need their own steps. I
 3. **Targets.** Overall rates only, district-level rates $B_{rc}(\mathcal I_d)$ too, or both?
 4. **Priority.** I recommend implementing $\Theta_O$ first (closed form / LP, extends the package directly), then a nonparametric estimate of the sharp $\Theta_I$ as an option. Do you agree?
 5. **Dependencies.** May the package take on `lpSolve`, needed only for $R\ge3$?
+
+---
+
+## 7. Decisions after first review (27–28 Oct 2026)
+
+* **General R×C** is the target. The running example is BC transitions, **3×3** (in-party voters, out-party voters, non-voters in each election), so $\dim\mathcal K=(3-1)\cdot3=6$; $X_i$ lives in the 2-simplex, and $A$ is the convex hull of the observed polls.
+* **Target:** overall (province-wide) rates $B_{rc}$ only. District-level rates are a by-product, not a goal.
+* **Data design.**
+  * *Stage 1:* 93 ridings as the units, so $p=93$ and $D=1$. Riding dummies are impossible at this stage (one unit per riding). Only M0 applies, and with $p=93$ and six quadratic coefficients per column, A5 and A7 (precision) are the binding concerns.
+  * *Stage 2:* about 10 polls per riding, so $p\approx930$, $D=93$, $p_d\approx10$. This is regime **R2** (many districts, few units each). The incidental-parameter problem of A10 is first-order here, not a footnote (see the illustration below). Phase 3 must deliver a precision-corrected intersection (Chernozhukov–Lee–Rosen) and/or partial pooling of the riding intercepts.
+* **Priority:** $\Theta_O$ first, as an extension of the package; the nonparametric $\Theta_I$ comes later as an option.
+* **Dependencies:** `lpSolve` is approved.
+
+### 7.1 Illustration: what riding dummies do (`illustrate_district_dummies.py`)
+
+The script uses a 2×2 setup for transparency: 93 ridings × 10 polls, riding baselines correlated with the riding's mean $X$, and contextual slopes common to all ridings (M1 true). Results over 300 replications:
+
+| Bound | Covers truth | Median width |
+|---|---|---|
+| DD (model-free) | 1.00 | about 0.54 |
+| Pooled M0 (current package) | 1.00 | 0.305 |
+| Riding M1, **true** coefficients (identification only) | 1.00 | 0.244 |
+| Riding M1, **estimated** from 10 polls per riding | **0.72** | 0.172 |
+
+* **Identification gain (row 3 vs row 2):** about a 20% narrower width, because each riding constrains the common contextual effect from its own baseline.
+* **Estimation problem (row 4):** taking the max/min over 93 noisy riding-level constraints makes the bounds *too narrow* and they miss the truth 28% of the time. The plain plug-in intersection must not be used at 10 polls per riding; this is what Phase 3 has to fix.
+* With step-shaped riding effects (pooled model misspecified), the pooled bound still covered the truth here (0.997). The robustness argument (D4) is a theoretical guarantee, but in these designs its practical value was small compared with the tightening.

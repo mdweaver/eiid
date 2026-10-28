@@ -1,0 +1,26 @@
+PASS Lemma 1: dim of unidentified part for 2x2 = 1 == (C-1)R(R-1)/2 = 1
+PASS Lemma 1: dim of unidentified part for 2x3 = 2 == (C-1)R(R-1)/2 = 2
+PASS Lemma 1: dim of unidentified part for 3x3 = 6 == (C-1)R(R-1)/2 = 6
+PASS Lemma 1: dim of unidentified part for 4x3 = 12 == (C-1)R(R-1)/2 = 12
+PASS Lemma 1(b): x'Kx == 0 for skew K (symbolic, R=3)
+PASS Lemma 1(a): x'Dx == 0 on the simplex forces symmetric D = 0 (symbolic, R=3)
+PASS Prop 4/5: |K_c,12| <= Q_c,12 reproduces JKST Prop. 3 constraints
+PASS Prop 5: K_c,rs in [-min(Q,1-Q), min(Q,1-Q)] matches LP (200 random tables)
+PASS Prop 6: projected interval formula matches LP (R=2, random C, A=[l,u])
+PASS Prop 6: greedy solution of the functional LP matches LP
+PASS Cor 6.1 (2x3, H valid only on A): joint never looser than collapsed; strictly tighter in 46 cases
+PASS Cor 6.1 (2x3, H >= 0 everywhere): joint never looser than collapsed; strictly tighter in 0 cases
+PASS Cor 6.1: for R=2 with nonnegative pure-poll rates, joint == collapsed
+PASS Cor 6.1 (3x3, H >= 0 everywhere): joint never looser than collapsed; strictly tighter in 20 cases
+PASS Prop 1: Theta_X inside Theta_O in all 400 valid 2x2 designs
+PASS Prop 1: inclusion is strict in 54/400 designs (dispersion straddling a binding kink)
+PASS Thm 1 (=>): a known feasible structure lies in Theta_X (227/227 linear designs)
+     3x3 example (population Q, A = hull of 2000 simulated polls):
+       loyalty P->P                truth 0.848   outer [0.399, 0.929]   DD [0.129, 0.973]
+PASS 3x3 example: truth inside outer bound for loyalty P->P
+       defection P->O              truth 0.087   outer [0.022, 0.352]   DD [0.000, 0.635]
+PASS 3x3 example: truth inside outer bound for defection P->O
+       demobilisation P->abstain   truth 0.066   outer [0.022, 0.291]   DD [0.000, 0.533]
+PASS 3x3 example: truth inside outer bound for demobilisation P->abstain
+       mobilisation N->P           truth 0.169   outer [0.048, 0.569]   DD [0.000, 0.890]
+PASS 3x3 example: truth inside outer bound for mobilisation N->P

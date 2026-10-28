@@ -2,6 +2,8 @@
 
 *A running list of restrictions that can be layered between Duncan–Davis (no assumptions) and Goodman-type constancy, in the spirit of Cho & Manski (2008): report what the data alone give, then add assumptions in decreasing order of plausibility. Nothing here is derived yet. Each item records what it restricts, whether it keeps the bounds a linear program (LP), and what to watch for. Notation follows PHASE1/PHASE2a.*
 
+*The tools are meant to be general: any R×C EI with units nested in groups and/or observed at several times. Voter transitions (BC) and the veterans/suffrage difference-in-differences (section F) are two applications, not the scope.*
+
 ## How the pieces fit
 
 * **Two kinds of layer.**
@@ -14,7 +16,7 @@
   * *Cross-unit* (links polls, ridings or elections): adds intersections.
 * **Every layer is refutable when its set is empty.** That is a free specification test at each rung (Prop. 8 generalised).
 
-## The ladder (riding design, decreasing plausibility)
+## The ladder (units nested in groups, e.g. polls in ridings; decreasing plausibility)
 
 | Rung | Assumption | Unidentified dimension (3×3) | Status |
 |---|---|---|---|
@@ -64,8 +66,29 @@ L4 is a useful intermediate step. Assuming no contextual effect for one row $r$ 
 15. **Emptiness tests at each rung,** with sampling-noise correction (Phase 3).
 16. **Inference with many constraints.** Intersection-bounds methods (Chernozhukov, Lee & Rosen 2013) are needed whenever constraints come from many ridings, elections or neighbours.
 
+### F. Repeated cross-sections and difference-in-differences
+
+Setting: the same units observed in a pre- and a post-period, e.g. counties voting on Black suffrage before and after the Civil War, with rows veteran / non-veteran. Each period $t$ has its own identified $Q_t$ and unidentified $K_t$. A typical target is
+$$\text{DiD}=(B_{v,\text{post}}-B_{v,\text{pre}})-(B_{n,\text{post}}-B_{n,\text{pre}}),$$
+which is affine in $(K_\text{pre},K_\text{post})$ (Lemma 2), so every item below keeps the LP structure.
+
+17. **No cross-period restriction.** The set for $(K_\text{pre},K_\text{post})$ is the product of the two periods' sets, and the DiD bound is a difference of intervals, so the widths add. This is the baseline. Within a period the accounting identity links the groups: with $\omega$ the group-$v$ weight, $B_n=(\bar\tau-\omega B_v)/(1-\omega)$. So each period contributes one unknown in 2×2, and the gap $B_v-B_n=(B_v-\bar\tau)/(1-\omega)$ amplifies uncertainty when one group is small.
+18. **Differencing out the unidentified part.** Suppose the units, $X_i$ and $N_i$ are the same in both periods, and the unidentified part of the contextual effects does not change, in whichever parametrisation is defended. One natural choice in 2×2: *the non-veteran contextual slope is unchanged*, so the war shifted non-veterans' support by the same amount everywhere, regardless of local veteran share. Then the unidentified term cancels and **each group's change and the DiD are point-identified**, even though the levels are only bounded. This is the EI analogue of DiD removing time-invariant confounding (checked in `illustrate_did.py`: exact without noise; centred on the truth with noise, Monte Carlo SD 0.02).
+    * Which object is held fixed matters. "Non-veteran slope fixed", "veteran slope fixed" and "$K$ fixed" are different assumptions with different estimates. Each must be justified substantively.
+    * In the veteran case, a change in the non-veteran slope *is* a spillover (veterans persuading neighbours in proportion to local veteran share). So this assumption rules out differential spillovers.
+19. **Bounded change (sensitivity).** $\lVert K_\text{post}-K_\text{pre}\rVert\le\delta$ (or $\lvert\Delta w_1\rvert\le\delta$). The DiD bound has width proportional to $\delta$, scaled by the sensitivity weights $\mu_{rs}/\mu_r$, and collapses to item 18 at $\delta=0$. This is the EI analogue of bounded-variation DiD (Manski & Pepper 2018) and of bounded departures from parallel trends (Rambachan & Roth 2023). With several pre-war elections, $\delta$ can be calibrated by how much the unidentified part could have moved between pre-periods ("relative magnitudes").
+20. **Stable contextual structure gives intersection.** A common $K$ across periods must satisfy both periods' constraint sets. This tightens the *levels* in both periods, the same mechanism as riding dummies with time playing the role of riding, and an empty intersection refutes stability.
+21. **First-difference contextual effects (robust to unit heterogeneity).** Let $\beta_{i,t}=\zeta_i+M_{H_t}(X_i)+e_{i,t}$ with an *arbitrary* time-invariant unit effect $\zeta_i$. Linearity in levels fails, but linearity in changes holds: $E[\Delta\beta\mid X]=M_{\Delta H}(X)$ and $E[\Delta T\mid X]=X^\top\Delta Q\,X$. The constraints come from both periods' unit DD polytopes, $\Delta\beta_i\in S(X_i,T_{i,\text{post}})-S(X_i,T_{i,\text{pre}})$ (a Minkowski difference). This is weaker than LCE in levels and fits "unit fixed effects" logic. The bounds are wider, but valid under persistent local political cultures.
+22. **Parallel trends for the causal claim (separate from EI).** Interpreting the DiD of group rates as the effect of service needs group-level parallel trends: absent the war, future veterans' and others' support would have moved together. Partial-identification version: the causal effect lies in DiD $\oplus[-M,M]$ (Rambachan & Roth 2023). Multiple pre-periods allow a placebo: if the bound on a pre-period DiD excludes 0, parallel trends are refuted.
+23. **Monotone response (Manski MTR).** E.g. service did not lower support, $\Delta B_v\ge\Delta B_n$. Sign restrictions as LP rows; plausibility is case-specific.
+24. **Composition change between periods (an A1 issue that is central here).**
+    * Pre-war "veterans" are *future* veterans, so pre-war $X_i$ is unobserved. Many were under voting age pre-war, and war deaths and migration change the electorate.
+    * The two cross-sections then cover different people, and the DiD of group rates differs from the average within-person change.
+    * Options: (a) interval-valued $X_\text{pre}$ from age and mortality data, making EI with interval regressors (more partial identification); (b) explicit entry/exit rows; (c) a within-person target, which is a 3-way (veteran × pre-vote × post-vote) table with one-way margins, a multi-way Fréchet / transition problem.
+    * Also: $T$ must use the same base as $X$ (yes votes / eligible men, with an abstain column), so the 2×2 becomes 2×3. R×C is needed here, not optional.
+
 ## Notes for implementation (Phase 4)
 
-* Items 1, 4–7, 9, 10 and 12 keep everything as one LP: they add rows or variables to $Gk\le g$ (Prop. 7). That makes a single `constraints=` interface practical.
+* Items 1, 4–7, 9, 10, 12 and 17–23 keep everything as one LP: they add rows or variables to $Gk\le g$ (Prop. 7). That makes a single `constraints=` interface practical.
 * Unit-level items (1, 3, 5, 10, 13) matter most for the sharp set and for poll-level bounds. Mean-level items matter for aggregate bounds.
 * Suggested reporting format: one table with the rungs as rows and the targets (loyalty, defection, demobilisation, mobilisation) as columns. Each cell gives the bound, its CI, whether the set was empty, and the breakdown value of the assumption that rung adds.

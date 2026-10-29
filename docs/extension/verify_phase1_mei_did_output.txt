@@ -7,5 +7,6 @@ PASS  V6 local within-sign everywhere does not imply aggregate dW >= 0 (countere
 PASS  V7a model-free DiD bound = difference of the periods' DD intervals  [max err 6.7e-16]
 PASS  V7b first-difference LCE + (Delta w1 = 0) point-identifies the DiD despite arbitrary unit effects  [max err 2.2e-16]
 PASS  V7c ER on Delta T is biased for the DiD by dW(changes)/Var(X_N)  [max err 1.2e-15]
+PASS  V8 M1 across periods = R1 and R2; Delta kappa = (zeta_v - zeta_n)/2, not 0  [max err 1.1e-16]
 
-9/9 PASS
+10/10 PASS

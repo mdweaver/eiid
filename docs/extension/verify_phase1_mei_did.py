@@ -335,4 +335,21 @@ for _ in range(200):
 check("V7c ER on Delta T is biased for the DiD by dW(changes)/Var(X_N)", worst_c < 1e-10,
       f"max err {worst_c:.1e}")
 
+# ---------------------------------------------------------------------------
+# V8. M1 across periods (common slopes, row-specific baseline shifts zeta_r):
+#     Delta w1 = Delta b1 = 0 (R1 and R2) but Delta kappa = (zeta_v - zeta_n)/2.
+# ---------------------------------------------------------------------------
+worst = 0.0
+for _ in range(200):
+    H = rng.uniform(0, 1, (2, 2))            # rows/cols ordered (v, n); H[r, s]
+    zeta = rng.uniform(-0.2, 0.2, 2)
+    Hp = H + zeta[:, None]                   # H + zeta 1'
+    dH = Hp - H
+    dw1 = dH[1, 0] - dH[1, 1]                # non-veteran slope change
+    db1 = dH[0, 0] - dH[0, 1]                # veteran slope change
+    dkap = (dH[0, 1] - dH[1, 0]) / 2
+    worst = max(worst, abs(dw1), abs(db1), abs(dkap - (zeta[0] - zeta[1]) / 2))
+check("V8 M1 across periods = R1 and R2; Delta kappa = (zeta_v - zeta_n)/2, not 0", worst < 1e-14,
+      f"max err {worst:.1e}")
+
 print(f"\n{sum(results)}/{len(results)} PASS")

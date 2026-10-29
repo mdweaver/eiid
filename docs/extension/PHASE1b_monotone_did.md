@@ -2,7 +2,7 @@
 
 *A proposal for review, covering structure and assumptions only. Nothing here is a Phase-2 derivation. Status labels are used throughout:*
 * ***proved*** *only for one-line facts whose proof is given here and that are also checked numerically;*
-* ***checked*** *for identities verified numerically in `verify_phase1_mei_did.py` (output: `verify_phase1_mei_did_output.txt`, 9/9 PASS), with formal proofs due in Phase 2;*
+* ***checked*** *for identities verified numerically in `verify_phase1_mei_did.py` (output: `verify_phase1_mei_did_output.txt`, 10/10 PASS), with formal proofs due in Phase 2;*
 * ***conjecture*** *or* ***heuristic*** *otherwise.*
 
 *Cited as P1, 2a, 2b, P3 and P4: the earlier phase documents. Cited as MENU: `ASSUMPTION_MENU.md`.*
@@ -224,7 +224,7 @@ $$\text{N1}(\delta_W\ge0)\ \supseteq\ \text{N2(each }m_r\uparrow)\ \supseteq\ \t
 | D8 | **Within-person table** (veteran × pre-vote × post-vote) | for the **DiD of means**, it adds nothing beyond the two two-way tables that share the veteran margin. *Proved, sketch*: any such pair extends to a 3-way table by coupling $Y_0$ and $Y_1$ independently given $V$. It matters only for *transition* targets such as "share of veterans who switched to yes" |
 
 **Nesting** (model classes; bounds nest by [nest]):
-$$\text{M1-periods}\subseteq\text{D1}+\{\Delta\kappa=0\},\qquad \text{per-period LCE (M2-periods)}\subseteq\text{D1},\qquad \text{D1}+\text{(any single restriction)}\subseteq\text{D1}+\text{D3}(\delta)\subseteq\text{D1}.$$
+$$\text{M1-periods}\subseteq\text{D1}+\{\text{R1 and R2}\},\qquad \text{per-period LCE (M2-periods)}\subseteq\text{D1},\qquad \text{D1}+\text{(any single restriction)}\subseteq\text{D1}+\text{D3}(\delta)\subseteq\text{D1}.$$
 D4 needs no linearity, is non-nested with D1, and sits inside D0's model-free bound. *All inclusions follow from the definitions; written proofs in Phase 2.*
 
 ## B3. Single restrictions that identify the DiD (2 rows, one column)
@@ -235,9 +235,9 @@ Let $H_{rs}$ be the rate of $r$-men in a hypothetical county made up entirely of
 |---|---|---|
 | (R1) $\Delta w_1=\Delta(H_{nv}-H_{nn})=0$ | non-veterans' change does not depend on the local veteran share: **no differential spillover onto non-veterans** | most natural; a uniform spillover is still allowed and biases the *causal* reading (D6) |
 | (R2) $\Delta b_1=\Delta(H_{vv}-H_{vn})=0$ | veterans' change does not depend on how many fellow veterans live nearby (no extra network or veterans-organisation effect) | plausible if veterans' attitudes formed in the army, not at home |
-| (R3) $\Delta\kappa=0$ | the change of veterans in non-veteran areas equals the change of non-veterans in veteran areas | = M1 across periods; hard to motivate on its own |
+| (R3) $\Delta\kappa=0$ | the change of veterans in non-veteran areas equals the change of non-veterans in veteran areas | hard to motivate on its own. *Not* M1 across periods: M1 shifts each row's baseline by $\zeta_r$, so $\Delta\kappa=(\zeta_v-\zeta_n)/2\neq0$ in general (checked: V8; corrected after review) |
 | (R4) $\Delta\delta_W=a\Delta b_1+b\Delta w_1=0$ | the composition-weighted average contextual change is zero | = Goodman's linear regression on $\Delta T$ is unbiased (D4) |
-| (R1)+(R2) | both slopes unchanged | over-identifying, testable: $\Delta d_1=0$ (equal $X^2$ coefficients) |
+| (R1)+(R2) | both slopes unchanged; this **is** M1 across periods ("contextual effects unchanged", 2b Remark 6.2) | over-identifying, testable: $\Delta d_1=0$ (equal $X^2$ coefficients) |
 
 Signed versions turn these into one-sided cuts: $\Delta w_1\ge0$ means non-negative differential spillover. Bounded versions are D3.
 
@@ -282,3 +282,82 @@ Pre-war "veterans" are *future* veterans. Many were too young to vote before the
 8. **Same units and base?** Are county boundaries and the population base (eligible men, with abstainers) the same in both periods? Which target is the headline: yes share of eligible men (linear), or yes share among voters (ratio)? Model-implied or actual-rate DiD?
 9. **Identifying restriction.** Which of R1–R4 do you find substantively defensible for veterans? Is the causal (parallel-trends) claim in scope, or only the DiD of group rates?
 10. **Regression test.** Can you share your earlier 2×2 JKST results so the new code can reproduce them?
+
+---
+
+## D. Decisions after first review (29 Oct 2026)
+
+| # | Decision |
+|---|---|
+| 1 | **Exact (finite-population) bounds** for the sign rungs. They apply to the realised units, need no CI, and come with a slack dial and breakdown value. *Caveat:* "exact" is possible only for rungs without a fitted regression (N1, D0, D4). Rungs that use a regression (K-rows, N2, D1) still need P3 inference. |
+| 2 | Open: W1 vs W2; explanation in D.1. |
+| 3 | N2 accepted in principle; plain-language explanation in D.2 and in the guide. |
+| 4 | No NZ benchmark for this work. What is needed is the **option** to impose contextual reinforcement. |
+| 5 | API: `monotone=` modifier plus `model=` values (`"DD"`, `"MIV"`). |
+| 6 | Data to come: **Wisconsin 1857/1865** and **Iowa 1857/1868** suffrage referenda. One pre-period per state, so no pre-period placebo; D3's δ cannot be calibrated from pre-trends and stays a sensitivity dial with breakdown values. |
+| 7 | Veteran share is measured once. Soldiers who died can be removed. The 1860 census gives age structure; migration is hard. → B4 option 1 (interval pre-war composition) with deaths removed exactly and age eligibility as an interval; migration as a sensitivity bound. |
+| 8 | Units are standardised to stable geographic/electoral units. **Population counts change between periods.** Headline target: **yes share of eligible men** (linear). Model-implied vs actual explained in D.3. |
+| 9 | Open: plain-language R1–R4 in D.4. |
+| 10 | Data and code to come. The earlier analysis applied JKST to the WI towns with near-zero 1857 YES votes, which narrowed the time-1 bounds (see D.6). |
+
+### D.1 W1 vs W2 (matters only with three or more rows)
+
+With two rows (veteran / non-veteran) the two definitions coincide. They differ once a third row appears, which happens here if we add an "entered" or "exited" row (B4 option 2).
+* **W1 (one-vs-rest, the paper's).** For veterans: "do veterans' yes-rates, and the yes-rates of *everyone else taken together*, rise with the town's veteran share?" Simple, but "everyone else" is a mix whose make-up changes from town to town. Its sign is therefore harder to argue from substance.
+* **W2 (each group separately).** For each group and each composition share: "does this group's yes-rate rise with that share?" Each sign is a statement about one identifiable group. It is also exactly what biases Goodman's multiple regression.
+
+**Recommendation:** W1 as the default (it reproduces the paper), with W2 as an option once rows ≥ 3.
+
+### D.2 N2 in plain language
+
+"How a group votes may depend on who its neighbours are. N2 assumes this dependence runs **one way only**: for example, the more veterans in a town, the higher (never lower) the veterans' yes-rate, and likewise for non-veterans. It may be any shape: flat and then rising, a step, a curve. The linear rung instead assumes a straight line."
+* **If wrong:** with a reversal (rates highest in middling towns, or backlash where a group is a large minority) the bound can miss the truth.
+* **Check:** an empty bound refutes it. Plot town yes-share against veteran share and look for reversals.
+* **Practical form:** the overall town pattern is fitted with a polynomial curve of data-chosen degree, and the uncertainty statement treats that curve's shape as correct.
+
+### D.3 Model-implied vs actual DiD
+
+* The **actual** DiD is the change in yes-rates among the actual men in these towns. It includes town-level idiosyncrasies (a local editor, a local controversy) that no model explains.
+* The **model-implied** DiD is what the *systematic* part of behaviour (average behaviour of towns with a given veteran share) implies for these towns.
+* For the exact, model-free rungs (decision 1) the target is automatically the actual DiD, and there is no sampling error.
+* For rungs that fit a regression, the actual DiD's interval adds an allowance for town-level luck in **both** elections, which can be large. The model-implied interval has none.
+* **Proposal:** report the actual DiD for model-free rungs, and the model-implied DiD as the headline for regression rungs (with the actual one alongside).
+
+### D.4 R1–R4 in plain language (Wisconsin)
+
+A group's **slope** is how its yes-rate differs between towns with many and few veterans. The war changed each group's yes-rate; the question is whether that *change* differed between veteran-heavy and veteran-light towns. Each rule fixes one aspect of this and turns the DiD into a single number. The rules generally give *different* numbers.
+
+* **R1 (no differential spillover onto non-veterans).** Non-veterans changed by the same amount whether they lived among many or few veterans.
+  * Rules out returning veterans persuading their neighbours *more where there were more of them*.
+  * Still allows non-veterans everywhere to shift equally.
+  * Fails if veterans persuaded or provoked neighbours in proportion to their numbers.
+* **R2 (veterans' change does not depend on fellow veterans).** A veteran changed by the same amount whether he came home to a town of many or few veterans.
+  * Plausible if the change happened in the army, not through veterans' networks at home (Grand Army posts, local veterans' politics).
+  * Fails if veteran communities reinforced each other.
+* **R3 (a technical symmetry).** The change among veterans in an imaginary town of non-veterans equals the change among non-veterans in an imaginary town of veterans.
+  * It has no natural substantive reading. **I propose to drop it**, or to report it only as a technical benchmark.
+  * *Correction to §B3:* R3 is not "contextual effects unchanged". That assumption is R1 and R2 together.
+* **R4 (on average, no contextual change).** The weighted average of the two groups' slope changes is zero. If non-veterans moved more in veteran-heavy towns, veterans moved correspondingly less there.
+  * Equivalent to a straight-line regression of the town's change in yes share on its veteran share (Goodman on changes).
+  * Fails if both groups moved the same way with veteran share (reinforcement), which seems the most likely violation.
+* **R1 + R2 together ("contextual effects unchanged", your earlier assumption).** Testable: the curvature of the town pattern must be the same in both elections.
+
+**Suggested reporting:**
+* the model-free bound, then each of R1, R2 and R4 as points;
+* the bounded-change version of R1 (how big a differential spillover would be needed to overturn the conclusion);
+* the R1+R2 test.
+
+### D.5 New consequence: changing population counts (proved from 2a Lemma 2)
+
+* Each period's rate depends on the unidentified part through weights built from that period's counts, $s_t=\mu_{vn,t}/\mu_{v,t}$ (and likewise for non-veterans).
+* When counts change, the DiD's unidentified part is $s_1\kappa_1-s_0\kappa_0=s_1\Delta\kappa+(s_1-s_0)\kappa_0$.
+* So **even R1–R4 no longer give a single number**. The DiD is bounded by a short interval whose width is proportional to $\lvert s_1-s_0\rvert$ times the width of the pre-war set for $\kappa_0$. That is small when the town mix of population growth is unrelated to veteran share.
+* This also interacts with composition (B4): different counts mean partly different men.
+* Phase 2 will give the exact form and a within-person (stayer) target for which the cancellation is exact.
+
+### D.6 New point: selecting towns by their votes
+
+* Restricting the analysis to towns with near-zero 1857 YES votes changes the population of the target: the rates refer to those towns.
+* It also **selects on the outcome**. Even if contextual effects are linear in all towns, they need not be linear among towns chosen for low YES votes, so a model-based bound on the subset can be biased (*heuristic concern; to quantify in Phase 2*).
+* The new tools get the same information without selection. In those towns the unit-level Duncan–Davis range is already nearly a point. The exact rungs (N1, D0, D4) use that automatically, and the `trim` option lets such towns enter through their own unit bounds.
+* The earlier result will be reproduced both ways once the data arrive.

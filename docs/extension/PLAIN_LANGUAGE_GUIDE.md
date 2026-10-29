@@ -174,3 +174,17 @@ Pinned in `ASSUMPTION_MENU.md` and not yet derived: structural zeros (a party no
 * **Monotone EI on changes.** If the spillover and the veteran–non-veteran gap in changes point the same way, the DiD lies between two simple regression-based numbers. No straight lines are needed.
 * **Parallel trends (for the causal claim).** Future veterans would have changed like non-veterans had there been no war. This is a separate assumption from all of the above. Spillovers from veterans to non-veterans violate it.
 * **Composition.** Before the war, "veterans" are future veterans; many were too young to vote, and deaths and migration change the electorate. The two periods must describe the same people, or the change must be bounded over who might be who.
+
+### Model-implied vs actual rates (and DiD)
+
+* **Actual:** the rate among the actual people in these units, including local idiosyncrasies no model explains.
+* **Model-implied:** what the systematic pattern (the average behaviour of units with this composition) implies for these units.
+* Bounds that use no fitted model (Duncan–Davis, the monotone-EI signs) are automatically about the actual rate and have no sampling error. Bounds that use a fitted regression report both. The actual one is wider because it must allow for local luck, in both periods for a DiD.
+
+### Which single assumption identifies the DiD (veterans example)
+
+* **R1, no differential spillover:** non-veterans changed equally in veteran-heavy and veteran-light towns.
+* **R2, no home-network effect:** veterans changed equally whether they came home to many or few fellow veterans.
+* **R4, no average contextual change:** a straight line through the towns' changes gives the answer (Goodman on changes).
+* **R1 + R2 ("contextual effects unchanged"):** testable, through equal curvature in both elections.
+* Each gives one number; different rules give different numbers. Report all of them, plus how large a violation of R1 would overturn the conclusion. If population counts change between elections, each becomes a short interval rather than a point.

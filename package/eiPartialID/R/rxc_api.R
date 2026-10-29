@@ -219,6 +219,8 @@ eiBounds <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL,
   if (any(est$table$empty)) notes <- c(notes, "empty bound: the assumptions are contradicted by the data (or by sampling noise; see the emptiness test)")
   if (st$vcov_type != vcov) notes <- c(notes, paste0("variance estimator fell back from ", vcov, " to ", st$vcov_type))
   if (any(!st$keep)) notes <- c(notes, sprintf("%d units trimmed; their contribution to the actual rate is bounded by Duncan-Davis, and the model-implied rate refers to the kept units", sum(!st$keep)))
+  if (any(est$table$ci_rejected))
+    notes <- c(notes, "a confidence interval lies wholly outside the logically possible range: the rung is contradicted by the data (reported as --)")
   if (model %in% c("L5", "L6") && any(est$table$estimate_lower < 0 | est$table$estimate_upper > 1, na.rm = TRUE))
     notes <- c(notes, "point estimate outside [0, 1]: constancy is contradicted by the data")
   structure(list(call = cl, model = model, delta = delta, rows = rl, cols = cll,
@@ -463,11 +465,18 @@ breakdown <- function(object, target, threshold, direction = c("above", "below")
 #' whether the true aggregate rates fall inside each interval, and the widths.
 #'
 #' @param datasets a named list; each element a list with \code{data},
-#'   \code{rows}, \code{cols}, optional \code{group}, and \code{truth}: an
-#'   R x C matrix of true aggregate cell counts (rows x columns).
-#' @param rungs rungs to run.
-#' @param ... further arguments passed to \code{eiBounds()}.
-#' @return a data frame with one row per dataset, rung and cell.
+#'   \code{rows}, \code{cols}, optional \code{group}, \code{truth} (an
+#'   R x C matrix of true aggregate cell counts, rows x columns) and optional
+#'   \code{meta} (a named list of descriptors copied to the output).
+#' @param rungs either a character vector of models, or a named list in which
+#'   each element is a list of arguments for \code{eiBounds()} (e.g.
+#'   \code{list(M0 = list(model = "M0"), "M0+order" = list(model = "M0",
+#'   restrictions = ...))}). Restrictions given as a function of the dataset
+#'   (\code{function(d) list(...)}) are evaluated per dataset.
+#' @param cores number of cores (uses \code{parallel::mclapply} where available).
+#' @param ... further arguments passed to \code{eiBounds()} for every rung.
+#' @return a data frame with one row per dataset, rung and cell: the truth, the
+#'   bounds, and coverage indicators.
 #' @examples
 #' \dontrun{
 #' library(eiPack); data(senc)
@@ -477,25 +486,105 @@ breakdown <- function(object, target, threshold, direction = c("above", "below")
 #'   cols = c("dem", "rep", "non"), group = "county", truth = tr)))
 #' }
 #' @export
-eiBenchmark <- function(datasets, rungs = c("M0", "M2", "M1", "L5", "L6"), ...) {
-  out <- list()
-  for (nm in names(datasets)) {
+eiBenchmark <- function(datasets, rungs = c("M0", "M2", "M1", "L5", "L6"), cores = 1, ...) {
+  if (is.character(rungs)) rungs <- stats::setNames(lapply(rungs, function(m) list(model = m)), rungs)
+  common <- list(...)
+  one <- function(nm) {
     d <- datasets[[nm]]
     truth <- d$truth / rowSums(d$truth)
-    for (rg in rungs) {
-      if (rg %in% c("M2", "M1delta", "M1", "L5") && is.null(d$group)) next
-      fit <- tryCatch(eiBounds(data = d$data, rows = d$rows, cols = d$cols, group = d$group,
-                               model = rg, tests = FALSE, ...), error = function(e) e)
+    tv <- as.vector(t(truth))
+    res <- list()
+    for (rg in names(rungs)) {
+      args <- utils::modifyList(common, rungs[[rg]])
+      if (is.function(args$restrictions)) args$restrictions <- args$restrictions(d)
+      if (args$model %in% c("M2", "M1delta", "M1", "L5") && is.null(d$group)) next
+      args <- c(list(data = d$data, rows = d$rows, cols = d$cols, group = d$group, tests = FALSE), args)
+      fit <- tryCatch(do.call(eiBounds, args), error = function(e) e)
       if (inherits(fit, "error")) { warning(nm, "/", rg, ": ", conditionMessage(fit)); next }
       tb <- fit$table
-      tv <- as.vector(t(truth))
-      out[[length(out) + 1]] <- data.frame(
-        dataset = nm, rung = rg, target = tb$target, truth = tv,
-        in_estimate = !tb$empty & tv >= tb$estimate_lower & tv <= tb$estimate_upper,
-        in_ci_actual = tv >= tb$ci_actual_lower & tv <= tb$ci_actual_upper,
-        width_ci_actual = tb$ci_actual_upper - tb$ci_actual_lower,
-        width_dd = tb$dd_upper - tb$dd_lower, stringsAsFactors = FALSE)
+      out <- data.frame(dataset = nm, rung = rg, target = tb$target, truth = tv,
+                        estimate_lower = tb$estimate_lower, estimate_upper = tb$estimate_upper, empty = tb$empty,
+                        ci_model_lower = tb$ci_model_lower, ci_model_upper = tb$ci_model_upper,
+                        ci_actual_lower = tb$ci_actual_lower, ci_actual_upper = tb$ci_actual_upper,
+                        dd_lower = tb$dd_lower, dd_upper = tb$dd_upper, stringsAsFactors = FALSE)
+      tol <- 1e-9
+      out$in_estimate <- !out$empty & tv >= out$estimate_lower - tol & tv <= out$estimate_upper + tol
+      out$ci_rejected <- tb$ci_rejected
+      out$in_ci_actual <- !is.na(out$ci_actual_lower) & tv >= out$ci_actual_lower - tol & tv <= out$ci_actual_upper + tol
+      out$in_dd <- tv >= out$dd_lower - tol & tv <= out$dd_upper + tol
+      out$width_estimate <- ifelse(out$empty, NA, out$estimate_upper - out$estimate_lower)
+      out$width_ci_actual <- out$ci_actual_upper - out$ci_actual_lower
+      out$width_dd <- out$dd_upper - out$dd_lower
+      if (!is.null(d$meta)) for (k in names(d$meta)) out[[k]] <- d$meta[[k]]
+      res[[length(res) + 1]] <- out
+    }
+    do.call(rbind, res)
+  }
+  nms <- names(datasets)
+  parts <- if (cores > 1 && .Platform$OS.type != "windows") {
+    parallel::mclapply(nms, one, mc.cores = cores, mc.preschedule = FALSE)
+  } else lapply(nms, one)
+  bad <- vapply(parts, function(p) inherits(p, "try-error"), logical(1))
+  if (any(bad)) warning(sum(bad), " datasets failed")
+  out <- do.call(rbind, parts[!bad])
+  rownames(out) <- NULL
+  out
+}
+
+#' Benchmark tables from the ei.Datasets package
+#'
+#' Builds ecological-inference tables with known truth from the New Zealand
+#' general elections in \pkg{ei.Datasets} (Pavia 2023): in each electorate,
+#' polling places are the units, the party vote gives the rows, the electorate
+#' (candidate) vote gives the columns, and the official electorate-level
+#' cross-tabulation of party by candidate vote gives the true table. The
+#' chosen parties form their own rows and columns; all other parties,
+#' candidates and informal votes are pooled into \code{"OTH"}. Columns with no
+#' votes in an electorate (e.g. no National candidate) are dropped.
+#'
+#' @param elections NZ election years (2002, 2005, ..., 2020).
+#' @param parties party names as used in \pkg{ei.Datasets}.
+#' @param labels short labels for the parties.
+#' @return a named list of benchmark entries for \code{eiBenchmark()}.
+#' @references Pavia, J. M. (2023). ei.Datasets: Real Datasets for Assessing
+#'   Ecological Inference Algorithms. Social Science Computer Review.
+#' @export
+eiDatasetsTables <- function(elections = c(2002, 2005, 2008, 2011, 2014, 2017, 2020),
+                             parties = c("Labour Party", "National Party"),
+                             labels = c("LAB", "NAT")) {
+  if (!requireNamespace("ei.Datasets", quietly = TRUE)) stop("package 'ei.Datasets' is required")
+  out <- list()
+  for (yr in elections) {
+    nm <- paste0("ei_NZ_", yr)
+    env <- new.env()
+    utils::data(list = nm, package = "ei.Datasets", envir = env)
+    x <- get(nm, envir = env)
+    for (i in seq_len(nrow(x))) {
+      P <- as.data.frame(x$Votes_to_parties[[i]]); Cn <- as.data.frame(x$Votes_to_candidates[[i]])
+      cv <- as.data.frame(x$District_cross_votes[[i]])
+      Pm <- as.matrix(P[, -(1:2)]); Cm <- as.matrix(Cn[, -(1:2)]); Xm <- as.matrix(cv[, -1])
+      pc <- colnames(Pm); cc <- colnames(cv)[-1]
+      # party (row) and candidate (column) groups; cross-table rows/columns follow the same order
+      rg <- rep("OTH", length(pc)); cg <- rep("OTH", length(cc))
+      for (k in seq_along(parties)) {
+        rg[pc == parties[k]] <- labels[k]
+        cg[grepl(paste0("(", parties[k], ")"), cc, fixed = TRUE)] <- labels[k]
+      }
+      lv <- c(labels, "OTH")
+      agg_c <- function(M, g) sapply(lv, function(l) rowSums(M[, g == l, drop = FALSE]))
+      R <- agg_c(Pm, rg); C <- agg_c(Cm, cg)
+      tr <- sapply(lv, function(l) rowSums(Xm[, cg == l, drop = FALSE]))       # rows: cross rows
+      tr <- t(sapply(lv, function(l) colSums(tr[rg == l, , drop = FALSE])))  # aggregate rows by party
+      keepc <- colSums(C) > 0; keepr <- colSums(R) > 0
+      R <- R[, keepr, drop = FALSE]; C <- C[, keepc, drop = FALSE]; tr <- tr[keepr, keepc, drop = FALSE]
+      rn <- paste0("p_", lv[keepr]); cn <- paste0("c_", lv[keepc])
+      colnames(R) <- rn; colnames(C) <- cn; dimnames(tr) <- list(rn, cn)
+      dat <- as.data.frame(cbind(R, C))
+      dat <- dat[rowSums(R) > 0, , drop = FALSE]
+      key <- sprintf("NZ%d_%02d_%s", yr, i, gsub("[^A-Za-z]", "", x$District[i]))
+      out[[key]] <- list(data = dat, rows = rn, cols = cn, truth = tr,
+                         meta = list(election = yr, district = x$District[i], units = nrow(dat)))
     }
   }
-  do.call(rbind, out)
+  out
 }

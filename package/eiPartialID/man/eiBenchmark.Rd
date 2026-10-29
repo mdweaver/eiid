@@ -4,19 +4,27 @@
 \alias{eiBenchmark}
 \title{Benchmark rungs on data with known cell values}
 \usage{
-eiBenchmark(datasets, rungs = c("M0", "M2", "M1", "L5", "L6"), ...)
+eiBenchmark(datasets, rungs = c("M0", "M2", "M1", "L5", "L6"), cores = 1, ...)
 }
 \arguments{
 \item{datasets}{a named list; each element a list with \code{data},
-\code{rows}, \code{cols}, optional \code{group}, and \code{truth}: an
-R x C matrix of true aggregate cell counts (rows x columns).}
+\code{rows}, \code{cols}, optional \code{group}, \code{truth} (an
+R x C matrix of true aggregate cell counts, rows x columns) and optional
+\code{meta} (a named list of descriptors copied to the output).}
 
-\item{rungs}{rungs to run.}
+\item{rungs}{either a character vector of models, or a named list in which
+each element is a list of arguments for \code{eiBounds()} (e.g.
+\code{list(M0 = list(model = "M0"), "M0+order" = list(model = "M0",
+restrictions = ...))}). Restrictions given as a function of the dataset
+(\code{function(d) list(...)}) are evaluated per dataset.}
 
-\item{...}{further arguments passed to \code{eiBounds()}.}
+\item{cores}{number of cores (uses \code{parallel::mclapply} where available).}
+
+\item{...}{further arguments passed to \code{eiBounds()} for every rung.}
 }
 \value{
-a data frame with one row per dataset, rung and cell.
+a data frame with one row per dataset, rung and cell: the truth, the
+  bounds, and coverage indicators.
 }
 \description{
 For each dataset with known cell counts, runs the requested rungs and reports

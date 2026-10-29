@@ -252,7 +252,7 @@
     row <- list(target = nm, estimate_lower = NA, estimate_upper = NA,
                 ci_model_lower = NA, ci_model_upper = NA,
                 ci_actual_lower = NA, ci_actual_upper = NA,
-                dd_lower = dd[1], dd_upper = dd[2], empty = isTRUE(pl$empty))
+                dd_lower = dd[1], dd_upper = dd[2], empty = isTRUE(pl$empty), ci_rejected = FALSE)
     if (!isTRUE(pl$empty) && !isTRUE(pl$unbounded)) {
       row$estimate_lower <- pl$lower - wid_eta; row$estimate_upper <- pl$upper + wid_eta
     }
@@ -310,6 +310,14 @@
       lo <- ce[1] - zE * sdE + tr[1] - eta * sum(abs(a2))
       hi <- ce[2] + zE * sdE + tr[2] + eta * sum(abs(a2))
       row$ci_actual_lower <- max(lo, dd[1]); row$ci_actual_upper <- min(hi, dd[2])
+      # an interval lying wholly outside the logical range / Duncan-Davis means the rung is
+      # contradicted by the data: report it as empty rather than as an inverted interval
+      if (!is.na(row$ci_model_lower) && row$ci_model_lower > row$ci_model_upper) {
+        row$ci_model_lower <- row$ci_model_upper <- NA; row$ci_rejected <- TRUE
+      }
+      if (!is.na(row$ci_actual_lower) && row$ci_actual_lower > row$ci_actual_upper) {
+        row$ci_actual_lower <- row$ci_actual_upper <- NA; row$ci_rejected <- TRUE
+      }
     }
     if (jkst && !isTRUE(pl$empty) && !point) {
       jk[[nm]] <- .rxc_jkst(st, cons, tg, pl, dd, jkst_x, a)

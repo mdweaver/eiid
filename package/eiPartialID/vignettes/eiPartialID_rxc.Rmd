@@ -158,3 +158,18 @@ b <- eiBenchmark(list(senc = list(data = senc2, rows = c("white", "black"),
                  rungs = c("M0", "M1", "L5"), seed = 1)
 aggregate(cbind(in_ci_actual, width_ci_actual, width_dd) ~ rung, b, mean)
 ```
+
+### Real elections with known truth: ei.Datasets
+
+`eiDatasetsTables()` builds 492 tables with exact truth from the New Zealand
+general elections 2002–2020 in the `ei.Datasets` package. In each electorate,
+polling places are the units, party votes are the rows and electorate
+(candidate) votes are the columns. The repository's
+`benchmarks/run_ei_datasets_benchmark.R` runs the full benchmark, and the
+results are stored in `benchmarks/results/`.
+
+```{r eidatasets, eval = FALSE}
+tb <- eiDatasetsTables(elections = 2020)
+eiBenchmark(tb[1:5], rungs = c("M0", "L6"), seed = 1)
+```
+

@@ -1,0 +1,9 @@
+PASS Lemma P3.1: upper endpoint is concave along a line in Q (second differences <= 0)
+PASS Lemma P3.1: ... and piecewise linear (most second differences exactly 0)
+PASS Prop P3.2(c): sample hull inside the true hull => bounds weakly wider (4 targets)
+PASS Thm P3.4: at a tie the plug-in endpoint is biased inward (mean error -0.564 ~ -1/sqrt(pi) = -0.564)
+PASS Thm P3.4: with a unique active constraint the bias vanishes (mean error 0.0071)
+PASS Prop S1: eta-bounds nested (wider as eta grows)
+PASS Prop S1: violated-model truth 0.8499 lies in the eta=0.02 bound [0.3617, 0.9669]
+     breakdown eta* for 'loyalty > 0.30': 0.0595
+PASS Breakdown: claim holds just below eta* and fails just above

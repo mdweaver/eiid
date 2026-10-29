@@ -1,0 +1,45 @@
+% Notation dictionary for the R x C / covariate extension of Jiang, King,
+% Schmaltz & Tanner (2019). Requires \usepackage{booktabs,amsmath,amssymb}.
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+Symbol & Meaning \\
+\midrule
+$i=1,\dots,p$ & unit (precinct) index \\
+$d=1,\dots,D$;\ $D_i$;\ $\mathcal I_d$;\ $p_d$ & district; district of unit $i$; units in $d$; their number \\
+$r,s=1,\dots,R$ & row categories (election-1 choice / group) \\
+$c=1,\dots,C$ & column categories (election-2 choice) \\
+$N_i,\ N_{ir},\ N_{irc}$ & unit size; row count; latent cell count \\
+$X_i\in\Delta^{R-1}$ & observed row shares $N_{ir}/N_i$ \\
+$T_i\in\Delta^{C-1}$ & observed column shares \\
+$Z_i$ & additional covariates (e.g.\ $\log N_i$) \\
+$\beta_i=[\beta_{irc}]\in\mathfrak B=(\Delta^{C-1})^R$ & latent transition matrix of unit $i$ \\
+$W_i=(N_i,X_i,T_i,Z_i,D_i)$ & observables of unit $i$ \\
+$P$;\ $\mathbb Q$ & law of $W$ (observable); law of $(W,\beta)$ \\
+$(\Omega,\mathcal F)$ & underlying measurable space \\
+$\mathcal G=\sigma(X,N,Z)$ & conditioning $\sigma$-algebra of the contextual model \\
+$\mathcal O_p=\sigma(W_1,\dots,W_p)$ & $\sigma$-algebra of the sample \\
+$B_{rc}(\mathcal S)$ & finite-population transition rate over units $\mathcal S$ \\
+$B^*_{rc}=E[NX_r\beta_{rc}]/E[NX_r]$ & superpopulation analogue \\
+$\varphi=\sum_{rc}a_{rc}B_{rc}$ & linear target (loyalty, defection, demobilisation) \\
+$A\subseteq\Delta^{R-1}$,\ $\operatorname{vert}(A)$ & region where LCE is assumed; its vertices \\
+$H_c\in\mathbb R^{R\times R}$ & homogeneous LCE coefficients: $E[\beta_{rc}\mid X]=e_r^\top H_cX$ \\
+$Q_c=\tfrac12(H_c+H_c^\top)$ & identified: $E[T_c\mid X]=X^\top Q_cX$ \\
+$K_c=\tfrac12(H_c-H_c^\top)$;\ $\mathcal K$ & unidentified; $\dim\mathcal K=(C-1)R(R-1)/2$ \\
+$\kappa_c=K_{c,12}$ & unidentified scalar per column when $R=2$ \\
+$M_H(x)=[e_r^\top H_cx]_{rc}$ & implied conditional-mean transition matrix \\
+$\tau_c(x)=E[T_c\mid X=x]$ & regression function \\
+$\mu_r=E[NX_r]$,\ $\mu_{rs}=E[NX_rX_s]$ & weighting moments; $\mu_{rs}/\mu_r=\partial B^*_{rc}/\partial K_{c,rs}$ \\
+$S(x,t)$;\ $h_S(u;x,t)$ & unit Duncan--Davis polytope; its support function \\
+$\mathbb E[S\mid\mathcal G]$ & conditional Aumann (selection) expectation \\
+$\Theta_I\subseteq\Theta_X\subseteq\Theta_O$ & sharp set; JKST Prop.~1 set; outer (Jensen/vertex) set \\
+$\mathcal B^*_I$ & identified set for the estimand \\
+$\zeta_{c,d}\in\mathbb R^R$ & district intercept shifts (model M1), identified \\
+$Q^{(d)}_c,\ \Theta^{(d)}_O,\ A_d$ & district-level identified part, constraint set, support \\
+$\mathrm{CI}_x,\ S_1,\ S_L,\ S_U$ & JKST confidence interval and standard-error terms \\
+$\Phi$ & standard normal CDF \\
+\bottomrule
+\end{tabular}
+\caption{Notation.}
+\end{table}

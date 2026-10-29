@@ -1,0 +1,175 @@
+---
+title: "R x C bounds, grouped units and the assumption ladder"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{R x C bounds, grouped units and the assumption ladder}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+has_eipack <- requireNamespace("eiPack", quietly = TRUE)
+```
+
+Version 0.2.0 adds `eiBounds()`, which extends the 2 x 2 method of Jiang,
+King, Schmaltz and Tanner (2019) to R x C tables, to units nested in groups
+(e.g. polls within ridings, precincts within counties), and to a ladder of
+assumptions running from Duncan–Davis bounds (no model) to Goodman constancy.
+The derivations, proofs and simulations are in `docs/extension/` of the source
+repository. `PLAIN_LANGUAGE_GUIDE.md` there explains every rung in plain terms.
+
+## What is reported
+
+For each target (by default every row-by-column cell), `eiBounds()` reports:
+
+* `estimate`: the estimated identified set for the *model-implied rate*. This
+  is not a confidence interval, and it tends to be too narrow when there are
+  many noisy constraints.
+* `ci_model`: a confidence interval for the model-implied rate at the observed
+  compositions (the "behavioural" rate).
+* `ci_actual`: a confidence interval for the *actual* rate in these units.
+  It includes an allowance for unit-level deviations, which can never be
+  estimated. That allowance is bounded by the Bhatia–Davis inequality (the
+  default) or by the Popoviciu bound of 1/4 used by Jiang et al.
+* `duncan_davis`: the model-free bounds for the actual rate.
+
+The confidence intervals use intersection-bound inference (Chernozhukov, Lee
+and Rosen 2013). Jiang et al.'s CI_x intervals are also available
+(`jkst = TRUE`).
+
+## Two-by-two: the original method
+
+```{r census}
+library(eiPartialID)
+library(eco)
+data(census)
+fit <- eiBounds(x = census$X, t = census$Y, n = census$N, model = "M0",
+                targets = list(black_literate = c(1, 1)), jkst = TRUE, seed = 1)
+fit
+```
+
+With `range_offset = 1e-5` and `vcov = "HC1"`, the plug-in bound and the
+CI_x intervals coincide with `generateBounds()` and `evaluateBounds()`.
+
+## Three ways to give the data
+
+```{r interfaces, eval = has_eipack}
+library(eiPack)
+data(senc)                       # NC registration by race, with true cell counts
+senc2 <- transform(senc, black = black + natam)   # merge a very small group
+# 1. formula with counts
+f1 <- eiBounds(cbind(dem, rep, non) ~ cbind(white, black), data = senc2,
+               targets = list(white_dem = c("white", "dem")), seed = 1)
+# 2. data plus column names
+f2 <- eiBounds(data = senc2, rows = c("white", "black"), cols = c("dem", "rep", "non"),
+               targets = list(white_dem = c("white", "dem")), seed = 1)
+# 3. shares and sizes
+X <- as.matrix(senc2[, c("white", "black")]) / senc2$total
+T <- as.matrix(senc2[, c("dem", "rep", "non")]) / senc2$total
+f3 <- eiBounds(x = X, t = T, n = senc2$total, targets = list(white_dem = c(1, 1)), seed = 1)
+rbind(f1$table$estimate_lower, f2$table$estimate_lower, f3$table$estimate_lower)
+```
+
+Row and column totals must describe the same population. If they differ,
+`eiBounds()` stops; `mismatch = "rescale"` overrides this, with a warning.
+
+## The ladder
+
+`ladder()` runs the rungs from the most to the least plausible:
+
+| Rung | Assumption |
+|---|---|
+| DD | none |
+| M2 | each group has its own linear contextual effects |
+| M1(delta) | contextual effects shared, each group within `delta` of them |
+| M1 | contextual effects shared; groups differ only in baselines ("group dummies") |
+| L4 | as M1, and one chosen row has no contextual effect |
+| L5 | constancy within each group (Goodman within groups) |
+| L6 | Goodman constancy |
+
+M0 (pooled, no groups) is reported alongside; it is not nested with the others.
+
+```{r ladder, eval = has_eipack}
+L <- ladder(data = senc2, rows = c("white", "black"), cols = c("dem", "rep", "non"),
+            group = "county", targets = list(white_dem = c("white", "dem")),
+            row_constant = "black")
+L
+# truth
+with(senc, sum(whdem) / sum(white))
+```
+
+## Composition range
+
+The bounds come from requiring the implied rates to be valid probabilities at
+the corners of the composition range. The choices are:
+
+* `range = "hull"` (default): the observed units. Each group uses its own units.
+* `range = "trim"`: drop extreme units from the corners (`trim = list(quantile
+  = 0.01)`, `min_n = ...` or `drop = ...`). Trimmed units enter the actual rate
+  only through their Duncan–Davis bounds, so trimming never relies on the model
+  for them.
+* `range = "extrapolate"`: impose the model beyond the data (`"simplex"` means
+  pure units). This gives narrower bounds, but it is untestable, and a warning is
+  printed.
+
+## Additional restrictions
+
+All of these keep the bounds as linear programs.
+
+```{r restrictions, eval = has_eipack}
+r <- list(
+  order = list(c(high = "black", low = "white", col = "dem")),  # same composition: black >= white
+  sign = list(list(row = "white", col = "dem", from = "white", to = "black", sign = 1)),
+  slope = 0.5,                                                  # no rate moves > 0.5 across compositions
+  external = list(list(target = c("white", "dem"), lower = 0.40, upper = 0.55))  # e.g. a survey
+)
+eiBounds(data = senc2, rows = c("white", "black"), cols = c("dem", "rep", "non"),
+         targets = list(white_dem = c("white", "dem")), restrictions = r, seed = 1)
+```
+
+`zeros` fixes structural zeros, e.g. a party that did not run. `linear` takes
+any linear restriction on the contextual-effect matrices.
+
+## Sensitivity and breakdown
+
+```{r sens}
+sv <- sensitivity(fit, eta = c(0, 0.02, 0.05))
+sv[, c("eta", "estimate_lower", "estimate_upper")]
+breakdown(fit, "black_literate", threshold = 0.5, which = "ci_model")
+```
+
+`eta` is how far average rates may depart from straight lines, in probability
+units, in ways the data cannot detect. The breakdown value is the largest
+`eta` at which the conclusion ("the rate is above 0.5") still holds.
+
+## Benchmarks
+
+`eiBenchmark()` runs the rungs on datasets with known cell counts, and reports
+whether each interval contains the truth and how wide it is.
+
+```{r bench, eval = has_eipack}
+truth <- with(senc, matrix(c(sum(whdem), sum(whrep), sum(whnon),
+                             sum(bldem + natamdem), sum(blrep + natamrep), sum(blnon + natamnon)),
+                           2, 3, byrow = TRUE))
+b <- eiBenchmark(list(senc = list(data = senc2, rows = c("white", "black"),
+                                  cols = c("dem", "rep", "non"), group = "county", truth = truth)),
+                 rungs = c("M0", "M1", "L5"), seed = 1)
+aggregate(cbind(in_ci_actual, width_ci_actual, width_dd) ~ rung, b, mean)
+```
+
+### Real elections with known truth: ei.Datasets
+
+`eiDatasetsTables()` builds 492 tables with exact truth from the New Zealand
+general elections 2002–2020 in the `ei.Datasets` package. In each electorate,
+polling places are the units, party votes are the rows and electorate
+(candidate) votes are the columns. The repository's
+`benchmarks/run_ei_datasets_benchmark.R` runs the full benchmark, and the
+results are stored in `benchmarks/results/`.
+
+```{r eidatasets, eval = FALSE}
+tb <- eiDatasetsTables(elections = 2020)
+eiBenchmark(tb[1:5], rungs = c("M0", "L6"), seed = 1)
+```
+

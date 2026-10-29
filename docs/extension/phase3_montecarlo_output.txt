@@ -1,0 +1,13 @@
+Design A: 2x2, M1, 10 districts x 93 units, 200 replications
+  B (D=10, PD=93)            plug-in: cover 0.970, empty 0.00, width 0.282 | conservative: cover 1.000, empty 0.00, width 0.681 | CLR-type: cover 1.000, empty 0.00, width 0.522 | CLR for B~: cover 1.000, width 0.424 | CLR for B (Bhatia-Davis): cover 1.000, width 0.531
+Design A: 2x2, M1, 93 districts x 30 units, 200 replications
+  B (D=93, PD=30)            plug-in: cover 0.665, empty 0.00, width 0.158 | conservative: cover 1.000, empty 0.00, width 0.702 | CLR-type: cover 1.000, empty 0.00, width 0.476 | CLR for B~: cover 1.000, width 0.419 | CLR for B (Bhatia-Davis): cover 1.000, width 0.481
+Design A: 2x2, M1, 93 districts x 10 units, 200 replications
+  B (D=93, PD=10)            plug-in: cover 0.055, empty 0.44, width 0.049 | conservative: cover 1.000, empty 0.00, width 1.048 | CLR-type: cover 1.000, empty 0.00, width 0.571 | CLR for B~: cover 1.000, width 0.471 | CLR for B (Bhatia-Davis): cover 1.000, width 0.580
+Design C: 2x2 pooled, 1000 units, truth on the boundary, 200 replications
+  B (boundary case)          plug-in: cover 0.660, empty 0.11, width 0.031 | conservative: cover 1.000, empty 0.00, width 0.140 | CLR-type: cover 1.000, empty 0.00, width 0.135 | CLR for B~: cover 0.990, width 0.042 | CLR for B (Bhatia-Davis): cover 1.000, width 0.077
+Design B: 3x3 pooled, 1000 units, 200 replications
+  loyalty P->P               plug-in: cover 1.000, empty 0.00, width 0.536 | conservative: cover 1.000, empty 0.00, width 0.689 | CLR-type: cover 1.000, empty 0.00, width 0.653 | CLR for B~: cover 1.000, width 0.560 | CLR for B (Bhatia-Davis): cover 1.000, width 0.661
+  defection P->O             plug-in: cover 1.000, empty 0.00, width 0.352 | conservative: cover 1.000, empty 0.00, width 0.498 | CLR-type: cover 1.000, empty 0.00, width 0.467 | CLR for B~: cover 1.000, width 0.373 | CLR for B (Bhatia-Davis): cover 1.000, width 0.471
+  demobilisation P->abstain  plug-in: cover 1.000, empty 0.00, width 0.283 | conservative: cover 1.000, empty 0.00, width 0.428 | CLR-type: cover 1.000, empty 0.00, width 0.397 | CLR for B~: cover 1.000, width 0.303 | CLR for B (Bhatia-Davis): cover 1.000, width 0.396
+  mobilisation N->P          plug-in: cover 1.000, empty 0.00, width 0.530 | conservative: cover 1.000, empty 0.00, width 0.721 | CLR-type: cover 1.000, empty 0.00, width 0.660 | CLR for B~: cover 1.000, width 0.561 | CLR for B (Bhatia-Davis): cover 1.000, width 0.668

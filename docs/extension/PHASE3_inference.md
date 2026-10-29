@@ -211,16 +211,16 @@ Checked: a nonlinear undetectable violation with $\eta=0.02$ stays inside the bo
 
 Coverage is the share of 200 replications containing the truth; width is the median. The DD width is shown for reference; every CI may be intersected with DD.
 
-| Design | DD width | Plug-in: cover / empty / width | Conservative CI for $B$ | CLR CI for $B$ | CLR CI for $\tilde B$ |
-|---|---|---|---|---|---|
-| A: 2×2, M1, 10 districts × 93 | 0.62 | 0.970 / 0.00 / 0.282 | 1.000 / 0.681 | 1.000 / 0.522 | 1.000 / 0.424 |
-| A: 2×2, M1, 93 × 30 | 0.56 | 0.665 / 0.00 / 0.158 | 1.000 / 0.702 | 1.000 / 0.476 | 1.000 / 0.419 |
-| A: 2×2, M1, 93 × 10 | 0.56 | **0.055 / 0.44** / 0.049 | 1.000 / 1.048 | 1.000 / 0.571 | 1.000 / 0.471 |
-| C: 2×2 pooled, truth on the boundary | 0.33 | 0.660 / 0.11 / 0.031 | 1.000 / 0.140 | 1.000 / 0.135 | **0.990** / 0.042 |
-| B: 3×3 pooled, loyalty P→P | 0.84 | 1.000 / 0.00 / 0.536 | 1.000 / 0.689 | 1.000 / 0.653 | 1.000 / 0.560 |
-| B: 3×3 pooled, defection P→O | 0.64 | 1.000 / 0.00 / 0.352 | 1.000 / 0.498 | 1.000 / 0.466 | 1.000 / 0.373 |
-| B: 3×3 pooled, demobilisation | 0.53 | 1.000 / 0.00 / 0.283 | 1.000 / 0.428 | 1.000 / 0.397 | 1.000 / 0.303 |
-| B: 3×3 pooled, mobilisation N→P | 0.89 | 1.000 / 0.00 / 0.530 | 1.000 / 0.720 | 1.000 / 0.660 | 1.000 / 0.561 |
+| Design | DD width | Plug-in: cover / empty / width | Conservative CI for $B$ | CLR CI for $B$ (Popoviciu) | CLR CI for $B$ (Bhatia–Davis) | CLR CI for $\tilde B$ |
+|---|---|---|---|---|---|---|
+| A: 2×2, M1, 10 districts × 93 | 0.62 | 0.970 / 0.00 / 0.282 | 1.000 / 0.681 | 1.000 / 0.522 | 1.000 / 0.531 | 1.000 / 0.424 |
+| A: 2×2, M1, 93 × 30 | 0.56 | 0.665 / 0.00 / 0.158 | 1.000 / 0.702 | 1.000 / 0.476 | 1.000 / 0.481 | 1.000 / 0.419 |
+| A: 2×2, M1, 93 × 10 | 0.56 | **0.055 / 0.44** / 0.049 | 1.000 / 1.048 | 1.000 / 0.571 | 1.000 / 0.580 | 1.000 / 0.471 |
+| C: 2×2 pooled, truth on the boundary | 0.33 | 0.660 / 0.11 / 0.031 | 1.000 / 0.140 | 1.000 / 0.135 | 1.000 / **0.077** | **0.990** / 0.042 |
+| B: 3×3 pooled, loyalty P→P | 0.84 | 1.000 / 0.00 / 0.536 | 1.000 / 0.689 | 1.000 / 0.653 | 1.000 / 0.661 | 1.000 / 0.560 |
+| B: 3×3 pooled, defection P→O | 0.64 | 1.000 / 0.00 / 0.352 | 1.000 / 0.498 | 1.000 / 0.466 | 1.000 / 0.471 | 1.000 / 0.373 |
+| B: 3×3 pooled, demobilisation | 0.53 | 1.000 / 0.00 / 0.283 | 1.000 / 0.428 | 1.000 / 0.397 | 1.000 / 0.396 | 1.000 / 0.303 |
+| B: 3×3 pooled, mobilisation N→P | 0.89 | 1.000 / 0.00 / 0.530 | 1.000 / 0.720 | 1.000 / 0.660 | 1.000 / 0.668 | 1.000 / 0.561 |
 
 **Reading the results.**
 
@@ -232,7 +232,8 @@ Coverage is the share of 200 replications containing the truth; width is the med
 3. **CLR is much narrower than the conservative version**: 0.571 vs 1.048 at 93 × 10, for example. It should be the default.
 4. **The residual term is a large part of the width.** Targeting $\tilde B$ instead of $B$ narrows the 3×3 intervals by 0.09–0.10 and the 2×2 M1 intervals by 0.06–0.10.
 5. **With 10 units per district the valid CI for $B$ is no narrower than DD** (0.571 vs 0.56), and for $\tilde B$ it is 0.471. The identification gain of M1 is mostly consumed by sampling noise in this regime (§6). With 93 units per district, the CI for $\tilde B$ is 0.424 against DD's 0.62.
-6. **In the pooled 3×3 design the CIs are 0.30–0.56 wide, against DD's 0.53–0.89.** A real gain, but these are wide intervals. Narrowing them further is the role of the stronger rungs and the menu restrictions.
+6. **Bhatia–Davis versus Popoviciu.** Bhatia–Davis narrows the actual-rate CI sharply when the plausible range of rates excludes 0.5: in the boundary design it is 0.077 against 0.135. Elsewhere that range includes 0.5, so the allowance equals Popoviciu's and the interval is about 0.01 wider, the price of the α share spent bounding the variance. It remains the package default: it is never worse by more than that small share and can be much better.
+7. **In the pooled 3×3 design the CIs are 0.30–0.56 wide, against DD's 0.53–0.89.** A real gain, but these are wide intervals. Narrowing them further is the role of the stronger rungs and the menu restrictions.
 
 ---
 

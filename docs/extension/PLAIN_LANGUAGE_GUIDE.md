@@ -129,3 +129,48 @@ Pinned in `ASSUMPTION_MENU.md` and not yet derived: structural zeros (a party no
   * Say which one you report.
 * **An empty confidence set is a real rejection.** If even the widened constraints cannot be satisfied, the assumptions are rejected at the stated level [P3 Prop 6].
 * **Sensitivity in one number.** For a headline claim (e.g. "loyalty above 30%"), report the *breakdown value*: how far average rates could depart from straight lines, undetectably, before the claim fails [P3 §7].
+
+---
+
+## 7. Proposed tools (Phase 1, awaiting review; not yet derived or implemented)
+
+*Details in `PHASE1b_monotone_did.md`. Entries will be finalised after Phase 2.*
+
+### Monotone EI: sign of the gap within units ("between" association)
+
+* **What it is:** assume that, on average across units, members of group A are more likely than members of group B *living in the same unit* to choose an outcome. Example: Labour party voters are more likely than other voters at the same polling place to vote for the Labour candidate. From Elzayn et al., "Monotone Ecological Inference".
+* **Key assumption:** only the *direction* of the average within-unit gap, not its size, and no straight-line model.
+* **If wrong:** one end of the bound is cut in the wrong place, so the bound can exclude the truth.
+* **Check:** an empty bound refutes it. Survey or individual-level data on a subsample (as Elzayn et al. do) can support it.
+
+### Monotone EI: sign of the contextual effect ("within" association)
+
+* **What it is:** assume that, on average, each group's rate moves in a known direction as a unit's composition changes. Example: both parties' voters are more likely to back candidate P where P's party is stronger. It needs no straight-line model.
+* **Key assumption:** the direction of the averaged contextual effect.
+* **If wrong:** the bound can exclude the truth. Goodman's regression then errs in the opposite direction from the one assumed.
+* **Check:** an empty bound refutes it (this happens when Goodman's estimate falls outside the no-model range on the "wrong" side).
+
+### Contextual reinforcement
+
+* **What it is:** assume the two directions above *agree*, without saying which way they go. The answer then lies between the neighbourhood model and Goodman's regression, and its sign is identified.
+* **Key assumption:** contextual effects reinforce individual differences, through social norms, local policies or peer effects. They do not counteract them.
+* **If wrong:** with opposing forces (e.g. backlash in mixed areas), the bound can exclude the truth.
+* **Check:** largely untestable from aggregates alone; an empty bound refutes it.
+
+### Monotone contextual effects without straight lines
+
+* **What it is:** each group's average rate is assumed to rise (or fall) steadily with the unit's composition, in any shape, not necessarily a straight line. This is Manski and Pepper's "monotone instrument" idea, with composition as the instrument.
+* **Key assumption:** no reversals. For example, a group's loyalty never falls as its own share rises.
+* **If wrong:** U-shapes or tipping points can push the truth outside the bound.
+* **Check:** an empty bound refutes it; plot the estimated regression for reversals.
+
+### Difference-in-differences: what each assumption buys
+
+* **No link between periods.** The bound for the change is the difference of the two periods' bounds, so the widths add. Always valid.
+* **Contextual effects on *changes* are straight lines.** This allows each county its own persistent political culture, which need not follow any line. With one more assumption the DiD becomes a single number. Example: the change among non-veterans does not depend on how many veterans live nearby, i.e. no differential spillover.
+  * *If wrong:* a confident, wrong number.
+  * *Check:* the single assumption is not testable on its own. Adding "veterans' change does not depend on it either" is testable (equal curvature in both periods).
+* **Bounded change δ.** The unidentified part may change by at most δ. The answer is the point ± a multiple of δ. Report how large δ must be to overturn the conclusion.
+* **Monotone EI on changes.** If the spillover and the veteran–non-veteran gap in changes point the same way, the DiD lies between two simple regression-based numbers. No straight lines are needed.
+* **Parallel trends (for the causal claim).** Future veterans would have changed like non-veterans had there been no war. This is a separate assumption from all of the above. Spillovers from veterans to non-veterans violate it.
+* **Composition.** Before the war, "veterans" are future veterans; many were too young to vote, and deaths and migration change the electorate. The two periods must describe the same people, or the change must be bounded over who might be who.

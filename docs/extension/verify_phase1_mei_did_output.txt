@@ -1,0 +1,11 @@
+PASS  V1 ER/NM bias identities, decomposition, NM = gamma*ER (300 pops, Y in [-1,1])  [max abs error 1.3e-15]
+PASS  V2 Elzayn closed forms (Prop.5, 7, 8 of arXiv v1) = unit-level LP  [1093 non-empty cases, 107 empty cases agree; max err 8.9e-16]
+PASS  V3 under LCE, dW and dB are affine in the unidentified w1 (closed forms)  [max err 2.0e-16]
+PASS  V4 R x C bias formulas for Goodman regression and the neighbourhood model; 1'Delta = 0  [max err 2.1e-15]
+PASS  V5 nondecreasing m1 and m0 in X  =>  dW >= 0 (500 random cases)
+PASS  V6 local within-sign everywhere does not imply aggregate dW >= 0 (counterexample exists)  [min aggregate dW = -0.0030]
+PASS  V7a model-free DiD bound = difference of the periods' DD intervals  [max err 6.7e-16]
+PASS  V7b first-difference LCE + (Delta w1 = 0) point-identifies the DiD despite arbitrary unit effects  [max err 2.2e-16]
+PASS  V7c ER on Delta T is biased for the DiD by dW(changes)/Var(X_N)  [max err 1.2e-15]
+
+9/9 PASS

@@ -14,6 +14,14 @@ from scipy.stats import norm
 REPS = int(sys.argv[1]) if len(sys.argv) > 1 else 300
 ALPHA1, ALPHA2 = 0.04, 0.01        # conservative method: estimation part, finite-population part
 ALPHA_SIDE_EST, ALPHA_SIDE_E = 0.02, 0.005   # CLR method, per side (two sides: total 0.05)
+ALPHA_SIDE_E_BD, ALPHA_V = 0.0025, 0.005     # Bhatia-Davis variant: E-term per side, variance-bound CI
+
+
+def bd_sd(w, mlo, mhi):
+    """Bhatia-Davis sd bound for E = sum w_i e_i given a CI [mlo, mhi] for the w^2-weighted mean rate."""
+    lo, hi = min(max(mlo, 0.0), 1.0), min(max(mhi, 0.0), 1.0)
+    vmax = 0.25 if lo <= 0.5 <= hi else max(lo * (1 - lo), hi * (1 - hi))
+    return np.sqrt(np.sum(w ** 2) * vmax)
 NDRAW = 4000
 
 
@@ -92,7 +100,7 @@ def design_A(d, x):
     return Z
 
 
-def lin_A(beta_len, d, x, N):
+def lin_A(beta_len, d, x, N, w_override=None):
     """Linear maps from the coefficient vector to: constraint RHS terms s_j, kappa-coefficients a_j,
     and the constant of B~ (finite-population target with sample weights)."""
     k = beta_len
@@ -121,7 +129,7 @@ def lin_A(beta_len, d, x, N):
     S = np.array(S); A = np.array(A)
     one = np.zeros(len(S)); one[2::4] = 1; one[3::4] = 1
     # B~ = sum_i w_i [Q11^(d) x_i + (Q12^(d) + sh_d + kappa)(1 - x_i)],  w_i = N_i x_i / sum N x
-    w = N * x / np.sum(N * x)
+    w = N * x / np.sum(N * x) if w_override is None else w_override
     c = np.zeros(k); gam = np.sum(w * (1 - x))
     for dd in range(D):
         q11, q12, q22, sh = Qd_coef(dd)
@@ -180,7 +188,18 @@ def run_A(seed, sim=None):
     # target B~ (conditional-mean rate): no finite-population term; per side alpha = 0.025
     U2, _ = clr_upper(GU @ beta + iU, GU, V, rng, 0.025, len(x))
     L2, _ = clr_upper(-(GL @ beta + iL), -GL, V, rng, 0.025, len(x))
-    return truth, plug, ci, clr, truth_cm, (-L2, U2)
+    # Bhatia-Davis allowance: Var(E) <= sum w^2 * mbar(1 - mbar), mbar = pi-weighted mean rate
+    # (pi = w^2 / sum w^2), bounded by its own CLR CI at total level ALPHA_V
+    wpi = w ** 2 / np.sum(w ** 2)
+    _, _, _, cp, gp, _ = lin_A(len(beta), d, x, N, w_override=wpi)
+    GUp = cp[None, :] - gp * S[up_j] / A[up_j, None]; iUp = -gp * one[up_j] / A[up_j]
+    GLp = cp[None, :] - gp * S[lo_j] / A[lo_j, None]; iLp = -gp * one[lo_j] / A[lo_j]
+    mU, _ = clr_upper(GUp @ beta + iUp, GUp, V, rng, ALPHA_V / 2, len(x))
+    mLn, _ = clr_upper(-(GLp @ beta + iLp), -GLp, V, rng, ALPHA_V / 2, len(x))
+    S1bd = bd_sd(w, -mLn, mU)
+    zE2 = norm.ppf(1 - ALPHA_SIDE_E_BD)
+    clr_bd = (-Lneg - zE2 * S1bd, U + zE2 * S1bd)
+    return truth, plug, ci, clr, truth_cm, (-L2, U2), clr_bd
 
 
 # ======================= Design B: 3x3 pooled =======================
@@ -274,7 +293,20 @@ def run_B(seed, p=1000, conc=40.0):
         clr = (-Ln - zE * S1, U + zE * S1)
         U2, _ = clr_upper(GU @ beta, GU, V, rng, 0.025, p)
         L2, _ = clr_upper(-(GL @ beta), -GL, V, rng, 0.025, p)
-        res.append((truth, plug, ci, clr, truth_cm, (-L2, U2)))
+        # Bhatia-Davis variant
+        wpi = w ** 2 / np.sum(w ** 2)
+        cp = sum(np.sum(wpi * X[:, s]) * Qcoef(c, r, s) for s in range(3))
+        gp = sum(np.sum(wpi * X[:, s]) * Kcoef(c, r, s) for s in range(3))
+        gam_save = gam; gam = gp
+        LUp, LLp = duals(+1.0), duals(-1.0)
+        gam = gam_save
+        GUp = cp[None, :] + LUp @ S; GLp = cp[None, :] - LLp @ S
+        mU, _ = clr_upper(GUp @ beta, GUp, V, rng, ALPHA_V / 2, p)
+        mLn, _ = clr_upper(-(GLp @ beta), -GLp, V, rng, ALPHA_V / 2, p)
+        S1bd = bd_sd(w, -mLn, mU)
+        zE2 = norm.ppf(1 - ALPHA_SIDE_E_BD)
+        clr_bd = (-Ln - zE2 * S1bd, U + zE2 * S1bd)
+        res.append((truth, plug, ci, clr, truth_cm, (-L2, U2), clr_bd))
     return res
 
 
@@ -286,6 +318,7 @@ def summarise(name, rows):
         out.append(f"{lab}: cover {np.mean([cov(r[k_], r[0]) for r in rows]):.3f}, "
                    f"empty {np.mean([r[k_] is None for r in rows]):.2f}, width {wid([r[k_] for r in rows]):.3f}")
     out.append(f"CLR for B~: cover {np.mean([cov(r[5], r[4]) for r in rows]):.3f}, width {wid([r[5] for r in rows]):.3f}")
+    out.append(f"CLR for B (Bhatia-Davis): cover {np.mean([cov(r[6], r[0]) for r in rows]):.3f}, width {wid([r[6] for r in rows]):.3f}")
     print("  " + f"{out[0]:26s} " + " | ".join(out[1:]))
 
 

@@ -8,7 +8,7 @@ Source: the CRAN package [`ei.Datasets`](https://CRAN.R-project.org/package=ei.D
 
 In New Zealand's mixed-member system each voter casts a party vote and an electorate (candidate) vote. For every electorate, polling-place counts of both votes are published, together with the official electorate-level cross-tabulation of party vote by candidate vote. That cross-tabulation aggregates exactly the same voters as the polling places, so it is an exact truth for an ecological-inference problem:
 
-* **units:** polling places in the electorate (median 140 per electorate);
+* **units:** polling places in the electorate (median 64 per electorate);
 * **rows:** party vote (Labour, National, all other parties and informal votes);
 * **columns:** electorate vote (Labour candidate, National candidate, all others and informal);
 * **truth:** the official cross-tabulation, collapsed to the same categories;

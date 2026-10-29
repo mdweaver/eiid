@@ -32,6 +32,7 @@ rungs <- list(
   DD = list(model = "M0", ci = "none"),               # Duncan-Davis columns are read from this run
   M0 = list(model = "M0"),
   `M0+order` = list(model = "M0", restrictions = order_restr),
+  `M0 trim` = list(model = "M0", range = "trim", trim = list(min_n = 100)),   # polling places < 100 voters
   L6 = list(model = "L6"))
 
 t0 <- Sys.time()
@@ -42,6 +43,7 @@ dd <- res$rung == "DD"
 res$ci_actual_lower[dd] <- res$dd_lower[dd]; res$ci_actual_upper[dd] <- res$dd_upper[dd]
 res$in_ci_actual[dd] <- res$in_dd[dd]; res$width_ci_actual[dd] <- res$width_dd[dd]
 res$estimate_lower[dd] <- res$estimate_upper[dd] <- NA; res$in_estimate[dd] <- NA; res$width_estimate[dd] <- NA
+res$empty[dd] <- NA
 res$diagonal <- sub("p_", "", sub(" ->.*", "", res$target)) == sub(".*-> c_", "", res$target)
 utils::write.csv(res, gzfile(file.path(out_dir, "ei_datasets_nz.csv.gz")), row.names = FALSE)
 
@@ -53,14 +55,15 @@ summ <- function(df) {
              ci_rejected = mean(df$ci_rejected | is.na(df$ci_actual_lower), na.rm = TRUE),
              median_ci_width = stats::median(df$width_ci_actual, na.rm = TRUE),
              ci_width_vs_dd = stats::median(df$width_ci_actual / pmax(df$width_dd, 1e-12), na.rm = TRUE),
-             estimate_empty = mean(df$empty, na.rm = TRUE),
+             estimate_empty = if (all(is.na(df$empty))) NA else mean(df$empty, na.rm = TRUE),
              estimate_covers = mean(df$in_estimate, na.rm = TRUE),
+             estimate_width_vs_dd = stats::median(df$width_estimate / pmax(df$width_dd, 1e-12), na.rm = TRUE),
              median_abs_error_mid = stats::median(abs((df$ci_actual_lower + df$ci_actual_upper) / 2 - df$truth), na.rm = TRUE))
 }
 tab <- do.call(rbind, lapply(rung_order, function(r) cbind(rung = r, summ(res[res$rung == r, ]))))
 tab_diag <- do.call(rbind, lapply(rung_order, function(r) cbind(rung = r, summ(res[res$rung == r & res$diagonal, ]))))
 tab_year <- do.call(rbind, lapply(sort(unique(res$election)), function(y)
-  do.call(rbind, lapply(c("M0", "M0+order"), function(r) cbind(election = y, rung = r, summ(res[res$rung == r & res$election == y, ]))))))
+  do.call(rbind, lapply(c("M0", "M0 trim"), function(r) cbind(election = y, rung = r, summ(res[res$rung == r & res$election == y, ]))))))
 
 fmt <- function(df) {
   num <- vapply(df, is.numeric, logical(1))
@@ -81,10 +84,10 @@ md <- c(
   "",
   "Intervals are 95% confidence intervals for the actual rate (`ci_actual`, Bhatia-Davis allowance, intersected with Duncan-Davis); `estimate` is the plug-in estimate of the identified set (not a confidence interval). `ci_width_vs_dd` is the median ratio of the CI width to the Duncan-Davis width.",
   "",
-  "Rungs: `DD` Duncan-Davis (no model); `M0` pooled linear contextual effects; `M0+order` M0 plus ordering (each party's voters are at least as likely as the other party's voters to vote for that party's candidate); `L6` Goodman constancy.",
+  "Rungs: `DD` Duncan-Davis (no model); `M0` pooled linear contextual effects; `M0+order` M0 plus ordering (each party's voters are at least as likely as the other party's voters to vote for that party's candidate); `M0 trim` M0 with polling places of fewer than 100 voters removed from the composition range (their votes enter through Duncan-Davis); `L6` Goodman constancy.",
   "",
   "## All cells", "", fmt(tab), "",
   "## Diagonal cells (same party in both votes)", "", fmt(tab_diag), "",
-  "## By election (M0 and M0+order, all cells)", "", fmt(tab_year), "")
+  "## By election (M0 and M0 trim, all cells)", "", fmt(tab_year), "")
 writeLines(md, file.path(out_dir, "ei_datasets_nz_summary.md"))
 cat(md, sep = "\n")

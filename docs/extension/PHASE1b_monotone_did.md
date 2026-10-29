@@ -267,7 +267,7 @@ Pre-war "veterans" are *future* veterans. Many were too young to vote before the
 2. Task 2 Phase 2 (D0–D8) in parallel with collecting the data.
 3. Task 2 Phases 3–4 after your answers on composition.
 
-**Housekeeping.** The interim benchmark results lacked the `M0 trim` rung. I re-ran `Rscript benchmarks/run_ei_datasets_benchmark.R 4 100` and committed the regenerated results on this branch.
+**Housekeeping.** The regenerated NZ benchmark results (with the `M0 trim` rung) are already in the main repository, so they are not re-run on this branch.
 
 ### Questions on Task 1
 1. **Finite or superpopulation signs?** Should the sign assumptions be about the realised counties/polls (exact bounds, slack dial, no CI) or about behaviour (CLR intervals)? I propose offering both, with the finite version as the default for the actual rate.

@@ -4,8 +4,14 @@
 \alias{calcSummaryOutputValues}
 \title{Internal/private method. Compute bounds and summary statistics according to Jiang et al. 2019}
 \usage{
-calcSummaryOutputValues(x, t, n, trueBetaB = NULL,
-  useXRangeOffset = TRUE, returnAdditionalStats = FALSE)
+calcSummaryOutputValues(
+  x,
+  t,
+  n,
+  trueBetaB = NULL,
+  useXRangeOffset = TRUE,
+  returnAdditionalStats = FALSE
+)
 }
 \arguments{
 \item{x}{Numeric (double-precision) vector. Contains the proportion of variable X in each precinct (or analagous geographic unit)}

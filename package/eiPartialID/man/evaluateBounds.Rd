@@ -46,17 +46,17 @@ outputList <- generateBounds(x, t, n, trueBetaB=trueBetaB, useXRangeOffset=TRUE,
     returnAdditionalStats=FALSE, printSummary=TRUE)
 summaryOutputList <- evaluateBounds(outputList)
 
-# $x$ & Nominal coverage (\\Phi(x)) & True B in CI_x & Width-ratio: |Proposed width|/|DD| &
-#     Reverted to DD & Proposed Lower & Proposed Upper \\\\
-# 0.00 & 0.5000 & TRUE & 0.4653 & FALSE & 0.6061 & 0.8101\\\\
-# 0.25 & 0.5987 & TRUE & 0.5028 & FALSE & 0.5977 & 0.8182\\\\
-# 0.50 & 0.6915 & TRUE & 0.5404 & FALSE & 0.5893 & 0.8262\\\\
-# 0.75 & 0.7734 & TRUE & 0.5780 & FALSE & 0.5809 & 0.8343\\\\
-# 1.00 & 0.8413 & TRUE & 0.6155 & FALSE & 0.5726 & 0.8424\\\\
-# 1.25 & 0.8944 & TRUE & 0.6531 & FALSE & 0.5642 & 0.8505\\\\
-# 1.50 & 0.9332 & TRUE & 0.6906 & FALSE & 0.5558 & 0.8586\\\\
-# 1.75 & 0.9599 & TRUE & 0.7282 & FALSE & 0.5474 & 0.8666\\\\
-# 2.00 & 0.9772 & TRUE & 0.7657 & FALSE & 0.5390 & 0.8747\\\\
+# $x$ & Nominal coverage (\Phi(x)) & True B in CI_x & Width-ratio: |Proposed width|/|DD| &
+#     Reverted to DD & Proposed Lower & Proposed Upper \\
+# 0.00 & 0.5000 & TRUE & 0.4653 & FALSE & 0.6061 & 0.8101\\
+# 0.25 & 0.5987 & TRUE & 0.5028 & FALSE & 0.5977 & 0.8182\\
+# 0.50 & 0.6915 & TRUE & 0.5404 & FALSE & 0.5893 & 0.8262\\
+# 0.75 & 0.7734 & TRUE & 0.5780 & FALSE & 0.5809 & 0.8343\\
+# 1.00 & 0.8413 & TRUE & 0.6155 & FALSE & 0.5726 & 0.8424\\
+# 1.25 & 0.8944 & TRUE & 0.6531 & FALSE & 0.5642 & 0.8505\\
+# 1.50 & 0.9332 & TRUE & 0.6906 & FALSE & 0.5558 & 0.8586\\
+# 1.75 & 0.9599 & TRUE & 0.7282 & FALSE & 0.5474 & 0.8666\\
+# 2.00 & 0.9772 & TRUE & 0.7657 & FALSE & 0.5390 & 0.8747\\
 
 # For example, CI_0.5 (0.5893336 0.8262426) corresponds to
 #     c(summaryOutputList$CI_x_lower[3], summaryOutputList$CI_x_upper[3])

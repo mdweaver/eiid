@@ -361,3 +361,38 @@ A group's **slope** is how its yes-rate differs between towns with many and few 
 * It also **selects on the outcome**. Even if contextual effects are linear in all towns, they need not be linear among towns chosen for low YES votes, so a model-based bound on the subset can be biased (*heuristic concern; to quantify in Phase 2*).
 * The new tools get the same information without selection. In those towns the unit-level Duncan–Davis range is already nearly a point. The exact rungs (N1, D0, D4) use that automatically, and the `trim` option lets such towns enter through their own unit bounds.
 * The earlier result will be reproduced both ways once the data arrive.
+
+### D.7 The veterans/suffrage data (received 1 Nov 2026; not committed to the repository)
+
+**Files.** `wi_twp_analysis_cleaned.csv` (370 stable units, 52 county clusters) and `ia_twp_analysis_cleaned.csv` (223 units: whole counties, part-counties and townships; 97 counties), with the owner's scripts `analysis_suffrage.R` and `analysis_suffrage_ei.R`.
+
+**Column meanings (confirmed by the owner).**
+* `elig_YYYY`: age-eligible men in year YYYY, from the **1860** census age structure linked to the stable unit. `elig_YYYY_70`: the same from the **1870** census.
+* `vets`: soldiers by recorded residence. `_alt` uses probabilistic record linkage, hence fractional counts. `_s` counts survivors; `_h` counts men at home in 1865.
+* `mil_age_males`: males aged about 15–40 in 1860 (owner to confirm).
+* Iowa `suff_*` (Dykstra's returns): `eev` is estimated eligible voters, with `eev = yes + no + ro + nv` exactly; `ro` is roll-off; `nv` is non-voting.
+* Soldiers' field votes are recorded separately, not in the town returns.
+* Negative vote counts are probably errors of unknown origin.
+
+**Implications for Phase 2.**
+1. **The base is uncertain, and two estimates bracket it.**
+   * The 1860-based count misses men who arrived after 1860. That is why votes or veterans exceed `elig` in fast-growing units (Iowa 1868: votes > `elig_1868` in about a quarter of units).
+   * The 1870-based count misses men who died or left before 1870.
+   * Proposal: treat each period's base $N_{it}$ as **interval-valued**, between the two estimates, with the floor $N_{it}\ge$ ballots cast and $N_{it}\ge$ veterans. In cell-count coordinates the unit table is then still a polytope (B4 option 1). This replaces the current A1 violations (shares above 1) with honest uncertainty.
+2. **Aging-in is a structural zero.**
+   * The common post-war denominator counts men who became eligible after 1857 as "not yes" in 1857. That is valid accounting, but veterans were disproportionately young, so a DiD of these rates mixes **aging-in** with **change of attitude**.
+   * Proposal: split each period-0 row into "eligible in 1857" and "aged in by 1865". The aged-in cells have **zero 1857 votes** (a known structural zero, MENU A1). The veterans' split between the two parts is interval-valued: $[\max(0,\text{vets}-\text{elig}_{1857}),\ \min(\text{vets},\text{elig}_{1865}-\text{elig}_{1857})]$, tighter if soldiers' ages at enlistment are available.
+   * Then report both targets:
+     * the owner's original target (all men on the post-war base);
+     * the attitude-change target among men eligible in both years.
+3. **Death and non-return.** The owner's earlier analysis assumed these are independent of voting potential outcomes. To relax it, the dead and non-returning veterans' 1857 votes enter as free cells: a bound, plus a sensitivity dial for how differently they voted.
+4. **Soldiers' field votes.** They are known in aggregate and lean against suffrage. They can enter as a known external moment on absent soldiers (MENU A4), if the counts are available.
+5. **Party × suffrage** (Wisconsin governor votes in 1857 and 1865).
+   * Assumptions:
+     * Democrats are no more pro-suffrage than Republicans (an ordering, MENU B5 / monotone-EI "between");
+     * optionally, Democrats are almost never "yes" (a structural zero relaxed to $\le\varepsilon$).
+   * The unit table becomes veteran × party × suffrage with three one-way margins.
+   * Whether this tightens the *veteran* bounds without an extra link between veteran status and party is open (*conjecture: little gain without such a link*). Checking it numerically is the first Phase-2 task.
+6. **Groups.** County clusters (Wisconsin) and counties (Iowa) can serve as groups for the group rungs and as clusters for inference. Iowa has few sub-county units per county, so the group rungs will be weak there.
+7. **Bad records.** Negative counts: drop the affected units in the main analysis, with a sensitivity check that keeps them as intervals.
+8. **The earlier headline estimate** (`diff_suff ~ vet_pct`) is Goodman's regression on changes. By the monotone-EI identity, it equals the DiD exactly when the "within" association of changes is zero (R4), with no linearity needed. Under contextual reinforcement of changes, the DiD lies between it and the neighbourhood-model estimate on changes.

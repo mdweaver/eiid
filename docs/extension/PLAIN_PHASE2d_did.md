@@ -45,7 +45,11 @@ What follows from the rules:
   - It gains from the shared number, which links all compositions.
   - It loses because it works with averages of towns at the same composition rather than each town's own range.
   - Report both.
-- **Compared with your appendix bounds:** it is always at least as wide as the straight-lines-in-levels bounds, because it assumes less.
+- **Compared with your appendix bounds (straight lines in each year's levels, §C.3):** it always *contains* them, so it is never narrower [FD4].
+  - *Why:* if both years' levels follow straight lines, so does the change. Every answer the appendix allows is therefore also allowed here, and curved level patterns can add more.
+  - *What the simulation showed:* this was confirmed numerically in 60 simulated populations where the appendix's assumption was true, with both bounds computed from exact averages.
+  - *The trade-off:* the extra width buys robustness. If levels are not straight lines (e.g. town cultures vary with veteran share in a curved way), the appendix bound can miss the truth however narrow it looks; this one stays valid.
+  - *In real data:* the guarantee holds when both bounds are built from the same inputs. With estimated, non-quadratic level curves, compare them on identical inputs.
 
 ## 3. No straight lines at all: monotone EI on changes [D4]
 

@@ -1,0 +1,23 @@
+Check 1: p(y|x) by the line integral vs Monte Carlo (bin probabilities, width 0.02)
+     x max_abs_z_correct total_correct max_abs_diff_correct
+1 0.15             1.867             1            0.0002521
+2 0.50             2.960             1            0.0002885
+3 0.85             1.843             1            0.0002054
+  max_abs_diff_arc_normalised
+1                     0.01007
+2                     0.00321
+3                     0.01758
+PASS(line integral matches Monte Carlo, all |z| < 5): TRUE
+
+Check 2: is the arc-length factor proportional to the correct Jacobian along a line?
+     w1 arc_over_correct
+1 0.010          0.08217
+2 0.173          0.18580
+3 0.337          0.25990
+4 0.500          0.29470
+5 0.663          0.29040
+6 0.827          0.25080
+7 0.990          0.19090
+PASS(ratio not constant along the line, so the two measures differ): TRUE
+
+OVERALL: PASS

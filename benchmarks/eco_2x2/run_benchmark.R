@@ -1,4 +1,4 @@
-# Benchmark: eiDPM (blocked Gibbs in C++, and Stan HMC) against eco / ecoNP on
+# Benchmark: eiDPM blocked Gibbs sampler (C++) against eco / ecoNP on
 # the two eco example datasets with known unit truth: reg (n = 275) and
 # census (n = 1040). Models: CAR and NCAR, parametric (K = 1) and DP mixture.
 #
@@ -98,7 +98,7 @@ summ <- list(); units <- list()
 for (i in seq_len(nrow(specs))) {
   sp <- specs[i, ]; dd <- datasets[[sp$data]]
   label <- sprintf("%s %s %s", sp$data, if (sp$context) "NCAR" else "CAR", if (sp$dp) "DP" else "parametric")
-  methods <- if (sp$dp) c("eco", "gibbs", "stan") else c("eco", "gibbs", "stan")
+  methods <- c("eco", "gibbs")   # Stan dropped after the dry run: no speed gain
   fits <- list()
   for (m in methods) {
     cat(format(Sys.time()), label, m, "\n")

@@ -1,3 +1,3 @@
 # Results
 
-The CSVs here are currently from a **quick dry run** (`run_benchmark.R 4 quick`: short chains), still in progress and provisional. They will be replaced by the full run.
+The CSVs here are **partial**: the full run (`run_benchmark.R 4`, eco vs the Gibbs sampler; Stan dropped) is in progress and writes them after each model. `report.md` is added when it completes.

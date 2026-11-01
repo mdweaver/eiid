@@ -35,7 +35,17 @@ What follows from the rules:
 
 **How much would it take to overturn the result? [FD3]** Allow R1 to fail by up to some amount. The **breakdown value** is the smallest extra spillover onto non-veterans that would erase the effect. This is your appendix Figure C1, made formal.
 
-**With no rule at all [FD4],** straight-line changes still give a bound. It can be computed even though each town's levels are arbitrary.
+**With no rule at all [FD4],** straight-line changes still give a bound, even though each town's levels are arbitrary.
+- **What it uses:**
+  1. The regression of the change in yes share on veteran share. It pins down everything about the change except **one shared number per outcome**: how the curvature of the change splits between veterans and non-veterans.
+  2. Both years' average yes shares at each observed veteran share, which give each year's possible rates there.
+- **How it works:** a value of that shared number is kept only if, at every composition, the implied change for each group can be written as (a possible 1865 rate) minus (a possible 1857 rate).
+- **Where it tightens:** compositions where a group's rate is near 0 or 1 in either year (for example, towns with almost no 1857 yes votes). There the change cannot go beyond what the floor or ceiling allows, and because the number is shared, that limit applies to all towns.
+- **Compared with "no link" (section 1):** it is not guaranteed to be narrower.
+  - It gains from the shared number, which links all compositions.
+  - It loses because it works with averages of towns at the same composition rather than each town's own range.
+  - Report both.
+- **Compared with your appendix bounds:** it is always at least as wide as the straight-lines-in-levels bounds, because it assumes less.
 
 ## 3. No straight lines at all: monotone EI on changes [D4]
 

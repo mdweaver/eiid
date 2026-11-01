@@ -68,6 +68,11 @@ L4 is a useful intermediate step. Assuming no contextual effect for one row $r$ 
 
 ### F. Repeated cross-sections and difference-in-differences
 
+*Derived in `PHASE2d_did.md` (Phase 2). Corrections:*
+* *item 17's product set is sharp (2d Prop. D0(b));*
+* *a one-column DiD needs one restriction, not $(C-1)R(R-1)/2$ (2d Lemma FD1);*
+* *"contextual effects unchanged" is R1 and R2 together, not $\Delta K=0$ (2d §5).*
+
 Setting: the same units observed in a pre- and a post-period, e.g. counties voting on Black suffrage before and after the Civil War, with rows veteran / non-veteran. Each period $t$ has its own identified $Q_t$ and unidentified $K_t$. A typical target is
 $$\text{DiD}=(B_{v,\text{post}}-B_{v,\text{pre}})-(B_{n,\text{post}}-B_{n,\text{pre}}),$$
 which is affine in $(K_\text{pre},K_\text{post})$ (Lemma 2), so every item below keeps the LP structure.

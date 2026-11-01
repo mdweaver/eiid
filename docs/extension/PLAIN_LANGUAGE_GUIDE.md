@@ -188,3 +188,15 @@ Pinned in `ASSUMPTION_MENU.md` and not yet derived: structural zeros (a party no
 * **R4, no average contextual change:** a straight line through the towns' changes gives the answer (Goodman on changes).
 * **R1 + R2 ("contextual effects unchanged"):** testable, through equal curvature in both elections.
 * Each gives one number; different rules give different numbers. Report all of them, plus how large a violation of R1 would overturn the conclusion. If population counts change between elections, each becomes a short interval rather than a point.
+
+## 8. What Phase 2 established for the new tools (`PHASE2c_monotone.md`, `PHASE2d_did.md`)
+
+* **Which monotone-EI assumptions the data can contradict.** With two groups, only the "within" (contextual) sign can be contradicted by aggregate data. The "between" sign and contextual reinforcement never produce an empty bound. Their credibility rests entirely on substantive argument, or on individual-level data for a subsample [2c Prop. M3].
+* **Imposing signs on several outcomes at once helps.** Signing the contextual effect for two outcome columns jointly narrowed bounds in about half of random test cases [2c Prop. M4].
+* **No straight lines, but no reversals (N2).** This rung is weaker than "straight lines with signed slopes". Its bound always contains the straight-line one [2c Prop. N2.2].
+* **DiD: the rules R1, R2 and R4.** R4 (Goodman's regression on changes) always gives an answer between R1's and R2's [2d Prop. FD2]. None of them needs straight lines in *levels*: each township may keep its own persistent political culture. Only the *changes* must follow straight lines.
+* **Goodman on changes is a bound, not just an estimate.** If spillovers from veterans pushed their neighbours towards suffrage, it *overstates* the DiD. If there was backlash, it understates it. If the spillover and the veteran gap point the same way (contextual reinforcement), it gets the *sign* right [2d Prop. D4].
+* **When population counts change between elections,** even R1 gives a short interval instead of a point [2d Prop. D6].
+* **Aging-in.** Using the post-war base in both years adds the term (1 − stayer share of veterans) × veterans' pre-war yes-rate, minus the same for non-veterans, to the DiD. That term is small when pre-war support was near zero [2d Prop. C2].
+* **Party and suffrage.** "Democrats never voted yes" does not by itself tighten the veteran bounds. Adding "before the war, within each party, future soldiers voted like their neighbours" (selection on party only) does, often substantially [2d Props P2–P3].
+* **The causal step.** "Service did not lower support", "no decline absent service" and "soldiers would have been at least as supportive as non-veterans" together bound the effect between 0 and an upper limit. If the data make all three impossible at once, they are rejected [2d Prop. CL].

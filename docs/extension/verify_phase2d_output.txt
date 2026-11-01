@@ -1,0 +1,17 @@
+PASS  D1 Prop FD2: R1, R2 and R4 each point-identify the DiD under FD-LCE with non-linear levels  [max err 4.0e-16]
+PASS  D1 Prop FD2(c): DiD_R4 lies between DiD_R1 and DiD_R2
+PASS  D1 Prop FD2(d): under R4, Goodman on the change equals the DiD
+PASS  D1 Prop FD3: dDiD/dDelta_w1 = -s, s = mu_vn (1/mu_v + 1/mu_n)
+PASS  D2(a) FD outer LP contains the true DiD (levels non-linear, exact tau)
+PASS  D2(b) per-period LCE (product of outer sets) is inside the FD outer bound  [60 cases]
+PASS  D3 Prop D4: CR on changes never empty, one branch
+PASS  D3 Prop D4: under realised CR on changes, sign(DiD) = sign(ER on Delta T)  [83 cases]
+PASS  D4 Prop D6: with changing counts, DiD = I' + (s1 - s0) kappa_0 under R1
+PASS  D4 Prop D6: truth inside the resulting interval
+PASS  D5 Prop C2: aging-in decomposition of the post-war-base DiD; bias formula when aged-in vote like stayers
+PASS  D6 Prop C1: composition polytope (interval aged-in split) bound contains the stayers' DiD
+PASS  D7 Prop CL: ATT upper bound (epigraph LP) = closed form in the 2-row product case
+PASS  D8 Prop P2: party margin + (Democrat, yes) = 0 leaves the veteran-yes range at Duncan-Davis
+PASS  D8 Prop P3: selection on party only gives a range inside Duncan-Davis containing the truth  [strictly narrower in 152/300]
+
+15/15 PASS

@@ -129,3 +129,14 @@ Pinned in `ASSUMPTION_MENU.md` and not yet derived: structural zeros (a party no
   * Say which one you report.
 * **An empty confidence set is a real rejection.** If even the widened constraints cannot be satisfied, the assumptions are rejected at the stated level [P3 Prop 6].
 * **Sensitivity in one number.** For a headline claim (e.g. "loyalty above 30%"), report the *breakdown value*: how far average rates could depart from straight lines, undetectably, before the claim fails [P3 §7].
+
+---
+
+## 7. Bayesian mixture models (`eiDPM`, separate package; see `docs/bayes/PHASE1_proposal.md`)
+
+These follow Imai, Lu & Strauss (2008) and the `eco` package. They give a single answer with a credible interval rather than a range. It is worth knowing where that extra precision comes from.
+
+* **What it is:** a model for how unit rates are spread out (a flexible mixture of bell curves on the log-odds scale), fitted so that each unit's rates stay on its line of arithmetically possible values.
+* **"No contextual effect" version (CAR):** rates are unrelated to composition. If that is true, the data really do pin down the whole spread of rates, given enough variety in composition [P1-bayes C2]. If it is false (e.g. Black literacy lower where the Black share is higher), the answer is biased, and the method gives no warning.
+* **"Contextual effect" version (NCAR):** rates may depend on composition. Without the mixture's smoothness, the data then say nothing beyond the Duncan–Davis range [C3]. The narrower answer comes from the model assuming that units with similar composition behave similarly. That is reasonable in many applications, but it is an assumption the data cannot check.
+* **Use:** as a point estimate *alongside* the bounds. If its interval is much narrower than the bounds, most of that narrowing is the model's assumption, not information in the data.

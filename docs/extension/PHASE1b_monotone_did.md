@@ -396,3 +396,24 @@ A group's **slope** is how its yes-rate differs between towns with many and few 
 6. **Groups.** County clusters (Wisconsin) and counties (Iowa) can serve as groups for the group rungs and as clusters for inference. Iowa has few sub-county units per county, so the group rungs will be weak there.
 7. **Bad records.** Negative counts: drop the affected units in the main analysis, with a sensitivity check that keeps them as intervals.
 8. **The earlier headline estimate** (`diff_suff ~ vet_pct`) is Goodman's regression on changes. By the monotone-EI identity, it equals the DiD exactly when the "within" association of changes is zero (R4), with no linearity needed. Under contextual reinforcement of changes, the DiD lies between it and the neighbourhood-model estimate on changes.
+
+### D.8 How the owner's earlier analysis maps onto this framework (Supplementary Appendix §C, read 1 Nov 2026)
+
+| Earlier analysis | Here | Comment |
+|---|---|---|
+| §C.1: the regression of the change in yes share on enlistment rate is unbiased "if the shifts are independent of X" | D4 / R4: Goodman on changes equals the DiD **exactly iff** the within association of changes is zero, $\delta^\Delta_W=0$ (V7c) | The appendix's condition (both groups' mean shifts constant in X) is sufficient, not necessary. Only the weighted average of the two groups' contextual changes needs to vanish. No linearity is required |
+| §C.2: conditioning on county FE, 1857 Republican–suffrage gap and eligibility change | conditional version of R4 within cells of the covariates; group rungs with counties as groups | Phase 2: the FE version of the bias identity (A2(c)) |
+| §C.3: $ATT_L=(L_{e1}-U_{e0})-(U_{n1}-L_{n0})$ and $ATT_U$, from the per-period JKST bounds | D0: product of the periods' LCE sets, i.e. no cross-period link | In 2×2 the separate veteran/non-veteran endpoints are attained at the same $w_1$ within a period, so this equals the joint period bound. It needs per-period linearity in levels. It is reproducible with `eiBounds()` per period (P4) |
+| Figure C1: the size of the contextual changes needed for ATT = 0 | breakdown values for R1/R2 (D3) | the same idea, formalised as a dial on $\Delta w_1$ or $\Delta b_1$ with a breakdown value and CIs |
+| Figure C2: bounds for towns below thresholds of 1857 yes support | subset rungs | Three cautions: (i) the plug-ins are estimates (inward-biased, P3 Thm 4), and the code uses `evaluateBounds` CIs at a small $x$, so they are not deterministic; (ii) scanning many thresholds and reporting the region that excludes 0 is a specification search; the non-monotone pattern in the threshold looks like noise; (iii) selecting on 1857 yes votes selects on the outcome (D.6). Alternative without selection: use all towns. Near-zero towns already have nearly point unit bounds, which the exact rungs use |
+| §C.4 / script lines 316–337: $ATT\in[0,\ B_{v1}-\max\{B_{v0},B_{n1}\}]$ ("Athey & Imbens 2006, 151–3" with MTR; *citation to verify*) | the causal layer D6, with three assumptions on the veterans' counterfactual $Y(0)_1$: **MTR** ($\le$ their actual post-war rate); **no decline** ($\ge$ their pre-war rate); **positive selection** ($\ge$ non-veterans' post-war rate; Manski–Pepper MTS-type) | All three are linear in the latent rates, so they are LP rows. The upper end $B_{v1}^U-\max\{B^L_{v0},B^L_{n1}\}$ in the script (line 336) is attained jointly in 2×2. A joint LP will reproduce it and extend it to R×C and to the interval bases |
+
+**Partisanship (owner's note).** The governor votes allow an EI of veteran × party in 1857 and 1865, i.e. how future and actual veterans voted and how that shifted. Three uses:
+* **(P1)** a party DiD of its own;
+* **(P2)** a structural zero (Democrats ≈ never yes; relaxed to $\le\varepsilon$) inside a veteran × party × suffrage unit table;
+* **(P3)** **selection on party only**: before the war, within each party, future veterans and others voted alike on suffrage. Then the pre-war veteran yes-rate is identified from the veterans' party mix (partially identified by EI) and the party yes-rates (nearly point-identified when Democrats ≈ 0).
+
+Expected gains:
+* Model-free, P2 alone adds nothing to the veteran × suffrage unit bounds (*proved, sketch*: yes ≤ Republicans + governor roll-off already holds in the data, so the Fréchet bounds are unchanged; to be written up in Phase 2).
+* Gains come from P3 or from linear contextual effects fitted jointly across the two tables.
+* P3 is the formal version of the appendix's §C.5 argument, that partisan selection cannot explain the result.

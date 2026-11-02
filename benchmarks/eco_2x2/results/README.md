@@ -28,7 +28,7 @@ Plan pre-registered in `docs/bayes/calibration_plan.md` (commit 426115a) before 
 | D2 | parametric CAR / K = 1 | 2000 | **calibrated** | some metrics inconclusive (power), none miscalibrated. |
 | D3 | exact DP NCAR / collapsed | 2000 | **not calibrated (inconclusive)** | nothing miscalibrated; W1_u1 and W1_u3 inconclusive on 90% coverage (0.878, 0.876; CIs reach 0.866 and 0.864, below the 0.87 margin). All ECDF curves stay inside the simultaneous 95% bands. Lower ESS (23% of fits < 100 for unit rates, vs 5% in D1). |
 
-**The cluster-count weakness is fixed (pre-registered claim).** In D1, alpha and the cluster count are equivalent on 90% coverage (0.896 and 0.900) and not miscalibrated on any metric. D1b, on the same data, reproduces the old failure clearly, so the test had power to detect it.
+**The cluster-count weakness is fixed (pre-registered claim).** In D1, alpha and the cluster count are equivalent on 90% coverage (0.893 and 0.890) and not miscalibrated on any metric. D1b, on the same data, reproduces the old failure clearly, so the test had power to detect it.
 
 **D3 is not a pass.** The data are consistent with mild under-coverage of NCAR unit rates (by about 2 percentage points at 90% and 95%) or with no problem at all; 2000 replications cannot separate the two at a 0.03 margin. Candidate cause (conjecture): the slower mixing in NCAR (lower ESS), since autocorrelated draws give too-narrow central intervals. Not re-run, so as not to add a post-hoc test to the pre-registered verdict.
 

@@ -1,3 +1,4 @@
 # Results
 
-The CSVs here are **partial**: the full run (`run_benchmark.R 4`, eco vs the Gibbs sampler; Stan dropped) is in progress and writes them after each model. `report.md` is added when it completes.
+* `summary.csv`, `units.csv`, `report.md`: full run of `run_benchmark.R 4` (eco vs the eiDPM Gibbs sampler; Stan dropped after a dry run showed no speed gain).
+* `unit_agreement.csv`: run-to-run versus sampler-to-sampler agreement of unit posterior means for the DP models (`unit_agreement.R`), added when complete.

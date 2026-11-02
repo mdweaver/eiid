@@ -1,0 +1,6 @@
+# Rscript benchmarks/eco_2x2/diagnostics/reg_dp_observed.R  (reg true rates treated as fully observed; DP, CAR)
+           alpha clusters
+gibbs1 1.9406170   8.5022
+gibbs2 0.8954660   5.2004
+eco1   0.8765294   5.0888
+eco2   0.8433795   4.9508

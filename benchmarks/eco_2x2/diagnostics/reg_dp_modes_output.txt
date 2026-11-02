@@ -1,0 +1,9 @@
+# Rscript benchmarks/eco_2x2/diagnostics/reg_dp_modes.R  (reg, CAR, DP; 20000 sweeps / 22000 draws, thin 4)
+gibbs one-cluster      agg_W1 0.5393  alpha 0.89  clusters  5.0  cor(eco) 0.896  rmsd(eco) 0.0701
+gibbs one-cluster s2   agg_W1 0.5341  alpha 0.99  clusters  5.0  cor(eco) 0.898  rmsd(eco) 0.0697
+gibbs 30-cluster       agg_W1 0.5374  alpha 1.22  clusters  6.0  cor(eco) 0.897  rmsd(eco) 0.0699
+gibbs 30-cluster s4    agg_W1 0.5321  alpha 0.95  clusters  5.0  cor(eco) 0.901  rmsd(eco) 0.0692
+gibbs K=100            agg_W1 0.5364  alpha 1.18  clusters  6.0  cor(eco) 0.898  rmsd(eco) 0.0698
+eco 22000              agg_W1 0.5300  alpha 0.68  clusters  4.0  cor(eco) 0.999  rmsd(eco) 0.0078
+eco 22000 s2           agg_W1 0.5214  alpha 0.73  clusters  4.0  cor(eco) 0.999  rmsd(eco) 0.0078
+(cor/rmsd are against the average of the two eco runs, so eco's own rows are flattered.)

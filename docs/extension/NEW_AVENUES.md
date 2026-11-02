@@ -552,8 +552,15 @@ python3 docs/extension/new_avenues/nz_diagnostics.py <dir>
 * Let $A(x)=\operatorname{Var}(T\mid x)$, optionally minus the binomial term under A1; without the subtraction it is a conservative upper bound.
 * If poll-level shocks to the two groups are not negatively correlated (the A2 assumption), then
   $$\operatorname{Var}(\beta_A\mid x)\le A(x)/x^2,\qquad \operatorname{Var}(\beta_B\mid x)\le A(x)/(1-x)^2.$$
-* This gives item 13's dispersion cap a ceiling from the data. Dispersion caps deliver **unit-level bounds** and tighten the sharp set.
-* It caps dispersion, **not** $\kappa$.
+* This gives item 13's dispersion cap a ceiling from the data. It caps dispersion, **not** $\kappa$.
+* **Relaxing the assumption (proved).** If the correlation may be as negative as $-r$, the ceilings become $A(x)/(x^2(1-r^2))$ and $A(x)/((1-x)^2(1-r^2))$.
+  * Allowing $r=0.5$ widens the SD ceiling by 15%, $r=0.8$ by 67%, and $r	o1$ removes it.
+  * The assumption is essential only against near-perfect offsetting.
+* **Correction.** A *variance* ceiling does not give hard unit-level bounds: a few units may still sit far out. Hard unit-level bounds need item 13's sup-norm form. The variance form restricts the sharp set ($\Theta_I$) through the dispersion of selections (conjecture: the gain is concentrated where similar units straddle DD kinks; untested).
+* **Suffrage data (WI, yes rate, units ≥ 100 men).**
+  * The leftover SD of the yes share given composition is 0.15 (1857) and 0.10 (1865); coin-flip noise is only about 0.02.
+  * At $r=0$, the SD ceilings at the mean composition are 0.42/0.37 for veterans (the smaller group, so divided by $x\approx0.3$) and 0.23/0.13 for non-veterans.
+  * Weak for veterans, modest for non-veterans: townships differ a lot beyond composition.
 
 **(h) Finite-sample inference and diagnostics** (not identification).
 * Concentration inequalities (Rademacher / Hoeffding, using shares in $[0,1]$) and split-conformal prediction for *observables* give finite-sample-valid bands for $E[Y\mid X]$ and an outlier screen for bad units (e.g. Iowa's negative counts).
@@ -573,7 +580,7 @@ Each entry is a ceiling (assumption) meeting a rung. The source of the ceiling i
 | linear + nonlinearity slack $\eta$ (P3 `sensitivity()`) + $\kappa$ | stops the slack-induced widening toward DD | judgement or the bridges above | a robust rung: "roughly linear, not wildly varying" |
 | M1 (group dummies) + B1(M) with $z$ varying within groups | dummies absorb group baselines; $M$ caps own-unit effects against identified neighbourhood effects | identified area-level effects | needs a sub-group $z$ (e.g. neighbouring towns) |
 | B0 with $z$ = group composition instead of dummies | far fewer noisy parameters than M1 | — | precision fix for few units per group |
-| unit-dispersion ceiling (§12.3 g) + item 13 + any mean rung | unit-level bounds; tightens the sharp set | residual variance, under non-negative shock correlation | new; derive the sharp-set form |
+| unit-dispersion ceiling (§12.3 g) + item 13 + any mean rung | caps spread around the mean; tightens the sharp set (conjecture); hard unit bounds need the sup-norm form | residual variance, under non-negative shock correlation | new; derive the sharp-set form |
 | single index ∩ B or M1 | dimension reduction, then intersection | — | for $R\ge3$ |
 | nesting + ordering (+ linear) | joint table of contests | county-level yes ≤ Republican | for contrasts only |
 | odds-ratio dial + sharp set | unit-level rows | judgement ($\psi_U$) | cheap; next to ordering |

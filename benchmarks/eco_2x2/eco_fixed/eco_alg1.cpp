@@ -20,6 +20,21 @@
 // uses the cluster form (cost n * k); grouped = 0 loops over units as eco does
 // (cost n^2). Both target the same distribution.
 // The function signature and output match eiDPM's dpm_collapsed_cpp.
+//
+// eco_param_cpp (end of file) does the same for eco's parametric Bayesian models
+// (eco(), CAR and NCAR; src/gibbsBase.c, src/gibbsXBase.c): rate step as above,
+// partially observed units, then (mu, Sigma) from the NIW posterior given all
+// units, with B1 fixed. eco's other inefficiencies are gone in both: no memory
+// allocation or Cholesky factorisation per density evaluation (eco's rMH even
+// computes the determinant, which cancels in the MH ratio).
+// Two further eco bugs, both for units with X exactly 0 or 1, do not arise here:
+//   B3 (ecoNP CAR, gibbsDP.c line 295): the draw of the missing W1* of the i-th
+//      X = 0 unit is written into slot n_samp + i (an X = 1 unit's observed W1*),
+//      so X = 0 units' W1 is never updated and X = 1 units' data are overwritten;
+//   B4 (eco and ecoNP, R/checkdata.R): units are ordered [regular, X=0, X=1] for
+//      relabelling but the C code stores [regular, X=1, X=0], so the returned
+//      draws of the X = 0 and X = 1 units are attached to the wrong units.
+// Here unit bookkeeping is done by eiDPM's dpmData, which keeps them apart.
 #include <Rcpp.h>
 #include <vector>
 #include <array>
@@ -319,4 +334,90 @@ Rcpp::List eco_alg1_cpp(int p, Rcpp::NumericVector X, Rcpp::NumericVector Y,
   return Rcpp::List::create(Rcpp::Named("W1") = sW1, Rcpp::Named("W2") = sW2,
                             Rcpp::Named("alpha") = salpha, Rcpp::Named("n_clusters") = sk,
                             Rcpp::Named("largest_cluster") = smax);
+}
+
+// [[Rcpp::export]]
+Rcpp::List eco_param_cpp(int p, Rcpp::NumericVector X, Rcpp::NumericVector Y,
+                         Rcpp::NumericVector L, Rcpp::NumericVector U,
+                         Rcpp::NumericMatrix Wobs, Rcpp::NumericVector w1obs,
+                         Rcpp::NumericVector w2obs,
+                         Rcpp::NumericVector mu0, double tau0, double nu0,
+                         Rcpp::NumericMatrix S0, int n_iter, int burnin, int thin,
+                         Rcpp::NumericVector W1init, int wstep) {
+  Rcpp::RNGScope scope;
+  Prior pr; pr.p = p; pr.tau0 = tau0; pr.nu0 = nu0;
+  for (int i = 0; i < 3; i++) {
+    pr.mu0[i] = i < p ? mu0[i] : 0;
+    for (int j = 0; j < 3; j++) pr.S0[i][j] = (i < p && j < p) ? S0(i, j) : 0;
+  }
+  const int n = X.size(), no = Wobs.ncol(), n1 = w1obs.size(), n0 = w2obs.size();
+  const int nt = n + no + n1 + n0;
+  std::vector<double> W1(n), lx(n);
+  std::vector<std::array<double, 3>> Ws(nt);
+  for (int i = 0; i < n; i++) {
+    W1[i] = W1init[i]; lx[i] = logitc(X[i]);
+    double w2 = (Y[i] - X[i] * W1[i]) / (1.0 - X[i]);
+    Ws[i] = {logitc(W1[i]), logitc(w2), p == 3 ? lx[i] : 0.0};
+  }
+  for (int j = 0; j < no; j++) Ws[n + j] = {Wobs(0, j), Wobs(1, j), p == 3 ? Wobs(2, j) : 0.0};
+  for (int j = 0; j < n1; j++) Ws[n + no + j] = {w1obs[j], w1obs[j], 0.0};   // missing coordinate started
+  for (int j = 0; j < n0; j++) Ws[n + no + n1 + j] = {w2obs[j], w2obs[j], 0.0}; // at the observed one
+
+  auto update_par = [&](Par &c) {
+    double s[3] = {0, 0, 0}, Q[3][3] = {{0}};
+    for (int i = 0; i < nt; i++)
+      for (int a = 0; a < p; a++) {
+        s[a] += Ws[i][a];
+        for (int b = 0; b < p; b++) Q[a][b] += Ws[i][a] * Ws[i][b];
+      }
+    draw_niw(c, pr, nt, s, Q);
+  };
+  Par c;
+  update_par(c);
+
+  int n_save = (n_iter - burnin) / thin;
+  Rcpp::NumericMatrix sW1(n_save, n), sW2(n_save, n), smu(n_save, p), sSig(n_save, p * p);
+  int s_ = 0;
+  for (int it = 0; it < n_iter; it++) {
+    for (int i = 0; i < n; i++) {
+      double w = W1[i];
+      if (wstep == 0) {
+        double prop = L[i] + unif_rand() * (U[i] - L[i]);
+        double r = lline(prop, X[i], Y[i], lx[i], p, c) - lline(w, X[i], Y[i], lx[i], p, c);
+        if (std::log(unif_rand()) < r) w = prop;
+      } else {
+        double h = lline(w, X[i], Y[i], lx[i], p, c) - exp_rand();
+        double a = L[i], b = U[i];
+        for (int k = 0; k < 200; k++) {
+          double prop = a + unif_rand() * (b - a);
+          if (lline(prop, X[i], Y[i], lx[i], p, c) > h) { w = prop; break; }
+          if (prop < w) a = prop; else b = prop;
+        }
+      }
+      W1[i] = w;
+      double w2 = (Y[i] - X[i] * w) / (1.0 - X[i]);
+      Ws[i][0] = logitc(w); Ws[i][1] = logitc(w2);
+    }
+    for (int j = 0; j < n1 + n0; j++) {
+      int i = n + no + j, o = j < n1 ? 0 : 1, mi = 1 - o;
+      double mean = c.mu[mi] + c.Sig[mi][o] / c.Sig[o][o] * (Ws[i][o] - c.mu[o]);
+      double var = c.Sig[mi][mi] - c.Sig[mi][o] * c.Sig[mi][o] / c.Sig[o][o];
+      Ws[i][mi] = mean + std::sqrt(var) * norm_rand();
+    }
+    update_par(c);
+    if (it >= burnin && (it - burnin) % thin == 0 && s_ < n_save) {
+      for (int i = 0; i < n; i++) {
+        sW1(s_, i) = W1[i];
+        sW2(s_, i) = (Y[i] - X[i] * W1[i]) / (1.0 - X[i]);
+      }
+      for (int a = 0; a < p; a++) {
+        smu(s_, a) = c.mu[a];
+        for (int b = 0; b < p; b++) sSig(s_, a * p + b) = c.Sig[a][b];
+      }
+      s_++;
+    }
+    if (it % 100 == 0) Rcpp::checkUserInterrupt();
+  }
+  return Rcpp::List::create(Rcpp::Named("W1") = sW1, Rcpp::Named("W2") = sW2,
+                            Rcpp::Named("mu") = smu, Rcpp::Named("Sigma") = sSig);
 }

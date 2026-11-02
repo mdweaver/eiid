@@ -1,0 +1,8 @@
+reg     CAR   MH     corrected 0.0874 ms/sweep (eco original 0.1650) | agg_W1 0.3652 (eco original 0.3638)
+reg     CAR   slice  corrected 0.1475 ms/sweep (eco original 0.1650) | agg_W1 0.3655 (eco original 0.3638)
+reg     NCAR  MH     corrected 0.0993 ms/sweep (eco original 0.1971) | agg_W1 0.4157 (eco original 0.4200)
+reg     NCAR  slice  corrected 0.1344 ms/sweep (eco original 0.1971) | agg_W1 0.4230 (eco original 0.4200)
+census  CAR   MH     corrected 0.3284 ms/sweep (eco original 0.6838) | agg_W1 0.6373 (eco original 0.6370)
+census  CAR   slice  corrected 0.5370 ms/sweep (eco original 0.6838) | agg_W1 0.6368 (eco original 0.6370)
+census  NCAR  MH     corrected 0.3588 ms/sweep (eco original 0.6935) | agg_W1 0.6887 (eco original 0.6823)
+census  NCAR  slice  corrected 0.5973 ms/sweep (eco original 0.6935) | agg_W1 0.6808 (eco original 0.6823)

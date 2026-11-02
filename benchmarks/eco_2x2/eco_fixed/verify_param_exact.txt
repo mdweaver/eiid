@@ -1,0 +1,19 @@
+CAR, 2 latent, wstep 0                   exact W1 0.2316 mu1 -0.5188 Sig11 4.3280 | sampler 0.2312 -0.5187 4.3163 | z -0.71 0.04 -0.99
+                                         max |CDF difference| for W1 = 0.0016
+CAR, 2 latent, wstep 1                   exact W1 0.2316 mu1 -0.5188 Sig11 4.3280 | sampler 0.2318 -0.5168 4.3105 | z 0.64 1.14 -2.16
+                                         max |CDF difference| for W1 = 0.0011
+CAR, partial unit, wstep 0               exact W1 0.2559 | sampler 0.2555 | z -0.95 | max |CDF difference| 0.0025
+CAR, partial unit, wstep 1               exact W1 0.2559 | sampler 0.2557 | z -0.61 | max |CDF difference| 0.0017
+NCAR, wstep 0                            exact W1 0.3411 mu1 -0.0441 Sig11 1.3875 | sampler 0.3420 -0.0431 1.3839 | z 1.38 0.86 -1.99
+                                         max |CDF difference| for W1 = 0.0028
+NCAR, wstep 1                            exact W1 0.3411 mu1 -0.0441 Sig11 1.3875 | sampler 0.3412 -0.0439 1.3889 | z 0.44 0.20 0.83
+                                         max |CDF difference| for W1 = 0.0011
+
+OVERALL: PASS 
+
+Follow-up on test 1 (CAR, 2 latent): the first version used a midpoint grid in W1 and gave
+E[Sigma11] = 4.2798; the sampler then sat at z = 3-4, and 16 independent chains of 4e5 sweeps
+(slice step) gave 4.3298 (SE 0.0031). Recomputed on a logistic grid (300 and 600 points per
+line agree to 6 digits): W1 0.231564, mu1 -0.518758, Sigma11 4.327988. The 16-chain sampler
+means are within z = -0.27 (W1), -0.35 (mu1), 0.58 (Sigma11) of these. The grid, not the
+sampler, was wrong; the script now uses the logistic grid.

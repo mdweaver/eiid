@@ -180,3 +180,10 @@ This is a stronger check than SBC for the update rules themselves: it compares t
 ## 7. Algorithm 1 with efficient code (corrected `eco`)
 
 See `benchmarks/eco_2x2/eco_fixed/README.md`. Per sweep, an efficient corrected Algorithm 1 with remixing is faster than the collapsed sampler (0.13–0.46 ms against 0.30–0.99 ms), so the speed advantage over `eco` comes entirely from implementation. Algorithm 3's advantage is mixing: on `census`, 3 of 8 (CAR) and 4 of 8 (NCAR) Algorithm 1 chains stayed for 22,000 sweeps in a state with about 2.5 clusters that no collapsed chain visited.
+
+## 8. Two further bugs for units with X exactly 0 or 1 (verified)
+
+* **B3, `ecoNP` CAR** (`gibbsDP.c` line 295): the X = 0 units' imputed $W_1^*$ is written to the X = 1 units' slots, so the X = 0 units are never updated and the X = 1 units' observed data are overwritten in the clustering step.
+* **B4, `eco` and `ecoNP`** (`R/checkdata.R`): the output order of the X = 0 and X = 1 units is swapped relative to the C code, so their draws are returned under the wrong units.
+
+Neither affects `reg` or `census`. Details and the check are in `benchmarks/eco_2x2/eco_fixed/README.md`, which also covers the corrected parametric samplers (B1 fixed; about 2× faster per sweep; exact against a grid posterior).

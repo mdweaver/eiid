@@ -71,6 +71,7 @@ exact <- function(pts, X, Y, lo, hi, pr, partial = NULL, ngrid = 400) {
 }
 
 run <- function(p, X, Y, lo, hi, Wobs, w1obs, pr, iters = 4e5) {
+  if (exists("RUN_SAMPLER")) return(RUN_SAMPLER(p, X, Y, lo, hi, Wobs, w1obs, pr, iters))
   r <- cpp(p, X, Y, lo, hi, Wobs, w1obs, numeric(0), pr$mu0, pr$tau0, pr$nu0, pr$S0, pr$a0, pr$b0,
            iters, 1000, 1, (lo + hi) / 2, 1, 1.0)
   r
@@ -102,6 +103,7 @@ compare <- function(name, ex, r) {
   ok
 }
 
+if (!exists("VERIFY_LIB_ONLY")) {  # sourcing with VERIFY_LIB_ONLY defined loads the functions only
 # --- Test 1: CAR (p = 2). 1 latent unit, 3 observed units, 1 unit with only W1 observed.
 pr2 <- list(mu0 = c(0, 0), tau0 = 2, nu0 = 4, S0 = diag(10, 2), a0 = 1, b0 = 0.1)
 X <- 0.6; Y <- 0.3; lo <- 0; hi <- 0.5           # W1 in [0, 0.5]
@@ -123,3 +125,4 @@ r2 <- run(3, X, Y, lo, hi, Wobs3, numeric(0), pr3)
 ok2 <- compare("NCAR, p = 3", ex2, r2)
 
 cat("\nOVERALL:", if (ok1 && ok2) "PASS" else "FAIL", "\n")
+}

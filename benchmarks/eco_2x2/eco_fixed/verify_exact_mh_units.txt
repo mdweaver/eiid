@@ -1,0 +1,31 @@
+variant: mh_units 
+
+== CAR, p = 2, with a partially observed unit ==
+ k   exact sampler        se       z
+ 1 0.06429 0.06345 0.0010804 -0.7778
+ 2 0.12316 0.12454 0.0008987  1.5413
+ 3 0.20898 0.20978 0.0008523  0.9333
+ 4 0.30748 0.30778 0.0009358  0.3219
+ 5 0.29609 0.29445 0.0014720 -1.1152
+E[alpha]: exact 9.6757  sampler 9.6308  z = -1.07
+E[W1]:    exact 0.2414  sampler 0.2412  z = -0.28
+W1 quantiles exact:   0.0081 0.0931 0.2381 0.3869 0.4869 
+W1 quantiles sampler: 0.0072 0.0916 0.2373 0.3884 0.4882 
+max |CDF difference| = 0.0057
+RESULT: PASS 
+
+== NCAR, p = 3 ==
+ k    exact  sampler        se        z
+ 1 0.230254 0.230298 0.0020718  0.02148
+ 2 0.454067 0.455383 0.0014708  0.89513
+ 3 0.240701 0.239639 0.0010926 -0.97211
+ 4 0.066879 0.066496 0.0005467 -0.70108
+ 5 0.008099 0.008183 0.0001593  0.52926
+E[alpha]: exact 1.6383  sampler 1.6350  z = -1.01
+E[W1]:    exact 0.4053  sampler 0.4062  z = 0.97
+W1 quantiles exact:   0.1237 0.2662 0.3862 0.5288 0.7488 
+W1 quantiles sampler: 0.1247 0.2673 0.3876 0.5295 0.7480 
+max |CDF difference| = 0.0029
+RESULT: PASS 
+
+OVERALL: PASS 

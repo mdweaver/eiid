@@ -103,7 +103,8 @@ Rcpp::List dpm_gibbs_cpp(int p, int K,
                          Rcpp::NumericVector mu0, double tau0, double nu0,
                          Rcpp::NumericMatrix S0, double a0, double b0,
                          int n_iter, int burnin, int thin,
-                         Rcpp::NumericVector W1init, int slice_steps) {
+                         Rcpp::NumericVector W1init, int slice_steps,
+                         int init_k = 1, double init_alpha = 1.0) {
   Rcpp::RNGScope scope;
   const int n = X.size(), no = Wobs.ncol(), n1 = w1obs.size(), n0 = w2obs.size();
   const int nt = n + no + n1 + n0;
@@ -132,7 +133,7 @@ Rcpp::List dpm_gibbs_cpp(int p, int K,
     refresh(comp[k]);
   }
   std::vector<int> z(nt);
-  for (int i = 0; i < nt; i++) z[i] = 0;
+  for (int i = 0; i < nt; i++) z[i] = init_k <= 1 ? 0 : (int) std::floor(unif_rand() * std::min(K, init_k));
   VectorXd logpi(K);
   {
     double acc = 0;
@@ -140,7 +141,7 @@ Rcpp::List dpm_gibbs_cpp(int p, int K,
     logpi(K - 1) = acc;
   }
   std::vector<double> v(K, 0.5);
-  double alpha = 1.0;
+  double alpha = init_alpha;
 
   int n_save = (n_iter - burnin) / thin;
   Rcpp::NumericMatrix sW1(n_save, n), sW2(n_save, n);

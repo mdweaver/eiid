@@ -149,3 +149,29 @@ On `reg` ($n=275$, $k\approx4$, $\alpha\approx0.7$): $-\log\eta\approx5$, so $r\
 3. **`eiDPM` is calibrated for $\alpha$ under its own truncated model (A, $p=0.017$, mild)** and roughly so against DP data (B). It has a tail failure for the cluster count when the true $\alpha$ is large: truncation at $K$ (3a) plus slow label mixing (3b).
    * Remedies: a larger or adaptive $K$; label-switching moves (Papaspiliopoulos & Roberts 2008; Hastie, Liverani & Richardson 2015); or an exact collapsed sampler (Neal 2000, Alg. 3).
 4. **Effect on the `reg` discrepancy.** On data like `reg`, where the DP clustering drives unit-level estimates, the two samplers' different $\alpha$ and cluster counts translate into the unit-level differences seen there (RMSD about 0.06). On the SBC evidence, `eco`'s $\alpha$ and cluster count are the biased ones. SBC averages over the prior, though, so it does not *prove* which answer is right on `reg` specifically.
+
+## 6. The exact sampler checked against Neal (2000)
+
+Source: Neal, "Markov Chain Sampling Methods for Dirichlet Process Mixture Models", Technical Report 9815, University of Toronto, 1998 (published in *JCGS* 9, 2000), §3. Neal's Algorithm 1 is the Escobar (1994) / Escobar–West (1995) per-unit sampler. Algorithm 2 (cluster labels plus cluster parameters) is attributed to Bush & MacEachern (1996) and West, Müller & Escobar (1994); `eco` is Algorithm 1 followed by an Algorithm-2-style redraw of each cluster's parameters (the "remixing"). Algorithm 3, attributed to MacEachern (1994) and Neal (1992), keeps only the labels $c_i$ and updates each by Gibbs sampling from his eq. (12):
+
+$$P(c_i=c\mid c_{-i},y_i)\propto \frac{n_{-i,c}}{n-1+\alpha}\int F(y_i,\phi)\,dH_{-i,c}(\phi),\qquad P(c_i\text{ new}\mid c_{-i},y_i)\propto\frac{\alpha}{n-1+\alpha}\int F(y_i,\phi)\,dG_0(\phi).$$
+
+**Code check (`src/collapsed.cpp`), item by item:**
+
+| Item | Neal / standard result | Code | Status |
+|---|---|---|---|
+| Assignment weights | $n_{-i,c}\times$ predictive of $c$ without $i$; $\alpha\times$ prior predictive (eq. 12; the common denominator cancels) | `log(m_c) + lt(x, cl[c])`; `log(alpha) + lt(x, prior_c)`, after removing $i$ | matches |
+| Predictive under the NIW base | $t_{\nu_m-p+1}\bigl(\mu_m,\;S_m(\tau_m+1)/(\tau_m(\nu_m-p+1))\bigr)$, $S_m=S_0+\sum(x-\bar x)(x-\bar x)^\top+\frac{\tau_0 m}{\tau_m}(\bar x-\mu_0)(\bar x-\mu_0)^\top$ | `cache()` | matches |
+| Empty cluster | removed from the state (Neal: "remove $\phi_{c_i}$") | dropped and relabelled | matches |
+| Latent rates (not in Neal: data augmentation) | $W_i\mid c,W_{-i}\propto t_{c_i,-i}(W_i^*)\,/\prod w(1-w)$ on the line | slice sampler on $W_1$ with the cluster's predictive without $i$; the prior predictive if $i$ was alone | correct Gibbs step |
+| Partially observed units | missing coordinate $\mid$ observed coordinate under the cluster's predictive $t$: a $t$ with df $+1$ and the scale inflated by $(\nu+d^2/s_{oo})/(\nu+1)$ | `rcond_t()` | matches |
+| $\alpha$ | Escobar–West (1995): $\eta\sim\mathrm{Beta}(\alpha+1,n)$, mixture weight $\pi/(1-\pi)=(a_0+k-1)/\{n(b_0-\log\eta)\}$ | as stated (odds converted to a probability) | matches |
+
+So the code implements Algorithm 3 exactly, with two additions Neal's setting does not need: a Gibbs step for the latent rates on each tomography line, and the Escobar–West update for $\alpha$.
+
+**Brute-force test (`verify_collapsed_exact.R`, output in `verify_collapsed_exact_output.txt`).** With five units, all 52 partitions can be enumerated. The exact posterior of the number of clusters, of $E[\alpha]$, and of a latent unit's $W_1$ is computed from the closed-form NIW marginal likelihood (independent of the sampler's predictive-$t$ code), with $\alpha$ integrated numerically and a partially observed unit integrated over its missing coordinate.
+
+* CAR ($p=2$; one latent, three observed, one partially observed unit): all $|z|\le1.06$; maximum CDF difference for $W_1$ 0.007 (grid resolution 0.00125). PASS.
+* NCAR ($p=3$; one latent, four observed units): one chain gave $|z|$ up to 2.8 with batch-means SEs. Sixteen independent chains of $4\times10^5$ sweeps (`verify_collapsed_exact_rep.R`) give all $|z|\le1.7$, e.g. $P(k=1)$ 0.23020 vs 0.23025 exact. PASS.
+
+This is a stronger check than SBC for the update rules themselves: it compares the sampler to the exact posterior, not to uniformity of ranks.

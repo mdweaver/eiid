@@ -1,6 +1,5 @@
 # Review: `eco`'s Dirichlet-process Gibbs sampler versus the `eiDPM` blocked Gibbs sampler
 
-**DRAFT (2026-11-02):** SBC design C (`ecoNP`) is still running; sections marked *pending* will be filled in.
 
 *The source code reviewed is `eco` 4.0-6:*
 * *`src/gibbsDP.c`, the CAR DP sampler behind `ecoNP`;*
@@ -131,6 +130,22 @@ On `reg` ($n=275$, $k\approx4$, $\alpha\approx0.7$): $-\log\eta\approx5$, so $r\
   |---|---|---|
   | A: exact target, $K=30$ | calibrated ($p=0.36$–$0.90$) | mildly off ($p=0.017$ / $0.08$; consistent with 3b) |
   | B: DP data, $K=50$ | calibrated ($p=0.08$–$0.81$) | clusters badly miscalibrated (3a) |
-  | C: `ecoNP` | *pending* | *pending* |
+  | C: `ecoNP`, 400 of the B simulations | calibrated ($p=0.12$–$0.95$) | **both miscalibrated, systematically** ($p=1.2\times10^{-4}$ / $4\times10^{-5}$; mean rank 0.574 / 0.578: too few clusters and too small an $\alpha$, the direction B1 predicts) |
 
 * **The $\nu_0$ test and the patched-`eco` test:** see §2, B1.
+
+**Same 400 simulations, Gibbs (design B, $K=50$) vs `ecoNP` (design C)** (`alpha` and `clusters` rows; mean rank 0.5 = unbiased):
+
+| | Gibbs | `ecoNP` |
+|---|---|---|
+| unit $W_1$, mean $W_1$ | calibrated ($p=0.94$, $0.38$) | calibrated ($p=0.12$, $0.95$) |
+| $\alpha$ | $p=0.075$, mean rank 0.487 | $p=1.2\times10^{-4}$, mean rank 0.574 (underestimates) |
+| clusters | $p=1.8\times10^{-10}$: a tail failure, with 15% of ranks extreme (true count above all draws); mean rank 0.524 | $p=4\times10^{-5}$: a systematic shift, mean rank 0.578 (too few clusters); 1% extreme |
+
+## 5. Conclusions
+
+1. **Both samplers are calibrated for the quantities reported in EI:** unit rates and in-sample aggregates (SBC A, B, C).
+2. **`ecoNP` systematically underestimates $\alpha$ and the number of clusters.** That is the direction predicted by the Wishart off-by-one (B1), and patching it moves `ecoNP` toward `eiDPM` on `reg`.
+3. **`eiDPM` is calibrated for $\alpha$ under its own truncated model (A, $p=0.017$, mild)** and roughly so against DP data (B). It has a tail failure for the cluster count when the true $\alpha$ is large: truncation at $K$ (3a) plus slow label mixing (3b).
+   * Remedies: a larger or adaptive $K$; label-switching moves (Papaspiliopoulos & Roberts 2008; Hastie, Liverani & Richardson 2015); or an exact collapsed sampler (Neal 2000, Alg. 3).
+4. **Effect on the `reg` discrepancy.** On data like `reg`, where the DP clustering drives unit-level estimates, the two samplers' different $\alpha$ and cluster counts translate into the unit-level differences seen there (RMSD about 0.06). On the SBC evidence, `eco`'s $\alpha$ and cluster count are the biased ones. SBC averages over the prior, though, so it does not *prove* which answer is right on `reg` specifically.

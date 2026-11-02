@@ -480,6 +480,7 @@ D can be done at any point, as infrastructure.
 | `new_avenues/apply_B_suffrage.py` → `_output.md` | Avenue B on the WI/IA suffrage data (data not committed) | WI gap signed at M ≤ 1 (yes column); IA 1868 empty at every rung |
 | `new_avenues/check_review_items.py` → `_output.md` | §13: multiple validation tables (rank), crossing partitions, stratified margins, covariance from Var(T\|x) on WI | 2 tables identify K for R ≤ 4; crossing partitions and strata tighten DD with no model; WI covariance fragile |
 | `new_avenues/apply_kappa_suffrage.py` → `_output.md` | κ dial on the suffrage data (§12.3) | binds only for κ ≲ 0.1–0.25; floors 0.001–0.015 |
+| `new_avenues/check_car_sensitivity.py` → `_output.md` | §14: invisible CAR violations; omitted-confounder bound when the confounder tracks composition; CAR-δ width versus overlap | invisible violation biases β by 0.08 with an exactly linear CEF; benchmark-sized $C_\alpha$ understates bias up to 12×; LP matches the overlap factor exactly |
 
 To reproduce the NZ diagnostics:
 
@@ -762,7 +763,7 @@ $\Sigma$ is identified, and the correlation that A2 merely *assumed* to be non-n
 * It ranks the covariance route (CAR2-type) lower. In the Wisconsin data the estimate was non-PSD in one year and unsigned in the other, and it is a local restriction.
 * It keeps B ahead of CAR for near-term implementation, because B's identified area effects come with a natural yardstick.
 
-### 13.9 Citations supplied by the review (not verified here)
+### 13.9 Citations supplied by the review (first three now read; see §14.1)
 
 * McCartan & Kuriwaki (2026), *Identification and Semiparametric Estimation of Conditional Means from Aggregate Data* (arXiv): CAR and CAR2, the polarisation identity, sensitivity analysis.
 * Kuriwaki & McCartan (2026): a reassessment emphasising confounding in EI (arXiv).
@@ -771,4 +772,164 @@ $\Sigma$ is identified, and the correlation that A2 merely *assumed* to be non-n
 * Elzayn et al. (2026, *Political Analysis*): monotone EI (the other session's topic).
 * Fan, Sherman & Shum: data combination for EI and treatment effects (exact paper and year to confirm).
 
-Each must be read and checked before it is relied on in Phase 2.
+Each must be read and checked before it is relied on in Phase 2. McCartan & Kuriwaki, Kuriwaki & McCartan and Moon have now been read; §14.1 gives the verified details and corrections.
+
+---
+
+## 14. CAR, CAR2 and omitted-confounder sensitivity (after reading the sources)
+
+This section follows a reading of McCartan & Kuriwaki, Kuriwaki & McCartan, Moon, and Cinelli & Hazlett (2020). It asks three things: what CAR and CAR2 can and cannot do; how McCartan & Kuriwaki's sensitivity analysis relates to Cinelli & Hazlett's partial-$R^2$ bounds; and what that relation suggests for our ladder. Checks are in `new_avenues/check_car_sensitivity.py` → `_output.md`.
+
+### 14.1 What the sources say (verified by reading)
+
+* **McCartan & Kuriwaki**, *Identification and Semiparametric Estimation of Conditional Means from Aggregate Data*, arXiv:2509.20194 (v2, 30 Apr 2026). R package `seine`.
+  * **CAR** is $E[B_G\mid Z_G,X_G,N_G]=E[B_G\mid Z_G]$. It has two parts: composition is mean-independent of rates given $(Z,N)$, and rates are mean-independent of size given $(X,Z)$. The size part is the "size invariance" assumption of Avenue A (§1.4). A weaker size-weighted version is CAR-U, and an individual-level sufficient condition is CAR-IND.
+  * **Identification (Thm 2.1).** Under CAR the CEF is partially linear, $E[Y\mid X,Z]=\eta(Z)^\top X$, and $\beta_j$ is a weighted mean of $\gamma_0(e_j,Z)$.
+  * **Positivity (POS).** The density of $X$ given $Z$ must be bounded below *on the whole simplex*. The second moment of the Riesz representer is the overlap diagnostic.
+  * **Estimator.** DML with series ridge nuisances restricted to the partially linear class, without cross-fitting.
+  * **CAR2 (§4.1).** $E[BB^\top\mid X,Z,N]=E[BB^\top\mid Z]$. It identifies $\Sigma(z)$ through the polarisation identity (Prop. 4.1). It is used **only for local (unit-level) confidence regions**: Chebyshev, plus an oblique projection of $\hat\eta(Z_g)$ onto the tomography line along $\hat\Sigma$. The authors anticipate non-PSD estimates and recommend clipping negative eigenvalues.
+  * **Sensitivity (§4.2, Thm 4.2).** This imports Chernozhukov, Cinelli, Newey, Sharma & Syrgkanis: $\lvert\beta^*_j-\beta_j\rvert\le\rho\,S\,C_\gamma C_\alpha$. It comes with contour plots, a robustness value and benchmarking against observed covariates.
+  * **A test of the partially linear form** (App. A), which the authors call "approximate … limited power".
+* **Kuriwaki & McCartan**, *The Role of Confounders and Linearity in Ecological Inference: A Reassessment*, arXiv:2601.07668 (v2, Jul 2026).
+  * It recasts EI as confounder adjustment: Goodman with $X$ fully interacted with $Z$ (their eq. 12).
+  * It notes that King's projection angle is set by the covariance of $B_g$, so CAR2 is King's tomography projection with $\Sigma$ estimated rather than assumed.
+  * **Validation finding:** all methods overstate racial polarisation, "because racial minorities are typically more Democratic-leaning in concentrated areas than in diverse ones". That is a *contextual* violation of CAR.
+  * In their sensitivity plots the `state` benchmark implies a bias near 1 on a $[-1,1]$ scale.
+  * They deliberately set partial identification aside, while noting that Duncan–Davis bounds can falsify the assumption.
+* **Moon**, *Partial Identification of Individual-Level Parameters Using Aggregate Data in a Nonparametric Model*, arXiv:2403.07236 (v8, Dec 2025; the review's "2026" is probably a later version or publication).
+  * Sharp bounds from marginals (not joints) of several covariates are an LP, with room for polyhedral shape restrictions.
+  * Subgroup pass-rate data tighten the bounds. A homogeneity restriction gives *empty* estimated sets in the Rhode Island data.
+  * This confirms §13.2 / E5.
+* **Cinelli & Hazlett (2020)**, *Making Sense of Sensitivity: Extending Omitted Variable Bias*, JRSSB 82(1): 39–67. **Chernozhukov et al.**, *Long Story Short: Omitted Variable Bias in Causal Machine Learning*, arXiv:2112.13398 / NBER w30302. Listed as forthcoming in *REStat*; publication status *to verify*.
+
+**Corrections to §13.**
+* §13.4 is consistent with the source.
+* §13.5 differs from McCartan & Kuriwaki in two ways: our version drops CAR for the means but keeps homoskedastic deviations, and it gives the covariance a global role. Theirs is conditional on $Z$ and purely local.
+* The Wisconsin 1857 non-PSD estimate is a case they anticipate. Clipping would hide it, and it may be evidence against CAR2 (§14.6).
+
+### 14.2 Plain-language entry
+
+* **What it is.** CAR: among areas that look alike on the covariates, the group mix tells you nothing about how each group behaves.
+* **Key assumption.** No contextual effects, and no unmeasured factor that sorts people into areas *and* shapes their behaviour, once the covariates are held fixed.
+* **What goes wrong.**
+  * Contextual effects: minorities in concentrated areas vote differently.
+  * Sorting on unmeasured traits.
+  * The first is the threat EI is known for, and §14.4 shows it is the case the standard confounder-sensitivity tools handle worst.
+* **What can be checked.**
+  * Only the part of a violation that bends the aggregate regression (§14.3).
+  * Overlap, i.e. whether units with similar covariates span the range of compositions.
+  * Whether the point estimate lies inside the Duncan–Davis bounds.
+
+### 14.3 What a CAR test can and cannot see (proved)
+
+Write a violation as $E[B\mid X,Z,N]=\eta(Z)+\Delta(X,Z,N)$. The data see $\Delta$ only through $X^\top\Delta$. Any $\Delta$ with $x^\top\Delta(x,z)=0$ leaves $E[Y\mid X,Z]=\eta(Z)^\top X$ **exactly**, so it passes every test of the partially linear form, yet it biases $\beta$ by $E[u\,\Delta_j]$. This is Prop. 9 restated around CAR.
+
+* With $Z$ empty and linear contextual effects, the invisible class is exactly the skew part $K$.
+* **Check (Part 1).** $\Delta=k(1-x_1,\,-x_1)$ with $k=0.2$ and $x_1\sim$ Beta(2,2) gives $\max\lvert E[Y\mid X]-\eta^\top X\rvert=10^{-16}$ and a bias of $+0.080$ (formula $k(1-E x_1^2/E x_1)=0.080$).
+
+So McCartan & Kuriwaki's "limited power" is structural, not a small-sample problem: the test has *zero* power against a whole subspace of violations. This is why a sensitivity analysis, not a test, has to carry the weight. They recommend the same.
+
+### 14.4 How this relates to Cinelli & Hazlett
+
+**The chain.**
+* Cinelli & Hazlett (CH) write the omitted-variable bias of an OLS coefficient in terms of two partial $R^2$s: confounder–outcome $R^2_{Y\sim U\mid D,X}$ and confounder–treatment $R^2_{D\sim U\mid X}$.
+* From these they derive a **robustness value**, an **extreme-scenario** analysis and **formal benchmarking** ($k_D$, $k_Y$: the confounder is at most $k$ times as strong as an observed covariate, measured by partial $R^2$).
+* Chernozhukov et al. extend this to any linear functional with a Riesz representer: $C_\gamma^2$ is the outcome partial $R^2$, and $C_\alpha^2$ is the relative gain in the representer's variance, which is roughly increasing in $R^2_{D\sim U\mid X}$.
+* McCartan & Kuriwaki apply that extension to EI. So **the user's intuition is right, and it has already been implemented in `seine`**. The mapping:
+
+| Cinelli–Hazlett (OLS) | EI via McCartan & Kuriwaki |
+|---|---|
+| treatment $D$ | composition $X_j$ |
+| outcome $Y$ | aggregate outcome $Y_g$ |
+| $R^2_{Y\sim U\mid D,X}$ | $C_\gamma^2=R^2_{Y\sim A\mid X,Z}$ |
+| $R^2_{D\sim U\mid X}$ | $C_\alpha^2\approx R^2_{X_j\sim A\mid Z}/(1-R^2_{X_j\sim A\mid Z})$ |
+| benchmark covariate $X_j$ ($k_D,k_Y$) | observed $Z_k$ (`ei_bench`) |
+| coefficient $\tau$ | $\beta_j$, an extrapolation of $\gamma_0$ to the vertex $e_j$ |
+
+CH's closed forms apply directly only when $\beta_j$ is a single OLS coefficient. Under Goodman-with-interactions, $\beta_j$ is a weighted *combination* of coefficients, so the Chernozhukov et al. form is the right one.
+
+**Three features specific to EI.**
+
+1. **The outcome dial is set by the problem: $C_\gamma=1$ is attained (proved).**
+   * $Y_g=B_g^\top X_g$ has no error term beyond heterogeneity in the rates. Taking $A=B$ makes CAR hold given $A$ trivially, with $R^2_{Y\sim A\mid X,Z}=1$.
+   * CH's "extreme scenario" (the confounder explains all residual outcome variance) is therefore the *natural* case in EI, not a stress test.
+   * EI sensitivity collapses to **one dial: how strongly the omitted factor predicts composition**. CH show the bias factor is unbounded in this dial.
+
+2. **Contextual effects are confounders that track composition, and benchmarks understate them (proved structure, simulated magnitudes).**
+   * A pure contextual effect is a "confounder" that *is* composition.
+   * In Part 2 the confounder is $A=x_1+\tau\nu$ and rates depend on $A$. The short CEF is exactly linear (invisible, §14.3), the true bias is 0.080 for every $\tau$, and the bound with the true parameters is tight (0.082):
+
+| $\tau$ | $R^2(x_1\sim A)$ | $C_\alpha$ | bound with benchmark-sized $C_\alpha=0.65$ | true bias |
+|---|---|---|---|---|
+| 0.02 | 0.99 | 8.4 | 0.006 | 0.080 |
+| 0.05 | 0.95 | 3.4 | 0.016 | 0.080 |
+| 0.10 | 0.83 | 1.7 | 0.032 | 0.080 |
+| 0.30 | 0.36 | 0.56 | 0.096 | 0.080 |
+
+   * As the violation becomes a pure contextual effect, $S\to0$ and $C_\alpha\to\infty$. A $C_\alpha$ calibrated on an ordinary covariate understates the bias by up to 12×.
+   * No observed covariate is as collinear with $X$ as $X$ itself, so **benchmarking against observed $Z_k$ is systematically optimistic about EI's signature threat**.
+   * CH's own caution applies with extra force. They note the data can rule out large $k_D$ when an observed covariate already explains much of $D$. In EI the dangerous confounder sits right at that ceiling.
+
+3. **The bound ignores logical bounds, and intersection is valid.**
+   * $\hat\beta\pm\rho SC_\gamma C_\alpha$ can leave $[0,1]$: the `state` benchmark in Kuriwaki & McCartan gives a bias near 1.
+   * Duncan–Davis / LP outer bounds hold with no assumptions. Intersecting them with the sensitivity interval is valid under the sensitivity assumption.
+   * In Part 2 Duncan–Davis gives $[0.20, 0.81]$ for $\beta_1$. The sensitivity interval with honest parameters is far narrower, so the two are complementary.
+   * Imposing the $(C_\gamma,C_\alpha)$ restriction *inside* the LP is not linear in $K$ and is probably nonconvex (*conjecture*). Intersection is the practical form.
+
+### 14.5 Native EI dials in the same spirit (proposal)
+
+The lesson from §14.4 is to parametrise the violation **directly in outcome units**, i.e. on $\Delta$, instead of through a hypothetical confounder's link to composition. These are the dials already on the ladder, now centred on CAR($Z$):
+
+| dial | restriction | form | combines with DD/LP | benchmark |
+|---|---|---|---|---|
+| CAR($Z$)-$\delta$ (§13.4) | $\lVert\Delta\rVert_\infty\le\delta$ | LP rows | yes | $\delta_k$ from dropping $Z_k$ (below) |
+| CAR($Z$)-$\kappa$ | $E[\Delta_j^2]\le\kappa_j\operatorname{Var}(Y)$ (an $R^2$-type share) | SOCP | yes | $\kappa_k$ from dropping $Z_k$ |
+| B1($M$) (§2.3) | own-composition effect ≤ $M\times$ the identified area-level effect | LP | yes | **built in**: composition at a second scale |
+| Chernozhukov–Cinelli $(C_\gamma,C_\alpha)$ | omitted confounder strengths | closed form $\pm$ | intersection only | observed $Z_k$ (optimistic for contextual effects, §14.4) |
+
+* **Formal benchmarking for $\delta$/$\kappa$ (proposal).** Under CAR($Z$), dropping $Z_k$ creates an *identified* violation of CAR($Z_{-k}$): $\Delta^{(-k)}(x,z_{-k})=E[\eta(Z)\mid X=x,Z_{-k}]-E[\eta(Z)\mid Z_{-k}]$. Set $\delta_k=\sup\lvert\Delta^{(-k)}\rvert$ and $\kappa_k=E[(\Delta^{(-k)}_j)^2]/\operatorname{Var}(Y)$. "The unobserved violation is at most $m$ times covariate $k$'s" then gives $\delta=m\delta_k$.
+  * This is CH's $k$-benchmark in outcome units. It meets their criterion that the relative-strength measure must be the one that determines the bias.
+  * Caveats:
+    * it is computed under CAR($Z$) itself;
+    * comparisons remain judgement;
+    * like any covariate benchmark, it cannot calibrate contextual effects.
+* **B1($M$) is the benchmark of the right kind.** The identified effect of composition at the county scale is a measured contextual effect. Bounding the township-scale effect by $M$ times it is CH-style relative-strength reasoning, with a comparison variable of the same nature as the threat. This is the strongest argument for keeping B ahead of CAR (§13.8).
+* **Overlap is identification-relevant under CAR-$\delta$ (proved, 2×2).**
+  * With composition confined to $[a,b]$, the identified half-width of the vertex rate is $\delta\,(2-a-b)/(b-a)$, and the LP in Part 3 matches it exactly. For example, $[0.3,0.7]$ multiplies $\delta$ by 2.5 and $[0.4,0.6]$ by 5.
+  * The aggregate $\beta_1$ is affected about as much.
+  * This is the partial-identification counterpart of McCartan & Kuriwaki's Riesz-representer norm: weak positivity within $Z$ inflates *every* CAR relaxation.
+  * The general $R\times C$ factor (an operator norm of the extrapolation from the observed support to the vertices) is a *conjecture* for Phase 2.
+
+**Ladder positions.**
+* No model ⊃ CAR($Z$)-$\delta$ / CAR($Z$)-$\kappa$ ⊃ CAR($Z$) (a point).
+* With linear $\eta$, CAR($Z$) is B0 with the own-composition effect set to zero, i.e. B1($M=0$). So B1($M$) is a CAR relaxation whose dial is benchmarked by the area-level effect.
+
+### 14.6 CAR2 / covariance, reconsidered
+
+* **What it is for.** In McCartan & Kuriwaki, CAR2 serves local inference only: unit-level regions, or King's projection with an estimated angle. It does not move aggregate bounds, and §13.7 D (local) stands.
+* **Data demands.** $\Sigma(z)$ via polarisation needs $\operatorname{Var}(Y\mid X,Z)$ at vertices *and* edge midpoints for each $z$. That is positivity twice over, plus fourth moments.
+* **It is more testable than CAR (proved implications).**
+  * $\operatorname{Var}(Y\mid X,Z)$ must be quadratic in $X$ (no cubic or quartic terms), and the implied $\Sigma(z)$ must be PSD.
+  * Wisconsin 1857: implied correlation 3.35, bootstrap interval [1.0, 11.9]. That is borderline evidence *against* CAR2, or against the quadratic form with unequal unit sizes.
+  * Clipping eigenvalues, as recommended, would hide this. Report the test before clipping.
+* **A new role (proposal): the scale for an $R^2$ dial on group rates.**
+  * If only the *variance* is assumed invariant, $\operatorname{Var}(B\mid X,Z)=\Sigma(Z)$, with no CAR on means, then $\operatorname{Var}(Y\mid X,Z)=X^\top\Sigma(Z)X$ still identifies $\Sigma$. The conditional variance is taken around $E[Y\mid X,Z]$, which absorbs mean violations.
+  * This yields a CH-like dial in the units that matter: $E_X[\Delta_j^2]\le\frac{r^2}{1-r^2}\Sigma_{jj}(Z)$. In words, composition explains at most a share $r^2$ of group $j$'s rate variation given $Z$.
+  * It is convex (SOCP) and global, and its denominator is identified rather than borrowed from $\operatorname{Var}(Y)$.
+  * It inherits CAR2's data hunger. In Wisconsin it would have failed in 1857.
+* **Verdict.** It is still limited for tightening aggregate bounds. It has three uses: local intervals; replacing A2's sign assumption (§13.5); and scaling an $R^2$ dial when there are many units with good overlap.
+
+### 14.7 Consequences for the priorities (§13.8)
+
+* **CAR($Z$)-$\delta$ stays at priority 4.** Implementation (Phase 3–4) should report, side by side:
+  1. the $\delta$ and $\kappa$ curves intersected with the LP outer set;
+  2. the overlap factor;
+  3. $\delta_k$/$\kappa_k$ benchmarks for each covariate;
+  4. B1($M$) as the contextual benchmark;
+  5. `seine`'s $(C_\gamma,C_\alpha)$ contour, for comparability with the literature, flagged with §14.4(2).
+* **Phase-2 derivations to add:**
+  * the invisible-violation class under CAR($Z$), in general $R\times C$ (§14.3);
+  * the overlap factor beyond 2×2 (§14.5);
+  * the SOCP form of the $\kappa$ and $r^2$ dials;
+  * whether imposing $(C_\gamma,C_\alpha)$ jointly with the LP is tractable.
+* **For the suffrage data:** the binding requirement is township-level covariates $Z$ with composition varying *within* $Z$ (positivity). County-level $Z$ alone puts us back in Avenue B.

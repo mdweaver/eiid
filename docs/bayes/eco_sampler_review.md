@@ -69,6 +69,17 @@
 * Separately, ILS write $\mu\mid\Sigma\sim N(\mu_0,\Sigma/\tau_0^2)$, while the code uses $\Sigma/\tau_0$ with a matching predictive scale $(1+\tau_0)/\tau_0$. `eiDPM` follows the code.
 * ILS eq. (7) gives yet another predictive ($\nu_0$ df, scale over $1+\nu_0$), inconsistent with App. B.
 
+**The package paper (Imai, Lu & Strauss 2011, J. Stat. Softw. 42(5), §§2.2–2.3; checked):**
+* It states the same prior for the parametric CAR and CCAR models and for the DP base measure: $\mu\mid\Sigma\sim N(\mu_0,\Sigma/\tau_0^2)$, $\Sigma\sim\text{InvWish}(\nu_0,S_0^{-1})$, with $\nu_0$ "the prior degrees of freedom parameter".
+* It does not describe the sampler (it refers to ILS 2008) and gives no shifted-df convention.
+* Its version history (to 3.1-4, 2009) lists no change to the prior or the Wishart routine.
+* It says the defaults ($\tau_0=2$, $\nu_0=4$, $S_0=10I$) give "an approximately uniform prior distribution of $W_1$ and $W_2$". Prior-predictive deciles of $W_1$ (uniform = 0.10):
+  * stated $IW(4,10I)$ with $\Sigma/\tau_0$: 0.20 in each outer decile, about 0.07 in the middle;
+  * as drawn, $IW(3,10I)$: 0.25 outer, about 0.05 middle;
+  * paper notation $\Sigma/\tau_0^2$: 0.18 outer.
+
+  None is uniform. The stated prior is closer than what `eco` draws, so the remark gives no support to an intended df$-1$.
+
 **Patched `eco` (verified; `diagnostics/` scripts to be committed).** Changing `df-i-1` to `df-i` in a local copy, on `reg`, CAR, DP, two runs each (`alpha` = posterior median; RMSD is of unit posterior means):
 
 | | $\alpha$ | clusters | unit cor. with Gibbs | unit RMSD vs Gibbs |

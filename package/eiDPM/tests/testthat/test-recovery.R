@@ -55,3 +55,26 @@ test_that("Stan parametric CAR agrees with the Gibbs sampler", {
   expect_lt(abs(mean(rowMeans(g$W1)) - mean(rowMeans(h$W1))), 0.02)
   expect_equal(h$diagnostics$divergences, 0)
 })
+
+test_that("exact DP (collapsed) sampler recovers in-sample means and agrees with the blocked sampler", {
+  s <- sim_car(300, 21)
+  f <- eiDPM(s$X, s$Y, n.draws = 3000, burnin = 500, seed = 8)          # K = Inf
+  expect_true(is.infinite(f$K))
+  a <- dpmAggregates(f)
+  expect_lt(abs(mean(a[, "mean_W1"]) - mean(s$W[, 1])), 0.04)
+  expect_lt(abs(mean(a[, "mean_W2"]) - mean(s$W[, 2])), 0.04)
+  expect_true(all(f$diagnostics$n_clusters >= 1))
+  b <- eiDPM(s$X, s$Y, K = 30, n.draws = 3000, burnin = 500, seed = 9)
+  expect_gt(cor(colMeans(f$W1), colMeans(b$W1)), 0.98)
+})
+
+test_that("exact DP sampler handles fully and partially observed units (eco's rule)", {
+  set.seed(5)
+  X <- c(runif(40, 0.1, 0.9), 1, 0, 0.5); Y <- c(runif(40, 0.2, 0.8), 0.7, 0.4, 1)
+  f <- eiDPM(X, Y, n.draws = 300, burnin = 100, seed = 1)
+  expect_equal(unname(f$W1[1, 41]), 0.7); expect_equal(unname(f$W2[1, 42]), 0.4)
+  expect_equal(unname(f$W1[1, 43]), 1 - 1e-4)
+  dev <- abs(sweep(f$W1[, 1:40], 2, X[1:40], `*`) + sweep(f$W2[, 1:40], 2, 1 - X[1:40], `*`) - rep(Y[1:40], each = 300))
+  expect_lt(max(dev), 1e-10)
+  expect_error(eiDPM(X, Y, method = "stan"), "finite K")
+})

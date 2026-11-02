@@ -77,25 +77,33 @@ dpmData <- function(X, Y, context = FALSE, eps = 1e-4, shrink = 1e-8) {
 
 #' Bayesian mixture models for 2x2 ecological inference
 #'
-#' Fits the parametric (\code{K = 1}) or truncated Dirichlet-process mixture
-#' (\code{K > 1}) models of Imai, Lu and Strauss (2008) under CAR
+#' Fits the parametric (\code{K = 1}) or Dirichlet-process mixture models of
+#' Imai, Lu and Strauss (2008) under CAR
 #' (\code{context = FALSE}) or NCAR (\code{context = TRUE}), with the same
 #' default priors as \pkg{eco}.
+#'
+#' The DP mixture is fitted exactly (\code{K = Inf}, the default) by a collapsed
+#' Gibbs sampler (Neal 2000, Algorithm 3) with the conjugate normal-inverse-Wishart
+#' base measure integrated out and the Escobar-West (1995) update for
+#' \code{alpha}. It has no truncation and no label ordering. A finite
+#' \code{K > 1} instead fits the truncated stick-breaking approximation with a
+#' blocked Gibbs sampler (Ishwaran and James 2001), or with Stan; that sampler
+#' can under-represent the number of clusters when \code{alpha} is large
+#' (see \code{docs/bayes/eco_sampler_review.md}).
 #'
 #' The Stan model is compiled at first use and cached under
 #' \code{tools::R_user_dir("eiDPM", "cache")}; set
 #' \code{options(eiDPM.cache = FALSE)} to compile without caching.
-#' The Gibbs sampler starts with every unit in the first component and
-#' \code{alpha = 1}; starting with many occupied components and a large
-#' \code{alpha} can leave the truncated sampler in a large-\code{alpha} region
-#' where the last component absorbs most units. Check
-#' \code{diagnostics$pi_last}.
+#' Both Gibbs samplers start with every unit in one cluster and
+#' \code{alpha = 1}. For the truncated sampler, check \code{diagnostics$pi_last}
+#' (the mass of the last component).
 #'
 #' @param X,Y shares (composition and outcome) in [0, 1].
 #' @param N optional unit sizes, used for weighted aggregates.
 #' @param context logical; NCAR if \code{TRUE}.
-#' @param K truncation level; 1 gives the parametric model.
-#' @param method \code{"gibbs"} (blocked Gibbs in C++) or \code{"stan"} (HMC).
+#' @param K \code{Inf} (default) for the exact DP mixture; 1 for the parametric
+#'   model; a finite value > 1 for the truncated DP (blocked Gibbs or Stan).
+#' @param method \code{"gibbs"} (C++) or \code{"stan"} (HMC; finite \code{K} only).
 #' @param n.draws,burnin,thin iterations (Gibbs) or per-chain sampling /
 #'   warm-up iterations (Stan: \code{n.draws} samples after \code{burnin} warm-up).
 #' @param chains number of chains.
@@ -107,7 +115,7 @@ dpmData <- function(X, Y, context = FALSE, eps = 1e-4, shrink = 1e-8) {
 #' @return an object of class \code{"eiDPM"} with draws of the unit rates
 #'   (\code{W1}, \code{W2}: draws x units, all units in input order).
 #' @export
-eiDPM <- function(X, Y, N = NULL, context = FALSE, K = 50,
+eiDPM <- function(X, Y, N = NULL, context = FALSE, K = Inf,
                   method = c("gibbs", "stan"), n.draws = 5000, burnin = 1000,
                   thin = 1, chains = 1, cores = 1, prior = list(), seed = NULL,
                   slice_steps = 1, ...) {
@@ -117,7 +125,26 @@ eiDPM <- function(X, Y, N = NULL, context = FALSE, K = 50,
   if (!is.null(seed)) set.seed(seed)
   t0 <- proc.time()[["elapsed"]]
   diag <- list()
-  if (method == "gibbs") {
+  if (!(K == Inf || (K >= 1 && K == round(K)))) stop("K must be Inf or a positive integer")
+  if (method == "stan" && is.infinite(K)) stop("method = \"stan\" needs a finite K")
+  if (method == "gibbs" && is.infinite(K)) {
+    res <- lapply(seq_len(chains), function(ch) {
+      tc <- proc.time()[["elapsed"]]
+      r <- dpm_collapsed_cpp(d$p, d$X, d$Y, d$L, d$U, d$Wobs, d$w1obs, d$w2obs,
+                             pr$mu0, pr$tau0, pr$nu0, pr$S0, pr$a0, pr$b0,
+                             as.integer(n.draws + burnin), as.integer(burnin), as.integer(thin),
+                             (d$L + d$U) / 2, as.integer(slice_steps), 1)
+      r$seconds <- proc.time()[["elapsed"]] - tc
+      r
+    })
+    W1l <- do.call(rbind, lapply(res, `[[`, "W1"))
+    W2l <- do.call(rbind, lapply(res, `[[`, "W2"))
+    chain <- rep(seq_len(chains), sapply(res, function(r) nrow(r$W1)))
+    diag$alpha <- unlist(lapply(res, `[[`, "alpha"))
+    diag$n_clusters <- unlist(lapply(res, `[[`, "n_clusters"))
+    diag$largest_cluster <- unlist(lapply(res, `[[`, "largest_cluster"))
+    diag$chain_seconds <- sapply(res, `[[`, "seconds")
+  } else if (method == "gibbs") {
     res <- lapply(seq_len(chains), function(ch) {
       tc <- proc.time()[["elapsed"]]
       r <- dpm_gibbs_cpp(d$p, as.integer(K), d$X, d$Y, d$L, d$U, d$Wobs, d$w1obs, d$w2obs,
@@ -211,9 +238,10 @@ dpmUnits <- function(object, prob = 0.9) {
 
 #' @export
 print.eiDPM <- function(x, ...) {
-  cat(sprintf("eiDPM: %s, %s, K = %d, method = %s, %d draws, %.1f s\n",
-              if (x$context) "NCAR" else "CAR", if (x$K == 1) "parametric" else "DP mixture",
-              x$K, x$method, nrow(x$W1), x$elapsed))
+  cat(sprintf("eiDPM: %s, %s, method = %s, %d draws, %.1f s\n",
+              if (x$context) "NCAR" else "CAR",
+              if (x$K == 1) "parametric" else if (is.infinite(x$K)) "DP mixture (exact, collapsed)"
+              else sprintf("DP mixture (truncated, K = %d)", x$K), x$method, nrow(x$W1), x$elapsed))
   print(summary(x))
   invisible(x)
 }

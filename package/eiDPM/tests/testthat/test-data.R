@@ -19,6 +19,8 @@ test_that("rates stay on the tomography line and inside the bounds", {
   W <- plogis(MASS::mvrnorm(n, c(0.5, -0.5), diag(0.5, 2)))
   Y <- X * W[, 1] + (1 - X) * W[, 2]
   f <- eiDPM(X, Y, K = 5, n.draws = 200, burnin = 100, seed = 1)
+  g <- eiDPM(X, Y, n.draws = 200, burnin = 100, seed = 1)
+  expect_equal(dim(g$W1), c(200, n))
   expect_equal(dim(f$W1), c(200, n))
   dev <- abs(sweep(f$W1, 2, X, `*`) + sweep(f$W2, 2, 1 - X, `*`) - rep(Y, each = 200))
   expect_lt(max(dev), 1e-10)

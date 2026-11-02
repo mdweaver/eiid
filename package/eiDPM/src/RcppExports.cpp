@@ -11,6 +11,36 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// dpm_collapsed_cpp
+Rcpp::List dpm_collapsed_cpp(int p, Rcpp::NumericVector X, Rcpp::NumericVector Y, Rcpp::NumericVector L, Rcpp::NumericVector U, Rcpp::NumericMatrix Wobs, Rcpp::NumericVector w1obs, Rcpp::NumericVector w2obs, Rcpp::NumericVector mu0, double tau0, double nu0, Rcpp::NumericMatrix S0, double a0, double b0, int n_iter, int burnin, int thin, Rcpp::NumericVector W1init, int slice_steps, double init_alpha);
+RcppExport SEXP _eiDPM_dpm_collapsed_cpp(SEXP pSEXP, SEXP XSEXP, SEXP YSEXP, SEXP LSEXP, SEXP USEXP, SEXP WobsSEXP, SEXP w1obsSEXP, SEXP w2obsSEXP, SEXP mu0SEXP, SEXP tau0SEXP, SEXP nu0SEXP, SEXP S0SEXP, SEXP a0SEXP, SEXP b0SEXP, SEXP n_iterSEXP, SEXP burninSEXP, SEXP thinSEXP, SEXP W1initSEXP, SEXP slice_stepsSEXP, SEXP init_alphaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type X(XSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type L(LSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type U(USEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type Wobs(WobsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type w1obs(w1obsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type w2obs(w2obsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type mu0(mu0SEXP);
+    Rcpp::traits::input_parameter< double >::type tau0(tau0SEXP);
+    Rcpp::traits::input_parameter< double >::type nu0(nu0SEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type S0(S0SEXP);
+    Rcpp::traits::input_parameter< double >::type a0(a0SEXP);
+    Rcpp::traits::input_parameter< double >::type b0(b0SEXP);
+    Rcpp::traits::input_parameter< int >::type n_iter(n_iterSEXP);
+    Rcpp::traits::input_parameter< int >::type burnin(burninSEXP);
+    Rcpp::traits::input_parameter< int >::type thin(thinSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type W1init(W1initSEXP);
+    Rcpp::traits::input_parameter< int >::type slice_steps(slice_stepsSEXP);
+    Rcpp::traits::input_parameter< double >::type init_alpha(init_alphaSEXP);
+    rcpp_result_gen = Rcpp::wrap(dpm_collapsed_cpp(p, X, Y, L, U, Wobs, w1obs, w2obs, mu0, tau0, nu0, S0, a0, b0, n_iter, burnin, thin, W1init, slice_steps, init_alpha));
+    return rcpp_result_gen;
+END_RCPP
+}
 // dpm_gibbs_cpp
 Rcpp::List dpm_gibbs_cpp(int p, int K, Rcpp::NumericVector X, Rcpp::NumericVector Y, Rcpp::NumericVector L, Rcpp::NumericVector U, Rcpp::NumericMatrix Wobs, Rcpp::NumericVector w1obs, Rcpp::NumericVector w2obs, Rcpp::NumericVector mu0, double tau0, double nu0, Rcpp::NumericMatrix S0, double a0, double b0, int n_iter, int burnin, int thin, Rcpp::NumericVector W1init, int slice_steps, int init_k, double init_alpha);
 RcppExport SEXP _eiDPM_dpm_gibbs_cpp(SEXP pSEXP, SEXP KSEXP, SEXP XSEXP, SEXP YSEXP, SEXP LSEXP, SEXP USEXP, SEXP WobsSEXP, SEXP w1obsSEXP, SEXP w2obsSEXP, SEXP mu0SEXP, SEXP tau0SEXP, SEXP nu0SEXP, SEXP S0SEXP, SEXP a0SEXP, SEXP b0SEXP, SEXP n_iterSEXP, SEXP burninSEXP, SEXP thinSEXP, SEXP W1initSEXP, SEXP slice_stepsSEXP, SEXP init_kSEXP, SEXP init_alphaSEXP) {
@@ -45,6 +75,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_eiDPM_dpm_collapsed_cpp", (DL_FUNC) &_eiDPM_dpm_collapsed_cpp, 20},
     {"_eiDPM_dpm_gibbs_cpp", (DL_FUNC) &_eiDPM_dpm_gibbs_cpp, 22},
     {NULL, NULL, 0}
 };

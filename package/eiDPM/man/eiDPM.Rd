@@ -9,7 +9,7 @@ eiDPM(
   Y,
   N = NULL,
   context = FALSE,
-  K = 50,
+  K = Inf,
   method = c("gibbs", "stan"),
   n.draws = 5000,
   burnin = 1000,
@@ -29,9 +29,10 @@ eiDPM(
 
 \item{context}{logical; NCAR if \code{TRUE}.}
 
-\item{K}{truncation level; 1 gives the parametric model.}
+\item{K}{\code{Inf} (default) for the exact DP mixture; 1 for the parametric
+model; a finite value > 1 for the truncated DP (blocked Gibbs or Stan).}
 
-\item{method}{\code{"gibbs"} (blocked Gibbs in C++) or \code{"stan"} (HMC).}
+\item{method}{\code{"gibbs"} (C++) or \code{"stan"} (HMC; finite \code{K} only).}
 
 \item{n.draws, burnin, thin}{iterations (Gibbs) or per-chain sampling /
 warm-up iterations (Stan: \code{n.draws} samples after \code{burnin} warm-up).}
@@ -53,18 +54,25 @@ an object of class \code{"eiDPM"} with draws of the unit rates
   (\code{W1}, \code{W2}: draws x units, all units in input order).
 }
 \description{
-Fits the parametric (\code{K = 1}) or truncated Dirichlet-process mixture
-(\code{K > 1}) models of Imai, Lu and Strauss (2008) under CAR
+Fits the parametric (\code{K = 1}) or Dirichlet-process mixture models of
+Imai, Lu and Strauss (2008) under CAR
 (\code{context = FALSE}) or NCAR (\code{context = TRUE}), with the same
 default priors as \pkg{eco}.
 }
 \details{
+The DP mixture is fitted exactly (\code{K = Inf}, the default) by a collapsed
+Gibbs sampler (Neal 2000, Algorithm 3) with the conjugate normal-inverse-Wishart
+base measure integrated out and the Escobar-West (1995) update for
+\code{alpha}. It has no truncation and no label ordering. A finite
+\code{K > 1} instead fits the truncated stick-breaking approximation with a
+blocked Gibbs sampler (Ishwaran and James 2001), or with Stan; that sampler
+can under-represent the number of clusters when \code{alpha} is large
+(see \code{docs/bayes/eco_sampler_review.md}).
+
 The Stan model is compiled at first use and cached under
 \code{tools::R_user_dir("eiDPM", "cache")}; set
 \code{options(eiDPM.cache = FALSE)} to compile without caching.
-The Gibbs sampler starts with every unit in the first component and
-\code{alpha = 1}; starting with many occupied components and a large
-\code{alpha} can leave the truncated sampler in a large-\code{alpha} region
-where the last component absorbs most units. Check
-\code{diagnostics$pi_last}.
+Both Gibbs samplers start with every unit in one cluster and
+\code{alpha = 1}. For the truncated sampler, check \code{diagnostics$pi_last}
+(the mass of the last component).
 }

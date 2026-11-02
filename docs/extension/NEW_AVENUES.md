@@ -455,6 +455,13 @@ D can be done at any point, as infrastructure.
 | `new_avenues/sim_two_scale_context.py` → `_output.md` | Avenue B, rungs B0–B3, true and false $M$ | smooth gain in $M$; correct failure when $M<\lambda$ |
 | `new_avenues/check_structural_claims.py` → `_output.md` | C1 (CVRs add nothing), E1 (rank of $K\mapsto B^*$) | PASS / PASS |
 | `new_avenues/export_nz_units.R`, `new_avenues/nz_diagnostics.py` → `_output.md` | D1: binomial slope in NZ; D2: persistence of the K-part | slope 0.69–0.81 (SE ≈ 0.10); persistence 0.03–0.51 |
+| `new_avenues/sim_size_grid.py` → `_output.md` | Avenue A: how many units, and how small | needs thousands of units with median size of a few hundred or less |
+| `new_avenues/check_nesting.py` → `_output.md` | outcome nesting, no model (§12.3) | no change to a single outcome; contrast width 0.39 of no-nesting (median) |
+| `new_avenues/check_nesting_lce.py` → `_output.md` | outcome nesting under linear contextual effects | no change to a single outcome in 400 designs |
+| `new_avenues/check_single_index_dim.py` → `_output.md` | single-index rung: unidentified dimension (§12.3) | C−1 directions instead of (C−1)R(R−1)/2 |
+| `new_avenues/sim_local_near_constancy.py` → `_output.md` | neighbour and all-pairs similarity dials (§12.3) | neighbour-only: no gain; all-pairs: modest gain |
+| `new_avenues/apply_B_suffrage.py` → `_output.md` | Avenue B on the WI/IA suffrage data (data not committed) | WI gap signed at M ≤ 1 (yes column); IA 1868 empty at every rung |
+| `new_avenues/apply_kappa_suffrage.py` → `_output.md` | κ dial on the suffrage data (§12.3) | binds only for κ ≲ 0.1–0.25; floors 0.001–0.015 |
 
 To reproduce the NZ diagnostics:
 
@@ -462,3 +469,130 @@ To reproduce the NZ diagnostics:
 Rscript docs/extension/new_avenues/export_nz_units.R <dir>   # needs ei.Datasets
 python3 docs/extension/new_avenues/nz_diagnostics.py <dir>
 ```
+
+---
+
+## 12. What survives a review of outside suggestions, and what combines
+
+*Added after reviewing a series of proposals from an external AI system that claimed to tighten bounds "without assumptions". These used optimal transport, copulas and rank correlations, maximum entropy, nuclear-norm completion, line-arrangement corridors, Rademacher caps, sub-sample intersections, conformal pruning, persistent homology, a "segregation anchor" and variance-based ceilings. Only what is useful for this project is recorded here. Claims are labelled as in the rest of the document.*
+
+### 12.1 Two rules that settle most proposals
+
+1. **Nothing in the data tightens the sharp set by itself (proved).**
+   * Every point of the identified set reproduces the observed law exactly. This is Prop. 9 for the model, and D0 for groupings.
+   * So any tightening restricts the *offsetting* directions: in 2×2, group A's rate moves up by $(1-x)h(x)$ while group B's moves down by $x\,h(x)$.
+   * Test for any proposal: what does it assume about those directions?
+   * A corollary: **data-implied quantities never tighten.** This covers a floor $\kappa_{\min}$, a maximum $\kappa_{\max}$ over the set, or $\varepsilon_{\min}$. Each holds for every element of the set. Only ceilings imposed as assumptions narrow it. In particular, imposing the linear model's own $\kappa_{\max}$ leaves the linear bound unchanged.
+2. **Local restrictions don't touch the smooth ambiguity (heuristic, supported by simulation).**
+   * The offsetting direction can be smooth, so constraints on *differences between neighbouring units* let it drift along chains of units.
+   * Only restrictions on its *slope, level or total size*, or on its relation to an identified quantity, bite.
+
+### 12.2 The map: three axes
+
+| axis | options (decreasing plausibility) | status |
+|---|---|---|
+| **shape** of $E[\beta_r\mid X]$ | any → single index (reduced rank) → linear (JKST/M0) → constant (Goodman) | single index new (§12.3 b) |
+| **size** of contextual variation | free → relative to an identified analogue (B's $M$) → slope or variance cap ($s$, $\kappa$) → zero | $\kappa$ new as a nonparametric rung (§12.3 a) |
+| **unit dispersion** around the mean | free → capped ($\varepsilon$, item 13), ceiling from residual variance (§12.3 g) → none | ceiling new |
+
+* Rungs combine by intersection.
+* The shape and size axes are complementary:
+  * linearity *eliminates* invisible directions but leaves $K$'s size free;
+  * a size cap *shrinks* all invisible directions but eliminates none.
+* Linear and nonparametric-capped are **not nested**, so report them side by side; their intersection is "linear with capped slopes".
+
+### 12.3 New or sharpened rungs and modifiers
+
+**(a) Variance-capped contextual effects (nonparametric $\kappa$).**
+* *Assumption:* $\operatorname{Var}_X(E[\beta_r\mid X])\le\kappa\operatorname{Var}(Y)$ for each group, with any shape. It is better reported as a maximum slope $s$ or a maximum range.
+* *Plain language:* group rates may vary with composition in any pattern, but not by much.
+* *Why it bites where local similarity fails:* every offsetting direction varies with $x$, so it costs variance.
+* *Computation:* with $x$ binned, a convex program (SOCP; or LP with tangent cuts).
+* *Ladder:*
+  * $\kappa=0$ is Goodman;
+  * under linearity it is the pinned slope cap, item 7. In 2×2 that gives LP rows; in R×C an ellipsoid in $K$.
+* *Suffrage data* (`apply_kappa_suffrage.py`, pooled linear model, plug-in): it binds only below $\kappa\approx0.25$ (WI 1865) or $0.1$ (WI 1857, IA 1857). The WI 1865 gap is positive once each group's yes rate moves at most about 3.7 points per 10 points of veteran share.
+* *Reporting device (new):* annotate each bound endpoint with the $\kappa$ (or $s$) it requires. Readers then see what extreme answers demand, without anyone committing to a ceiling.
+
+**(b) Single-index (reduced-rank) contextual effects.** Salvaged from the matrix-completion proposal.
+* *Assumption:* rates depend on composition only through one index $c^\top x$, i.e. $H_j=m_j\mathbf 1^\top+d_jc^\top$.
+* *Plain language:* context matters through one dimension of a place's make-up.
+* *Ladder:* Goodman (rank 1) ⊂ single index (rank 2) ⊂ linear (rank $\le R$).
+* *Gain (generic local count, `check_single_index_dim.py`; conjecture until proved):* the unidentified dimension falls to $C-1$ from $(C-1)R(R-1)/2$. For 3×3 that is 2 instead of 6.
+* *Testable* when $R\ge3,C\ge3$ or $R\ge4$.
+* *Computation:* nonconvex, but an LP for each direction $c$ over a small grid.
+* *If wrong:* different groups' shares have distinct effects.
+
+**(c) Bounded within-unit association (odds-ratio dial).** Salvaged from the copula proposal.
+* *Assumption:* each unit's group-by-outcome odds ratio lies in $[\psi_L,\psi_U]$. Group ordering is $\psi_L=1$.
+* *Computation:* with a unit's margins fixed, its cell is monotone in the odds ratio, so this is a unit-level interval: linear rows that tighten even the sharp set.
+* *Limitation:* untestable when the dial contains 1.
+* The *ecological* rank correlation cannot calibrate it: by the law of total covariance it measures only the between-unit part of the association.
+
+**(d) Outcome nesting with slack $\varepsilon$ (ordered contests).**
+* *Assumption:* the more extreme choice implies the less extreme one, e.g. suffrage yes ⇒ Republican, except for at most $\varepsilon$.
+* *Results (verified):*
+  * no change to the bound on a single outcome, with no model (`check_nesting.py`) or under linear contextual effects (`check_nesting_lce.py`, 400 designs);
+  * it narrows cross-outcome contrasts (yes minus Republican; the share of Republicans voting no) to a median 0.39 of their no-nesting width.
+* *Test:* county-level, yes ≤ Republican after roll-off.
+
+**(e) Distance to an explicit reference (KL ball).** The honest form of the maximum-entropy proposals.
+* *Assumption:* the truth lies within KL distance $b$ of a defensible reference table: a survey, a prior election, or a jurisdiction with a published table.
+* Never use the independence table. Maximum entropy at fixed margins *is* "no within-unit association", so an entropy budget pulls bounds away from polarised truths.
+* *Computation:* convex.
+
+**(f) All-pairs similarity with a slope allowance.**
+* *Assumption:* $\lvert\beta_i-\beta_j\rvert\le e+L\lvert x_i-x_j\rvert$ for all pairs. This is items 7 and 13 without a parametric mean.
+* *Results (`sim_local_near_constancy.py`):*
+  * a neighbour-only version gives no gain;
+  * the all-pairs version gives 0.5–0.6 of the DD width at best, with large units and low heterogeneity only.
+* The data floor $e_{\min}$ is a refutation threshold, not a calibration: the truth needed 1.1–3.5 times the floor.
+
+**(g) A data-informed ceiling on unit dispersion (proved).** Corrects the "binomial deductible" and "total-variance" ceiling proposals, which placed contextual variation in the residual.
+* Let $A(x)=\operatorname{Var}(T\mid x)$, optionally minus the binomial term under A1; without the subtraction it is a conservative upper bound.
+* If poll-level shocks to the two groups are not negatively correlated (the A2 assumption), then
+  $$\operatorname{Var}(\beta_A\mid x)\le A(x)/x^2,\qquad \operatorname{Var}(\beta_B\mid x)\le A(x)/(1-x)^2.$$
+* This gives item 13's dispersion cap a ceiling from the data. Dispersion caps deliver **unit-level bounds** and tighten the sharp set.
+* It caps dispersion, **not** $\kappa$.
+
+**(h) Finite-sample inference and diagnostics** (not identification).
+* Concentration inequalities (Rademacher / Hoeffding, using shares in $[0,1]$) and split-conformal prediction for *observables* give finite-sample-valid bands for $E[Y\mid X]$ and an outlier screen for bad units (e.g. Iowa's negative counts).
+* A Phase-3 option for regimes with few units.
+
+**Computation only.** Regularised optimal-transport support functions are a possible way to compute $\Theta_X/\Theta_I$ (Avenue F). Persistent homology, line arrangements and sub-sample intersections add no identifying power; sub-sample intersections are the group rungs (M1/L5) under another name.
+
+### 12.4 Combinations that can actually tighten
+
+Each entry is a ceiling (assumption) meeting a rung. The source of the ceiling is the bridge that lets the data inform it. With no bridge, the ceiling is pure judgement and should be reported with its breakdown value.
+
+| combination | mechanism | where the ceiling comes from | status |
+|---|---|---|---|
+| linear (JKST/M0) ∩ $\kappa$ or slope cap $s<s_{\max}$ | shrinks the $K$ box | judgement; or a bridge below | LP rows (2×2) / ellipsoid (R×C) |
+| **no offsetting** (both groups' rates move the same way with $x$) + ordering | $x\,m_A'+(1-x)m_B'=\tau'-\text{gap}\le\tau'$, so $m_A'\le\tau'/x$, $m_B'\le\tau'/(1-x)$, gap $\le\tau'$ | **the observed slope $\tau'$**: a data-informed slope ceiling, which then tightens the linear and $\kappa$ rungs (proved in 2×2) | overlaps the DiD session's "contextual reinforcement"; derive there |
+| coin-flip voting (A1/A2) + accounting | pointwise bounds on the gap give $m_A=\tau+(1-x)\text{gap}$, $m_B=\tau-x\,\text{gap}$, hence bounds on each rate and on $\kappa$ | the $1/n$ variance slope | needs many smallish units (`sim_size_grid.py`) |
+| linear + nonlinearity slack $\eta$ (P3 `sensitivity()`) + $\kappa$ | stops the slack-induced widening toward DD | judgement or the bridges above | a robust rung: "roughly linear, not wildly varying" |
+| M1 (group dummies) + B1(M) with $z$ varying within groups | dummies absorb group baselines; $M$ caps own-unit effects against identified neighbourhood effects | identified area-level effects | needs a sub-group $z$ (e.g. neighbouring towns) |
+| B0 with $z$ = group composition instead of dummies | far fewer noisy parameters than M1 | — | precision fix for few units per group |
+| unit-dispersion ceiling (§12.3 g) + item 13 + any mean rung | unit-level bounds; tightens the sharp set | residual variance, under non-negative shock correlation | new; derive the sharp-set form |
+| single index ∩ B or M1 | dimension reduction, then intersection | — | for $R\ge3$ |
+| nesting + ordering (+ linear) | joint table of contests | county-level yes ≤ Republican | for contrasts only |
+| odds-ratio dial + sharp set | unit-level rows | judgement ($\psi_U$) | cheap; next to ordering |
+| validation tables (E) → empirical distribution of $\kappa$, $\delta$, $M$ | calibrates any dial | known tables elsewhere | NZ tables as a reference set |
+
+**Non-combinations** (checked; no gain):
+* imposing a rung's own data-implied $\kappa_{\max}$ or $\kappa_{\min}$;
+* nesting for a single outcome;
+* neighbour-only similarity;
+* sub-sample intersections without a shared-parameter assumption;
+* joint ballot-level margins without a cross-contest restriction.
+
+### 12.5 Suggested additions to the Phase-2 list
+
+In order of expected value:
+1. The no-offsetting slope ceiling, with the DiD session.
+2. Nonparametric $\kappa$ and $\kappa$-annotated endpoints.
+3. The single-index rung.
+4. The unit-dispersion ceiling (§12.3 g) and its unit-level bounds.
+5. The odds-ratio dial.
+
+Items 2 and 5 are cheap given the existing LP machinery. Item 3 is the largest structural gain for tables with three or more groups.

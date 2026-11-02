@@ -1,0 +1,52 @@
+     data model   sampler chain sweeps agg_W1 agg_W1_2nd_half alpha clusters share_k1
+1  census   CAR eco_slice     1  22000  0.639           0.639 0.353     2.52    0.000
+2  census  NCAR eco_slice     1  22000  0.670           0.664 0.306     2.19    0.000
+3  census   CAR collapsed     1  22000  0.648           0.648 0.162     1.16    0.859
+4  census  NCAR collapsed     1  22000  0.721           0.722 0.152     1.13    0.886
+5  census   CAR eco_slice     2  22000  0.648           0.648 0.167     1.17    0.862
+6  census  NCAR eco_slice     2  22000  0.682           0.675 0.314     2.18    0.000
+7  census   CAR collapsed     2  22000  0.648           0.649 0.160     1.18    0.848
+8  census  NCAR collapsed     2  22000  0.720           0.718 0.157     1.11    0.900
+9  census   CAR eco_slice     3  22000  0.648           0.648 0.170     1.21    0.823
+10 census  NCAR eco_slice     3  22000  0.716           0.716 0.155     1.11    0.893
+11 census   CAR collapsed     3  22000  0.648           0.649 0.161     1.17    0.856
+12 census  NCAR collapsed     3  22000  0.719           0.722 0.145     1.11    0.903
+13 census   CAR eco_slice     4  22000  0.648           0.648 0.162     1.18    0.848
+14 census  NCAR eco_slice     4  22000  0.720           0.725 0.157     1.14    0.877
+15 census   CAR collapsed     4  22000  0.648           0.648 0.153     1.17    0.856
+16 census  NCAR collapsed     4  22000  0.719           0.721 0.161     1.10    0.906
+17 census   CAR eco_slice     5  22000  0.648           0.648 0.156     1.14    0.877
+18 census  NCAR eco_slice     5  22000  0.713           0.711 0.160     1.14    0.874
+19 census   CAR collapsed     5  22000  0.648           0.648 0.159     1.18    0.850
+20 census  NCAR collapsed     5  22000  0.715           0.717 0.157     1.13    0.878
+21 census   CAR eco_slice     6  22000  0.648           0.648 0.167     1.19    0.840
+22 census  NCAR eco_slice     6  22000  0.718           0.713 0.151     1.12    0.895
+23 census   CAR collapsed     6  22000  0.648           0.649 0.161     1.18    0.850
+24 census  NCAR collapsed     6  22000  0.723           0.721 0.162     1.13    0.886
+25 census   CAR eco_slice     7  22000  0.637           0.638 0.363     2.50    0.000
+26 census  NCAR eco_slice     7  22000  0.670           0.676 0.315     2.19    0.000
+27 census   CAR collapsed     7  22000  0.648           0.648 0.166     1.20    0.837
+28 census  NCAR collapsed     7  22000  0.719           0.718 0.158     1.09    0.914
+29 census   CAR eco_slice     8  22000  0.638           0.638 0.356     2.50    0.000
+30 census  NCAR eco_slice     8  22000  0.691           0.697 0.312     2.19    0.000
+31 census   CAR collapsed     8  22000  0.649           0.649 0.165     1.19    0.837
+32 census  NCAR collapsed     8  22000  0.720           0.720 0.157     1.13    0.886
+33    reg   CAR    eco_mh     1 220000  0.545           0.549 1.073     5.50    0.000
+34    reg   CAR eco_slice     1 220000  0.545           0.544 1.099     5.62    0.000
+35    reg   CAR collapsed     1 220000  0.544           0.543 1.098     5.62    0.000
+36    reg   CAR    eco_mh     2 220000  0.548           0.547 1.099     5.59    0.000
+37    reg   CAR eco_slice     2 220000  0.546           0.547 1.110     5.65    0.000
+38    reg   CAR collapsed     2 220000  0.546           0.545 1.105     5.64    0.000
+39    reg   CAR    eco_mh     3 220000  0.543           0.545 1.000     5.15    0.000
+40    reg   CAR eco_slice     3 220000  0.544           0.543 1.105     5.64    0.000
+41    reg   CAR collapsed     3 220000  0.545           0.545 1.105     5.63    0.000
+42    reg   CAR    eco_mh     4 220000  0.548           0.547 1.150     5.82    0.000
+43    reg   CAR eco_slice     4 220000  0.546           0.547 1.096     5.63    0.000
+44    reg   CAR collapsed     4 220000  0.547           0.546 1.109     5.67    0.000
+census CAR   eco_slice  pooled unit means vs collapsed: cor 0.9882  RMSD 0.0130
+census CAR   collapsed  pooled unit means vs collapsed: cor 1.0000  RMSD 0.0000
+census NCAR  eco_slice  pooled unit means vs collapsed: cor 0.9479  RMSD 0.0409
+census NCAR  collapsed  pooled unit means vs collapsed: cor 1.0000  RMSD 0.0000
+reg CAR      eco_mh     pooled unit means vs collapsed: cor 0.9933  RMSD 0.0177
+reg CAR      eco_slice  pooled unit means vs collapsed: cor 1.0000  RMSD 0.0011
+reg CAR      collapsed  pooled unit means vs collapsed: cor 1.0000  RMSD 0.0000

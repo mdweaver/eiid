@@ -37,3 +37,7 @@ Plan pre-registered in `docs/bayes/calibration_plan.md` (commit 426115a) before 
 **Speed (median seconds per fit, n = 100, 5975 sweeps):** collapsed 1.09 (D1), blocked 1.58 (D1b), parametric 0.35 (D2), NCAR collapsed 0.93 (D3).
 
 Note on `ks_D`: the reported 90% CI is a bootstrap percentile interval of a supremum, which is biased upward, so the point estimate can fall below it; only the upper bound is used, as pre-registered.
+
+## Corrected eco with efficient code (2026-11-02)
+
+See `../eco_fixed/README.md`. In short: per sweep, the speed-up over `eco` is entirely implementation (efficient Algorithm 1 is even a little faster than the collapsed sampler); the collapsed sampler's advantage is that it does not get trapped (census). The reg discrepancy is mostly slow mixing of `eco`'s uniform-proposal MH step for the rates, not B1.

@@ -149,6 +149,7 @@ On `reg` ($n=275$, $k\approx4$, $\alpha\approx0.7$): $-\log\eta\approx5$, so $r\
 3. **`eiDPM` is calibrated for $\alpha$ under its own truncated model (A, $p=0.017$, mild)** and roughly so against DP data (B). It has a tail failure for the cluster count when the true $\alpha$ is large: truncation at $K$ (3a) plus slow label mixing (3b).
    * Remedies: a larger or adaptive $K$; label-switching moves (Papaspiliopoulos & Roberts 2008; Hastie, Liverani & Richardson 2015); or an exact collapsed sampler (Neal 2000, Alg. 3).
 4. **Effect on the `reg` discrepancy.** On data like `reg`, where the DP clustering drives unit-level estimates, the two samplers' different $\alpha$ and cluster counts translate into the unit-level differences seen there (RMSD about 0.06). On the SBC evidence, `eco`'s $\alpha$ and cluster count are the biased ones. SBC averages over the prior, though, so it does not *prove* which answer is right on `reg` specifically.
+   * **Revised (2026-11-02, `benchmarks/eco_2x2/eco_fixed/`):** a corrected re-implementation of `eco` (B1 and B2 fixed) reproduces most of the `reg` discrepancy at `eco`'s run length when it keeps `eco`'s uniform-proposal MH step for the rates, and removes it when that step is replaced by slice sampling. So the `reg` difference is mainly slow mixing, with B1 the smaller part. The SBC bias of `ecoNP` in item 2 is likewise consistent with B1 but may be partly mixing.
 
 ## 6. The exact sampler checked against Neal (2000)
 
@@ -175,3 +176,7 @@ So the code implements Algorithm 3 exactly, with two additions Neal's setting do
 * NCAR ($p=3$; one latent, four observed units): one chain gave $|z|$ up to 2.8 with batch-means SEs. Sixteen independent chains of $4\times10^5$ sweeps (`verify_collapsed_exact_rep.R`) give all $|z|\le1.7$, e.g. $P(k=1)$ 0.23020 vs 0.23025 exact. PASS.
 
 This is a stronger check than SBC for the update rules themselves: it compares the sampler to the exact posterior, not to uniformity of ranks.
+
+## 7. Algorithm 1 with efficient code (corrected `eco`)
+
+See `benchmarks/eco_2x2/eco_fixed/README.md`. Per sweep, an efficient corrected Algorithm 1 with remixing is faster than the collapsed sampler (0.13–0.46 ms against 0.30–0.99 ms), so the speed advantage over `eco` comes entirely from implementation. Algorithm 3's advantage is mixing: on `census`, 3 of 8 (CAR) and 4 of 8 (NCAR) Algorithm 1 chains stayed for 22,000 sweeps in a state with about 2.5 clusters that no collapsed chain visited.

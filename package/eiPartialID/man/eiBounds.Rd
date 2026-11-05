@@ -35,7 +35,9 @@ eiBounds(
   seed = NULL,
   tests = TRUE,
   range_offset = 0,
-  mismatch = c("error", "rescale")
+  mismatch = c("error", "rescale"),
+  union = c("pieces", "hull"),
+  diagnostics = NULL
 )
 }
 \arguments{
@@ -73,7 +75,22 @@ Duncan-Davis) or \code{"extrapolate"} (impose the model beyond the data).}
 \item{cluster}{optional cluster variable (pooled models), giving CR1 variances.}
 
 \item{restrictions}{optional list with elements \code{zeros}, \code{order},
-\code{sign}, \code{slope}, \code{linear}, \code{external}; see the vignette.}
+\code{sign}, \code{slope}, \code{linear}, \code{external}, \code{assoc}
+and \code{cr}; see the vignette. \code{assoc} is a list of signs on mean
+associations, each \code{list(type = "dB" or "dW", row, col, sign = +1 or -1,
+version, other)}: \code{"dB"} is the between-group association
+\eqn{\delta_B} (version \code{"W1"}, row vs the rest, default; or
+\code{"pair"}, row vs \code{other}), \code{"dW"} the within-group
+(contextual) association \eqn{\delta_W} (version \code{"W1"}, one-vs-rest,
+default; or \code{"W2"}, \eqn{\Delta_r}). \code{cr} is a list of
+contextual-reinforcement restrictions (\eqn{\delta_B} and \eqn{\delta_W}
+have the same sign, which is not assumed known), each \code{list(row, col,
+version = "W1", "W2" or "pair", other)}. W1 (and every 2 x 2 CR) is one LP
+(a slab); W2 and pair are a union of two branches and may give two disjoint
+intervals. All associations are model-implied (LCE) means with design
+weights \eqn{N_i}. Signs on \eqn{\delta_W} can be refuted by the data;
+with two rows a sign on \eqn{\delta_B} and CR cannot be refuted by
+aggregates on their own (refutation is always joint with the rung).}
 
 \item{alpha}{1 - confidence level.}
 
@@ -99,6 +116,14 @@ Duncan-Davis) or \code{"extrapolate"} (impose the model beyond the data).}
 only; Jiang et al. use 1e-5).}
 
 \item{mismatch}{\code{"error"} or \code{"rescale"} when row and column totals differ.}
+
+\item{union}{with CR restrictions the estimate and CIs can be two disjoint
+intervals: \code{"pieces"} (default) reports the hull in
+\code{*_lower}/\code{*_upper} and the excluded gap in \code{*_gap_lower}/
+\code{*_gap_upper}; \code{"hull"} reports the hull only (valid, wider or equal).}
+
+\item{diagnostics}{compute \code{eiRedundancy()} diagnostics and store them in
+\code{$sign} (default: when \code{assoc} or \code{cr} restrictions are given).}
 }
 \value{
 an object of class \code{"eiRxC"}.

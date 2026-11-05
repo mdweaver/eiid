@@ -100,6 +100,37 @@
       a <- matrix(0, length(rl), length(cl)); a[ri(e$target[1]), ci(e$target[2])] <- 1; a }
     list(weights = a, lower = e$lower, upper = e$upper)
   })
+  R <- length(rl)
+  ver <- function(v, allowed, what) {
+    v <- if (is.null(v)) "W1" else as.character(v)
+    if (!v %in% allowed) stop(what, ": version must be one of ", paste(allowed, collapse = ", "))
+    v
+  }
+  oth <- function(o, r, v, what) {
+    if (v != "pair") return(NULL)
+    if (is.null(o)) { if (R == 2) return(setdiff(1:2, r)) else stop(what, ": version \"pair\" needs 'other'") }
+    o <- ri(o); if (o == r) stop(what, ": 'other' must differ from 'row'")
+    o
+  }
+  if (!is.null(res$assoc)) out$assoc <- lapply(res$assoc, function(s) {
+    type <- as.character(s[["type"]])
+    if (length(type) != 1 || !type %in% c("dB", "dW")) stop("assoc: type must be \"dB\" or \"dW\"")
+    v <- ver(s[["version"]], if (type == "dB") c("W1", "pair") else c("W1", "W2"),
+             paste0("assoc (", type, ")"))
+    r <- ri(s[["row"]])
+    sg <- sign(as.numeric(if (is.null(s[["sign"]])) 1 else s[["sign"]]))
+    if (sg == 0) stop("assoc: sign must be +1 or -1")
+    list(type = type, version = v, row = r, col = ci(if (is.null(s[["col"]])) 1 else s[["col"]]),
+         sign = sg, other = oth(s[["other"]], r, v, "assoc"))
+  })
+  if (!is.null(res$cr)) out$cr <- lapply(res$cr, function(s) {
+    v <- ver(s[["version"]], c("W1", "W2", "pair"), "cr")
+    r <- ri(s[["row"]])
+    list(row = r, col = ci(if (is.null(s[["col"]])) 1 else s[["col"]]), version = v,
+         other = oth(s[["other"]], r, v, "cr"))
+  })
+  for (nm in setdiff(names(res), c("zeros", "order", "sign", "slope", "linear", "external", "assoc", "cr")))
+    warning("unknown restriction type '", nm, "' ignored")
   out
 }
 
@@ -151,7 +182,22 @@
 #' @param vcov \code{"HC3"} (default; falls back to HC1, HC0, classical), \code{"HC1"} or \code{"HC0"}.
 #' @param cluster optional cluster variable (pooled models), giving CR1 variances.
 #' @param restrictions optional list with elements \code{zeros}, \code{order},
-#'   \code{sign}, \code{slope}, \code{linear}, \code{external}; see the vignette.
+#'   \code{sign}, \code{slope}, \code{linear}, \code{external}, \code{assoc}
+#'   and \code{cr}; see the vignette. \code{assoc} is a list of signs on mean
+#'   associations, each \code{list(type = "dB" or "dW", row, col, sign = +1 or -1,
+#'   version, other)}: \code{"dB"} is the between-group association
+#'   \eqn{\delta_B} (version \code{"W1"}, row vs the rest, default; or
+#'   \code{"pair"}, row vs \code{other}), \code{"dW"} the within-group
+#'   (contextual) association \eqn{\delta_W} (version \code{"W1"}, one-vs-rest,
+#'   default; or \code{"W2"}, \eqn{\Delta_r}). \code{cr} is a list of
+#'   contextual-reinforcement restrictions (\eqn{\delta_B} and \eqn{\delta_W}
+#'   have the same sign, which is not assumed known), each \code{list(row, col,
+#'   version = "W1", "W2" or "pair", other)}. W1 (and every 2 x 2 CR) is one LP
+#'   (a slab); W2 and pair are a union of two branches and may give two disjoint
+#'   intervals. All associations are model-implied (LCE) means with design
+#'   weights \eqn{N_i}. Signs on \eqn{\delta_W} can be refuted by the data;
+#'   with two rows a sign on \eqn{\delta_B} and CR cannot be refuted by
+#'   aggregates on their own (refutation is always joint with the rung).
 #' @param alpha 1 - confidence level.
 #' @param ci \code{"clr"} (default), \code{"conservative"} or \code{"none"}.
 #' @param fpc unit-level allowance for \code{ci_actual}: \code{"bhatia-davis"} (default) or \code{"popoviciu"}.
@@ -165,6 +211,12 @@
 #' @param range_offset shrink the observed range by this amount (two-row tables
 #'   only; Jiang et al. use 1e-5).
 #' @param mismatch \code{"error"} or \code{"rescale"} when row and column totals differ.
+#' @param union with CR restrictions the estimate and CIs can be two disjoint
+#'   intervals: \code{"pieces"} (default) reports the hull in
+#'   \code{*_lower}/\code{*_upper} and the excluded gap in \code{*_gap_lower}/
+#'   \code{*_gap_upper}; \code{"hull"} reports the hull only (valid, wider or equal).
+#' @param diagnostics compute \code{eiRedundancy()} diagnostics and store them in
+#'   \code{$sign} (default: when \code{assoc} or \code{cr} restrictions are given).
 #' @return an object of class \code{"eiRxC"}.
 #' @references Jiang, W., King, G., Schmaltz, A. and Tanner, M. A. (2019).
 #'   Ecological Regression with Partial Identification. Political Analysis.
@@ -183,8 +235,10 @@ eiBounds <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL,
                      fpc = c("bhatia-davis", "popoviciu"), jkst = FALSE,
                      jkst_x = seq(0, 2, by = 0.25), eta = 0, ndraw = 100, nz_draw = 4000,
                      seed = NULL, tests = TRUE, range_offset = 0,
-                     mismatch = c("error", "rescale")) {
+                     mismatch = c("error", "rescale"), union = c("pieces", "hull"),
+                     diagnostics = NULL) {
   cl <- match.call()
+  union <- match.arg(union)
   model <- match.arg(model); range <- match.arg(range); weights <- match.arg(weights)
   vcov <- match.arg(vcov); ci <- match.arg(ci); fpc <- match.arg(fpc); mismatch <- match.arg(mismatch)
   if (!is.null(seed)) set.seed(seed)
@@ -205,10 +259,12 @@ eiBounds <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL,
                    cluster = cluster, extra = extra)
   tl <- .rxc_targets(targets, rl, cll)
   est <- .rxc_estimate(st, tl, alpha = alpha, ci = ci, fpc = fpc, jkst = jkst, jkst_x = jkst_x,
-                       eta = eta, ndraw = ndraw, nz_draw = nz_draw)
+                       eta = eta, ndraw = ndraw, nz_draw = nz_draw, union = union)
   tst <- NULL
   if (tests) {
-    tst <- list(empty_rejected = .rxc_empty_test(st, alpha = alpha, nz_draw = nz_draw))
+    ed <- .rxc_empty_test(st, alpha = alpha, nz_draw = nz_draw, detail = TRUE)
+    tst <- list(empty_rejected = if (is.list(ed)) ed$rejected else ed,
+                empty_detail = if (is.list(ed)) ed else NULL)
     if (model %in% c("M1", "L4") && st$G > 1)
       tst$m1 <- .rxc_m1_test(dat$X[st$keep, , drop = FALSE], dat$T[st$keep, , drop = FALSE],
                              dat$N[st$keep], dat$group[st$keep], weights = weights, vcov = vcov)
@@ -216,21 +272,48 @@ eiBounds <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL,
   if (range == "extrapolate")
     warning("range = \"extrapolate\": the linear model is assumed where no units are observed; this cannot be checked")
   notes <- character(0)
-  if (any(est$table$empty)) notes <- c(notes, "empty bound: the assumptions are contradicted by the data (or by sampling noise; see the emptiness test)")
+  mlabels <- .rxc_module_labels(extra, rl, cll)
+  combo <- if (length(mlabels)) paste0("the rung (", model, ") + ", paste(mlabels, collapse = " + ")) else
+    paste0("the rung (", model, ")")
+  if (any(est$table$empty))
+    notes <- c(notes, paste0("empty bound: ", combo, " is contradicted by the data (or by sampling noise; ",
+                             "see the emptiness test). Refutation is joint: the combination is rejected, ",
+                             "never a restriction on its own"))
+  if (isTRUE(tst$empty_rejected)) {
+    ra <- tst$empty_detail$rung_alone_rejected
+    notes <- c(notes, paste0("emptiness test rejects ", combo,
+                             if (isTRUE(ra)) "; the rung alone is also rejected" else
+                               if (identical(ra, FALSE)) "; the rung alone is not rejected" else ""))
+  }
+  sign_like <- c(vapply(extra$assoc, function(a) a$type == "dB", TRUE), rep(TRUE, length(extra$cr)))
+  if (length(sign_like) && all(sign_like) && length(rl) == 2 &&
+      (any(est$table$empty) || isTRUE(tst$empty_rejected)))
+    notes <- c(notes, "with two rows a sign on delta_B and CR can never be refuted by aggregate data on their own; the rejection concerns their combination with the linear-contextual-effects rung")
+  if (length(extra$assoc) || length(extra$cr)) {
+    if (any(est$table$ci_rejected) || any(est$table$empty) || isTRUE(tst$empty_rejected))
+      notes <- c(notes, "a narrow interval after a (near-)rejection is not reassurance: coverage holds only if the restrictions are true")
+    if (st$nz == 0) notes <- c(notes, "sign/CR restrictions are not imposed on point-identified rungs (L5, L6)")
+    if (jkst && length(extra$cr)) notes <- c(notes, "JKST CI_x intervals are not reported with CR restrictions")
+  }
   if (st$vcov_type != vcov) notes <- c(notes, paste0("variance estimator fell back from ", vcov, " to ", st$vcov_type))
   if (any(!st$keep)) notes <- c(notes, sprintf("%d units trimmed; their contribution to the actual rate is bounded by Duncan-Davis, and the model-implied rate refers to the kept units", sum(!st$keep)))
   if (any(est$table$ci_rejected))
     notes <- c(notes, "a confidence interval lies wholly outside the logically possible range: the rung is contradicted by the data (reported as --)")
   if (model %in% c("L5", "L6") && any(est$table$estimate_lower < 0 | est$table$estimate_upper > 1, na.rm = TRUE))
     notes <- c(notes, "point estimate outside [0, 1]: constancy is contradicted by the data")
-  structure(list(call = cl, model = model, delta = delta, rows = rl, cols = cll,
+  out <- structure(list(call = cl, model = model, delta = delta, rows = rl, cols = cll,
                  n = nrow(dat$X), n_kept = sum(st$keep), groups = st$groups, G = st$G,
                  vcov_type = st$vcov_type, alpha = alpha, ci = ci, fpc = fpc,
                  table = est$table, jkst = est$jkst, tests = tst, notes = notes,
                  n_vertices = sum(sapply(st$vertices, nrow)), eta = eta,
-                 setup = st, targets = tl,
-                 settings = list(ndraw = ndraw, nz_draw = nz_draw, range = range)),
+                 setup = st, targets = tl, pieces = est$pieces,
+                 settings = list(ndraw = ndraw, nz_draw = nz_draw, range = range,
+                                 union = union, weights = weights)),
             class = "eiRxC")
+  if (is.null(diagnostics)) diagnostics <- length(extra$assoc) + length(extra$cr) > 0
+  if (diagnostics) out$sign <- tryCatch(eiRedundancy(out, ci = ci != "none"),
+                                        error = function(e) { warning("diagnostics failed: ", conditionMessage(e)); NULL })
+  out
 }
 
 .rxc_model_label <- function(model, delta = 0, row = NULL) {
@@ -254,13 +337,23 @@ print.eiRxC <- function(x, digits = 3, ...) {
               x$vcov_type, 100 * (1 - x$alpha), x$ci))
   if (x$eta > 0) cat(sprintf("Sensitivity: eta = %g (undetectable nonlinearity allowed)\n", x$eta))
   tb <- x$table
-  f <- function(l, u) ifelse(is.na(l), "      --      ", sprintf(paste0("[%.", digits, "f, %.", digits, "f]"), l, u))
+  f <- .rxc_fmt_iv(digits)
+  g <- function(p) if (paste0(p, "_gap_lower") %in% names(tb))
+    f(tb[[paste0(p, "_lower")]], tb[[paste0(p, "_upper")]], tb[[paste0(p, "_gap_lower")]], tb[[paste0(p, "_gap_upper")]]) else
+    f(tb[[paste0(p, "_lower")]], tb[[paste0(p, "_upper")]])
   out <- data.frame(target = tb$target,
-                    estimate = ifelse(tb$empty, "empty", f(tb$estimate_lower, tb$estimate_upper)),
-                    ci_model = f(tb$ci_model_lower, tb$ci_model_upper),
-                    ci_actual = f(tb$ci_actual_lower, tb$ci_actual_upper),
+                    estimate = ifelse(tb$empty, "empty", g("estimate")),
+                    ci_model = g("ci_model"), ci_actual = g("ci_actual"),
                     duncan_davis = f(tb$dd_lower, tb$dd_upper), stringsAsFactors = FALSE)
   print(out, row.names = FALSE, right = FALSE)
+  ex <- x$setup$extra
+  if (length(ex$assoc) || length(ex$cr)) {
+    cat("\nSign / CR restrictions (model-implied mean associations, design-weighted):\n")
+    for (lb in .rxc_module_labels(list(assoc = ex$assoc, cr = ex$cr), x$rows, x$cols)) cat("  ", lb, "\n")
+    if (any(!is.na(tb$estimate_gap_lower)) || any(!is.na(tb$ci_model_gap_lower)))
+      cat("  'U' marks a union of two disjoint intervals (CR branches; use union = \"hull\" for the hull)\n")
+    cat("  estimate is sharp for the regression (PHASE5a R3(b))\n")
+  }
   cat("\n  estimate:  estimated identified set for the model-implied rate (not a confidence interval)\n")
   cat("  ci_model:  CI for the rate implied by the model at the observed compositions\n")
   cat(sprintf("  ci_actual: CI for the actual rate in these units (unit-level allowance: %s)\n", x$fpc))
@@ -275,6 +368,18 @@ print.eiRxC <- function(x, digits = 3, ...) {
   invisible(x)
 }
 
+.rxc_fmt_iv <- function(digits) {
+  fmt <- paste0("[%.", digits, "f, %.", digits, "f]")
+  function(l, u, gl = NULL, gu = NULL) {
+    out <- ifelse(is.na(l), "      --      ", sprintf(fmt, l, u))
+    if (!is.null(gl)) {
+      j <- !is.na(l) & !is.na(gl)
+      out[j] <- paste(sprintf(fmt, l[j], gl[j]), "U", sprintf(fmt, gu[j], u[j]))
+    }
+    out
+  }
+}
+
 #' @export
 summary.eiRxC <- function(object, ...) {
   print(object, ...)
@@ -282,6 +387,7 @@ summary.eiRxC <- function(object, ...) {
   cat(sprintf("\nComposition range: %s; %d constraint points in total\n",
               object$settings$range, object$n_vertices))
   cat(sprintf("Unknown parameters (contextual-effect splits): %d\n", st$nz))
+  if (!is.null(object$sign)) { cat("\n"); print(object$sign) }
   if (!is.null(object$jkst)) {
     cat("\nJiang et al. (2019) CI_x intervals (valid with one active constraint per side):\n")
     for (nm in names(object$jkst)) {
@@ -324,22 +430,29 @@ plot.eiRxC <- function(x, ...) {
 #' @param delta values of delta for M1delta.
 #' @param row_constant row for L4 (skipped if \code{NULL}).
 #' @param seed random seed.
+#' @param sign_rungs optional named list of extra rungs with sign or CR
+#'   restrictions, run after the standard rungs; each element is
+#'   \code{list(model = "M0", restrictions = list(cr = ..., assoc = ...))}
+#'   (model defaults to \code{"M0"}). Example:
+#'   \code{list("M0 + CR" = list(restrictions = list(cr = list(list(row = 1, col = 1)))))}.
 #' @return a data frame with one row per rung and target.
 #' @export
 ladder <- function(..., rungs = c("DD", "M0", "M2", "M1delta", "M1", "L4", "L5", "L6"),
-                   delta = c(0.10, 0.05, 0.02), row_constant = NULL, seed = 1) {
+                   delta = c(0.10, 0.05, 0.02), row_constant = NULL, seed = 1,
+                   sign_rungs = NULL) {
   args <- list(...)
   has_group <- !is.null(args$group)
   out <- list()
-  run <- function(model, d = 0) {
+  run <- function(model, d = 0, restr = NULL, label = NULL) {
     a <- args; a$model <- model; a$delta <- d; a$seed <- seed; a$row_constant <- row_constant
-    a$tests <- FALSE
+    a$tests <- FALSE; a$diagnostics <- FALSE
+    if (!is.null(restr)) a$restrictions <- c(a$restrictions, restr)
     fit <- tryCatch(do.call(eiBounds, a), error = function(e) e)
     if (inherits(fit, "error")) {
-      warning("rung ", model, " skipped: ", conditionMessage(fit)); return(NULL)
+      warning("rung ", if (is.null(label)) model else label, " skipped: ", conditionMessage(fit)); return(NULL)
     }
     tb <- fit$table
-    tb$rung <- if (model == "M1delta") sprintf("M1(delta=%g)", d) else model
+    tb$rung <- if (!is.null(label)) label else if (model == "M1delta") sprintf("M1(delta=%g)", d) else model
     tb
   }
   base <- NULL
@@ -351,12 +464,18 @@ ladder <- function(..., rungs = c("DD", "M0", "M2", "M1delta", "M1", "L4", "L5",
       fit <- do.call(eiBounds, a)
       tb <- fit$table
       tb[, c("estimate_lower", "estimate_upper", "ci_model_lower", "ci_model_upper")] <- NA
+      tb[, grep("_gap_", names(tb))] <- NA; tb$n_pieces <- 1L
       tb$ci_actual_lower <- tb$dd_lower; tb$ci_actual_upper <- tb$dd_upper
       tb$rung <- "DD"; tb$empty <- FALSE
       out[[length(out) + 1]] <- tb
     } else if (rg == "M1delta") {
       for (d in sort(delta, decreasing = TRUE)) out[[length(out) + 1]] <- run(rg, d)
     } else out[[length(out) + 1]] <- run(rg)
+  }
+  for (nm in names(sign_rungs)) {
+    sr <- sign_rungs[[nm]]
+    m <- if (is.null(sr$model)) "M0" else sr$model
+    out[[length(out) + 1]] <- run(m, if (is.null(sr$delta)) 0 else sr$delta, sr$restrictions, nm)
   }
   res <- do.call(rbind, out)
   res <- res[, c("rung", setdiff(names(res), "rung"))]
@@ -367,13 +486,14 @@ ladder <- function(..., rungs = c("DD", "M0", "M2", "M1delta", "M1", "L4", "L5",
 
 #' @export
 print.eiLadder <- function(x, digits = 3, ...) {
-  f <- function(l, u) ifelse(is.na(l), "--", sprintf(paste0("[%.", digits, "f, %.", digits, "f]"), l, u))
+  f <- .rxc_fmt_iv(digits)
   for (tg in unique(x$target)) {
     s <- x[x$target == tg, ]
     cat("Target:", tg, "\n")
-    print(data.frame(rung = s$rung, estimate = ifelse(s$empty, "empty", f(s$estimate_lower, s$estimate_upper)),
-                     ci_model = f(s$ci_model_lower, s$ci_model_upper),
-                     ci_actual = f(s$ci_actual_lower, s$ci_actual_upper)), row.names = FALSE, right = FALSE)
+    print(data.frame(rung = s$rung, estimate = ifelse(s$empty, "empty", f(s$estimate_lower, s$estimate_upper, s$estimate_gap_lower, s$estimate_gap_upper)),
+                     ci_model = f(s$ci_model_lower, s$ci_model_upper, s$ci_model_gap_lower, s$ci_model_gap_upper),
+                     ci_actual = f(s$ci_actual_lower, s$ci_actual_upper, s$ci_actual_gap_lower, s$ci_actual_gap_upper)),
+          row.names = FALSE, right = FALSE)
     cat("\n")
   }
   cat("Rungs run from the most plausible (top) to the most restrictive (bottom).\n")
@@ -396,7 +516,8 @@ sensitivity <- function(object, eta = seq(0, 0.1, by = 0.01), seed = 1) {
   res <- lapply(eta, function(e) {
     set.seed(seed)
     tb <- .rxc_estimate(st, object$targets, alpha = object$alpha, ci = object$ci, fpc = object$fpc,
-                        eta = e, ndraw = object$settings$ndraw, nz_draw = object$settings$nz_draw)$table
+                        eta = e, ndraw = object$settings$ndraw, nz_draw = object$settings$nz_draw,
+                        union = .rxc_union_setting(object))$table
     tb$eta <- e
     tb
   })
@@ -404,6 +525,8 @@ sensitivity <- function(object, eta = seq(0, 0.1, by = 0.01), seed = 1) {
   class(res) <- c("eiSensitivity", "data.frame")
   res
 }
+
+.rxc_union_setting <- function(object) if (is.null(object$settings$union)) "pieces" else object$settings$union
 
 #' @export
 plot.eiSensitivity <- function(x, target = unique(x$target)[1], ...) {
@@ -444,9 +567,10 @@ breakdown <- function(object, target, threshold, direction = c("above", "below")
     set.seed(seed)
     tb <- .rxc_estimate(st, tl, alpha = object$alpha, ci = if (which == "estimate") "none" else object$ci,
                         fpc = object$fpc, eta = e, ndraw = object$settings$ndraw,
-                        nz_draw = object$settings$nz_draw)$table
+                        nz_draw = object$settings$nz_draw, union = .rxc_union_setting(object))$table
     lo <- tb[[paste0(which, "_lower")]]; hi <- tb[[paste0(which, "_upper")]]
     if (is.na(lo) || isTRUE(tb$empty)) return(FALSE)
+    # with a CR union the hull is used: a conclusion holds only if every piece satisfies it
     if (direction == "above") lo > threshold else hi < threshold
   }
   if (!holds(0)) return(0)

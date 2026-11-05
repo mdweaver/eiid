@@ -109,12 +109,21 @@
 # ---------------------------------------------------------------------------
 # Candidate endpoints (dual vertices) and CLR-type intersection bounds
 # ---------------------------------------------------------------------------
-.rxc_collect <- function(cons, tg, beta, Vsq, ndraw, side) {
+# 'relax = TRUE': when the system is infeasible at every draw, each draw's rows are shifted
+# by the smallest uniform slack that makes them feasible. Any dual-feasible vertex is a
+# valid CLR candidate (weak duality), so this only supplies candidates; it lets the CLR
+# ends be computed, and cross, for (near-)empty sets.
+.rxc_collect <- function(cons, tg, beta, Vsq, ndraw, side, relax = FALSE, draws = NULL) {
   g <- if (side == "upper") tg$gamma else -tg$gamma
-  draws <- c(list(beta), lapply(seq_len(ndraw), function(i) beta + as.vector(Vsq %*% stats::rnorm(ncol(Vsq)))))
+  if (is.null(draws))
+    draws <- c(list(beta), lapply(seq_len(ndraw), function(i) beta + as.vector(Vsq %*% stats::rnorm(ncol(Vsq)))))
   found <- list(); keys <- character(0)
   for (b in draws) {
     s <- as.vector(cons$S %*% b) + cons$s0
+    if (relax) {
+      tt <- .rxc_meet(numeric(0), matrix(0, 0, ncol(cons$A)), s, cons$A)   # max_z min_j (s + A z)_j
+      if (is.finite(tt) && tt < 0) s <- s - tt + 1e-9
+    }
     d <- .rxc_dual(s, cons$A, g)
     if (d$status != 0) next
     lam <- d$lambda
@@ -153,13 +162,18 @@
 }
 
 # CLR confidence interval for the model-implied target (two sides at alpha_lo, alpha_up)
+# Emptiness rule for this version (R10 §3.1): the CI is empty iff the ends cross. If no draw
+# is feasible, candidates come from relaxed rows (see .rxc_collect); the CLR rule is kept and
+# is not mixed with the conservative rule. The caller reports a crossing as "rejected".
 .rxc_ci_clr <- function(st, cons, tg, alpha_lo, alpha_up, Zs, ndraw) {
-  cu <- .rxc_collect(cons, tg, st$beta, Zs$Vsq, ndraw, "upper")
-  cl <- .rxc_collect(cons, tg, st$beta, Zs$Vsq, ndraw, "lower")
-  if (is.null(cu) || is.null(cl)) {
-    # no feasible draw (e.g. empty plug-in): fall back to the conservative inflated set
-    return(.rxc_ci_conservative(st, cons, tg, alpha_lo + alpha_up, Zs)$ci)
-  }
+  if (length(cons$disj)) stop("internal: CLR is not valid with disjunctive (slab) rows; use branches")
+  draws <- c(list(st$beta), lapply(seq_len(ndraw), function(i)
+    st$beta + as.vector(Zs$Vsq %*% stats::rnorm(ncol(Zs$Vsq)))))
+  cu <- .rxc_collect(cons, tg, st$beta, Zs$Vsq, ndraw, "upper", draws = draws)
+  cl <- .rxc_collect(cons, tg, st$beta, Zs$Vsq, ndraw, "lower", draws = draws)
+  if (is.null(cu)) cu <- .rxc_collect(cons, tg, st$beta, Zs$Vsq, ndraw, "upper", relax = TRUE, draws = draws)
+  if (is.null(cl)) cl <- .rxc_collect(cons, tg, st$beta, Zs$Vsq, ndraw, "lower", relax = TRUE, draws = draws)
+  if (is.null(cu) || is.null(cl)) return(c(NA_real_, NA_real_))
   n <- nrow(st$X)
   U <- .rxc_clr_min(as.vector(cu$G %*% st$beta) + cu$ic, cu$G, Zs, alpha_up, n)
   Ln <- .rxc_clr_min(-(as.vector(cl$G %*% st$beta) + cl$ic), -cl$G, Zs, alpha_lo, n)
@@ -167,8 +181,12 @@
 }
 
 # conservative version (Theorem P3.5(a)): inflate every constraint simultaneously
+# Disjunctive (slab) rows, R10(b): every piece joins the critical-value maximum, each piece
+# is inflated by its own k * se, and the max over pieces is taken afterwards. Emptiness rule
+# for this version: the CI is empty iff the inflated set is empty.
 .rxc_ci_conservative <- function(st, cons, tg, alpha, Zs) {
-  Gall <- rbind(cons$S, tg$cvec)
+  DS <- if (length(cons$disj)) do.call(rbind, lapply(cons$disj, function(d) d$S)) else NULL
+  Gall <- rbind(cons$S, DS, tg$cvec)
   se <- sqrt(pmax(rowSums((Gall %*% Zs$V) * Gall), 0))
   W <- (Zs$draws %*% t(Gall)) / matrix(pmax(se, 1e-300), nrow(Zs$draws), length(se), byrow = TRUE)
   W[, se == 0] <- 0
@@ -176,6 +194,12 @@
   k <- stats::quantile(apply(W, 1, max), 1 - alpha, names = FALSE)
   ns <- nrow(cons$S)
   cons2 <- cons; cons2$s0 <- cons$s0 + k * se[seq_len(ns)]
+  if (length(cons$disj)) {
+    np <- vapply(cons$disj, function(d) nrow(d$S), 0L)
+    off <- ns + c(0, cumsum(np))
+    infl <- lapply(seq_along(np), function(j) k * se[off[j] + seq_len(np[j])])
+    cons2 <- .rxc_fix_disj(cons2, st$beta, infl)
+  }
   pl <- .rxc_plugin(cons2, tg, st$beta)
   if (isTRUE(pl$empty) || isTRUE(pl$unbounded)) return(list(ci = c(NA_real_, NA_real_), empty = TRUE, k = k))
   list(ci = c(pl$lower - k * se[last], pl$upper + k * se[last]), empty = FALSE, k = k)
@@ -224,9 +248,16 @@
 .rxc_estimate <- function(st, targets, alpha = 0.05, ci = c("clr", "conservative", "none"),
                           fpc = c("bhatia-davis", "popoviciu"), jkst = FALSE,
                           jkst_x = seq(0, 2, by = 0.25), eta = 0, ndraw = 100,
-                          nz_draw = 4000, alpha_split = c(est = 0.04, E = 0.005, v = 0.005)) {
-  ci <- match.arg(ci); fpc <- match.arg(fpc)
+                          nz_draw = 4000, alpha_split = c(est = 0.04, E = 0.005, v = 0.005),
+                          union = c("pieces", "hull")) {
+  ci <- match.arg(ci); fpc <- match.arg(fpc); union <- match.arg(union)
   cons <- .rxc_constraints(st, eta = eta)
+  # CR restrictions make the restricted set a union of systems (R3(c)). Point bounds and the
+  # conservative CI use the W1/2x2 slab form (R10(b)); CLR uses the branch union (R10(c)).
+  sys_pt <- .rxc_systems(cons, "slab")
+  sys_ci <- .rxc_systems(cons, if (ci == "clr") "branch" else "slab")
+  base <- sys_pt[[1]]; base$disj <- NULL                 # rung + linear rows (no CR)
+  has_cr <- length(cons$cr) > 0
   Zs <- .rxc_zdraws(st$V, nz_draw)
   R <- st$R; C <- st$C
   share <- colSums(st$N * st$X) / colSums(st$N_all * st$X_all)          # kept share by row
@@ -242,45 +273,37 @@
   zE <- stats::qnorm(1 - a_E / 2)
   point <- st$nz == 0
   fpc_cache <- list()
-  out <- list(); jk <- list()
+  out <- list(); jk <- list(); pieces <- list()
+  usum <- function(u) {
+    sm <- .rxc_union_summary(u)
+    if (union == "hull" && !is.null(u)) { sm$pieces <- 1L; sm$gap_lower <- sm$gap_upper <- NA_real_ }
+    sm
+  }
   for (nm in names(targets)) {
     a <- targets[[nm]]
     tg <- .rxc_target(st, a)
     wid_eta <- eta * sum(abs(a))
-    pl <- .rxc_plugin(cons, tg, st$beta)
+    pt <- .rxc_sys_interval(sys_pt, tg, st$beta)
+    est_u <- pt$union
+    if (!is.null(est_u)) { est_u[, 1] <- est_u[, 1] - wid_eta; est_u[, 2] <- est_u[, 2] + wid_eta }
+    unb <- pt$unbounded
+    if (unb) est_u <- NULL
+    se_ <- usum(est_u)
     dd <- .rxc_interval_lin(a, dd_all$lower, dd_all$upper)
-    row <- list(target = nm, estimate_lower = NA, estimate_upper = NA,
+    row <- list(target = nm, estimate_lower = se_$lower, estimate_upper = se_$upper,
                 ci_model_lower = NA, ci_model_upper = NA,
                 ci_actual_lower = NA, ci_actual_upper = NA,
-                dd_lower = dd[1], dd_upper = dd[2], empty = isTRUE(pl$empty), ci_rejected = FALSE)
-    if (!isTRUE(pl$empty) && !isTRUE(pl$unbounded)) {
-      row$estimate_lower <- pl$lower - wid_eta; row$estimate_upper <- pl$upper + wid_eta
-    }
+                dd_lower = dd[1], dd_upper = dd[2], empty = is.null(pt$union) && !unb,
+                ci_rejected = FALSE, n_pieces = se_$pieces,
+                estimate_gap_lower = se_$gap_lower, estimate_gap_upper = se_$gap_upper,
+                ci_model_gap_lower = NA_real_, ci_model_gap_upper = NA_real_,
+                ci_actual_gap_lower = NA_real_, ci_actual_gap_upper = NA_real_)
+    cm_u <- ca_u <- NULL
     if (ci != "none") {
-      # model-implied rate
-      if (point) {
-        se <- sqrt(max(0, sum(tg$cvec * (st$V %*% tg$cvec))))
-        cm <- c(pl$lower, pl$upper) + c(-1, 1) * stats::qnorm(1 - alpha / 2) * se
-      } else if (ci == "clr") {
-        cm <- .rxc_ci_clr(st, cons, tg, alpha / 2, alpha / 2, Zs, ndraw)
-      } else {
-        cm <- .rxc_ci_conservative(st, cons, tg, alpha, Zs)$ci
-      }
-      # the model-implied rate is an average of valid rates: intersect with its logical range
       rng <- .rxc_interval_lin(a, matrix(0, R, C), matrix(1, R, C))
-      row$ci_model_lower <- max(cm[1] - wid_eta, rng[1]); row$ci_model_upper <- min(cm[2] + wid_eta, rng[2])
-      # actual rate: kept part (scaled by kept share) + trimmed part (Duncan-Davis)
       a2 <- sweep(a, 1, share, "*")
       tg2 <- .rxc_target(st, a2)
-      if (point) {
-        se <- sqrt(max(0, sum(tg2$cvec * (st$V %*% tg2$cvec))))
-        pt <- sum(tg2$cvec * st$beta) + tg2$c0
-        ce <- pt + c(-1, 1) * stats::qnorm(1 - a_est / 2) * se
-      } else if (ci == "clr") {
-        ce <- .rxc_ci_clr(st, cons, tg2, a_est / 2, a_est / 2, Zs, ndraw)
-      } else {
-        ce <- .rxc_ci_conservative(st, cons, tg2, a_est, Zs)$ci
-      }
+      # unit-level allowance and trimmed part do not depend on the system
       sdE <- 0
       for (r in seq_len(R)) for (c in seq_len(C)) {
         if (a2[r, c] == 0) next
@@ -299,7 +322,7 @@
               vmax <- if (lo <= 0.5 && hi >= 0.5) 0.25 else max(lo * (1 - lo), hi * (1 - hi))
               sqrt(sum(st$w[, r]^2) * vmax)
             }
-          } else .rxc_fpc_sd(st, cons, r, c, fpc, a_v, Zs, ndraw)
+          } else .rxc_fpc_sd(st, base, r, c, fpc, a_v, Zs, ndraw)   # rung + linear rows: valid
         }
         sdE <- sdE + abs(a2[r, c]) * fpc_cache[[key]]
       }
@@ -307,35 +330,72 @@
         a3 <- sweep(a, 1, 1 - share, "*")
         .rxc_interval_lin(a3, dd_trim$lower, dd_trim$upper)
       } else c(0, 0)
-      lo <- ce[1] - zE * sdE + tr[1] - eta * sum(abs(a2))
-      hi <- ce[2] + zE * sdE + tr[2] + eta * sum(abs(a2))
-      row$ci_actual_lower <- max(lo, dd[1]); row$ci_actual_upper <- min(hi, dd[2])
-      # an interval lying wholly outside the logical range / Duncan-Davis means the rung is
-      # contradicted by the data: report it as empty rather than as an inverted interval
-      if (!is.na(row$ci_model_lower) && row$ci_model_lower > row$ci_model_upper) {
-        row$ci_model_lower <- row$ci_model_upper <- NA; row$ci_rejected <- TRUE
+      cms <- list(); cas <- list()
+      for (sy in sys_ci) {
+        # model-implied rate
+        if (point) {
+          pl <- .rxc_plugin(sy, tg, st$beta)
+          se <- sqrt(max(0, sum(tg$cvec * (st$V %*% tg$cvec))))
+          cm <- c(pl$lower, pl$upper) + c(-1, 1) * stats::qnorm(1 - alpha / 2) * se
+          pl2 <- sum(tg2$cvec * st$beta) + tg2$c0
+          se2 <- sqrt(max(0, sum(tg2$cvec * (st$V %*% tg2$cvec))))
+          ce <- pl2 + c(-1, 1) * stats::qnorm(1 - a_est / 2) * se2
+        } else if (ci == "clr") {
+          cm <- .rxc_ci_clr(st, sy, tg, alpha / 2, alpha / 2, Zs, ndraw)
+          ce <- .rxc_ci_clr(st, sy, tg2, a_est / 2, a_est / 2, Zs, ndraw)
+        } else {
+          cm <- .rxc_ci_conservative(st, sy, tg, alpha, Zs)$ci
+          ce <- .rxc_ci_conservative(st, sy, tg2, a_est, Zs)$ci
+        }
+        # the model-implied rate is an average of valid rates: intersect with its logical range
+        cms[[length(cms) + 1]] <- c(max(cm[1] - wid_eta, rng[1]), min(cm[2] + wid_eta, rng[2]))
+        # actual rate: kept part (scaled by kept share) + trimmed part (Duncan-Davis)
+        lo <- ce[1] - zE * sdE + tr[1] - eta * sum(abs(a2))
+        hi <- ce[2] + zE * sdE + tr[2] + eta * sum(abs(a2))
+        cas[[length(cas) + 1]] <- c(max(lo, dd[1]), min(hi, dd[2]))
       }
-      if (!is.na(row$ci_actual_lower) && row$ci_actual_lower > row$ci_actual_upper) {
-        row$ci_actual_lower <- row$ci_actual_upper <- NA; row$ci_rejected <- TRUE
-      }
+      # a branch whose interval is empty (inflated set empty, CLR ends crossed, or wholly
+      # outside the logical range / Duncan-Davis) drops out; all empty = rejected (R10(c))
+      cm_u <- .rxc_union(cms, tol = 0); ca_u <- .rxc_union(cas, tol = 0)
+      sm <- usum(cm_u); sa <- usum(ca_u)
+      row$ci_model_lower <- sm$lower; row$ci_model_upper <- sm$upper
+      row$ci_model_gap_lower <- sm$gap_lower; row$ci_model_gap_upper <- sm$gap_upper
+      row$ci_actual_lower <- sa$lower; row$ci_actual_upper <- sa$upper
+      row$ci_actual_gap_lower <- sa$gap_lower; row$ci_actual_gap_upper <- sa$gap_upper
+      row$ci_rejected <- is.null(cm_u) || is.null(ca_u)
     }
-    if (jkst && !isTRUE(pl$empty) && !point) {
-      jk[[nm]] <- .rxc_jkst(st, cons, tg, pl, dd, jkst_x, a)
+    if (jkst && !row$empty && !point && !has_cr) {
+      pl <- .rxc_plugin(base, tg, st$beta)
+      jk[[nm]] <- .rxc_jkst(st, base, tg, pl, dd, jkst_x, a)
     }
+    pieces[[nm]] <- list(estimate = est_u, ci_model = cm_u, ci_actual = ca_u)
     out[[nm]] <- as.data.frame(row, stringsAsFactors = FALSE)
   }
   res <- do.call(rbind, out); rownames(res) <- NULL
-  list(table = res, jkst = if (jkst) jk else NULL, cons = cons)
+  list(table = res, jkst = if (jkst) jk else NULL, cons = cons, pieces = pieces)
 }
 
-# emptiness test (Proposition P3.6(a)): reject if the inflated set is empty
-.rxc_empty_test <- function(st, alpha = 0.05, nz_draw = 4000) {
+# Emptiness test (Proposition P3.6(a), conservative version): reject iff the inflated set is
+# empty. With CR, every system (slab form for W1/2x2, branches otherwise) is tested and the
+# union is rejected only if all are empty (R10(c)).
+.rxc_empty_test <- function(st, alpha = 0.05, nz_draw = 4000, detail = FALSE) {
   if (st$nz == 0) return(NA)
   cons <- .rxc_constraints(st)
   a <- matrix(0, st$R, st$C); a[1, 1] <- 1
   tg <- .rxc_target(st, a)
   Zs <- .rxc_zdraws(st$V, nz_draw)
-  isTRUE(.rxc_ci_conservative(st, cons, tg, alpha, Zs)$empty)
+  sys <- .rxc_systems(cons, "slab")
+  emp <- vapply(sys, function(sy) isTRUE(.rxc_ci_conservative(st, sy, tg, alpha, Zs)$empty), logical(1))
+  # LCE alone (rung without the optional restrictions), to name the rejected combination
+  base_only <- NA
+  if (all(emp) && !is.null(st$extra)) {
+    st0 <- st; st0$extra <- NULL
+    c0 <- .rxc_constraints(st0)
+    base_only <- isTRUE(.rxc_ci_conservative(st0, c0, tg, alpha, Zs)$empty)
+  }
+  if (!detail) return(all(emp))
+  list(rejected = all(emp), systems = emp, branches = vapply(sys, function(s) s$branch, ""),
+       rung_alone_rejected = base_only)
 }
 
 # Wald test of M1's testable part (overidentifying restrictions, 2b Lemma D1(b))

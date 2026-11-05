@@ -1,4 +1,5 @@
 T1 face test = brute force in 800/800 (3x2, random + through-vertex rows); active-but-redundant rows 400, of which solver dual > 0 in 133  PASS
 T2 implied <=> witness target does not tighten: 333/333  PASS
 T3 2x2 sign rows: closed forms match LP (max err 1.7e-14); not-implied <=> tightens D in 7409/7409; 'cuts set but not D' cases 0  PASS
+T1b non-singleton optimal faces (facet-normal targets): 2907 faces; face test = brute force: row below face 2458/2458; row inside face 2907/2907; row above face 2907/2907  PASS
 T4 3x2 true delta^0 sign rows x targets B_0..B_2: implied 147/1794; cuts set, not this target 494/1794; tightens target 1153/1794

@@ -159,6 +159,50 @@ def T4(reps=300):
     return counts
 
 
+def T1b(reps=150):
+    """Non-singleton optimal faces (added after review).  Target normal = a facet
+    normal A[j], so argmax_F A[j]'k is that facet (when the row is irredundant).
+    Rows a'k <= bb with bb below / inside / above the range of a'k over the face."""
+    out = {"below": [0, 0], "inside": [0, 0], "above": [0, 0]}
+    faces = 0
+    for i in range(reps):
+        P = V.make_3x2(support=("2d", "near-1d")[i % 2])
+        A, b = V.rows_3x2(P, ["DD"])
+        for j in range(len(b)):
+            gam = A[j]
+            U, _ = lpmax(gam, A, b)
+            if U is None or U < b[j] - 1e-9:          # row j redundant: no facet
+                continue
+            a = RNG.normal(size=3)
+            Af, bf = np.vstack([A, -gam]), np.append(b, -(U - 1e-10))
+            fmin = linprog(a, A_ub=Af, b_ub=bf, bounds=FREE, method="highs").fun
+            fmax = -linprog(-a, A_ub=Af, b_ub=bf, bounds=FREE, method="highs").fun
+            if fmax - fmin < 1e-6:                    # face is (numerically) a vertex
+                continue
+            faces += 1
+            gmin = linprog(a, A_ub=A, b_ub=b, bounds=FREE, method="highs").fun
+            cases = [("inside", fmin + RNG.uniform(0.1, 0.9) * (fmax - fmin)),
+                     ("above", fmax + 0.1 * (fmax - fmin))]
+            if fmin - gmin > 1e-6:                    # room to cut the whole face
+                cases.append(("below", gmin + RNG.uniform(0.1, 0.9) * (fmin - gmin)))
+            for kind, bb in cases:
+                U2, _ = lpmax(gam, np.vstack([A, a]), np.append(b, bb))
+                if U2 is None:
+                    continue
+                brute = (U - U2) > 1e-7 * max(1, abs(U))
+                test = face_min(a, gam, U, A, b) > bb + 1e-7 * max(1, abs(bb))
+                out[kind][0] += brute == test
+                out[kind][1] += 1
+    return faces, out
+
+
+if __name__ == "__main__":
+    faces, out = T1b()
+    ok = all(a == n for a, n in out.values())
+    print(f"T1b non-singleton optimal faces (facet-normal targets): {faces} faces; face test = brute force: " +
+          "; ".join(f"row {k} face {a}/{n}" for k, (a, n) in out.items()) + f"  {'PASS' if ok else 'FAIL'}")
+
+
 if __name__ == "__main__":
     c = T4()
     tot = sum(c.values())

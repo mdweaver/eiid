@@ -1,6 +1,6 @@
 # Phase 5a: the sign module (M-SIGN), proofs for build step 1
 
-*Proof-register items R3, R2 and R10-union from `PACKAGE_DESIGN.md` §8. Notation and justification tags follow 2a §0.3, 2c §0.3 and P3 §0.3. Each item ends with its numerical check. Status: R3 (§1), R2 (§2) and R10-union (§3) written and checked. All three await an independent review pass.*
+*Proof-register items R3, R2 and R10-union from `PACKAGE_DESIGN.md` §8. Notation and justification tags follow 2a §0.3, 2c §0.3 and P3 §0.3. Each item ends with its numerical check. Status: R3 (§1), R2 (§2) and R10-union (§3) written and checked. An independent review pass (fresh session) found one error, in R10(d), and several gaps; all are fixed below and listed in §4.*
 
 *Extra tags used here:*
 
@@ -18,7 +18,9 @@
 * The design $(N_i,X_i)_{i\le p}$ is fixed, and $A\supseteq\operatorname{supp}P_X$ is a polytope (2a §0).
 * LCE rung: $H=Q(P)+K$ with $K\in\mathcal K$, and $k\in\mathbb R^d$ its free coordinates (2a Prop. 7).
 * $\Theta_I=\Theta_I(P;A)$ is the sharp set (2a Thm 1). $\Theta_O=\Theta_O(P;A)$ is the regression-only set that the LP computes (2a Prop. 7). Both are treated as subsets of $\mathbb R^d$ through $k$.
-* **Target.** A model-implied linear target $\varphi(k)=\varphi_0+\gamma^\top k$, for example $\tilde B_{rc}$ or $\tilde D=\tilde B_1-\tilde B_2$ (2a Prop. 7; 2c §0.2). The actual-population rate $B$ is *not* covered: $B-\tilde B$ is a weighted sum of unit residuals that the data never pin down, and it needs the P3 allowance.
+* **Target.** A model-implied linear target $\varphi(k)=\varphi_0+h^\top k$, for example $\tilde B_{rc}$ or $\tilde D=\tilde B_1-\tilde B_2$ (2a Prop. 7; 2c §0.2). (The letter $\gamma$ is reserved for the variance ratio $\gamma_r$ of (d).)
+  * $\tilde B$ uses the design weights $N_i$. It is 2a's $B^*$ when $P_{(N,X)}$ is the empirical law of the design, which is the case here because the design is fixed. In the population, $ER$ computed from $T$ and from $\tau=E[T\mid X]$ coincide by iterated expectations, so restrictions written with the $\tau$-based $ER^*$ satisfy (C2).
+  * The actual-population rate $B$ is *not* covered: $B-\tilde B$ is a weighted sum of unit residuals that the data never pin down, and it needs the P3 allowance.
 * **Admissible restriction.** A set $C=C(P)\subseteq\mathbb R^d$ such that
   * (C1) $C$ is closed and convex;
   * (C2) $C$ depends on $P$ only through the design and $Q(P)$.
@@ -40,11 +42,12 @@ or $\emptyset$.
 (b) **What the LP delivers.** $\Theta_O\cap C=\bigcup_{P'\in\mathcal P(P)}\big(\Theta_I(P')\cap C(P')\big)$, where $\mathcal P(P)$ is as in 2a Prop. 2.
 * So the LP interval $\varphi(\Theta_O\cap C)$ is sharp for the information in the regression $E[T\mid X]$ and the design.
 * It equals the sharp interval of (a) whenever $\Theta_I=\Theta_O$ (2a Cor. 2, Prop. 3).
-* Otherwise it is an outer interval, and M-SHARP tightens it.
+* Otherwise it is a weakly outer interval, and M-SHARP can tighten it.
 
 (c) **Unions.** For $C=C_+\cup C_-$, the identified set is $\varphi(\Theta\cap C_+)\cup\varphi(\Theta\cap C_-)$ for $\Theta\in\{\Theta_I,\Theta_O\}$. That is at most two closed intervals.
-* The reported hull $[\min,\max]$ is sharp exactly when the two intervals intersect.
-* **Certificate:** if $\Theta\cap C_+\cap C_-\neq\emptyset$, which one feasibility LP can check, they intersect.
+* If one piece is empty, the set is the other piece, a single interval, and the hull is sharp.
+* If both are non-empty, the hull $[\min,\max]$ is sharp exactly when the two intervals intersect.
+* **Certificate:** if $\Theta\cap C_+\cap C_-\neq\emptyset$, they intersect. For $\Theta_O$ with polyhedral $C_\pm$ this is one feasibility LP.
 
 (d) **One-vs-rest CR is one LP.** Let $(g_B,g_W)=(\delta^{r*}_B,\delta^{r*}_W)$ (W1), and assume $\operatorname{Var}_p(X_r)>0$. Put:
 * $\gamma_r=\operatorname{Var}_p(X_r)/(\mu_r(1-\mu_r))\in(0,1]$;
@@ -73,7 +76,7 @@ which is two linear rows in $k$. For $R=2$ this is the only CR, so in $2\times2$
 
 *(c)*
 9. $\varphi(\Theta\cap(C_+\cup C_-))=\varphi(\Theta\cap C_+)\cup\varphi(\Theta\cap C_-)$. Each piece is a closed interval or empty, by (a), or by (b) for $\Theta_O$. [image of a union; (a), (b)]
-10. A union of two closed intervals is an interval iff they intersect. A point $k_0\in\Theta\cap C_+\cap C_-$ gives $\varphi(k_0)$ in both. [order on $\mathbb R$] ∎(c)
+10. If one piece is empty the union is the other piece. A union of two non-empty closed intervals is an interval iff they intersect. A point $k_0\in\Theta\cap C_+\cap C_-$ gives $\varphi(k_0)$ in both. [order on $\mathbb R$] ∎(c)
 
 *(d)*
 11. Apply 2c Lemma M1(c) with $m(X_i)=M_H(X_i)$ in place of $\beta_i$, and $\tau(X_i)$ in place of $T_i$. The identities there use only $T=\sum_sX_s\beta_s$ and the simplex, and $x^\top M_H(x)=\tau(x)$ holds. This gives
@@ -93,22 +96,22 @@ where $NM^{r*}$ is the neighbourhood gap computed from $\tau$. [2c L M1(c); 2a L
   * N2 shape restrictions, which do not restrict $k$;
   * N1 signs on the realised $\delta$, which are unit-level, not mean-level;
   * any target that mixes $\tilde B$ with $B$ (marked ⚠ in the matrix).
-* **Degenerate hull.** If $A$ has empty relative interior, $\Theta_O$ can be unbounded (2a L3(b)). Then (a) holds with a possibly infinite endpoint, and the LP reports unboundedness. Added rows can restore a finite endpoint (V5, near-1d support).
+* **Degenerate hull.** If $A$ has empty relative interior, $\Theta_O$ can be unbounded (2a L3(b)). For polyhedral $C$, (a) and (b) then hold with a possibly infinite endpoint, and the LP reports unboundedness. For non-polyhedral closed convex $C$ the image of an unbounded closed convex set need not be closed, so an endpoint may be a supremum that is not attained. Added rows can restore a finite endpoint (V5, near-1d support).
 
 ### 1.5 Numerical check (`verify_R3.py`, output `verify_R3_output.txt`)
 
 | Check | Result |
 |---|---|
-| S1: constructive sharpness. 3×2, LCE with the true signs of $\delta^{0*}_B$ and $\delta^{0*}_W$. For 1000 random $t\in[L,U]$, solve for $k$, build $\beta_i=M_H(X_i)$, and check simplex, accounting, rows and $\varphi=t$ | worst violation $1.8\times10^{-15}$ |
+| S1: constructive sharpness *for the LP set*, i.e. part (b) (it uses the 2a Prop. 2 construction with $x^\top\beta=\tau$). 3×2, LCE with the true signs of $\delta^{0*}_B$ and $\delta^{0*}_W$. For 1000 random $t\in[L,U]$, solve for $k$, build $\beta_i=M_H(X_i)$, and check simplex, accounting, rows and $\varphi=t$ | worst violation $1.8\times10^{-15}$ |
 | S2: 2×2 CR branches (2000 designs) | exactly one non-empty in 2000/2000 |
 | S3: 3×2 W1 CR, row 0 (1000 designs) | both branches non-empty 0 times, as (d) predicts |
 | S4: 3×2 CR with the W2 or pairwise pairings | both non-empty in 357/1000 and 614/1000; no gaps |
-| S5: adversarial search (3 bases × 2 pairings × 3 targets; 3600 problems) | both non-empty 951; certificate held 945; **gaps 3**, all where the certificate failed; gap ≈ 2% of hull width |
+| S5: adversarial search (3 bases × 2 pairings × 3 targets; 3600 problems) | both non-empty 951; certificate held 945; **gaps 3**, all where the certificate failed; gap ≈ 2% of hull width on this seed. The reviewer's rerun on a fresh seed found 14 gaps, up to ≈ 31% of hull width, each confirmed by checking that both branch LPs are infeasible at the gap midpoint |
 
 ### 1.6 Consequences for the package
 
 1. For a linear rung plus any sign, ordering or local rows, `eiBounds()` may label the LP interval **sharp for the regression**. It is the sharp identified set when $\Theta_I=\Theta_O$, and outer otherwise.
-2. One-vs-rest CR (the default, W1) and $2\times2$ CR are implemented as two ordinary rows. That needs no union and no special inference, which shrinks R10-union to the W2/pairwise options.
+2. One-vs-rest CR (the default, W1) and $2\times2$ CR are implemented as two rows in $k$, so identification needs no union. Inference is not quite ordinary: the rows' constants are a min/max of estimated quantities. The conservative CI inflates each piece before the max (R10(b)); the CLR CI takes the union of the two branch CIs (R10(c)).
 3. For other CR pairings the package:
    * runs the certificate LP;
    * if the certificate fails, solves both branches and reports both intervals when they are disjoint.
@@ -120,8 +123,8 @@ where $NM^{r*}$ is the neighbourhood gap computed from $\tau$. [2c L M1(c); 2a L
 
 ### 2.1 Setting
 
-* $F=\{k:Gk\le g\}$ is the current feasible set: the rung, plus any rows already imposed. It is nonempty and compact (R3; 2a L3(b)).
-* $\varphi(k)=\varphi_0+\gamma^\top k$ is a linear target, with $U=\max_F\varphi$, $L=\min_F\varphi$, and optimal faces $F^*_U=\arg\max_F\varphi$ and $F^*_L=\arg\min_F\varphi$.
+* $F=\{k:Gk\le g\}$ is the current feasible set: the rung, plus any rows already imposed. It is compact by 2a L3(b) (nonempty relative interior of $A$). Nonemptiness is *assumed*: R3 does not deliver it, and an empty $F$ is a rejection (R3(e)).
+* $\varphi(k)=\varphi_0+h^\top k$ is a linear target, with $U=\max_F\varphi$, $L=\min_F\varphi$, and optimal faces $F^*_U=\arg\max_F\varphi$ and $F^*_L=\arg\min_F\varphi$.
 * $N$ is the added restriction: an admissible set as in §1.1, closed and convex, with $F\cap N\ne\emptyset$. $U_N$ and $L_N$ are the endpoints after adding it.
 * Three possible verdicts for $N$ relative to $F$:
   * **implied:** $F\subseteq N$;
@@ -139,7 +142,7 @@ where $NM^{r*}$ is the neighbourhood gap computed from $\tau$. [2c L M1(c); 2a L
 * A zero multiplier, or a row that is slack at an optimum, certifies that the row does not tighten.
 * "Active" (the row holds with equality at the optimum) does **not** mean "tightening".
 
-(c) **Implied = useless for every target.** $N$ is implied iff it tightens no linear target. For a row $a^\top k\le b$, it is implied iff $\max_Fa^\top k\le b$, and when it is not implied the target $\varphi=a^\top k$ is a witness that tightens. So the "already implied" table answers "can this assumption buy anything at all?". Whether it buys something *for your target* is a separate question, answered by (a).
+(c) **Implied = useless for every target.** $N$ is implied iff it tightens no linear target. For general closed convex $N$ the witness comes from a hyperplane separating a point of $F\setminus N$ from $N$; for polyhedral $N$, any non-implied row of $N$ serves. For a row $a^\top k\le b$, it is implied iff $\max_Fa^\top k\le b$, and when it is not implied the target $\varphi=a^\top k$ is a witness that tightens. So the "already implied" table answers "can this assumption buy anything at all?". Whether it buys something *for your target* is a separate question, answered by (a).
 
 (d) **$2\times2$ under LCE.** $k=w_1$ is scalar and $\tilde D$ is strictly monotone in $w_1$ (when $\gamma<1$).
 * Each of the four sign rows is either implied or tightens $\tilde D$; the middle verdict cannot occur.
@@ -163,22 +166,23 @@ where $NM^{r*}$ is the neighbourhood gap computed from $\tau$. [2c L M1(c); 2a L
 1. $F\cap N\subseteq F$, so $U_N\le U$. [nest]
 2. If $k\in F^*_U\cap N$, then $U_N\ge\varphi(k)=U$. So $U_N=U$. [Def; 1]
 3. If $F^*_U\cap N=\emptyset$: $F\cap N$ is nonempty and compact, so $\varphi$ attains $U_N$ at some $k'\in F\cap N$. Since $k'\notin F^*_U$, $\varphi(k')<U$. [C1; compact; Weier; Def $F^*_U$]
-4. The lower endpoint is the same argument applied to $-\varphi$. If $N=\{Mk\le m\}$, then $F^*_U\cap N=\{Gk\le g,\ \gamma^\top k\ge U,\ Mk\le m\}$ is a feasibility LP. [sym; Def] ∎(a)
+4. The lower endpoint is the same argument applied to $-\varphi$. If $N=\{Mk\le m\}$, then $F^*_U\cap N=\{Gk\le g,\ h^\top k\ge U,\ Mk\le m\}$ is a feasibility LP. [sym; Def] ∎(a)
 
 *(b)*
-5. $F^*_U$ is a nonempty compact face of $F$, so $\beta^*:=\min_{F^*_U}a^\top k$ is attained, and $F^*_U\cap\{a^\top k\le b\}=\emptyset$ iff $\beta^*>b$. The first claim follows from (a). [Weier; 4]
+5. $F^*_U$ is a nonempty compact face of $F$, so $\beta^*:=\min_{F^*_U}a^\top k$ is attained, and $F^*_U\cap\{a^\top k\le b\}=\emptyset$ iff $\beta^*>b$. The first claim follows from (a). [Weier; (a)]
 6. Let $v(\beta)$ be the perturbation function. Then $v(\beta)=U$ for $\beta\ge\beta^*$, by (a) applied at $\beta$, and $v(\beta)<U$ for $\beta<\beta^*$. [(a); Def $v$]
 7. If $b\ge\beta^*$, $v$ is constant on $[b,\infty)$, so $v'_+(b)=0$ and $0$ is an optimal multiplier. [6; pert]
-8. If $b<\beta^*$: by concavity, $v'_+(b)\ge(v(\beta^*)-v(b))/(\beta^*-b)>0$. So every optimal multiplier, which lies in $[v'_+(b),v'_-(b)]$, is positive. [pert; 6]
-9. A solver returns *one* multiplier from $\partial v(b)$, and when $\partial v(b)=[0,\lambda]$ with $\lambda>0$ it may return a positive one even though the row does not tighten. This is the degenerate case of a row through an optimal vertex: it is active, but it removes nothing at the optimum (T1). A slack row at some optimum $k$ has $k\in F^*_U\cap N$, so by 2 it does not tighten. [pert; 2] ∎(b)
+8. If $b<\beta^*$: by concavity, $v'_+(b)\ge(v(\beta^*)-v(b))/(\beta^*-b)>0$. So every optimal multiplier, which lies in $[v'_+(b),v'_-(b)]$, is positive. At the left end of the domain, $b=\min_Fa^\top k$, the multiplier set is $[v'_+(b),\infty)$ ($v'_-=+\infty$); the equivalence is unaffected. [pert; 6]
+9. A solver returns *one* multiplier from $\partial v(b)$, and when $\partial v(b)=[0,\lambda]$ with $\lambda>0$ it may return a positive one even though the row does not tighten. This is the degenerate case of a row through an optimal vertex: it is active, but it removes nothing at the optimum (T1). Suppose the row is slack, $a^\top k<b$, at an optimum $k$ of the *augmented* LP. Near $k$ the augmented set coincides with $F$, so $k$ is a local maximiser of the linear $\varphi$ on the convex $F$, hence a global one. Then $k\in F^*_U\cap N$, and by 2 the row does not tighten. [pert; local = global for concave maximisation; 2] ∎(b)
 
 *(c)*
 10. If $F\subseteq N$, then $F\cap N=F$, and no target changes. [Def]
-11. If $a^\top k\le b$ is not implied, then $\max_Fa^\top k>b$. For $\varphi=a^\top k$, $U_N\le b<U$. [Def; 1] ∎(c)
+11. If $a^\top k\le b$ is not implied, then $\max_Fa^\top k>b$. For $\varphi=a^\top k$, $U_N\le b<U$. [Def; 1]
+11′. General closed convex $N$ with $F\not\subseteq N$: take $k_1\in F\setminus N$. Strict separation of the point $k_1$ from the closed convex set $N$ gives $(a,b)$ with $a^\top k\le b$ on $N$ and $a^\top k_1>b$. For $\varphi=a^\top k$: $U_N\le b<a^\top k_1\le U$. [sep. hyperplane; 11] ∎(c)
 
 *(d)*
-12. By 2c M3 / §1.2(d) with $R=2$: $\delta^*_W=\operatorname{Var}_p(X)(ER^*-\tilde D)$ and $\delta^*_B=\mu(1-\mu)(\tilde D-NM^*)$, with $\tilde D$ affine and non-constant in $w_1$. [§1.3 step 11; G2 step 3]
-13. Each sign row is therefore a half-line in $\tilde D$, and $F$ maps to $[L_J,U_J]$. Intersecting gives the closed forms. [12; R3(a)]
+12. By 2c M3 / §1.2(d) with $R=2$: $\delta^*_W=\operatorname{Var}_p(X)(ER^*-\tilde D)$ and $\delta^*_B=\mu(1-\mu)(\tilde D-NM^*)$, with $\tilde D$ affine in $w_1$ with slope proportional to $-(1-\gamma)$, so non-constant iff $\gamma<1$. [§1.3 step 11; G2 step 3]
+13. Each sign row is therefore a half-line in $\tilde D$, and $F$ maps to $[L_J,U_J]$. Intersecting gives the closed forms. [12; R3(b) and 2a §6.1, since $F$ is the LP set]
 14. Since $\tilde D$ is a bijection between $F$ and $[L_J,U_J]$, cutting $F$ means cutting $[L_J,U_J]$. So "cuts the set only" is impossible for $\tilde D$, and also for any target that is non-constant in $w_1$. [12; bij] ∎(d)
 
 *(e)* This is (a) applied to $N$ and to each sub-stack. Order dependence follows from (a), since $F^*_U$ changes as rows are added. ∎
@@ -188,7 +192,8 @@ where $NM^{r*}$ is the neighbourhood gap computed from $\tau$. [2c L M1(c); 2a L
 | Check | Result |
 |---|---|
 | T1: face test vs brute force. 3×2 LCE base, random targets; 400 random rows and 400 rows through the solver's optimal vertex | agree 800/800. Of the 400 active-but-redundant rows, the solver reported a **positive dual in 133** |
-| T2: implied ⇔ the witness target $a^\top k$ does not tighten | 333/333 |
+| T1b (added after review; random targets give a vertex face almost surely, so T1 never tests a larger face): target normal = a facet normal, so the optimal face is that facet; added rows cut through the facet's interior, cut all of it, or miss it | face test = brute force in every case (see output) |
+| T2: implied ⇔ the witness target $a^\top k$ does not tighten (a sanity check, close to a tautology since $U_N=\min(U,b)$ for this target) | 333/333 |
 | T3: 2×2, four sign rows, 2000 designs | closed forms = LP (error $1.7\times10^{-14}$); not implied ⇔ tightens $\tilde D$ in 7409/7409; "cuts set only" 0 |
 | T4: 3×2, true-sign rows on $\delta^{0*}_B$ and $\delta^{0*}_W$, targets $\tilde B_0,\tilde B_1,\tilde B_2$ (1794 cases) | implied 8%; **cuts set but not this target 28%**; tightens 64% |
 
@@ -212,36 +217,37 @@ where $NM^{r*}$ is the neighbourhood gap computed from $\tau$. [2c L M1(c); 2a L
 
 P3 §0, regimes R1/R3. $\hat\beta$ is the regression coefficient vector with $\sqrt n(\hat\beta-\beta_0)\Rightarrow N(0,\Sigma)$ and $\hat\Sigma$ consistent. The design is conditioned on (P3-S2).
 * Base rows: $s_j(\beta)+a_j^\top k\ge0$ (P3 §1 step 2).
-* Target: $\varphi=c(\beta)+\gamma^\top k$.
+* Target: $\varphi=c(\beta)+h^\top k$.
 * **Linear-in-$\beta$ added row:** $s_j(\beta)+a_j^\top k\ge0$, with $s_j$ linear in $\beta$ and $a_j$ fixed by the design. Every sign, ordering and local row in §1.1 has this form. The reason: $\delta^*$, $\tilde B$, $ER^*$ and the orderings are linear in $m=M_{Q+K}(X_i)$ with design weights, and $Q$ is linear in $\beta$ [2c M5 step 2; P3 §1].
 * **Parallel disjunction:** a row of the form $\max_{l\le L}s_l(\beta)+a^\top k\ge0$, equivalently $\bigcup_l\{s_l(\beta)+a^\top k\ge0\}$. The pieces share the same $k$-normal $a$.
 * **General union:** $C_+\cup C_-$, each branch a finite set of linear-in-$\beta$ rows.
-* $\mathrm{CI}(\mathcal R)$ denotes the P3.5 interval (version (a) or (b)) computed with the base rows plus the row set $\mathcal R$, at total level $\alpha=\alpha_U+\alpha_L(+\alpha_E)$. The convention is $\mathrm{CI}=\emptyset$ when the inflated set $\hat\Theta^+$ is empty, or when the computed lower end exceeds the upper end.
+* $\mathrm{CI}(\mathcal R)$ denotes the P3.5 interval (version (a) or (b)) computed with the base rows plus the row set $\mathcal R$, at total level $\alpha=\alpha_U+\alpha_L(+\alpha_E)$. **Emptiness convention**, one rule per version: for P3.5(a), $\mathrm{CI}=\emptyset$ iff the inflated set $\hat\Theta^+$ is empty; for P3.5(b), $\mathrm{CI}=\emptyset$ iff the computed ends cross, $\hat L>\hat U$. (Applying both rules to (b) would double the bound in (d), by the union bound.)
 
 ### 3.2 Statement
 
-**Theorem R10.** Assume P3.5's conditions and that the restrictions hold at the truth, i.e. $k_0$ satisfies them.
+**Theorem R10.** Assume P3.5's conditions *for the augmented row system* (base rows plus added rows), and that the restrictions hold at the truth, i.e. $k_0$ satisfies them. Version (a) needs no Slater-type condition. Statements of P3.2/P3.4 type do, and rows that bind at the truth (e.g. the CR edge) can break it.
 
-(a) **Added rows.** For a finite set $\mathcal R$ of linear-in-$\beta$ rows, P3.5(a), P3.5(b) and P3.6(a) hold unchanged, for both $\tilde B$ and $B$. The new rows simply join the Gaussian maximum that sets the critical value.
+(a) **Added rows.** For a finite set $\mathcal R$ of linear-in-$\beta$ rows, P3.5(a), P3.5(b) and P3.6(a) hold unchanged, for both $\tilde B$ and $B$. The new rows simply join the Gaussian maximum that sets the critical value. A row whose $s_j$ does not depend on $\beta$ has $\sigma_j=0$: it is imposed exactly and left out of the maximum.
 
 (b) **Parallel disjunction.** Inflate each piece separately, then take the maximum:
 $$\max_l\big(s_l(\hat\beta)+\hat k\hat\sigma_l\big)+a^\top k\ge0,$$
-with all pieces included in the critical-value maximum. Version (a) then covers at the nominal level.
+with all pieces included in the critical-value maximum. **For version (a) (conservative) only**, this covers at the nominal level. The row is not linear in $\beta$, so Lemma P3.1 fails (an endpoint becomes a max of minima) and CLR does not apply. For CLR, use (c): in W1/2×2 each branch is a set of linear-in-$\beta$ rows.
 * W1 CR and $2\times2$ CR are of this form, by §1.2(d):
-  * lower row: $\gamma_D^\top k+\max(c_D-ER^*,\ c_D-\gamma_rER^*)\ge0$;
-  * upper row: $-\gamma_D^\top k+\max(ER^*-c_D,\ \gamma_rER^*-c_D)\ge0$.
+  * lower row: $h_D^\top k+\max(c_D-ER^*,\ c_D-\gamma_rER^*)\ge0$;
+  * upper row: $-h_D^\top k+\max(ER^*-c_D,\ \gamma_rER^*-c_D)\ge0$.
 * No branch is selected, so the sign of $\widehat{ER}$ never enters.
 
 (c) **General union.** $\mathrm{CI}_\cup:=\mathrm{CI}(C_+)\cup\mathrm{CI}(C_-)$, with *each* branch at the full level $\alpha$, satisfies
 $$\liminf_nP(\theta_0\in\mathrm{CI}_\cup)\ \ge\ 1-\alpha.$$
 * No Bonferroni split across branches is needed.
-* The hull of $\mathrm{CI}_\cup$ is also valid, but it is wider.
+* The hull of $\mathrm{CI}_\cup$ is also valid; it is wider or equal.
 * The emptiness test "reject if both branch sets are empty" has asymptotic level $\le\alpha_U+\alpha_L$.
 
 (d) **Near-empty sets.**
 * Under the model, $P(\mathrm{CI}=\emptyset)\to\le\alpha_U+\alpha_L$, including when the identified set is a point or nearly one.
 * Coverage holds unconditionally, so reporting "empty" is part of the allowed error, not an extra one.
-* Coverage is **not** guaranteed conditionally on passing the emptiness test.
+* Conditioning on passing the emptiness test can only *raise* coverage: covering implies non-empty, so $P(\text{cover}\mid\ne\emptyset)=P(\text{cover})/P(\ne\emptyset)\ge P(\text{cover})$.
+* Conditioning on other data events (a near-rejection, a CI that came out narrow) is not covered by the theorem.
 * If the restrictions are false, no coverage statement holds. In particular, a non-empty, narrow CI is no evidence that they are true (G3).
 
 (e) **Plug-in restrictions are not valid.** A rule that estimates the CR bracket $\operatorname{hull}\{\gamma_r\widehat{ER},\widehat{ER}\}$ and imposes it without inflating it can under-cover when the truth is on the bracket's edge (MC, §3.4).
@@ -258,22 +264,22 @@ $$\liminf_nP(\theta_0\in\mathrm{CI}_\cup)\ \ge\ 1-\alpha.$$
 5. Let $l^*$ be a piece that holds at the truth: $s_{l^*}(\beta_0)+a^\top k_0\ge0$. [hypothesis; Def disjunction]
 6. On $\mathcal E$, which now includes every piece, $s_{l^*}(\beta_0)\le s_{l^*}(\hat\beta)+\hat k\hat\sigma_{l^*}$. So $\max_l(s_l(\hat\beta)+\hat k\hat\sigma_l)+a^\top k_0\ge0$. [Def $\mathcal E$; 5]
 7. For given data this is one linear row in $k$, and $k_0$ satisfies it on $\mathcal E$. Proceed as in step 3. [6; (a)]
-8. For W1/2×2 CR: §1.2(d) gives $D^{r*}\ge\min(ER^*,\gamma_rER^*)\iff\max(D^{r*}-ER^*,\ D^{r*}-\gamma_rER^*)\ge0$, and similarly for the upper side. Each piece is linear in $\beta$ apart from the common $\gamma_D^\top k$. [§1.3 steps 11–13; alg] ∎(b)
+8. For W1/2×2 CR: §1.2(d) gives $D^{r*}\ge\min(ER^*,\gamma_rER^*)\iff\max(D^{r*}-ER^*,\ D^{r*}-\gamma_rER^*)\ge0$, and similarly for the upper side. Each piece is linear in $\beta$ apart from the common $h_D^\top k$. [§1.3 steps 11–13; alg] ∎(b)
 
 *(c)*
 9. Fix a branch $j^*\in\{+,-\}$ with $k_0\in C_{j^*}$. It is non-random, because $k_0$ is a population quantity. [hypothesis]
 10. The model "rung $\cap\,C_{j^*}$" holds, so by (a), $\liminf P(\theta_0\in\mathrm{CI}(C_{j^*}))\ge1-\alpha$. [9; (a)]
 11. $\mathrm{CI}(C_{j^*})\subseteq\mathrm{CI}_\cup\subseteq\operatorname{hull}\mathrm{CI}_\cup$. [Def]
 12. The other branch's CI is never used for coverage, so its level is irrelevant. That is why no split is needed. [10–11]
-13. Both sets empty implies the $j^*$ set is empty, which has probability $\to\le\alpha_U+\alpha_L$. [P3.6(a) for branch $j^*$] ∎(c)
+13. Both sets empty implies the $j^*$ set is empty, which has probability $\to\le\alpha_U+\alpha_L$. [P3.6(a) for version (a); the crossing argument of (d) step 15 for version (b); both applied to branch $j^*$] ∎(c)
 
 *(d)*
 14. For P3.5(a): $\mathrm{CI}=\emptyset$ requires $\hat\Theta^+=\emptyset$, which requires $\mathcal E^c$. [P3.5(a) step 2]
-15. For P3.5(b): a crossing $\hat L>\hat U$ requires $\hat U<\theta_0$ or $\hat L>\theta_0$. These have asymptotic probabilities $\le\alpha_U$ and $\le\alpha_L$ respectively, by CLR's one-sided validity, whatever the width of the identified set. [CLR; union]
+15. For P3.5(b), take $\theta_0=\tilde B$ (or $\tilde D$). A crossing $\hat L>\hat U$ requires $\hat U<\theta_0$ or $\hat L>\theta_0$. These have asymptotic probabilities $\le\alpha_U$ and $\le\alpha_L$ respectively, by CLR's one-sided validity, whatever the width of the identified set. For the target $B$, the E-allowance only widens the interval, so a crossing of the $B$-interval implies a crossing of the $\tilde B$-interval, and the same bound holds. [CLR; union; P3 allowance]
 16. In both cases the empty event is contained in the non-coverage event whose probability is bounded. Neither step uses the width of the identified set. [14–15]
-17. Conditional coverage given $\{\mathrm{CI}\ne\emptyset\}$ is $P(\text{cover})/P(\ne\emptyset)$. This can fall below $1-\alpha$ when $P(\ne\emptyset)<1$. And if the restrictions are false, step 1 fails. [Def cond. prob.; 1] ∎(d)
+17. $\{\theta_0\in\mathrm{CI}\}\subseteq\{\mathrm{CI}\ne\emptyset\}$, so $P(\text{cover}\mid\ne\emptyset)=P(\text{cover})/P(\ne\emptyset)\ge P(\text{cover})$. If the restrictions are false, step 1 fails. [Def cond. prob.; 1] ∎(d)
 
-*(e)* This is shown by the counterexample in §3.4: coverage 0.917 < 0.95, with a Monte Carlo standard error of about 0.011. The mechanism: when the truth is on the edge of the bracket, the estimated edge falls inside the truth about half the time, and the target's own inflation does not fully compensate. ∎
+*(e)* Counterexample in §3.4: coverage 0.917 < 0.95, with a Monte Carlo standard error of about 0.011. Asymptotic sketch: at the edge, $\tilde D_0=ER^*$ is the upper end of the identified set. When the JKST end does not bind, the naive upper end is $\widehat{ER}+\hat k\hat\sigma_D+o_p(n^{-1/2})$, where $\hat\sigma_D$ is the target's own inflation term. Non-coverage is the event $\widehat{ER}-ER^*<-\hat k\hat\sigma_D$, with limiting probability $\Phi(-\hat k\,\sigma_D/\sigma_{ER})$. Both standard deviations scale as $n^{-1/2}$, so the limit does not vanish as $n$ grows. It exceeds $\alpha$ whenever $\sigma_{ER}/\sigma_D>\hat k/z_{1-\alpha}$. The reviewer's reruns confirm the persistence: coverage 0.914, 0.909 and 0.903 at $n=150$, 600 and 2000. ∎
 
 **Uniformity.** The statements are pointwise in the DGP, as in P3. Uniform validity near point identification (a Stoye-type adaptation) remains P3's open item. (d) only says that emptiness is controlled pointwise, including at point-identified DGPs.
 
@@ -295,10 +301,38 @@ Entries are coverage / median length. No CI was empty in any design.
 ### 3.5 Consequences for the package
 
 1. **Every added row goes through the same CI machinery.** Sign, ordering and local rows join the critical-value maximum. Nothing new is needed beyond appending rows (R10(a)).
-2. **CR (W1 default and 2×2) uses the slab form (b).** It is one row per side, with each piece inflated before the maximum. Here CR costs about 0.36 of width against 1.1 for JKST alone. It is a large gain, but it rests on an unrefutable belief (2c M3).
+2. **CR (W1 default and 2×2) uses the slab form (b) for the conservative CI** (one row per side, each piece inflated before the maximum) **and the branch union (c) for CLR**, the default CI. Here CR costs about 0.36 of width against 1.1 for JKST alone. It is a large gain, but it rests on an unrefutable belief (2c M3).
 3. **Other CR pairings use the union of the branch CIs, each at the full level (c).** The package reports the union, which can be two intervals, and offers the hull as an option.
-4. **Never impose an estimated bracket as if it were known.** The EGGHM bracket $[\gamma\,\widehat{ER},\widehat{ER}]$ intersected with a JKST CI is not a confidence interval (e).
+4. **Never impose an estimated bracket as if it were known.** The EGGHM bracket $[\gamma\,\widehat{ER},\widehat{ER}]$ intersected with a JKST CI is not a confidence interval (e). The MC naive interval (the bracket plus the target's own inflation) contains bracket ∩ JKST CI, so the under-coverage transfers to the latter a fortiori. (Our $\widehat{ER}^*$ is $\tau$-based. It equals the $T$-based EGGHM $\widehat{ER}$ under $N$-weighted OLS, because $X_r$ and $1$ lie in the span of the quadratic monomials. P3 uses unweighted OLS, so the two differ slightly in samples.)
 5. **Emptiness is reported as a test result, not as an error.** Output includes:
    * the rejection flag;
    * the combination that was rejected (R3(e));
    * a warning that a narrow CI after a near-rejection is not reassurance (d).
+
+---
+
+## 4. Independent review log
+
+A fresh-session adversarial review of §§1–3 and the three scripts. Verdicts: R3, R2 and R10 all **accept with fixes**. Every fix below has been applied.
+
+| # | Item | Class | Finding | Fix |
+|---|---|---|---|---|
+| 1 | R10(d) | ERROR | It claimed coverage conditional on non-emptiness can fall below $1-\alpha$. In fact cover ⊆ non-empty, so conditioning raises coverage | (d) and step 17 rewritten |
+| 2 | R10(b) | GAP | The slab row is not linear in $\beta$, so CLR is not covered | Slab restricted to version (a); CLR goes through (c) |
+| 3 | R10 §3.1 | GAP | Two emptiness rules for version (b) would double the level | One rule per version |
+| 4 | R10 step 15 | GAP | Wrong for $\theta_0=B$ (the E-allowance) | Argument run with $\tilde B$ |
+| 5 | R10(a) | GAP | Rows with $\sigma_j=0$; conditions on the augmented system; Slater | Stated |
+| 6 | R10(e) | GAP | Shown by MC only | Asymptotic sketch added |
+| 7 | R10 minors | MINOR | Step-13 citation; "wider or equal"; a-fortiori remark; $\tau$- vs $T$-based $ER$ | Fixed |
+| 8 | R3(c) | GAP | "Sharp iff intersect" is false when one branch is empty | Case split |
+| 9 | R3 setting | GAP | Meaning of $\tilde B$ and of $ER^*$ under (C2) | Note added |
+| 10 | R3 §1.6.2 | GAP | Contradicted R10(b): CR rows need inflation | Rewritten |
+| 11 | R3 §1.4 | MINOR | Non-polyhedral images may be non-closed | Stated |
+| 12 | R3 minors | MINOR | S1 tests (b), not (a); certificate is an LP only for $\Theta_O$; "weakly outer"; $\gamma$ used for two things (target normal now $h$); S5 gap sizes reach ≈ 31% on other seeds | Fixed |
+| 14 | R2(c) | GAP | Proved for one row only | Separation step 11′ |
+| 15 | R2 step 9 | GAP | Which optimum is meant | Local ⇒ global argument |
+| 16–17 | R2 minors | MINOR | Domain boundary in [pert]; citations; nonemptiness of $F$ is an assumption | Fixed |
+| 18 | R2 checks | GAP | T1 never tests a non-singleton face; T2 nearly tautological | T1b added; T2 relabelled |
+
+Numerical re-checks by the reviewer: the identities in R3 step 11 hold for every $r$ to $1.5\times10^{-16}$; the S5 holes are genuine; the T4 28% "cuts set only" rate is not a tolerance artefact (shallowest cut $3.8\times10^{-6}$); `verify_R10.py` reproduces exactly.
+

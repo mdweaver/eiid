@@ -393,15 +393,15 @@ Status: **P** proved · **C** checked numerically · **J** conjecture · **O** o
 | ID | Claim | Status | Strategy / check | Blocks |
 |---|---|---|---|---|
 | R1 | C1: $x^*\in$ hull (2×2), hence weighted-local ⇒ $\delta_W\ge0$ under LCE | J (C [V3]) | pairwise variance representation plus a cancellation argument; try two-point designs first | the M-LOC ⇒ SIGN-W cell |
-| R2 | An added restriction moves an endpoint iff it removes the whole optimal face (one feasibility LP); for one row, iff every optimal dual is positive (a solver's dual alone does not certify); implied ⇔ tightens no target; 2×2 closed form = G2 | **P** (5a §2; `verify_R2.py`; independent review pending) | — | redundancy diagnostic |
-| R3 | LCE ∩ any closed convex restriction on $k$ is sharp for the model-implied target; CR is a union, a single slab for W1/2×2, and may have a gap otherwise | **P** (5a §1; `verify_R3.py`; independent review pending) | — | M-SIGN reporting |
+| R2 | An added restriction moves an endpoint iff it removes the whole optimal face (one feasibility LP); for one row, iff every optimal dual is positive (a solver's dual alone does not certify); implied ⇔ tightens no target; 2×2 closed form = G2 | **P** (5a §2; `verify_R2.py`; independently reviewed, fixes applied, 5a §4) | — | redundancy diagnostic |
+| R3 | LCE ∩ any closed convex restriction on $k$ is sharp for the model-implied target; CR is a union, a single slab for W1/2×2, and may have a gap otherwise | **P** (5a §1; `verify_R3.py`; independently reviewed, fixes applied, 5a §4) | — | M-SIGN reporting |
 | R4 | Refutability classification for $R\ge3$ (which signs, orderings and local rows can produce emptiness, model-free and under LCE) | O | construct feasible completions; counterexamples | §4.2 codes, tests |
 | R5 | P-R(c): any spanning tree of pairs reaches all directions; behaviour with lower-dimensional support | P (star); C (chain) [V7] | induction on tree leaves; support rank | step 4 |
 | R6 | When joint column restrictions in 2×C are strictly tighter than the best single one; ordinal cumulative version | C [V6] | LP geometry in the $(C-1)$-dimensional $t$-space | step 3 |
 | R7 | N2 grid LP: outer validity with estimated τ; convergence as the grid is refined | O | uniform confidence band for τ, then a monotone envelope | step 8 |
 | R8 | B1(M), κ, CAR-δ: each is a valid outer bound, monotone in its dial; B1 rank condition | partly (NA) | per module | steps 6, 7, 10 |
 | R9 | Consistency of the M-SHARP series bound; never wider than the current $\Theta_X$ | O | sieve argument | step 1b |
-| R10 | CLR validity with added rows, unions (min/max over LPs), near-emptiness, and the actual-rate allowance with new rows | **P** (5a §3: added rows; parallel disjunction = W1/2×2 CR; union of branch CIs at full level; emptiness level; plug-in bracket invalid; MC in `verify_R10.py`; review pending). Still open: uniformity near point identification, and the CLR candidate collection (both inherited from P3) | — | all code |
+| R10 | CLR validity with added rows, unions (min/max over LPs), near-emptiness, and the actual-rate allowance with new rows | **P** (5a §3: added rows; parallel disjunction = W1/2×2 CR; union of branch CIs at full level; emptiness level; plug-in bracket invalid; MC in `verify_R10.py`; independently reviewed, one error in (d) fixed, 5a §4). Still open: uniformity near point identification, and the CLR candidate collection (both inherited from P3) | — | all code |
 | R11 | DiD: DiD-S sharp within FD; FD4 ∩ D4; LCE-levels ∩ sign-Δ; union inference | DiD-S validity P; rest O | as in 2d | §7 |
 | R12 | P-S (sandwich) | P [V4] | — | — |
 | R13 | G2 table (JKST + signs) | P (§2.2) [V1, V2] | — | — |

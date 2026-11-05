@@ -394,7 +394,7 @@ Status: **P** proved · **C** checked numerically · **J** conjecture · **O** o
 |---|---|---|---|---|
 | R1 | C1: $x^*\in$ hull (2×2), hence weighted-local ⇒ $\delta_W\ge0$ under LCE | J (C [V3]) | pairwise variance representation plus a cancellation argument; try two-point designs first | the M-LOC ⇒ SIGN-W cell |
 | R2 | An added row strictly tightens $\varphi$'s interval iff it cuts every optimal face of the current LP (in practice: its dual is positive at all optima); 2×2 closed form = G2 | P for 2×2 (G2); O in general | LP duality / degeneracy cases | redundancy diagnostic |
-| R3 | LCE ∩ any finite set of K-rows is sharp for the model-implied target | P (convex set, affine target; 2a Prop. 7) | write it out | M-SIGN reporting |
+| R3 | LCE ∩ any closed convex restriction on $k$ is sharp for the model-implied target; CR is a union, a single slab for W1/2×2, and may have a gap otherwise | **P** (5a §1; `verify_R3.py`; independent review pending) | — | M-SIGN reporting |
 | R4 | Refutability classification for $R\ge3$ (which signs, orderings and local rows can produce emptiness, model-free and under LCE) | O | construct feasible completions; counterexamples | §4.2 codes, tests |
 | R5 | P-R(c): any spanning tree of pairs reaches all directions; behaviour with lower-dimensional support | P (star); C (chain) [V7] | induction on tree leaves; support rank | step 4 |
 | R6 | When joint column restrictions in 2×C are strictly tighter than the best single one; ordinal cumulative version | C [V6] | LP geometry in the $(C-1)$-dimensional $t$-space | step 3 |

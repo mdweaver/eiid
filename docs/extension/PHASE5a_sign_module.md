@@ -257,7 +257,7 @@ $$\liminf_nP(\theta_0\in\mathrm{CI}_\cup)\ \ge\ 1-\alpha.$$
 *(b)*
 5. Let $l^*$ be a piece that holds at the truth: $s_{l^*}(\beta_0)+a^\top k_0\ge0$. [hypothesis; Def disjunction]
 6. On $\mathcal E$, which now includes every piece, $s_{l^*}(\beta_0)\le s_{l^*}(\hat\beta)+\hat k\hat\sigma_{l^*}$. So $\max_l(s_l(\hat\beta)+\hat k\hat\sigma_l)+a^\top k_0\ge0$. [Def $\mathcal E$; 5]
-7. For given data this is one linear row in $k$, and $k_0$ satisfies it on $\mathcal E$. Proceed as in steps 3. [6; (a)]
+7. For given data this is one linear row in $k$, and $k_0$ satisfies it on $\mathcal E$. Proceed as in step 3. [6; (a)]
 8. For W1/2×2 CR: §1.2(d) gives $D^{r*}\ge\min(ER^*,\gamma_rER^*)\iff\max(D^{r*}-ER^*,\ D^{r*}-\gamma_rER^*)\ge0$, and similarly for the upper side. Each piece is linear in $\beta$ apart from the common $\gamma_D^\top k$. [§1.3 steps 11–13; alg] ∎(b)
 
 *(c)*

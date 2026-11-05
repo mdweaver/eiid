@@ -102,6 +102,8 @@ which is affine in $(K_\text{pre},K_\text{post})$ (Lemma 2), so every item below
     * Options: (a) interval-valued $X_\text{pre}$ from age and mortality data, making EI with interval regressors (more partial identification); (b) explicit entry/exit rows; (c) a within-person target, which is a 3-way (veteran × pre-vote × post-vote) table with one-way margins, a multi-way Fréchet / transition problem.
     * Also: $T$ must use the same base as $X$ (yes votes / eligible men, with an abstain column), so the 2×2 becomes 2×3. R×C is needed here, not optional.
 
+*Consolidated module catalogue, layering matrix, build order and proof register: `PACKAGE_DESIGN.md` (Nov 2026).*
+
 ## Notes for implementation (Phase 4)
 
 * Items 1, 4–7, 9, 10, 12 and 17–23 keep everything as one LP: they add rows or variables to $Gk\le g$ (Prop. 7). That makes a single `constraints=` interface practical.

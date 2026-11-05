@@ -1,0 +1,58 @@
+V1  Monotone-EI identities under LCE (500 random 2x2 populations)
+    max |(D_ER-D)Var(X_N) - delta_W|            = 3.04e-16
+    max |(D_NM-D)Var(X)   + delta_B|            = 1.49e-16
+    max |dW/Var(X_N)+dB/Var(X)-(D_ER-D_NM)|     = 2.59e-14  (segment)
+    max |D-interval change after re-imposing JKST-implied (dW,dB) marginals| = 2.78e-16
+
+V2  2x2: Monotone-EI restrictions layered on JKST (2000 populations with non-empty JKST set)
+    restriction        tightens  redundant  empty  truth covered  median width ratio (non-empty)
+    dW true sign           1669        331      0     2000/2000       0.703
+    dB true sign           1777        223      0     2000/2000       0.665
+    CR (true)               846        214      0     1060/1060       0.688
+    dW wrong sign          1669          0    331        0/1669       0.349
+    dB wrong sign          1777          0    223        0/1777       0.371
+    (CR rows: only populations where CR is true; imposed as the union of both same-sign LPs,
+     i.e. the common sign is NOT assumed known.)
+
+V3  2x2 nesting of contextual-direction rows (2000 populations)
+    closed form delta_W = (a+b) w1 + a d1 verified in all populations (assert)
+    sign rows  =>  weighted-local rows      : 2000/2000
+    x* = a/(a+b) inside the composition hull: 2000/2000
+    ... and then weighted-local => delta_W>=0 : 2000/2000  (strictly stronger in 2000)
+    x* outside hull: delta_W>=0 => local in 0/0 (non-nested otherwise)
+    adversarial search (50,000 discrete designs): max hull violation of x* = 1.0e-06
+
+V4  3x2 sandwich lemma: in k-space the ordering normal for pair (r,s) at x equals minus the
+    weighted-local normal, and (between gap)+(weighted contextual term) = identified directional slope
+    max abs error over 200 populations x 30 points x 3 pairs = 5.55e-16
+
+V5  3x2, support = 2d (200 populations; true restrictions only; dim K = 3)
+    rank of imposed O    normals: rank 0: 56, rank 1: 0, rank 2: 77, rank 3: 67
+    rank of imposed L    normals: rank 0: 59, rank 1: 0, rank 2: 60, rank 3: 81
+    rank of imposed O+L  normals: rank 0: 56, rank 1: 0, rank 2: 77, rank 3: 67
+    DD-only set unbounded/empty in 0 populations (excluded)
+    rungs     group-rate targets tightened   truth covered   median width ratio vs DD
+    DD+O         414/600                      600/600        0.801
+    DD+L         382/600                      600/600        0.898
+    DD+O+L       418/600                      600/600        0.770
+
+V5  3x2, support = near-1d (200 populations; true restrictions only; dim K = 3)
+    rank of imposed O    normals: rank 0: 11, rank 1: 0, rank 2: 30, rank 3: 159
+    rank of imposed L    normals: rank 0: 8, rank 1: 0, rank 2: 28, rank 3: 164
+    rank of imposed O+L  normals: rank 0: 11, rank 1: 0, rank 2: 30, rank 3: 159
+    DD-only set unbounded/empty in 0 populations (excluded)
+    rungs     group-rate targets tightened   truth covered   median width ratio vs DD
+    DD+O         560/600                      600/600        0.612
+    DD+L         534/600                      600/600        0.747
+    DD+O+L       563/600                      600/600        0.472
+
+V6  2x3: true delta_W signs on all three columns jointly vs best single column (1000 populations)
+    joint strictly narrower than the best single-column restriction: 184/1000
+    truth covered by joint bound: 1000/1000;  median joint width / JKST width = 0.615
+
+V7  Rank of pairwise ordering / weighted-local functionals g_rs(x;K) = (Kx)_r - (Kx)_s
+    (binary outcome, full-dimensional composition support, 200 Dirichlet points)
+    R=3: dim K=3; one pair: 2; star tree: 3; chain tree: 3; all pairs: 3
+    R=4: dim K=6; one pair: 3; star tree: 6; chain tree: 6; all pairs: 6
+    R=5: dim K=10; one pair: 4; star tree: 10; chain tree: 10; all pairs: 10
+

@@ -76,64 +76,6 @@
   })
 }
 
-.rxc_restrictions <- function(res, rl, cl, groups) {
-  if (is.null(res)) return(NULL)
-  ri <- function(v) .rxc_index(v, rl); ci <- function(v) .rxc_index(v, cl)
-  gi <- function(v) if (is.null(v)) NULL else .rxc_index(as.character(v), groups)
-  out <- list()
-  if (!is.null(res$zeros)) out$zeros <- lapply(res$zeros, function(z)
-    list(row = ri(z[["row"]]), col = ci(z[["col"]]),
-         group = if ("group" %in% names(z)) gi(z[["group"]]) else NULL))
-  if (!is.null(res$order)) out$order <- lapply(res$order, function(o)
-    list(high = ri(o[["high"]]), low = ri(o[["low"]]), col = ci(o[["col"]])))
-  if (!is.null(res$sign)) out$sign <- lapply(res$sign, function(s)
-    list(row = ri(s[["row"]]), col = ci(s[["col"]]), from = ri(s[["from"]]), to = ri(s[["to"]]),
-         sign = sign(as.numeric(s[["sign"]]))))
-  if (!is.null(res$slope)) out$slope <- as.numeric(res$slope)
-  if (!is.null(res$linear)) out$linear <- lapply(res$linear, function(l) {
-    tm <- l$terms
-    m <- cbind(row = ri(tm$row), col = ci(tm$col), context = ri(tm$context), value = as.numeric(tm$value))
-    list(terms = m, rhs = as.numeric(l$rhs), group = gi(l$group))
-  })
-  if (!is.null(res$external)) out$external <- lapply(res$external, function(e) {
-    a <- if (is.matrix(e$target)) e$target else {
-      a <- matrix(0, length(rl), length(cl)); a[ri(e$target[1]), ci(e$target[2])] <- 1; a }
-    list(weights = a, lower = e$lower, upper = e$upper)
-  })
-  R <- length(rl)
-  ver <- function(v, allowed, what) {
-    v <- if (is.null(v)) "W1" else as.character(v)
-    if (!v %in% allowed) stop(what, ": version must be one of ", paste(allowed, collapse = ", "))
-    v
-  }
-  oth <- function(o, r, v, what) {
-    if (v != "pair") return(NULL)
-    if (is.null(o)) { if (R == 2) return(setdiff(1:2, r)) else stop(what, ": version \"pair\" needs 'other'") }
-    o <- ri(o); if (o == r) stop(what, ": 'other' must differ from 'row'")
-    o
-  }
-  if (!is.null(res$assoc)) out$assoc <- lapply(res$assoc, function(s) {
-    type <- as.character(s[["type"]])
-    if (length(type) != 1 || !type %in% c("dB", "dW")) stop("assoc: type must be \"dB\" or \"dW\"")
-    v <- ver(s[["version"]], if (type == "dB") c("W1", "pair") else c("W1", "W2"),
-             paste0("assoc (", type, ")"))
-    r <- ri(s[["row"]])
-    sg <- sign(as.numeric(if (is.null(s[["sign"]])) 1 else s[["sign"]]))
-    if (sg == 0) stop("assoc: sign must be +1 or -1")
-    list(type = type, version = v, row = r, col = ci(if (is.null(s[["col"]])) 1 else s[["col"]]),
-         sign = sg, other = oth(s[["other"]], r, v, "assoc"))
-  })
-  if (!is.null(res$cr)) out$cr <- lapply(res$cr, function(s) {
-    v <- ver(s[["version"]], c("W1", "W2", "pair"), "cr")
-    r <- ri(s[["row"]])
-    list(row = r, col = ci(if (is.null(s[["col"]])) 1 else s[["col"]]), version = v,
-         other = oth(s[["other"]], r, v, "cr"))
-  })
-  for (nm in setdiff(names(res), c("zeros", "order", "sign", "slope", "linear", "external", "assoc", "cr")))
-    warning("unknown restriction type '", nm, "' ignored")
-  out
-}
-
 #' Bounds for R x C ecological inference
 #'
 #' \code{eiBounds()} computes partial-identification bounds and confidence
@@ -307,6 +249,7 @@ eiBounds <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL,
                  table = est$table, jkst = est$jkst, tests = tst, notes = notes,
                  n_vertices = sum(sapply(st$vertices, nrow)), eta = eta,
                  setup = st, targets = tl, pieces = est$pieces,
+                 modules = .rxc_module_table(extra, rl, cll),
                  settings = list(ndraw = ndraw, nz_draw = nz_draw, range = range,
                                  union = union, weights = weights)),
             class = "eiRxC")
@@ -353,6 +296,10 @@ print.eiRxC <- function(x, digits = 3, ...) {
     if (any(!is.na(tb$estimate_gap_lower)) || any(!is.na(tb$ci_model_gap_lower)))
       cat("  'U' marks a union of two disjoint intervals (CR branches; use union = \"hull\" for the hull)\n")
     cat("  estimate is sharp for the regression (PHASE5a R3(b))\n")
+  }
+  if (!is.null(x$modules)) {
+    exp <- x$modules[!grepl("^proved", x$modules$proof_status), , drop = FALSE]
+    for (k in seq_len(nrow(exp))) cat(sprintf("  EXPERIMENTAL module %s: %s\n", exp$restriction[k], exp$proof_status[k]))
   }
   cat("\n  estimate:  estimated identified set for the model-implied rate (not a confidence interval)\n")
   cat("  ci_model:  CI for the rate implied by the model at the observed compositions\n")
@@ -500,42 +447,76 @@ print.eiLadder <- function(x, digits = 3, ...) {
   invisible(x)
 }
 
-#' Sensitivity to undetectable nonlinearity
+#' Sensitivity to undetectable nonlinearity, or to the slack on sign beliefs
 #'
-#' Recomputes the bounds of a fitted \code{eiRxC} object allowing average
-#' rates to depart from the linear model by up to \code{eta} (in probability
-#' units) in directions the data cannot detect (Phase 3, Proposition S1).
+#' Recomputes the bounds of a fitted \code{eiRxC} object along a dial.
+#' \code{dial = "eta"} (default) allows average rates to depart from the linear
+#' model by up to \code{eta} (in probability units) in directions the data
+#' cannot detect (Phase 3, Proposition S1). \code{dial = "slack"} relaxes the
+#' sign and contextual-reinforcement restrictions (\code{assoc}, \code{cr}):
+#' each association may have the "wrong" sign by up to \code{slack}, measured
+#' as an average within-unit gap (\eqn{\delta_B}) or an average slope in own
+#' share (\eqn{\delta_W}), in probability units. Bounds widen monotonically in
+#' either dial.
 #'
 #' @param object an \code{eiRxC} object.
-#' @param eta grid of values.
+#' @param eta grid of values of the dial.
 #' @param seed random seed.
-#' @return a data frame of bounds by \code{eta} and target (class \code{"eiSensitivity"}).
+#' @param dial \code{"eta"} or \code{"slack"}.
+#' @param modules for \code{dial = "slack"}: module names (e.g. \code{"cr[1]"},
+#'   \code{"assoc[2]"}; see \code{fit$modules}) whose slack is set; default all
+#'   \code{assoc} and \code{cr} modules.
+#' @return a data frame of bounds by dial value and target (class
+#'   \code{"eiSensitivity"}); the dial value is in column \code{eta} or \code{slack}.
 #' @export
-sensitivity <- function(object, eta = seq(0, 0.1, by = 0.01), seed = 1) {
-  st <- object$setup
+sensitivity <- function(object, eta = seq(0, 0.1, by = 0.01), seed = 1, dial = c("eta", "slack"),
+                        modules = NULL) {
+  dial <- match.arg(dial)
   res <- lapply(eta, function(e) {
     set.seed(seed)
-    tb <- .rxc_estimate(st, object$targets, alpha = object$alpha, ci = object$ci, fpc = object$fpc,
-                        eta = e, ndraw = object$settings$ndraw, nz_draw = object$settings$nz_draw,
-                        union = .rxc_union_setting(object))$table
-    tb$eta <- e
+    tb <- .rxc_dial_estimate(object, object$targets, dial, e, modules, ci = object$ci)$table
+    tb[[dial]] <- e
     tb
   })
   res <- do.call(rbind, res)
   class(res) <- c("eiSensitivity", "data.frame")
+  attr(res, "dial") <- dial
   res
 }
 
 .rxc_union_setting <- function(object) if (is.null(object$settings$union)) "pieces" else object$settings$union
 
+# set the slack of the sign / CR modules (all, or those named) to a common value
+.rxc_set_slack <- function(ex, value, modules = NULL) {
+  for (ty in c("assoc", "cr")) for (i in seq_along(ex[[ty]])) {
+    if (is.null(modules) || paste0(ty, "[", i, "]") %in% modules) ex[[ty]][[i]]$slack <- value
+  }
+  ex
+}
+
+# re-estimate a fit at one value of a dial
+.rxc_dial_estimate <- function(object, targets, dial, value, modules = NULL, ci = object$ci) {
+  st <- object$setup
+  eta <- object$eta
+  if (dial == "eta") eta <- value else {
+    if (!length(st$extra$assoc) && !length(st$extra$cr)) stop("dial = \"slack\" needs assoc or cr restrictions")
+    st$extra <- .rxc_set_slack(st$extra, value, modules)
+  }
+  .rxc_estimate(st, targets, alpha = object$alpha, ci = ci, fpc = object$fpc, eta = eta,
+                ndraw = object$settings$ndraw, nz_draw = object$settings$nz_draw,
+                union = .rxc_union_setting(object))
+}
+
 #' @export
 plot.eiSensitivity <- function(x, target = unique(x$target)[1], ...) {
   s <- x[x$target == target, ]
-  graphics::plot(s$eta, s$ci_actual_upper, type = "n", ylim = c(0, 1), xlab = "eta", ylab = "rate",
+  dial <- if (is.null(attr(x, "dial"))) "eta" else attr(x, "dial")
+  dv <- s[[dial]]
+  graphics::plot(dv, s$ci_actual_upper, type = "n", ylim = c(0, 1), xlab = dial, ylab = "rate",
                  main = target, ...)
-  graphics::polygon(c(s$eta, rev(s$eta)), c(s$dd_lower, rev(s$dd_upper)), col = "grey90", border = NA)
-  graphics::lines(s$eta, s$ci_actual_lower, lty = 2); graphics::lines(s$eta, s$ci_actual_upper, lty = 2)
-  graphics::lines(s$eta, s$estimate_lower, lwd = 2); graphics::lines(s$eta, s$estimate_upper, lwd = 2)
+  graphics::polygon(c(dv, rev(dv)), c(s$dd_lower, rev(s$dd_upper)), col = "grey90", border = NA)
+  graphics::lines(dv, s$ci_actual_lower, lty = 2); graphics::lines(dv, s$ci_actual_upper, lty = 2)
+  graphics::lines(dv, s$estimate_lower, lwd = 2); graphics::lines(dv, s$estimate_upper, lwd = 2)
   graphics::legend("topright", c("estimate", "CI actual", "Duncan-Davis"), lwd = c(2, 1, 8),
                    lty = c(1, 2, 1), col = c("black", "black", "grey90"), bty = "n", cex = 0.8)
   invisible(x)
@@ -543,9 +524,12 @@ plot.eiSensitivity <- function(x, target = unique(x$target)[1], ...) {
 
 #' Breakdown value of a conclusion
 #'
-#' The largest \code{eta} (undetectable departure from linear contextual
-#' effects) for which a conclusion of the form "target > threshold" (or
-#' "target < threshold") still holds for every value in the chosen interval.
+#' The largest value of a dial for which a conclusion of the form "target >
+#' threshold" (or "target < threshold") still holds for every value in the
+#' chosen interval. With \code{dial = "eta"} the dial is the undetectable
+#' departure from linear contextual effects; with \code{dial = "slack"} it is
+#' the slack on the sign / contextual-reinforcement beliefs (see
+#' \code{sensitivity()}), the natural dial for beliefs the data cannot refute.
 #'
 #' @param object an \code{eiRxC} object.
 #' @param target name of a target in \code{object$table}.
@@ -555,26 +539,27 @@ plot.eiSensitivity <- function(x, target = unique(x$target)[1], ...) {
 #' @param max_eta upper end of the search.
 #' @param tol tolerance of the bisection.
 #' @param seed random seed.
-#' @return the breakdown value (0 if the conclusion fails already at eta = 0).
+#' @param dial \code{"eta"} or \code{"slack"}.
+#' @param modules for \code{dial = "slack"}: modules whose slack is varied (default all sign / CR modules).
+#' @return the breakdown value (0 if the conclusion fails already at 0).
 #' @export
 breakdown <- function(object, target, threshold, direction = c("above", "below"),
                       which = c("ci_actual", "ci_model", "estimate"), max_eta = 0.5,
-                      tol = 1e-3, seed = 1) {
-  direction <- match.arg(direction); which <- match.arg(which)
-  st <- object$setup
+                      tol = 1e-3, seed = 1, dial = c("eta", "slack"), modules = NULL) {
+  direction <- match.arg(direction); which <- match.arg(which); dial <- match.arg(dial)
   tl <- object$targets[target]
   holds <- function(e) {
     set.seed(seed)
-    tb <- .rxc_estimate(st, tl, alpha = object$alpha, ci = if (which == "estimate") "none" else object$ci,
-                        fpc = object$fpc, eta = e, ndraw = object$settings$ndraw,
-                        nz_draw = object$settings$nz_draw, union = .rxc_union_setting(object))$table
+    tb <- .rxc_dial_estimate(object, tl, dial, e, modules,
+                             ci = if (which == "estimate") "none" else object$ci)$table
     lo <- tb[[paste0(which, "_lower")]]; hi <- tb[[paste0(which, "_upper")]]
     if (is.na(lo) || isTRUE(tb$empty)) return(FALSE)
     # with a CR union the hull is used: a conclusion holds only if every piece satisfies it
     if (direction == "above") lo > threshold else hi < threshold
   }
-  if (!holds(0)) return(0)
-  lo <- 0; hi <- max_eta
+  base <- 0
+  if (!holds(base)) return(0)
+  lo <- base; hi <- max_eta
   if (holds(hi)) return(hi)
   while (hi - lo > tol) {
     mid <- (lo + hi) / 2

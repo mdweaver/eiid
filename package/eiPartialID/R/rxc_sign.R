@@ -59,6 +59,24 @@
   .rxc_mlin(st, c, .rxc_assoc_W(st, type, version, r, other))
 }
 
+# Positive design-only scale that turns an association into probability units:
+# delta_B / scale = average within-unit rate gap (weights p_i X_ir X_is);
+# delta_W / scale = average within-group slope of the rate on X_r (W1: groups r and
+# not-r; W2: every group), i.e. sum_g mu_g Cov_g(m_g, X_r) / sum_g mu_g Var_g(X_r).
+# The slack dial (S9) relaxes sign * delta >= 0 to sign * delta >= -slack * scale.
+.rxc_assoc_scale <- function(st, type, version = "W1", r, other = NULL) {
+  X <- st$X; p <- st$N / sum(st$N); R <- st$R; xr <- unname(X[, r])
+  mu <- unname(colSums(p * X))
+  wvar <- function(w) { w <- w / sum(w); sum(w * xr^2) - sum(w * xr)^2 }
+  if (type == "dB") {
+    oth <- if (version == "pair") other else setdiff(seq_len(R), r)
+    return(sum(p * xr * rowSums(X[, oth, drop = FALSE])))
+  }
+  if (version == "W1")
+    return(mu[r] * wvar(p * xr) + (1 - mu[r]) * wvar(p * (1 - xr)))
+  sum(vapply(seq_len(R), function(g) mu[g] * wvar(p * X[, g]), 0))
+}
+
 # design quantities for row r: mu_r, Var_p(X_r), gamma_r
 .rxc_design_r <- function(st, r) {
   p <- st$N / sum(st$N); xr <- st$X[, r]
@@ -103,21 +121,29 @@
   lapply(seq_along(ex$cr), function(i) {
     cr <- ex$cr[[i]]
     pr <- .rxc_cr_pair(st, cr)
+    sl <- if (is.null(cr$slack)) 0 else cr$slack
+    # slack (S9): branch + is {g_B >= -eta s_B, g_W >= -eta s_W}, branch - is {g_B <= eta s_B, g_W <= eta s_W}
+    sB <- .rxc_assoc_scale(st, "dB", if (cr$version == "pair") "pair" else "W1", cr$row, cr$other)
+    sW <- .rxc_assoc_scale(st, "dW", if (cr$version == "W1") "W1" else "W2", cr$row)
+    plus <- .rxc_rows(list(pr$gB, pr$gW), 1); plus$s0 <- plus$s0 + sl * c(sB, sW)
+    minus <- .rxc_rows(list(pr$gB, pr$gW), -1); minus$s0 <- minus$s0 + sl * c(sB, sW)
     out <- list(module = paste0("cr[", i, "]"), spec = cr,
-                gB = pr$gB, gW = pr$gW,
-                plus = .rxc_rows(list(pr$gB, pr$gW), 1),
-                minus = .rxc_rows(list(pr$gB, pr$gW), -1), slab = NULL)
+                gB = pr$gB, gW = pr$gW, plus = plus, minus = minus, slab = NULL)
     if (cr$version == "W1") {
       # slab D in hull{gamma ER, ER}: lower max(D - ER, D - gamma ER) >= 0,
-      # upper max(ER - D, gamma ER - D) >= 0 (R10(b)); pieces share the k-normal
+      # upper max(ER - D, gamma ER - D) >= 0 (R10(b)); pieces share the k-normal.
+      # With slack: branch + is D in [NM - a, ER + b], branch - is D in [ER - b, NM + a],
+      # a = eta s_B / (mu(1-mu)), b = eta s_W / Var(X_r); two non-empty branches always
+      # intersect, so the union is [min(NM - a, ER - b), max(ER + b, NM + a)] (PHASE5a §5.2)
       dz <- .rxc_design_r(st, cr$row)
       D <- .rxc_assoc_form(st, "D", "W1", cr$row, cr$col)
       ER <- .rxc_ER_form(st, cr$row, cr$col)
       gm <- dz$gamma
+      aa <- sl * sB / (dz$mu * (1 - dz$mu)); bb <- sl * sW / dz$var
       lo <- list(S = rbind(D$coef - ER$coef, D$coef - gm * ER$coef),
-                 s0 = c(D$const - ER$const, D$const - gm * ER$const), a = D$a)
+                 s0 = c(D$const - ER$const + bb, D$const - gm * ER$const + aa), a = D$a)
       up <- list(S = rbind(ER$coef - D$coef, gm * ER$coef - D$coef),
-                 s0 = c(ER$const - D$const, gm * ER$const - D$const), a = -D$a)
+                 s0 = c(ER$const - D$const + bb, gm * ER$const - D$const + aa), a = -D$a)
       out$slab <- list(lo, up)
       out$D <- D; out$ER <- ER; out$gamma <- gm
     }
@@ -244,7 +270,8 @@
     if (a$version == "W2") sprintf("Delta_W(%s) [W2]", rl[a$row])
     else sprintf("delta_W(%s vs rest)", rl[a$row])
   }
-  sprintf("%s for '%s' %s 0", nm, cl[a$col], if (a$sign > 0) ">=" else "<=")
+  sl <- if (is.null(a$slack) || a$slack == 0) "" else sprintf(" (slack %g)", a$slack)
+  sprintf("%s for '%s' %s 0%s", nm, cl[a$col], if (a$sign > 0) ">=" else "<=", sl)
 }
 
 .rxc_cr_label <- function(cr, rl, cl) {
@@ -252,20 +279,8 @@
                W1 = sprintf("delta_B(%s vs rest), delta_W(%s vs rest)", rl[cr$row], rl[cr$row]),
                W2 = sprintf("delta_B(%s vs rest), Delta_W(%s) [W2]", rl[cr$row], rl[cr$row]),
                pair = sprintf("delta_B(%s, %s), Delta_W(%s) [W2]", rl[cr$row], rl[cr$other], rl[cr$row]))
-  sprintf("CR for '%s': same sign of %s", cl[cr$col], pr)
-}
-
-.rxc_module_labels <- function(ex, rl, cl) {
-  out <- character(0)
-  for (i in seq_along(ex$zeros)) out[paste0("zeros[", i, "]")] <- sprintf("structural zero %s -> %s", rl[ex$zeros[[i]]$row], cl[ex$zeros[[i]]$col])
-  for (i in seq_along(ex$order)) out[paste0("order[", i, "]")] <- sprintf("ordering %s >= %s for '%s'", rl[ex$order[[i]]$high], rl[ex$order[[i]]$low], cl[ex$order[[i]]$col])
-  for (i in seq_along(ex$sign)) out[paste0("sign[", i, "]")] <- sprintf("contextual-effect sign (row %s, col %s)", rl[ex$sign[[i]]$row], cl[ex$sign[[i]]$col])
-  if (!is.null(ex$slope)) out["slope"] <- sprintf("bounded slopes (%g)", ex$slope)
-  for (i in seq_along(ex$linear)) out[paste0("linear[", i, "]")] <- sprintf("linear restriction %d", i)
-  for (i in seq_along(ex$external)) out[paste0("external[", i, "]")] <- sprintf("external benchmark %d", i)
-  for (i in seq_along(ex$assoc)) out[paste0("assoc[", i, "]")] <- .rxc_assoc_label(ex$assoc[[i]], rl, cl)
-  for (i in seq_along(ex$cr)) out[paste0("cr[", i, "]")] <- .rxc_cr_label(ex$cr[[i]], rl, cl)
-  out
+  sl <- if (is.null(cr$slack) || cr$slack == 0) "" else sprintf(" (slack %g)", cr$slack)
+  sprintf("CR for '%s': same sign of %s%s", cl[cr$col], pr, sl)
 }
 
 # ---------------------------------------------------------------------------
@@ -426,7 +441,8 @@
   }
   rows <- lapply(items, function(it) {
     f <- .rxc_assoc_form(st0, it$type, it$v, it$r, it$c, it$other)
-    tg <- list(cvec = f$coef, c0 = f$const, gamma = f$a)
+    sc <- .rxc_assoc_scale(st0, it$type, it$v, it$r, it$other)      # report in probability units
+    tg <- list(cvec = f$coef / sc, c0 = f$const / sc, gamma = f$a / sc)
     pl <- .rxc_plugin(cons0, tg, st0$beta)
     lo <- hi <- NA_real_
     if (!isTRUE(pl$empty) && !isTRUE(pl$unbounded)) { lo <- pl$lower; hi <- pl$upper }
@@ -435,7 +451,8 @@
     if (ci == "conservative") { cc <- .rxc_ci_conservative(st0, cons0, tg, alpha, Zs)$ci; cil <- cc[1]; ciu <- cc[2] }
     sgn <- function(l, u) if (is.na(l) || is.na(u) || l > u) NA_character_ else
       if (l > 0) "positive" else if (u < 0) "negative" else "undetermined"
-    data.frame(association = it$nm, column = cl[it$c], lower = lo, upper = hi,
+    data.frame(association = it$nm, column = cl[it$c],
+               scale = if (it$type == "dB") "average gap" else "average slope", lower = lo, upper = hi,
                ci_lower = cil, ci_upper = ciu, sign_point = sgn(lo, hi), sign_ci = sgn(cil, ciu),
                stringsAsFactors = FALSE)
   })
@@ -573,7 +590,8 @@ print.eiRedundancy <- function(x, digits = 3, ...) {
     cat("\n")
   }
   if (!is.null(x$implied)) {
-    cat("Associations under the rung alone (signs already implied by the data + rung)\n")
+    cat("Associations under the rung alone (signs already implied by the data + rung),\n")
+    cat("in probability units: average within-unit gap (delta_B) or average slope in own share (delta_W)\n")
     print(r(x$implied), row.names = FALSE, right = FALSE)
     cat("\n")
   }

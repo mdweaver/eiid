@@ -2,22 +2,41 @@
 % Please edit documentation in R/rxc_api.R
 \name{sensitivity}
 \alias{sensitivity}
-\title{Sensitivity to undetectable nonlinearity}
+\title{Sensitivity to undetectable nonlinearity, or to the slack on sign beliefs}
 \usage{
-sensitivity(object, eta = seq(0, 0.1, by = 0.01), seed = 1)
+sensitivity(
+  object,
+  eta = seq(0, 0.1, by = 0.01),
+  seed = 1,
+  dial = c("eta", "slack"),
+  modules = NULL
+)
 }
 \arguments{
 \item{object}{an \code{eiRxC} object.}
 
-\item{eta}{grid of values.}
+\item{eta}{grid of values of the dial.}
 
 \item{seed}{random seed.}
+
+\item{dial}{\code{"eta"} or \code{"slack"}.}
+
+\item{modules}{for \code{dial = "slack"}: module names (e.g. \code{"cr[1]"},
+\code{"assoc[2]"}; see \code{fit$modules}) whose slack is set; default all
+\code{assoc} and \code{cr} modules.}
 }
 \value{
-a data frame of bounds by \code{eta} and target (class \code{"eiSensitivity"}).
+a data frame of bounds by dial value and target (class
+  \code{"eiSensitivity"}); the dial value is in column \code{eta} or \code{slack}.
 }
 \description{
-Recomputes the bounds of a fitted \code{eiRxC} object allowing average
-rates to depart from the linear model by up to \code{eta} (in probability
-units) in directions the data cannot detect (Phase 3, Proposition S1).
+Recomputes the bounds of a fitted \code{eiRxC} object along a dial.
+\code{dial = "eta"} (default) allows average rates to depart from the linear
+model by up to \code{eta} (in probability units) in directions the data
+cannot detect (Phase 3, Proposition S1). \code{dial = "slack"} relaxes the
+sign and contextual-reinforcement restrictions (\code{assoc}, \code{cr}):
+each association may have the "wrong" sign by up to \code{slack}, measured
+as an average within-unit gap (\eqn{\delta_B}) or an average slope in own
+share (\eqn{\delta_W}), in probability units. Bounds widen monotonically in
+either dial.
 }

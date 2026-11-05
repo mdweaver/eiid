@@ -12,7 +12,9 @@ breakdown(
   which = c("ci_actual", "ci_model", "estimate"),
   max_eta = 0.5,
   tol = 0.001,
-  seed = 1
+  seed = 1,
+  dial = c("eta", "slack"),
+  modules = NULL
 )
 }
 \arguments{
@@ -31,12 +33,19 @@ breakdown(
 \item{tol}{tolerance of the bisection.}
 
 \item{seed}{random seed.}
+
+\item{dial}{\code{"eta"} or \code{"slack"}.}
+
+\item{modules}{for \code{dial = "slack"}: modules whose slack is varied (default all sign / CR modules).}
 }
 \value{
-the breakdown value (0 if the conclusion fails already at eta = 0).
+the breakdown value (0 if the conclusion fails already at 0).
 }
 \description{
-The largest \code{eta} (undetectable departure from linear contextual
-effects) for which a conclusion of the form "target > threshold" (or
-"target < threshold") still holds for every value in the chosen interval.
+The largest value of a dial for which a conclusion of the form "target >
+threshold" (or "target < threshold") still holds for every value in the
+chosen interval. With \code{dial = "eta"} the dial is the undetectable
+departure from linear contextual effects; with \code{dial = "slack"} it is
+the slack on the sign / contextual-reinforcement beliefs (see
+\code{sensitivity()}), the natural dial for beliefs the data cannot refute.
 }

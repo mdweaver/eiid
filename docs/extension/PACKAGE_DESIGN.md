@@ -393,7 +393,7 @@ Status: **P** proved · **C** checked numerically · **J** conjecture · **O** o
 | ID | Claim | Status | Strategy / check | Blocks |
 |---|---|---|---|---|
 | R1 | C1: $x^*\in$ hull (2×2), hence weighted-local ⇒ $\delta_W\ge0$ under LCE | J (C [V3]) | pairwise variance representation plus a cancellation argument; try two-point designs first | the M-LOC ⇒ SIGN-W cell |
-| R2 | An added row strictly tightens $\varphi$'s interval iff it cuts every optimal face of the current LP (in practice: its dual is positive at all optima); 2×2 closed form = G2 | P for 2×2 (G2); O in general | LP duality / degeneracy cases | redundancy diagnostic |
+| R2 | An added restriction moves an endpoint iff it removes the whole optimal face (one feasibility LP); for one row, iff every optimal dual is positive (a solver's dual alone does not certify); implied ⇔ tightens no target; 2×2 closed form = G2 | **P** (5a §2; `verify_R2.py`; independent review pending) | — | redundancy diagnostic |
 | R3 | LCE ∩ any closed convex restriction on $k$ is sharp for the model-implied target; CR is a union, a single slab for W1/2×2, and may have a gap otherwise | **P** (5a §1; `verify_R3.py`; independent review pending) | — | M-SIGN reporting |
 | R4 | Refutability classification for $R\ge3$ (which signs, orderings and local rows can produce emptiness, model-free and under LCE) | O | construct feasible completions; counterexamples | §4.2 codes, tests |
 | R5 | P-R(c): any spanning tree of pairs reaches all directions; behaviour with lower-dimensional support | P (star); C (chain) [V7] | induction on tree leaves; support rank | step 4 |

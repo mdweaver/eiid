@@ -1,6 +1,13 @@
 # Phase 5a: the sign module (M-SIGN), proofs for build step 1
 
-*Proof-register items R3, R2 and R10-union from `PACKAGE_DESIGN.md` §8. Notation and justification tags follow 2a §0.3, 2c §0.3 and P3 §0.3. Each item ends with its numerical check. Status: R3 written and checked (this file, §1); R2 and R10-union to follow.*
+*Proof-register items R3, R2 and R10-union from `PACKAGE_DESIGN.md` §8. Notation and justification tags follow 2a §0.3, 2c §0.3 and P3 §0.3. Each item ends with its numerical check. Status: R3 (§1) and R2 (§2) written and checked; R10-union to follow.*
+
+*Extra tags used here:*
+
+| Tag | Meaning |
+|---|---|
+| [Weier] | a continuous function on a nonempty compact set attains its maximum |
+| [pert] | for an LP, the perturbation function $v(\beta)=\max\{\varphi(k):k\in F,\ a^\top k\le\beta\}$ is concave and nondecreasing on its domain. Its superdifferential at $\beta$ is the set of optimal dual multipliers of the row $a^\top k\le\beta$, and for a concave function on $\mathbb R$ it is $[v'_+(\beta),v'_-(\beta)]$ (Rockafellar 1970, Thms 23.2, 24.1, 29.1†; Bertsimas & Tsitsiklis 1997, §5.2†) |
 
 ---
 
@@ -106,3 +113,93 @@ where $NM^{r*}$ is the neighbourhood gap computed from $\tau$. [2c L M1(c); 2a L
    * runs the certificate LP;
    * if the certificate fails, solves both branches and reports both intervals when they are disjoint.
 4. Emptiness messages always name the *combination* (LCE + restriction) that has been refuted.
+
+---
+
+## 2. R2: when does an added restriction tighten the bound?
+
+### 2.1 Setting
+
+* $F=\{k:Gk\le g\}$ is the current feasible set: the rung, plus any rows already imposed. It is nonempty and compact (R3; 2a L3(b)).
+* $\varphi(k)=\varphi_0+\gamma^\top k$ is a linear target, with $U=\max_F\varphi$, $L=\min_F\varphi$, and optimal faces $F^*_U=\arg\max_F\varphi$ and $F^*_L=\arg\min_F\varphi$.
+* $N$ is the added restriction: an admissible set as in §1.1, closed and convex, with $F\cap N\ne\emptyset$. $U_N$ and $L_N$ are the endpoints after adding it.
+* Three possible verdicts for $N$ relative to $F$:
+  * **implied:** $F\subseteq N$;
+  * **cuts the set only:** $F\not\subseteq N$, but $[L_N,U_N]=[L,U]$ for the target in question;
+  * **tightens the target:** $[L_N,U_N]\subsetneq[L,U]$.
+
+### 2.2 Statement
+
+**Proposition R2.**
+
+(a) **Face criterion.** $U_N<U$ iff $F^*_U\cap N=\emptyset$, and $L_N>L$ iff $F^*_L\cap N=\emptyset$. Each is one feasibility LP when $N$ is polyhedral. In words: the restriction moves an endpoint iff it removes *every* point that attains that endpoint.
+
+(b) **One row $a^\top k\le b$.** $U_N<U$ iff $\min_{F^*_U}a^\top k>b$. This is also equivalent to: every optimal dual multiplier of the new row is $>0$ (that is, $v'_+(b)>0$).
+* A positive multiplier returned by the solver at *one* optimum does **not** certify tightening.
+* A zero multiplier, or a row that is slack at an optimum, certifies that the row does not tighten.
+* "Active" (the row holds with equality at the optimum) does **not** mean "tightening".
+
+(c) **Implied = useless for every target.** $N$ is implied iff it tightens no linear target. For a row $a^\top k\le b$, it is implied iff $\max_Fa^\top k\le b$, and when it is not implied the target $\varphi=a^\top k$ is a witness that tightens. So the "already implied" table answers "can this assumption buy anything at all?". Whether it buys something *for your target* is a separate question, answered by (a).
+
+(d) **$2\times2$ under LCE.** $k=w_1$ is scalar and $\tilde D$ is strictly monotone in $w_1$ (when $\gamma<1$).
+* Each of the four sign rows is either implied or tightens $\tilde D$; the middle verdict cannot occur.
+* The closed forms are those of G2:
+  * $\delta^*_W\ge0$: $[L_J,\min(U_J,ER^*)]$; implied iff $ER^*\ge U_J$; empty iff $ER^*<L_J$.
+  * $\delta^*_W\le0$: $[\max(L_J,ER^*),U_J]$.
+  * $\delta^*_B\ge0$: $[\max(L_J,NM^*),U_J]$.
+  * $\delta^*_B\le0$: $[L_J,\min(U_J,NM^*)]$.
+
+  Here $ER^*$ and $NM^*$ are computed from $\tau$ (§1.2(d)), and $[L_J,U_J]$ is the JKST interval for $\tilde D$.
+
+(e) **Several rows.** For $N=\bigcap_jN_j$, (a) applies to $N$ as a whole. A row's contribution depends on what is already imposed.
+* The package reports, for each row:
+  * its gain when added first (to the rung alone);
+  * its gain when added last (dropped from the full stack).
+* A row whose last-added gain is zero is redundant *given the others*, even if it tightens on its own.
+
+### 2.3 Proof
+
+*(a)*
+1. $F\cap N\subseteq F$, so $U_N\le U$. [nest]
+2. If $k\in F^*_U\cap N$, then $U_N\ge\varphi(k)=U$. So $U_N=U$. [Def; 1]
+3. If $F^*_U\cap N=\emptyset$: $F\cap N$ is nonempty and compact, so $\varphi$ attains $U_N$ at some $k'\in F\cap N$. Since $k'\notin F^*_U$, $\varphi(k')<U$. [C1; compact; Weier; Def $F^*_U$]
+4. The lower endpoint is the same argument applied to $-\varphi$. If $N=\{Mk\le m\}$, then $F^*_U\cap N=\{Gk\le g,\ \gamma^\top k\ge U,\ Mk\le m\}$ is a feasibility LP. [sym; Def] ∎(a)
+
+*(b)*
+5. $F^*_U$ is a nonempty compact face of $F$, so $\beta^*:=\min_{F^*_U}a^\top k$ is attained, and $F^*_U\cap\{a^\top k\le b\}=\emptyset$ iff $\beta^*>b$. The first claim follows from (a). [Weier; 4]
+6. Let $v(\beta)$ be the perturbation function. Then $v(\beta)=U$ for $\beta\ge\beta^*$, by (a) applied at $\beta$, and $v(\beta)<U$ for $\beta<\beta^*$. [(a); Def $v$]
+7. If $b\ge\beta^*$, $v$ is constant on $[b,\infty)$, so $v'_+(b)=0$ and $0$ is an optimal multiplier. [6; pert]
+8. If $b<\beta^*$: by concavity, $v'_+(b)\ge(v(\beta^*)-v(b))/(\beta^*-b)>0$. So every optimal multiplier, which lies in $[v'_+(b),v'_-(b)]$, is positive. [pert; 6]
+9. A solver returns *one* multiplier from $\partial v(b)$, and when $\partial v(b)=[0,\lambda]$ with $\lambda>0$ it may return a positive one even though the row does not tighten. This is the degenerate case of a row through an optimal vertex: it is active, but it removes nothing at the optimum (T1). A slack row at some optimum $k$ has $k\in F^*_U\cap N$, so by 2 it does not tighten. [pert; 2] ∎(b)
+
+*(c)*
+10. If $F\subseteq N$, then $F\cap N=F$, and no target changes. [Def]
+11. If $a^\top k\le b$ is not implied, then $\max_Fa^\top k>b$. For $\varphi=a^\top k$, $U_N\le b<U$. [Def; 1] ∎(c)
+
+*(d)*
+12. By 2c M3 / §1.2(d) with $R=2$: $\delta^*_W=\operatorname{Var}_p(X)(ER^*-\tilde D)$ and $\delta^*_B=\mu(1-\mu)(\tilde D-NM^*)$, with $\tilde D$ affine and non-constant in $w_1$. [§1.3 step 11; G2 step 3]
+13. Each sign row is therefore a half-line in $\tilde D$, and $F$ maps to $[L_J,U_J]$. Intersecting gives the closed forms. [12; R3(a)]
+14. Since $\tilde D$ is a bijection between $F$ and $[L_J,U_J]$, cutting $F$ means cutting $[L_J,U_J]$. So "cuts the set only" is impossible for $\tilde D$, and also for any target that is non-constant in $w_1$. [12; bij] ∎(d)
+
+*(e)* This is (a) applied to $N$ and to each sub-stack. Order dependence follows from (a), since $F^*_U$ changes as rows are added. ∎
+
+### 2.4 Numerical check (`verify_R2.py`, output `verify_R2_output.txt`)
+
+| Check | Result |
+|---|---|
+| T1: face test vs brute force. 3×2 LCE base, random targets; 400 random rows and 400 rows through the solver's optimal vertex | agree 800/800. Of the 400 active-but-redundant rows, the solver reported a **positive dual in 133** |
+| T2: implied ⇔ the witness target $a^\top k$ does not tighten | 333/333 |
+| T3: 2×2, four sign rows, 2000 designs | closed forms = LP (error $1.7\times10^{-14}$); not implied ⇔ tightens $\tilde D$ in 7409/7409; "cuts set only" 0 |
+| T4: 3×2, true-sign rows on $\delta^{0*}_B$ and $\delta^{0*}_W$, targets $\tilde B_0,\tilde B_1,\tilde B_2$ (1794 cases) | implied 8%; **cuts set but not this target 28%**; tightens 64% |
+
+### 2.5 Consequences for the package
+
+1. **The redundancy diagnostic uses the face test, not solver duals.** For each added module and each reported target, the package runs one feasibility LP per endpoint. Dual values are shown only as supplementary sensitivity information.
+2. **Three verdicts per module, reported separately:**
+   * "already implied by the data and the rung" (target-free; the "already implied" table);
+   * "narrows the set but not this quantity";
+   * "narrows this quantity by X".
+
+   In $2\times2$ the middle verdict cannot occur. With three or more groups it is common (T4: 28%).
+3. **Added-first and added-last gains** are reported for stacks, so users can see which beliefs are doing the work.
+4. **Statistical caveat (feeds R10).** In samples, "implied" and "tightens" are estimated sharp-edged verdicts. Near a tie (e.g. $ER^*\approx U_J$), report the width change with its confidence interval rather than a binary verdict. A one-sided test of $\max_Fa^\top k\le b$ is an LP-value test of the kind P3 Thm 5 already covers.

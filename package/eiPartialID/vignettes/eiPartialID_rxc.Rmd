@@ -132,6 +132,81 @@ eiBounds(data = senc2, rows = c("white", "black"), cols = c("dem", "rep", "non")
 `zeros` fixes structural zeros, e.g. a party that did not run. `linear` takes
 any linear restriction on the contextual-effect matrices.
 
+## Signs on associations and contextual reinforcement
+
+Two kinds of "monotone EI" belief (Elzayn et al., *Monotone Ecological
+Inference*) can be added to the linear-contextual-effects rungs as extra rows:
+
+* the **between** association $\delta_B$: within the same unit, group $r$ is
+  on average more (or less) likely than the rest to choose column $c$;
+* the **within** (contextual) association $\delta_W$: group rates rise (or
+  fall) on average with the group's own share of the unit;
+* **contextual reinforcement (CR)**: $\delta_B$ and $\delta_W$ have the same
+  sign, without saying which.
+
+All three are model-implied means with design weights $N_i$. A sign is one
+linear row; CR is a union of two branches. With the one-vs-rest version (`"W1"`,
+the default, and every 2 x 2 table) CR is a single slab
+$D^r \in [\gamma_r ER^r, ER^r]$, so it stays one LP. The other pairings (`"W2"`,
+`"pair"`) can give **two disjoint intervals**; they are printed as
+`[a, b] U [c, d]` (use `union = "hull"` for the hull).
+
+```{r sign}
+set.seed(2)
+n <- 200
+x <- pmin(pmax(rbeta(n, 2, 2) * 0.8 + 0.1, 0.02), 0.98)
+m0 <- 0.40 + 0.20 * x; m1 <- 0.55 + 0.05 * x          # linear means, CR holds
+t <- (1 - x) * rbeta(n, m0 * 15, (1 - m0) * 15) + x * rbeta(n, m1 * 15, (1 - m1) * 15)
+N <- sample(300:3000, n, replace = TRUE)
+gap <- list(gap = matrix(c(1, -1, 0, 0), 2, 2))      # B(X -> T) - B(notX -> T)
+jkst <- eiBounds(x = x, t = t, n = N, targets = gap, seed = 1)   # linear rung alone
+jkst$table[, c("estimate_lower", "estimate_upper", "ci_model_lower", "ci_model_upper")]
+cr <- eiBounds(x = x, t = t, n = N, targets = gap, seed = 1,
+               restrictions = list(cr = list(list(row = 1, col = 1))))
+cr
+dW <- eiBounds(x = x, t = t, n = N, targets = gap, seed = 1,
+               restrictions = list(assoc = list(list(type = "dW", row = 1, col = 1, sign = 1))))
+dW$table[, c("estimate_lower", "estimate_upper", "ci_model_lower", "ci_model_upper")]
+```
+
+`eiRedundancy()` (stored in `$sign` when sign or CR restrictions are given)
+reports, for each restriction and target, whether it is already implied by the
+data and the rung, cuts the set but not this quantity, or narrows this
+quantity, with the gain when added first and when added last. The verdict uses
+a face test (one LP per endpoint), never solver dual values. It also shows the
+associations' intervals under the rung alone and the EGGHM quantities
+$\widehat{ER}$, $\widehat{NM} = \gamma\widehat{ER}$ and $\gamma$:
+
+```{r sign2}
+cr$sign$descriptive
+cr$sign$verdicts[, c("restriction", "verdict_first", "gain_first")]
+```
+
+How to read and report these:
+
+* **The estimate is sharp for the regression.** Under the linear rung plus
+  sign rows, the LP interval is exactly the set of values consistent with the
+  fitted regression and the beliefs (PHASE5a R3).
+* **What the data can and cannot check.** A sign on $\delta_W$ can be refuted
+  by aggregate data. With two groups, a sign on $\delta_B$ and CR can never be
+  refuted by aggregates on their own: an empty set refutes their combination
+  with the linear rung, and messages name the whole combination. Their
+  credibility rests on substantive argument or individual-level data.
+* **They can buy a lot.** In the PHASE5a Monte Carlo (2 x 2, truth on the CR
+  edge) the CR interval had median width 0.36 against 1.1 for the linear rung
+  alone, with coverage 0.99.
+* **Never intersect the estimated bracket $[\gamma\widehat{ER}, \widehat{ER}]$
+  with a confidence interval.** Treating the estimated bracket as known
+  under-covers (about 0.90 at the CR edge, and it does not improve with $n$).
+  The package inflates every piece instead: the conservative CI inflates each
+  piece of the slab before taking the maximum; the CLR CI (default) takes the
+  union of the two branch CIs, each at the full level.
+* Our $\widehat{ER}$ uses the fitted $E[T \mid X]$; it equals the EGGHM
+  $T$-based $\widehat{ER}$ when `weights = "n"`.
+
+`ladder()` takes sign and CR rungs through `sign_rungs`, e.g.
+`sign_rungs = list("M0 + CR" = list(restrictions = list(cr = list(list(row = 1, col = 1)))))`.
+
 ## Sensitivity and breakdown
 
 ```{r sens}

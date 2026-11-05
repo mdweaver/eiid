@@ -336,3 +336,45 @@ A fresh-session adversarial review of §§1–3 and the three scripts. Verdicts:
 
 Numerical re-checks by the reviewer: the identities in R3 step 11 hold for every $r$ to $1.5\times10^{-16}$; the S5 holes are genuine; the T4 28% "cuts set only" rate is not a tolerance artefact (shallowest cut $3.8\times10^{-6}$); `verify_R10.py` reproduces exactly.
 
+
+---
+
+## 5. Implementation status (build step 1, branch `claude/msign-build`)
+
+**Implemented** (`package/eiPartialID`):
+
+| Spec item | Where | Notes |
+|---|---|---|
+| Sign rows on $\delta_B$ (W1, pairwise) and $\delta_W$ (W1, W2 $=\Delta_r$), §1.6.1, R10(a) | `R/rxc_sign.R` (`.rxc_mlin`, `.rxc_assoc_W`, `.rxc_assoc_form`); rows added in `.rxc_extra_rows` (`R/rxc_core.R`) | `restrictions$assoc = list(list(type = "dB"/"dW", row, col, sign, version, other))`. One design-weighted ($N_i$) row per restriction, pooled over groups; unit $i$ uses its own group's $H$ |
+| CR, W1 / 2×2 slab, §1.6.2, R10(b) | `.rxc_cr_parts` (slab = two disjunctive rows), `.rxc_fix_disj`; `.rxc_ci_conservative` (`R/rxc_infer.R`) | Point bounds: slab at $\hat\beta$. Conservative CI: every piece in the critical-value maximum, each inflated by its own $\hat k\hat\sigma_l$, then the max. `.rxc_ci_clr` refuses disjunctive rows |
+| CR, W2 / pair, and CLR for every CR, §1.6.3, R10(c) | `.rxc_systems(cons, "branch")`, `.rxc_estimate` | Union of branch CIs, each at the full level; branches with empty / crossed / out-of-range intervals drop out; all empty = rejected. Several CRs give $2^m$ systems |
+| Two intervals per target, hull option | `.rxc_union`, `.rxc_union_summary`; table columns `n_pieces`, `*_gap_lower/upper`; `fit$pieces`; `eiBounds(union = "pieces"/"hull")` | Printed as `[a, b] U [c, d]` |
+| R2 redundancy diagnostic, §2.5 | `eiRedundancy()` (exported; stored in `fit$sign` by default when `assoc`/`cr` are given) | Face test via one feasibility LP per endpoint (`.rxc_meet`, `.rxc_face_moves`); duals never used. Verdicts implied / cuts set only / tightens, added first and added last, with width gains. If the base is itself a union (another non-W1 CR), the verdict falls back to a brute-force width comparison and says so (`method`) |
+| "Already implied" table | `.rxc_implied_table` | Every $\delta$ (W1, W2, pairwise) under the rung alone: point interval and CI, signs flagged |
+| CR certificate, §1.6.3 | `.rxc_cr_table` | $\Theta\cap\{g_B=0,g_W=0\}\neq\emptyset$ (feasibility LP), branch intervals, number of pieces |
+| Emptiness, §1.6.4, R10(d) | `.rxc_empty_test` (conservative; reject iff every system's inflated set is empty; also reports whether the rung alone is rejected); notes in `eiBounds` | Messages name the combination "rung (M) + restriction labels"; 2-row note that $\delta_B$ / CR are never refuted on their own; "narrow interval after a near-rejection is not reassurance" |
+| CLR no longer falls back to the conservative CI | `.rxc_collect(relax = TRUE)`, `.rxc_ci_clr` | When no draw is feasible, candidates come from rows relaxed by the smallest uniform slack (any dual-feasible vertex is a valid CLR candidate). The CLR rule (ends cross ⇒ empty) is kept, so the two emptiness rules are never mixed |
+| Descriptive $\widehat{ER}$, $\widehat{NM}=\gamma\widehat{ER}$, $\gamma$, bracket, §3.5.4 | `.rxc_descriptive`, printed under "DESCRIPTIVE ONLY" | $\tau$-based; equals the EGGHM $T$-based value under `weights = "n"` (tested to 1e-10). Never imposed |
+| Integration | `ladder(sign_rungs = ...)`, `print`/`summary`, `sensitivity()`, `breakdown()` (pass `union`) | Point-identified rungs (L5, L6) ignore sign/CR rows, with a note |
+| Docs | roxygen (`eiBounds`, `eiRedundancy`, `ladder`), vignette `eiPartialID_rxc.Rmd` section "Signs on associations and contextual reinforcement", `PLAIN_LANGUAGE_GUIDE.md` §9 | Applied framing as in §3.5 |
+
+**Tests** (`tests/testthat/test-msign.R`; reference numbers from `docs/extension/make_msign_reference.py`, which calls `verify_R3.py`'s `assoc_3x2` / `assoc_alt` and writes `msign_example_3x2.csv`, `msign_gap_3x2.csv`, `msign_reference_3x2.csv`):
+
+* all association forms, ER, NM, γ, D and $\tilde B$ match Python to 1e-9 on a noise-free 3×2 example and on the gap example;
+* the W1 identities hold for random $k$ to 1e-12;
+* 3×2 CR point bounds (W1, W2, pair; three targets) equal the Python branch unions; W1 slab = union of branches; the gap example (near-1-d support plus one ordering row, found with the S5 search) gives two pieces for W2 and pair, certificate false, and the hull option;
+* noise-free gap example: both CI versions return the two pieces;
+* 2×2 closed forms of R2(d) for all four sign rows and CR (voter_vax and two simulated designs, both regression weightings); 2×2 CR slab = the single non-empty branch;
+* MonotoneEI `voter_vax` (bundled as `voter_vax_MonotoneEI.csv`, MIT, attribution in `voter_vax_MonotoneEI.README`): CR bounds for the gap $[-0.4699, -0.0502]$, ER $=-0.470$, NM $=-0.050$, N-weighted;
+* redundancy verdicts = brute force for 24 sign rows × 3 targets (both "tightens" and "cuts the set, not this target" occur); the middle verdict never occurs in 2×2; added-last gains = width differences;
+* joint refutation and its messages; CR CIs contain the estimate and are narrower than the rung's; an empty CLR branch is dropped via crossing ends, not by fallback;
+* `sensitivity`, `breakdown`, `ladder(sign_rungs)` run with sign/CR rows; input checks;
+* gated coverage MC (`EIPARTIALID_SLOW=1`): truth on the CR edge, $n=150$, 200 reps: conservative slab **1.000** (median width 0.346), CLR branch union **0.990** (median width 0.230).
+
+**Run:** R 4.3 (Ubuntu apt) in the build session: full `testthat` suite 0 failures (skips: `ei.Datasets` not installed, slow MC unless enabled); the slow MC was run once with the result above; `R CMD check --no-manual --no-vignettes`: no errors (pre-existing notes: unused imports `MASS`/`eco`, unavailable Suggests; a locale warning from the container). The vignette was rendered with `rmarkdown::render`.
+
+**Open / not done:**
+* Uniformity near point identification remains P3's open item; the CLR candidate collection is unchanged apart from the relaxation above.
+* With several non-W1 CRs, systems grow as $2^m$; no pruning.
+* The redundancy verdicts are point-level; the R2 §2.5.4 "width change with its CI" near ties is not yet reported (the "already implied" table does give CIs for the associations).
+* Out of scope as instructed: N1, N2, M-LOC (R1), R×C rank (R5), DiD, slack $\eta$ on $\delta$.

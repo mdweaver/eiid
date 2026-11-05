@@ -106,7 +106,7 @@ Listed from **most** to **least** plausible. Each rung's bound sits inside the o
 
 ## 4. Optional extras that apply to any rung
 
-Pinned in `ASSUMPTION_MENU.md` and not yet derived: structural zeros (a party not running), survey benchmarks, group ordering (in-party voters at least as likely to vote P as out-party voters), sign restrictions on contextual effects, stability across elections, similarity of neighbouring units, and sensitivity dials for each.
+Pinned in `ASSUMPTION_MENU.md` and not yet derived: structural zeros (a party not running), survey benchmarks, group ordering (in-party voters at least as likely to vote P as out-party voters), sign restrictions on contextual effects, stability across elections, similarity of neighbouring units, and sensitivity dials for each. (Signs on the average between and within associations, and contextual reinforcement, are now derived and implemented: see §9.)
 
 ## 5. Reading results
 
@@ -200,3 +200,29 @@ Pinned in `ASSUMPTION_MENU.md` and not yet derived: structural zeros (a party no
 * **Aging-in.** Using the post-war base in both years adds the term (1 − stayer share of veterans) × veterans' pre-war yes-rate, minus the same for non-veterans, to the DiD. That term is small when pre-war support was near zero [2d Prop. C2].
 * **Party and suffrage.** "Democrats never voted yes" does not by itself tighten the veteran bounds. Adding "before the war, within each party, future soldiers voted like their neighbours" (selection on party only) does, often substantially [2d Props P2–P3].
 * **The causal step.** "Service did not lower support", "no decline absent service" and "soldiers would have been at least as supportive as non-veterans" together bound the effect between 0 and an upper limit. If the data make all three impossible at once, they are rejected [2d Prop. CL].
+
+---
+
+## 9. Now in the package: sign beliefs and contextual reinforcement (build step 1, `PHASE5a_sign_module.md`)
+
+`eiBounds(..., restrictions = list(assoc = ..., cr = ...))` adds the Monotone EI beliefs of §7 to the straight-line rungs (M0, M1, M2, ...).
+
+* **What you can say.**
+  * "Group A is on average more likely than others *in the same unit* to choose P": `assoc = list(list(type = "dB", row = "A", col = "P", sign = 1))`.
+  * "Rates for P rise with A's share of the unit": `type = "dW"`.
+  * "These two point the same way, whichever way that is": `cr = list(list(row = "A", col = "P"))`.
+  * With three or more groups, choose the comparison: A against everyone else (`version = "W1"`, the default), A against one other group B (`version = "pair"`, `other = "B"`), or the contextual effect on each group separately (`version = "W2"`).
+* **The bound is exact for what the regression knows.** Given the straight-line rung and the beliefs, the reported range contains every value consistent with the fitted regression, and nothing else.
+* **What the data can check.**
+  * A belief about the *contextual* direction (`dW`) can be contradicted by the data: the bound comes out empty.
+  * With two groups, the *between* direction (`dB`) and reinforcement (CR) can never be contradicted by aggregate data on their own. If the bound is empty, it is the *combination* with straight lines that is contradicted, and the package says so. Their credibility rests on argument, or on individual-level data for a subsample.
+* **They can buy a lot.** In simulations of a 2×2 table, reinforcement shrank the confidence interval for the gap between groups from about 1.1 to about 0.36, and it still contained the truth 99% of the time. But that gain rests on a belief the data cannot check.
+* **Reinforcement can give two separate ranges.** With three or more groups and the `"W2"` or `"pair"` comparisons, "both positive" and "both negative" can lead to two separate ranges with a gap between them. The package prints both (`[a, b] U [c, d]`); `union = "hull"` reports one range covering both. With the default comparison, and always with two groups, it is one range.
+* **Do not do this by hand.** Elzayn et al. give the reinforcement range as lying between the "neighbourhood model" and Goodman's regression. Plugging in the *estimated* values of those two and intersecting with a confidence interval is not a valid confidence interval: it misses the truth too often (8–10% of the time instead of 5% when the truth is at the edge), however large the sample. The package widens each piece by its own uncertainty instead. It still reports the estimated neighbourhood and Goodman values, marked as descriptive only.
+* **What each belief buys.** `eiRedundancy(fit)` (also stored in `fit$sign`) says, for each belief and each quantity, whether the belief
+  * is already implied by the data and the rung (it buys nothing);
+  * narrows the set of possible tables but not this quantity; or
+  * narrows this quantity, and by how much,
+
+  both when it is added first and when it is added last. It also lists which directions the data already settle under the rung alone. These verdicts are estimates: when a belief only just matters, compare widths rather than trusting the label.
+

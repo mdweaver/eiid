@@ -1,0 +1,15 @@
+boundary, ER far from 0: true D~ = 0.150, ER* = 0.150, delta*_W = 0.0e+00, delta*_B = 0.033; n = 150, 600 reps
+   JKST      coverage 1.000  empty 0.000  median length 1.106
+   CR-slab   coverage 0.992  empty 0.000  median length 0.359
+   CR-union  coverage 0.992  empty 0.000  median length 0.386
+   CR-naive  coverage 0.917  empty 0.000  median length 0.256
+boundary, ER near 0: true D~ = 0.005, ER* = 0.005, delta*_W = -9.4e-17, delta*_B = 0.001; n = 150, 600 reps
+   JKST      coverage 1.000  empty 0.000  median length 1.223
+   CR-slab   coverage 1.000  empty 0.000  median length 0.242
+   CR-union  coverage 1.000  empty 0.000  median length 0.430
+   CR-naive  coverage 1.000  empty 0.000  median length 0.147
+interior: true D~ = 0.200, ER* = 0.309, delta*_W = 3.5e-03, delta*_B = 0.040; n = 150, 600 reps
+   JKST      coverage 1.000  empty 0.000  median length 1.232
+   CR-slab   coverage 1.000  empty 0.000  median length 0.480
+   CR-union  coverage 1.000  empty 0.000  median length 0.480
+   CR-naive  coverage 1.000  empty 0.000  median length 0.388

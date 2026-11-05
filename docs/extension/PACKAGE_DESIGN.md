@@ -401,7 +401,7 @@ Status: **P** proved · **C** checked numerically · **J** conjecture · **O** o
 | R7 | N2 grid LP: outer validity with estimated τ; convergence as the grid is refined | O | uniform confidence band for τ, then a monotone envelope | step 8 |
 | R8 | B1(M), κ, CAR-δ: each is a valid outer bound, monotone in its dial; B1 rank condition | partly (NA) | per module | steps 6, 7, 10 |
 | R9 | Consistency of the M-SHARP series bound; never wider than the current $\Theta_X$ | O | sieve argument | step 1b |
-| R10 | CLR validity with added rows, unions (min/max over LPs), near-emptiness, and the actual-rate allowance with new rows | P for the base (P3 Thm 5); O for unions | extend Thm 5; coverage simulation | all code |
+| R10 | CLR validity with added rows, unions (min/max over LPs), near-emptiness, and the actual-rate allowance with new rows | **P** (5a §3: added rows; parallel disjunction = W1/2×2 CR; union of branch CIs at full level; emptiness level; plug-in bracket invalid; MC in `verify_R10.py`; review pending). Still open: uniformity near point identification, and the CLR candidate collection (both inherited from P3) | — | all code |
 | R11 | DiD: DiD-S sharp within FD; FD4 ∩ D4; LCE-levels ∩ sign-Δ; union inference | DiD-S validity P; rest O | as in 2d | §7 |
 | R12 | P-S (sandwich) | P [V4] | — | — |
 | R13 | G2 table (JKST + signs) | P (§2.2) [V1, V2] | — | — |

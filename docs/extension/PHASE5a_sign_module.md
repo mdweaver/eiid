@@ -1,6 +1,6 @@
 # Phase 5a: the sign module (M-SIGN), proofs for build step 1
 
-*Proof-register items R3, R2 and R10-union from `PACKAGE_DESIGN.md` §8. Notation and justification tags follow 2a §0.3, 2c §0.3 and P3 §0.3. Each item ends with its numerical check. Status: R3 (§1) and R2 (§2) written and checked; R10-union to follow.*
+*Proof-register items R3, R2 and R10-union from `PACKAGE_DESIGN.md` §8. Notation and justification tags follow 2a §0.3, 2c §0.3 and P3 §0.3. Each item ends with its numerical check. Status: R3 (§1), R2 (§2) and R10-union (§3) written and checked. All three await an independent review pass.*
 
 *Extra tags used here:*
 
@@ -203,3 +203,102 @@ where $NM^{r*}$ is the neighbourhood gap computed from $\tau$. [2c L M1(c); 2a L
    In $2\times2$ the middle verdict cannot occur. With three or more groups it is common (T4: 28%).
 3. **Added-first and added-last gains** are reported for stacks, so users can see which beliefs are doing the work.
 4. **Statistical caveat (feeds R10).** In samples, "implied" and "tightens" are estimated sharp-edged verdicts. Near a tie (e.g. $ER^*\approx U_J$), report the width change with its confidence interval rather than a binary verdict. A one-sided test of $\max_Fa^\top k\le b$ is an LP-value test of the kind P3 Thm 5 already covers.
+
+---
+
+## 3. R10-union: inference with added rows, either/or restrictions, and near-empty sets
+
+### 3.1 Setting
+
+P3 §0, regimes R1/R3. $\hat\beta$ is the regression coefficient vector with $\sqrt n(\hat\beta-\beta_0)\Rightarrow N(0,\Sigma)$ and $\hat\Sigma$ consistent. The design is conditioned on (P3-S2).
+* Base rows: $s_j(\beta)+a_j^\top k\ge0$ (P3 §1 step 2).
+* Target: $\varphi=c(\beta)+\gamma^\top k$.
+* **Linear-in-$\beta$ added row:** $s_j(\beta)+a_j^\top k\ge0$, with $s_j$ linear in $\beta$ and $a_j$ fixed by the design. Every sign, ordering and local row in §1.1 has this form. The reason: $\delta^*$, $\tilde B$, $ER^*$ and the orderings are linear in $m=M_{Q+K}(X_i)$ with design weights, and $Q$ is linear in $\beta$ [2c M5 step 2; P3 §1].
+* **Parallel disjunction:** a row of the form $\max_{l\le L}s_l(\beta)+a^\top k\ge0$, equivalently $\bigcup_l\{s_l(\beta)+a^\top k\ge0\}$. The pieces share the same $k$-normal $a$.
+* **General union:** $C_+\cup C_-$, each branch a finite set of linear-in-$\beta$ rows.
+* $\mathrm{CI}(\mathcal R)$ denotes the P3.5 interval (version (a) or (b)) computed with the base rows plus the row set $\mathcal R$, at total level $\alpha=\alpha_U+\alpha_L(+\alpha_E)$. The convention is $\mathrm{CI}=\emptyset$ when the inflated set $\hat\Theta^+$ is empty, or when the computed lower end exceeds the upper end.
+
+### 3.2 Statement
+
+**Theorem R10.** Assume P3.5's conditions and that the restrictions hold at the truth, i.e. $k_0$ satisfies them.
+
+(a) **Added rows.** For a finite set $\mathcal R$ of linear-in-$\beta$ rows, P3.5(a), P3.5(b) and P3.6(a) hold unchanged, for both $\tilde B$ and $B$. The new rows simply join the Gaussian maximum that sets the critical value.
+
+(b) **Parallel disjunction.** Inflate each piece separately, then take the maximum:
+$$\max_l\big(s_l(\hat\beta)+\hat k\hat\sigma_l\big)+a^\top k\ge0,$$
+with all pieces included in the critical-value maximum. Version (a) then covers at the nominal level.
+* W1 CR and $2\times2$ CR are of this form, by §1.2(d):
+  * lower row: $\gamma_D^\top k+\max(c_D-ER^*,\ c_D-\gamma_rER^*)\ge0$;
+  * upper row: $-\gamma_D^\top k+\max(ER^*-c_D,\ \gamma_rER^*-c_D)\ge0$.
+* No branch is selected, so the sign of $\widehat{ER}$ never enters.
+
+(c) **General union.** $\mathrm{CI}_\cup:=\mathrm{CI}(C_+)\cup\mathrm{CI}(C_-)$, with *each* branch at the full level $\alpha$, satisfies
+$$\liminf_nP(\theta_0\in\mathrm{CI}_\cup)\ \ge\ 1-\alpha.$$
+* No Bonferroni split across branches is needed.
+* The hull of $\mathrm{CI}_\cup$ is also valid, but it is wider.
+* The emptiness test "reject if both branch sets are empty" has asymptotic level $\le\alpha_U+\alpha_L$.
+
+(d) **Near-empty sets.**
+* Under the model, $P(\mathrm{CI}=\emptyset)\to\le\alpha_U+\alpha_L$, including when the identified set is a point or nearly one.
+* Coverage holds unconditionally, so reporting "empty" is part of the allowed error, not an extra one.
+* Coverage is **not** guaranteed conditionally on passing the emptiness test.
+* If the restrictions are false, no coverage statement holds. In particular, a non-empty, narrow CI is no evidence that they are true (G3).
+
+(e) **Plug-in restrictions are not valid.** A rule that estimates the CR bracket $\operatorname{hull}\{\gamma_r\widehat{ER},\widehat{ER}\}$ and imposes it without inflating it can under-cover when the truth is on the bracket's edge (MC, §3.4).
+
+### 3.3 Proof
+
+*(a)*
+1. Under the model, $k_0$ satisfies the base rows and the rows in $\mathcal R$ at $\beta_0$. [R3(e); hypothesis]
+2. Each added $s_j(\hat\beta)$ is a linear map of $\hat\beta$, so it is jointly asymptotically normal with the base terms. Let $\mathcal E$ be P3.5(a)'s event, with the maximum taken over all rows. Then $P(\mathcal E)\to\ge1-\alpha_U-\alpha_L$. [OLS; lin; P3.5(a) step 1]
+3. On $\mathcal E$, $k_0\in\hat\Theta^+$. P3.5(a) steps 3–7 and P3.6(a) then go through verbatim, since they use only $k_0\in\hat\Theta^+$ and the residual term. [1–2; P3.5, P3.6]
+4. For (b) of P3.5, the endpoint is still a minimum of finitely many linear functions of $\beta$, because Lemma P3.1 needs only rows that are linear in $\beta$ with fixed $a_j$. CLR applies as before, and inherits P3's open item on collecting candidates. [P3.1; CLR] ∎(a)
+
+*(b)*
+5. Let $l^*$ be a piece that holds at the truth: $s_{l^*}(\beta_0)+a^\top k_0\ge0$. [hypothesis; Def disjunction]
+6. On $\mathcal E$, which now includes every piece, $s_{l^*}(\beta_0)\le s_{l^*}(\hat\beta)+\hat k\hat\sigma_{l^*}$. So $\max_l(s_l(\hat\beta)+\hat k\hat\sigma_l)+a^\top k_0\ge0$. [Def $\mathcal E$; 5]
+7. For given data this is one linear row in $k$, and $k_0$ satisfies it on $\mathcal E$. Proceed as in steps 3. [6; (a)]
+8. For W1/2×2 CR: §1.2(d) gives $D^{r*}\ge\min(ER^*,\gamma_rER^*)\iff\max(D^{r*}-ER^*,\ D^{r*}-\gamma_rER^*)\ge0$, and similarly for the upper side. Each piece is linear in $\beta$ apart from the common $\gamma_D^\top k$. [§1.3 steps 11–13; alg] ∎(b)
+
+*(c)*
+9. Fix a branch $j^*\in\{+,-\}$ with $k_0\in C_{j^*}$. It is non-random, because $k_0$ is a population quantity. [hypothesis]
+10. The model "rung $\cap\,C_{j^*}$" holds, so by (a), $\liminf P(\theta_0\in\mathrm{CI}(C_{j^*}))\ge1-\alpha$. [9; (a)]
+11. $\mathrm{CI}(C_{j^*})\subseteq\mathrm{CI}_\cup\subseteq\operatorname{hull}\mathrm{CI}_\cup$. [Def]
+12. The other branch's CI is never used for coverage, so its level is irrelevant. That is why no split is needed. [10–11]
+13. Both sets empty implies the $j^*$ set is empty, which has probability $\to\le\alpha_U+\alpha_L$. [P3.6(a) for branch $j^*$] ∎(c)
+
+*(d)*
+14. For P3.5(a): $\mathrm{CI}=\emptyset$ requires $\hat\Theta^+=\emptyset$, which requires $\mathcal E^c$. [P3.5(a) step 2]
+15. For P3.5(b): a crossing $\hat L>\hat U$ requires $\hat U<\theta_0$ or $\hat L>\theta_0$. These have asymptotic probabilities $\le\alpha_U$ and $\le\alpha_L$ respectively, by CLR's one-sided validity, whatever the width of the identified set. [CLR; union]
+16. In both cases the empty event is contained in the non-coverage event whose probability is bounded. Neither step uses the width of the identified set. [14–15]
+17. Conditional coverage given $\{\mathrm{CI}\ne\emptyset\}$ is $P(\text{cover})/P(\ne\emptyset)$. This can fall below $1-\alpha$ when $P(\ne\emptyset)<1$. And if the restrictions are false, step 1 fails. [Def cond. prob.; 1] ∎(d)
+
+*(e)* This is shown by the counterexample in §3.4: coverage 0.917 < 0.95, with a Monte Carlo standard error of about 0.011. The mechanism: when the truth is on the edge of the bracket, the estimated edge falls inside the truth about half the time, and the target's own inflation does not fully compensate. ∎
+
+**Uniformity.** The statements are pointwise in the DGP, as in P3. Uniform validity near point identification (a Stoye-type adaptation) remains P3's open item. (d) only says that emptiness is controlled pointwise, including at point-identified DGPs.
+
+### 3.4 Monte Carlo (`verify_R10.py`, output `verify_R10_output.txt`)
+
+Setup:
+* 2×2, $n=150$ units, 600 replications.
+* Unit rates are Beta draws with linear conditional means, so LCE and CR hold.
+* HC3 covariance, conservative CI (P3.5(a)) at 95%, target $\tilde D$.
+
+| Design | JKST | CR slab (b) | CR union (c) | CR naive (plug-in bracket) |
+|---|---|---|---|---|
+| Truth on the CR edge ($\delta^*_W=0$), $ER^*=0.15$ | 1.000 / 1.106 | **0.992** / 0.359 | 0.992 / 0.386 | **0.917** / 0.256 |
+| Truth on the edge, $ER^*=0.005$ (near-point CR set, branch ambiguous) | 1.000 / 1.223 | 1.000 / 0.242 | 1.000 / 0.430 | 1.000 / 0.147 |
+| Interior truth | 1.000 / 1.232 | 1.000 / 0.480 | 1.000 / 0.480 | 1.000 / 0.388 |
+
+Entries are coverage / median length. No CI was empty in any design.
+
+### 3.5 Consequences for the package
+
+1. **Every added row goes through the same CI machinery.** Sign, ordering and local rows join the critical-value maximum. Nothing new is needed beyond appending rows (R10(a)).
+2. **CR (W1 default and 2×2) uses the slab form (b).** It is one row per side, with each piece inflated before the maximum. Here CR costs about 0.36 of width against 1.1 for JKST alone. It is a large gain, but it rests on an unrefutable belief (2c M3).
+3. **Other CR pairings use the union of the branch CIs, each at the full level (c).** The package reports the union, which can be two intervals, and offers the hull as an option.
+4. **Never impose an estimated bracket as if it were known.** The EGGHM bracket $[\gamma\,\widehat{ER},\widehat{ER}]$ intersected with a JKST CI is not a confidence interval (e).
+5. **Emptiness is reported as a test result, not as an error.** Output includes:
+   * the rejection flag;
+   * the combination that was rejected (R3(e));
+   * a warning that a narrow CI after a near-rejection is not reassurance (d).

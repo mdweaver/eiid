@@ -102,3 +102,54 @@ test_that("3x2 gap case: slack keeps the union structure and only widens", {
   inside <- function(a, b) all(apply(a, 1, function(r) any(b[, 1] <= r[1] + 1e-9 & r[2] <= b[, 2] + 1e-9)))
   expect_true(inside(u0, u1))
 })
+
+test_that("verdicts on union bases (another W2/pair CR in the stack) agree with brute force", {
+  ref <- utils::read.csv(test_path("msign_reference_3x2.csv"))
+  len <- function(u) if (is.null(u)) 0 else sum(u[, 2] - u[, 1])
+  same <- function(u, v) (is.null(u) && is.null(v)) ||
+    (!is.null(u) && !is.null(v) && nrow(u) == nrow(v) && max(abs(u - v)) < 1e-7)
+  for (case in c("gap", "main")) {
+    d <- utils::read.csv(test_path(if (case == "gap") "msign_gap_3x2.csv" else "msign_example_3x2.csv"))
+    od <- ref[ref$case == "gap" & ref$name == "order", ]
+    stack <- list(cr = list(list(row = 1, version = "W2"), list(row = 2, version = "pair", other = 3)),
+                  assoc = list(list(type = "dW", row = 3, sign = 1, version = "W2"),
+                               list(type = "dB", row = 2, sign = -1)))
+    if (case == "gap") stack$order <- list(list(high = od$r, low = od$s, col = 1))
+    run <- function(res) eiBounds(x = as.matrix(d[, 1:3]), t = as.matrix(d[, 5:6]), n = d$N,
+                                  targets = list(B1 = c(1, 1), B2 = c(2, 1), B3 = c(3, 1)),
+                                  ci = "none", tests = FALSE, restrictions = res, diagnostics = FALSE)
+    f <- run(stack)
+    if (all(f$table$empty)) next
+    vd <- eiRedundancy(f, ci = FALSE)$verdicts
+    full <- f$pieces
+    for (md in unique(vd$module)) {
+      ty <- sub("\\[.*", "", md); ix <- as.integer(sub(".*\\[([0-9]+)\\]", "\\1", md))
+      res_wo <- stack
+      if (ty == "order") res_wo$order <- NULL else res_wo[[ty]] <- res_wo[[ty]][-ix]
+      if (!length(res_wo[[ty]])) res_wo[[ty]] <- NULL
+      wo <- run(res_wo)$pieces
+      for (t in 1:3) {
+        v <- vd$verdict_last[vd$module == md][t]
+        if (grepl("^implied|^empty|^base", v)) next
+        brute <- !same(wo[[t]]$estimate, full[[t]]$estimate)
+        expect_equal(v == "tightens this target", brute, label = paste(case, md, t, v))
+        expect_equal(vd$gain_last[vd$module == md][t], len(wo[[t]]$estimate) - len(full[[t]]$estimate), tolerance = 1e-7)
+      }
+    }
+    expect_true(any(vd$method_last == "face test per branch + coverage"))
+  }
+})
+
+test_that("near-tie flag: implied at the point estimate but not at the confidence bound", {
+  sim1 <- sim(n = 120, seed = 21)
+  f0 <- eiBounds(x = sim1$x, t = sim1$t, n = sim1$n, targets = Dg, ci = "none", tests = FALSE)
+  imp <- eiRedundancy(f0, ci = FALSE)$implied
+  # pick the side of delta_W that the point estimate implies most weakly, if any
+  f <- eiBounds(x = sim1$x, t = sim1$t, n = sim1$n, targets = Dg, ci = "clr", seed = 1, tests = FALSE,
+                restrictions = list(assoc = list(list(type = "dW", row = 1, sign = 1), list(type = "dW", row = 1, sign = -1),
+                                                 list(type = "dB", row = 1, sign = 1), list(type = "dB", row = 1, sign = -1))))
+  vd <- f$sign$verdicts
+  expect_true(all(vd$margin_lcb <= vd$margin + 1e-9, na.rm = TRUE))
+  expect_equal(vd$near_tie, !is.na(vd$margin) & vd$margin >= 0 & !(vd$margin_lcb >= 0))
+  expect_equal(vd$verdict_first == "implied (buys nothing)", vd$margin >= -1e-7)
+})

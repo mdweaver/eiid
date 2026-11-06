@@ -379,17 +379,47 @@
   if (all(vapply(Ffix, function(Ff) .rxc_implied(Ff, alts, tol), logical(1)))) {
     res$verdict <- "implied (buys nothing)"; return(res)
   }
-  if (length(Fsys) == 1) {
-    # R2(a): an endpoint moves iff the restriction removes the whole optimal face
-    up <- .rxc_face_moves(Ffix[[1]], tg, beta, alts, "upper", hF$upper, tol)
-    lo <- .rxc_face_moves(Ffix[[1]], tg, beta, alts, "lower", hF$lower, tol)
-    moves <- up || lo
-  } else {
-    res$method <- "brute (base is a union)"
-    moves <- res$width_gain > tol * max(1, abs(hF$upper - hF$lower))
-  }
+  # R2(a) per convex piece: for each branch F_j of the base, an endpoint of F_j's image moves
+  # iff the restriction removes the whole optimal face of F_j (one feasibility LP each; no
+  # duals). The target's set shrinks iff some lost segment of some F_j -- a moved end, or a
+  # gap opened inside F_j's image when the restriction is itself a union -- is not covered by
+  # the new union. For a convex base and a polyhedral restriction this is exactly R2(a).
+  res$method <- if (length(Fsys) == 1 && length(alts) == 1) "face test" else "face test per branch + coverage"
+  moves <- .rxc_union_moves(Ffix, tg, beta, alts, IN$union, tol)
   res$verdict <- if (moves) "tightens this target" else "cuts the set, not this target"
   res
+}
+
+# image of a fixed system (optionally with extra rows) under the target, by primal LPs
+.rxc_branch_iv <- function(Ff, tg, beta, alt = NULL) {
+  s <- Ff$s; A <- Ff$A
+  if (!is.null(alt)) { s <- c(s, alt$s); A <- rbind(A, alt$A) }
+  cb <- sum(tg$cvec * beta) + tg$c0
+  up <- .rxc_lp_z(tg$gamma, s, A, "max")
+  if (up$status == 2) return(NULL)
+  lo <- .rxc_lp_z(tg$gamma, s, A, "min")
+  if (up$status == 3 || lo$status == 3) return(c(-Inf, Inf))
+  c(cb + lo$value, cb + up$value)
+}
+
+.rxc_union_moves <- function(Ffix, tg, beta, alts, newU, tol) {
+  covered <- function(a, b) !is.null(newU) && any(newU[, 1] <= a + tol & b <= newU[, 2] + tol)
+  for (Ff in Ffix) {
+    I <- .rxc_branch_iv(Ff, tg, beta)
+    if (is.null(I)) next
+    upm <- .rxc_face_moves(Ff, tg, beta, alts, "upper", I[2], tol)
+    lom <- .rxc_face_moves(Ff, tg, beta, alts, "lower", I[1], tol)
+    newI <- .rxc_union(lapply(alts, function(al) .rxc_branch_iv(Ff, tg, beta, al)))
+    lost <- list()
+    if (is.null(newI)) lost <- list(I) else {
+      if (upm) lost[[length(lost) + 1]] <- c(max(newI[, 2]), I[2])
+      if (lom) lost[[length(lost) + 1]] <- c(I[1], min(newI[, 1]))
+      if (nrow(newI) > 1) for (k in seq_len(nrow(newI) - 1))
+        if (newI[k + 1, 1] - newI[k, 2] > tol) lost[[length(lost) + 1]] <- c(newI[k, 2], newI[k + 1, 1])
+    }
+    for (sg in lost) if (!covered(sg[1], sg[2])) return(TRUE)
+  }
+  FALSE
 }
 
 .rxc_all_modules <- function(cons) {
@@ -397,10 +427,32 @@
 }
 
 # redundancy table for a setup and list of targets (point level, at beta-hat)
-.rxc_redundancy <- function(st, targets, labels, tol = 1e-7) {
+.rxc_redundancy <- function(st, targets, labels, tol = 1e-7, ci = "none", alpha = 0.05, ndraw = 100,
+                            nz_draw = 4000) {
   cons <- .rxc_constraints(st)
   mods <- .rxc_all_modules(cons)
   if (!length(mods) || st$nz == 0) return(NULL)
+  # R2 §2.5.4: "implied" is an estimated, sharp-edged verdict. For each sign row, the margin
+  # min over the rung of sign * delta (probability units) and a lower confidence bound for it;
+  # implied_ci = TRUE when even the lower bound is >= 0.
+  marg <- list()
+  if (length(st$extra$assoc)) {
+    st0 <- st; st0$extra <- NULL
+    cons0 <- .rxc_constraints(st0)
+    Zs <- if (ci != "none") .rxc_zdraws(st$V, nz_draw) else NULL
+    for (i in seq_along(st$extra$assoc)) {
+      a <- st$extra$assoc[[i]]
+      f <- .rxc_assoc_form(st0, a$type, a$version, a$row, a$col, a$other)
+      sc <- .rxc_assoc_scale(st0, a$type, a$version, a$row, a$other)
+      tg <- list(cvec = a$sign * f$coef / sc, c0 = a$sign * f$const / sc + a$slack, gamma = a$sign * f$a / sc)
+      pl <- .rxc_plugin(cons0, tg, st0$beta)
+      m <- if (isTRUE(pl$empty) || isTRUE(pl$unbounded)) NA_real_ else pl$lower
+      lcb <- NA_real_
+      if (ci == "clr") lcb <- .rxc_ci_clr(st0, cons0, tg, alpha, alpha, Zs, ndraw)[1]
+      if (ci == "conservative") lcb <- .rxc_ci_conservative(st0, cons0, tg, 2 * alpha, Zs)$ci[1]
+      marg[[paste0("assoc[", i, "]")]] <- c(m, lcb)
+    }
+  }
   out <- list()
   for (md in mods) for (nm in names(targets)) {
     tg <- .rxc_target(st, targets[[nm]])
@@ -410,7 +462,11 @@
       module = md, restriction = unname(labels[md]), target = nm,
       verdict_first = f1$verdict, gain_first = f1$width_gain,
       lower_gain_first = f1$lower_gain, upper_gain_first = f1$upper_gain,
-      verdict_last = f2$verdict, gain_last = f2$width_gain, method = f1$method,
+      verdict_last = f2$verdict, gain_last = f2$width_gain, method_first = f1$method,
+      method_last = f2$method,
+      margin = if (is.null(marg[[md]])) NA_real_ else marg[[md]][1],
+      margin_lcb = if (is.null(marg[[md]])) NA_real_ else marg[[md]][2],
+      near_tie = if (is.null(marg[[md]])) NA else isTRUE(marg[[md]][1] >= 0 && !(marg[[md]][2] >= 0)),
       stringsAsFactors = FALSE)
   }
   res <- do.call(rbind, out); rownames(res) <- NULL
@@ -564,7 +620,9 @@ eiRedundancy <- function(object, targets = NULL, cols = NULL, ci = TRUE, tol = 1
   }
   labels <- .rxc_module_labels(ex, object$rows, object$cols)
   structure(list(
-    verdicts = .rxc_redundancy(st, tl, labels, tol),
+    verdicts = .rxc_redundancy(st, tl, labels, tol, ci = if (ci) object$ci else "none",
+                               alpha = object$alpha, ndraw = object$settings$ndraw,
+                               nz_draw = object$settings$nz_draw),
     implied = .rxc_implied_table(st, cols, object$rows, object$cols,
                                  ci = if (ci) object$ci else "none", alpha = object$alpha,
                                  ndraw = object$settings$ndraw, nz_draw = object$settings$nz_draw),
@@ -581,7 +639,11 @@ print.eiRedundancy <- function(x, digits = 3, ...) {
     print(r(x$verdicts[, c("restriction", "target", "verdict_first", "gain_first", "verdict_last", "gain_last")]),
           row.names = FALSE, right = FALSE)
     cat("  gain = reduction in the width of the estimated set; first = added to the rung alone,\n")
-    cat("  last = added to all other restrictions\n\n")
+    cat("  last = added to all other restrictions\n")
+    nt <- x$verdicts[!is.na(x$verdicts$near_tie) & x$verdicts$near_tie, , drop = FALSE]
+    if (nrow(nt)) cat("  NEAR TIE: implied at the point estimate but not at the confidence bound for:",
+                      paste(unique(nt$restriction), collapse = "; "), "\n")
+    cat("\n")
   }
   if (!is.null(x$cr)) {
     cat("Contextual reinforcement: branch intervals and connectivity certificate\n")

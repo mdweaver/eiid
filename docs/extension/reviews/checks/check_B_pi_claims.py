@@ -95,4 +95,28 @@ n = 10_000; Z = rng.standard_normal(5000)
 err2 = -np.ones_like(Z) / n
 assert np.all(0 + err2 < 0)          # estimate + 0 * k < truth always
 print("I4 null-direction bound with zero s.e. misses in 100% of draws")
+
+# ---------------------------------------------------------------------------
+# I5 (EI referee). W1 versus W2 can disagree in sign although every original
+#     group's rate rises by 2 points from unit 1 to unit 2.
+# ---------------------------------------------------------------------------
+X = np.array([[.2, .7, .1], [.6, .05, .35]]); M = np.array([[.4, .8, .1], [.42, .82, .12]])
+pw = np.array([.5, .5]); xa = X[:, 0]; muv = pw @ X
+rest = (X[:, 1:] * M[:, 1:]).sum(1) / (1 - xa)
+W1 = muv[0] * cov(pw * xa, xa, M[:, 0]) + (1 - muv[0]) * cov(pw * (1 - xa), xa, rest)
+W2 = sum(muv[s] * cov(pw * X[:, s], xa, M[:, s]) for s in range(3))
+assert np.all(M[1] > M[0]) and np.isclose(W1, -.02633, atol=5e-6) and np.isclose(W2, .00110, atol=5e-6)
+print(f"I5 every group's rate rises; W1 = {W1:.5f} < 0 < W2 = {W2:.5f}")
+
+# ---------------------------------------------------------------------------
+# I6 (EI referee). Two four-voter precincts, 1 and 2 A voters, one P vote each.
+#     ER = NM = 0, continuous CR set {0}; integer gaps -2/5, 2/15, 2/3: CR empty,
+#     and under the positive between sign the integer lower end is 2/15, not 0.
+# ---------------------------------------------------------------------------
+cc, grid, step, w = integer_check([4, 4], [1, 2], [1, 1])
+gaps = sorted({k / 3 - (2 - k) / 5 for k in (0, 1, 2)})
+assert np.allclose(cc, 0) and grid == [] and np.allclose(gaps, [-2/5, 2/15, 2/3])
+assert min(g for g in gaps if g >= 0) == gaps[1]
+print("I6 integer gaps", [round(g, 4) for g in gaps], "; integer CR empty; positive-between lower end 2/15")
+
 print("ALL CHECKS PASS")

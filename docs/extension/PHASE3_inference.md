@@ -354,6 +354,12 @@ Conventions:
 * CLR: Conjecture P3.5(b3) everywhere. All its figures are simulation findings.
 * The projection interval for $B$ uses the Bhatia–Davis allowance, whose variance bound comes from a CLR interval (as in the package). Strictly, only the version with the Popoviciu allowance is fully covered by P3.5(b2).
 
+**Rank of $\hat\Sigma$ in the projection interval** (`phase3_montecarlo_rank.py`, `phase3_montecarlo_rank_output.txt`; same seeds, 1000 replications per design). Prop. P3.5(b2)(ii) uses $q=\operatorname{rank}\hat\Sigma$. If $\hat\Sigma$ were singular while the estimation error had a component in its null space, those directions would not be controlled. The numerical rank (eigenvalues above $10^{-10}$ times the largest) equals $\dim\beta$ in every replication of every 2×2 design, from $\dim\beta=3$ to 401.
+* Conditioning: the smallest-to-largest eigenvalue ratio is 0.005–0.04 for the pooled fits, and falls with the number of districts, to a minimum of $2.6\times10^{-8}$ at 200 × 10. That is still far above the rank threshold.
+* Design B fits all three columns ($\dim\beta=18$) and has $q=12$ in every replication. The six null directions are the adding-up constraint: summed across columns, the coefficients are the regression of 1 on the design, which has no error. So the estimation error lies in the range of $\hat\Sigma$, and nothing is left uncontrolled.
+* On the $C-1$ free columns (Remark P3.4.1, as the package fits), $\hat\Sigma$ has full rank 12 in every replication.
+* No replication had a numerical rank drop, so there is no rank-drop subsample whose coverage could be compared.
+
 ### 8.1 Model holds (M1, or M0 without shifts)
 
 | Design | $q$ | DD | Plug-in: cover / empty / width | Conservative, $B$ | CLR, $B$ | Projection, $B$ | Conservative, $\tilde B$ | CLR, $\tilde B$ | Projection, $\tilde B$ |

@@ -78,7 +78,7 @@ also free of $D$. It is convex and compact. It is **not** the Cartesian product 
 
 ## 2. What each rung identifies
 
-**Lemma D1.** Assume (A5-d): for each $d$, $\operatorname{supp}P_{X\mid D=d}\cap A_d$ lies in no quadric of the simplex.
+**Lemma D1.** Assume (A5-d): for each $d$, $\operatorname{supp}(P_{X\mid D=d}|_{A_d})$ lies in no quadric of the simplex. Here $\operatorname{supp}(P_{X\mid D=d}|_{A_d})$ is the support of the restricted measure (2a §0.1); since $P(X\in A_d\mid D=d)=1$ (§0.1), it equals $\operatorname{supp}P_{X\mid D=d}$. *(Corrected after review, Batch B, Nov 2026: earlier written $\operatorname{supp}P_{X\mid D=d}\cap A_d$, which differs when $A_d$ carries less than full mass; see 2a §0.1.)*
 (a) Under any rung, $Q^{(d)}$ is identified from $E[T\mid X,D=d]=X^\top Q^{(d)}X$, $\sum_cH^{(d)}_c=J$, and each $K^{(d)}$ is unidentified with $K^{(d)}\in\mathcal K$.
 (b) Under M1: $\zeta_{c,d}=\operatorname{diag}(Q^{(d)}_c-Q^{(1)}_c)$; the off-diagonal entries satisfy the **overidentifying restrictions**
 $$(Q^{(d)}_c-Q^{(1)}_c)_{rs}=\tfrac12(\zeta_{c,d,r}+\zeta_{c,d,s})\quad(r\ne s);$$
@@ -86,7 +86,7 @@ and $K^{(d)}=K+\operatorname{skew}(\zeta_{\cdot,d}\mathbf 1^\top)$ with $K=K^{(1
 (c) Under L5: $\alpha_{c,d}=\operatorname{diag}Q^{(d)}_c$, $K^{(d)}=\operatorname{skew}(\alpha_{\cdot,d}\mathbf 1^\top)$ is identified, and $Q^{(d)}_c=\operatorname{sym}(\alpha_{c,d}\mathbf 1^\top)$ is testable.
 
 (d) **Under M1, less richness suffices (revised after review).** Replace (A5-d) by the stacked rank condition (A5-M1): for symmetric $D$ and vectors $z_2,\dots,z_{D^\star}$,
-$$x^\top Dx+z_d^\top x=0\ \ \forall x\in\operatorname{supp}P_{X\mid D=d}\cap A_d,\ \forall d\quad(z_1:=0)\ \Longrightarrow\ D=0,\ z_d=0.$$
+$$x^\top Dx+z_d^\top x=0\ \ \forall x\in\operatorname{supp}(P_{X\mid D=d}|_{A_d}),\ \forall d\quad(z_1:=0)\ \Longrightarrow\ D=0,\ z_d=0.$$
 This is the population version of "the design with the pooled quadratic monomials and the district × $X_r$ shifts ($d\ge2$) has full column rank". Then $Q$, the $\zeta_{c,d}$ and the conclusions of (b) hold. A sufficient condition: A5 holds within one district, and every other district's support contains $R$ affinely independent points. Having $R$ *distinct* compositions is not enough: they must be affinely independent.
 
 *Proof of (a).*

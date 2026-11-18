@@ -239,3 +239,36 @@ G_, res_, *_ = np.linalg.lstsq(Xs_, Zt, rcond=None)
 Zt0 = np.zeros_like(Zt); _, res0, *_ = np.linalg.lstsq(Xs_, Zt0, rcond=None)
 ok("Prop P3.6(c): nonzero district shifts are not of the form G X_i (residual > 0); zero shifts are",
    res_.sum() > 1e-6 and (len(res0) == 0 or res0.sum() < 1e-20))
+
+# ---------- Batch B review (Nov 2026): two corrections in P3.5 ----------
+# (1) P3.5(b2)(ii) null direction. Error (Z/sqrt(n), -1/n): limit covariance diag(1, 0), rank 1. The old rule
+#     (q = rank Sigma, pseudoinverse) gives the second coordinate standard error 0, so its upper bound
+#     beta_hat_2 + 0 misses beta_0,2 in every sample. Under the corrected (ii-b) the null-direction error is
+#     exactly zero (beta_hat = L eta_hat + b), and the same projection bound covers.
+from scipy.stats import chi2 as _chi2, norm as _norm
+n_ = 10_000; reps_ = 2000; kq = np.sqrt(_chi2.ppf(0.95, 1)); beta0 = np.array([0.3, 0.6])
+Zs = rng.standard_normal(reps_)
+Sig_hat = np.diag([1.0, 0.0])                                # estimated limit covariance, singular
+g2 = np.array([0.0, 1.0]); se2 = np.sqrt(g2 @ Sig_hat @ g2 / n_)   # = 0
+bh_old = beta0[None, :] + np.column_stack([Zs / np.sqrt(n_), np.full(reps_, -1.0 / n_)])
+cov_old = np.mean(bh_old[:, 1] + kq * se2 >= beta0[1])
+bh_new = beta0[None, :] + np.column_stack([Zs / np.sqrt(n_), np.zeros(reps_)])   # (ii-b): null error exactly 0
+g1 = np.array([1.0, 0.0]); se1 = np.sqrt(g1 @ Sig_hat @ g1 / n_)
+cov_new = np.mean((bh_new[:, 1] + kq * se2 >= beta0[1]) & (bh_new[:, 0] + kq * se1 >= beta0[0]))
+print(f"     P3.5(b2)(ii) null direction: old rule covers coordinate 2 in {cov_old:.3f} of {reps_}; "
+      f"under (ii-b) both coordinates covered in {cov_new:.3f}")
+ok("P3.5(b2)(ii) null direction (Batch B): rank-q pseudoinverse rule misses surely (old statement fails); "
+   "reduced full-rank parameterisation covers (corrected statement holds)", cov_old == 0.0 and cov_new >= 0.95)
+
+# (2) P3.5(a) step 5, residual CLT. Weights w_i = 1/n (max w^2 / sum w^2 = 1/n -> 0) but only unit 1 has a
+#     positive residual variance (e_1 = +-1/2). E / sd(E) is Rademacher, not normal: the old "CLT under the
+#     weight condition" fails. The corrected step (Chebyshev branch, sd(E)/S_1 -> 0) still gives the bound.
+n_r = 400; w_r = np.full(n_r, 1.0 / n_r); S1_r = 0.5 * np.sqrt(np.sum(w_r ** 2)); sd_r = 0.5 / n_r
+E_r = w_r[0] * rng.choice([-0.5, 0.5], 20000)
+z_r = _norm.ppf(0.975)
+clt_tail = np.mean(np.abs(E_r / sd_r) > z_r)                 # would be ~0.05 if the old CLT claim held
+bound_tail = np.mean(np.abs(E_r) > z_r * S1_r)
+print(f"     P3.5(a) residual: P(|E/sd| > 1.96) = {clt_tail:.3f} (normal: 0.05); P(|E| > 1.96 S_1) = {bound_tail:.3f}; "
+      f"sd/S_1 = {sd_r / S1_r:.3f}")
+ok("P3.5(a) step 5 (Batch B): weight condition alone does not give a standardised CLT (old step fails); "
+   "the allowance z*S_1 still holds (Chebyshev branch)", clt_tail == 0.0 and bound_tail <= 0.05)

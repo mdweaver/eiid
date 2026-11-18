@@ -66,7 +66,7 @@ Here:
 * **Contextual reinforcement (CR)**, $\delta_B\delta_W\ge0$ with the common sign unknown (Def. 1, Prop. 8, Cor. 3):
   * $D$ lies between $D_{NM}$ and $D_{ER}$, intersected with MOB;
   * $\operatorname{sign}D=\operatorname{sign}(D_{ER}-D_{NM})$.
-* Theorem 1 and Tables 1–3 cover all sign combinations, for $D$, $Y^1$ and $Y^0$. Every bound is stated as sharp.
+* Theorem 1 (Table 1) covers all sign combinations for the gap $D$; Theorems 2 and 3 (Tables 2–3) cover the group levels $Y^1$ and $Y^0$. Every bound is stated as sharp, in EGGHM's sense: sharpness ranges over compatible joint distributions on the continuous mean-probability model with a mixed neighbourhood ($\gamma<1$). It does not license whole-ballot (integer-table) attainability (2c M2, Remark M2.1). *(Corrected after review, Batch B, Nov 2026: earlier attributed all three tables to Theorem 1.)*
 
 **Neighbourhood-level results** (§5).
 * Prop. 11: the local sign $\delta_{B,n}=\operatorname{Var}(X\mid n)D_n$ cuts the neighbourhood MOB at 0 (Manski 2018's bounded variation).
@@ -115,7 +115,7 @@ Consequences:
 
 | MENU item | EGGHM analogue | Relation |
 |---|---|---|
-| B5 group ordering, unit level ($\beta_{ic}^{r}\ge\beta_{ic}^{s}$ for each $i$) | local $\delta_{B,n}\ge0$ (Prop. 11; Manski 2018) | identical in 2 groups |
+| B5 group ordering, unit level ($\beta_{ic}^{r}\ge\beta_{ic}^{s}$ for each $i$) | local $\delta_{B,n}\ge0$ (Prop. 11; Manski 2018) | identical in 2 groups **at mixed units** ($0<X_i<1$). At a pure unit the local between association $X_i(1-X_i)D_i$ is identically 0, so the local sign restricts nothing there, while a unit-level ordering still constrains the (unobserved) absent group's rate. *(Caveat added after review, Batch B, Nov 2026.)* |
 | B5 ordering, mean level (package `order=`: $M_H(x)_{rc}\ge M_H(x)_{sc}$ on $A$) | $\delta_B\ge0$ is its $X(1-X)$-weighted average | mean-level order ⇒ $\delta_B\ge0$ (*proved*: a weighted average of non-negative terms) |
 | B6 sign of each row's contextual slope (package `sign=`) | $\delta_W\ge0$ is a positively weighted sum of the two rows' slopes | sign on both rows ⇒ $\delta_W\ge0$ (*proved* under LCE from A2(a); nonparametrically via V5) |
 | B8 monotone nonparametric contextual effects | Prop. 12, local $\delta_W(x)\ge0$ | "each $m_r$ nondecreasing" ⇒ local sign ⇒ … but **local sign everywhere does not imply aggregate $\delta_W\ge0$** (V6 counterexample), so the local and aggregate rungs are non-nested |

@@ -366,3 +366,16 @@ lo7, hi7 = phi0 + lo_in + L_out, phi0 + hi_in + U_out
 dd = (np.sum(Ns * np.maximum(0, xs_g + Tg[:, 0] - 1)) / mu1, np.sum(Ns * np.minimum(xs_g, Tg[:, 0])) / mu1)
 ok(f"Prop 7': truth {truth:.4f} lies in [{lo7:.4f}, {hi7:.4f}], which is inside DD [{dd[0]:.4f}, {dd[1]:.4f}]",
    lo7 - 1e-9 <= truth <= hi7 + 1e-9 and dd[0] - 1e-9 <= lo7 and hi7 <= dd[1] + 1e-9)
+
+# [supp] (corrected after review, Batch B): continuous functions equal P_X-a.e. on A agree on the support of
+# the RESTRICTED measure P_X|_A, which can be smaller than supp P_X cap A. X ~ U[0,1] (row-1 share), A = {1/2}.
+# P(X in A cap U) = length(A cap U) = 0 for every open U, so supp(P_X|_A) is empty, while supp P_X cap A = {1/2}.
+A_pt = 0.5
+f_s, g_s = (lambda t: 0.0), (lambda t: 1.0)                 # agree P_X-a.e. on A, since P(X in A) = 0
+mass_A_near = lambda x, eps: 0.0                            # P(X in A cap (x-eps, x+eps)) = Lebesgue length of a point
+supp_restricted = [x for x in [A_pt] if all(mass_A_near(x, e) > 0 for e in (1e-1, 1e-3, 1e-6))]
+old_set = [A_pt] if 0 <= A_pt <= 1 else []                  # supp P_X cap A
+old_claim = all(f_s(x) == g_s(x) for x in old_set)          # old [supp]: they agree on supp P_X cap A
+new_claim = all(f_s(x) == g_s(x) for x in supp_restricted)  # new [supp]: they agree on supp(P_X|_A)
+ok("[supp] (Batch B): X~U[0,1], A={1/2}: old tag claims 0 = 1 at 1/2 (fails); restricted support is empty "
+   "and the corrected tag holds", (not old_claim) and new_claim and supp_restricted == [])

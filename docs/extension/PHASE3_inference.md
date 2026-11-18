@@ -1,6 +1,6 @@
 # Phase 3: estimation, inference and sensitivity
 
-*Builds on P1, 2a and 2b. Proof steps carry justification tags (2a §0.3, 2b §0.3, plus §0.3 below). Theorems marked "(cited)" apply a published result whose conditions are verified here but whose proof is not repeated. Checks: `verify_phase3.py` (13/13 PASS; `verify_phase3_output.txt`). Monte Carlo: `phase3_montecarlo.py`, 1000 replications per design, with Monte Carlo standard errors (`phase3_montecarlo_output.txt`; cross-check against the package in `phase3_montecarlo_crosscheck.py`).*
+*Builds on P1, 2a and 2b. Proof steps carry justification tags (2a §0.3, 2b §0.3, plus §0.3 below). Theorems marked "(cited)" apply a published result whose conditions are verified here but whose proof is not repeated. Checks: `verify_phase3.py` (15/15 PASS; `verify_phase3_output.txt`). Monte Carlo: `phase3_montecarlo.py`, 1000 replications per design, with Monte Carlo standard errors (`phase3_montecarlo_output.txt`; cross-check against the package in `phase3_montecarlo_crosscheck.py`).*
 
 ---
 
@@ -37,7 +37,7 @@ $\tilde B$ is the right target when the question is about behaviour rather than 
 | [minLin] | the directional derivative of $\beta\mapsto\min_{j\in J}g_j^\top\beta$ ($J$ finite) at $\beta_0$, in direction $h$, is $\min_{j\in J^*(\beta_0)}g_j^\top h$, with $J^*$ the active set |
 | [CLR] | Chernozhukov, Lee & Rosen (2013, *Econometrica* 81:667–737): parametric bounding functions (Condition P, Lemma 4, Thm 4, via Thms 1–2); finite index set as in their Example 1. *Corrected after review: earlier cited as Thm 2; see 2a §0.4.* |
 | [Pop] | Popoviciu: $\operatorname{Var}(Y)\le(b-a)^2/4$ for $Y\in[a,b]$; [BD] Bhatia–Davis: $\operatorname{Var}(Y)\le(M-\mu)(\mu-m)$ |
-| [Lyap] | Lyapunov CLT for independent bounded summands with $\max_iw_i^2/\sum_iw_i^2\to0$ |
+| [Lyap] | Lindeberg–Feller CLT for independent summands $Y_i$ with $\lvert Y_i\rvert\le b_i$, applied relative to the **actual** standard deviation $s_n$ of the sum: it holds when $\max_ib_i/s_n\to0$. *(Corrected after review, Batch B, Nov 2026: earlier stated as a CLT under $\max_iw_i^2/\sum_iw_i^2\to0$ alone, which does not give a variance-standardised CLT when, e.g., only one summand has positive variance. P3.5(a) step 5 now combines it with Chebyshev; see there.)* |
 | [union] | $P(A\cup B)\le P(A)+P(B)$ |
 | [OLS] | consistency and asymptotic normality of OLS for a fixed-dimensional parameter, with heteroskedasticity-robust (HC) variance, independent units, a full-rank design and bounded outcomes |
 | [BR] | the multivariate CLT holds uniformly over all convex sets of $\mathbb R^p$ (Bhattacharya & Rao 1976, *Normal Approximation and Asymptotic Expansions*, Thm 17.5, standard) |
@@ -178,13 +178,17 @@ The same coverage bound holds. With $\alpha_E=0$ and no $S_1$ term, either versi
 
 **(b2) Any candidate set, with a simultaneous critical value (proved here).** Let $\hat\Lambda$ be any data-dependent set of dual-feasible points (vertices or not; for example collected by simulation), and $\hat U=\min_{\lambda\in\hat\Lambda}(\hat\theta_\lambda+\hat k\hat\sigma_\lambda)$, with $\hat U=+\infty$ if $\hat\Lambda=\emptyset$. Then $\liminf_nP(\varphi_U(\beta_0)\le\hat U)\ge1-\alpha_U$ in either of two cases:
 * (i) $\hat k$ is the $(1-\alpha_U)$-quantile of $\max_{\lambda\in\bar\Lambda}Z_\lambda$ for a fixed finite set $\bar\Lambda\supseteq\hat\Lambda$ a.s. (e.g. all of $\Lambda$), with $\sigma_\lambda>0$ on $\bar\Lambda$;
-* (ii) projection: $\hat k=\sqrt{\chi^2_{q,1-\alpha}}$ with $q=\operatorname{rank}\Sigma$. This one event covers both ends, any $\hat\Lambda$, at total level $\alpha$.
+* (ii) projection: $\hat k=\sqrt{\chi^2_{q,1-\alpha}}$ and $\hat\sigma_\lambda=(g_\lambda^\top\hat\Sigma g_\lambda/n)^{1/2}$, in either of two settings: (ii-a) $\Sigma$ is positive definite and $q=\dim\beta$ (use $C-1$ columns and a full-rank design, Remark P3.4.1); or (ii-b) a **reduced full-rank parameterisation**: there are a fixed matrix $L$ ($\dim\beta\times q$) and a vector $b$ with $\beta=L\eta+b$ and $\hat\beta=L\hat\eta+b$ **exactly** (so every error in a null direction of $\Sigma$ is identically zero, e.g. coordinates fixed by known identities), $\sqrt n(\hat\eta-\eta_0)\Rightarrow N(0,\Sigma_\eta)$ with $\Sigma_\eta$ positive definite, and $\hat\Sigma=L\hat\Sigma_\eta L^\top$ with $\hat\Sigma_\eta$ consistent. This one event covers both ends, any $\hat\Lambda$, at total level $\alpha$.
+
+  *(Corrected after review, Batch B, Nov 2026. The earlier statement took $q=\operatorname{rank}\Sigma$ for any $\Sigma$, with a pseudoinverse in the proof. That bounds $g^\top(\hat\beta-\beta_0)$ only for $g$ in the range of $\Sigma$. A singular limit does not control errors of smaller order in its null directions: with $\hat\beta-\beta_0=(Z/\sqrt n,\,-1/n)$, $Z\sim N(0,1)$, the limit covariance is $\operatorname{diag}(1,0)$, the second coordinate gets standard error 0, and the upper bound $\hat\beta_2+0$ misses $\beta_{0,2}$ in every sample. Counterexample due to the referee; `verify_phase3.py`, "P3.5(b2)(ii) null direction".)*
 
 *Proof.*
 1. Under the model the primal LP at $\beta_0$ is feasible ($k_0$ is feasible). For any dual-feasible $\lambda$ and any primal-feasible $k$: $\gamma^\top k=-\lambda^\top Ak\le\lambda^\top s(\beta_0)$. So $\theta_\lambda(\beta_0)\ge\varphi_U(\beta_0)$ for **every** dual-feasible $\lambda$, not only optimal ones. [weak duality; $\lambda\ge0$, $s+Ak\ge0$]
 2. On $\mathcal E=\{\theta_\lambda(\beta_0)\le\hat\theta_\lambda+\hat k\hat\sigma_\lambda\ \forall\lambda\in\bar\Lambda\}$: $\hat U\ge\min_{\lambda\in\hat\Lambda}\theta_\lambda(\beta_0)\ge\varphi_U(\beta_0)$. [1; $\hat\Lambda\subseteq\bar\Lambda$]
 3. (i): $(\theta_\lambda(\beta_0)-\hat\theta_\lambda)/\hat\sigma_\lambda$, $\lambda\in\bar\Lambda$, is a fixed finite collection of standardised linear functionals of $\hat\beta$, jointly asymptotically $N(0,\text{corr})$. So $P(\mathcal E)\to1-\alpha_U$. [OLS; $\hat\Sigma$ consistent; Def $\hat k$]
-4. (ii): by Cauchy–Schwarz in the metric of $\Sigma$, $\lvert g^\top(\hat\beta-\beta_0)\rvert\le\lVert\Sigma^{+1/2}(\hat\beta-\beta_0)\rVert\,(g^\top\Sigma g)^{1/2}$ for every $g$ in the range of $\Sigma$. The first factor, scaled by $\sqrt n$, is asymptotically $\chi_q$. So $\mathcal E$ holds for all $\lambda$ at once, and for both ends, with probability $\to1-\alpha$. [alg; OLS] ∎
+4. (ii): case (ii-b) contains (ii-a) (take $L=I$, $b=0$, $\eta=\beta$). Write $\hat e=\hat\eta-\eta_0$. For every $g$, $g^\top(\hat\beta-\beta_0)=(L^\top g)^\top\hat e$ exactly, so by Cauchy–Schwarz in the metric of $\hat\Sigma_\eta$ (positive definite with probability $\to1$),
+$$\lvert g^\top(\hat\beta-\beta_0)\rvert\le\big(\hat e^\top\hat\Sigma_\eta^{-1}\hat e\big)^{1/2}\big(g^\top L\hat\Sigma_\eta L^\top g\big)^{1/2}=\big(n\,\hat e^\top\hat\Sigma_\eta^{-1}\hat e\big)^{1/2}\hat\sigma_g .$$
+This holds for every $g$ at once, including $g$ with $L^\top g=0$, for which both sides are 0. By continuous mapping, $n\,\hat e^\top\hat\Sigma_\eta^{-1}\hat e\Rightarrow\chi^2_q$, since $\Sigma_\eta$ is nonsingular. So $\mathcal E$ holds for all $\lambda$ at once, and for both ends, with probability $\to1-\alpha$. Nonsingularity of $\Sigma_\eta$ is what the earlier rank-$q$ pseudoinverse argument lacked: there, a null-direction error of order $o(n^{-1/2})$ is neither zero nor controlled. [alg; OLS; continuous mapping] ∎
 
 (ii) needs no enumeration of vertices and is valid for any collection rule. It is conservative, increasingly so as $q$ grows (many districts). (i) is sharper, but needs a fixed superset, and enumerating all dual vertices is feasible only in small problems. Checked (`verify_phase3.py`): weak duality on 500 random dual-feasible points. In a small LP, the projection bound built from the plug-in dual alone covered in 100% of 3000 replications, against 94.5% for a one-candidate $z$-bound.
 
@@ -199,7 +203,11 @@ Until this is settled, the CLR-type interval as implemented is an *Algorithm* wi
 2. On $\mathcal E$, the true $k_0$ satisfies $s(\beta_0)+Ak_0\ge0$, hence $s(\hat\beta)+\hat k\hat\sigma_s+Ak_0\ge0$, i.e. $k_0\in\hat\Theta^+$. [2b:Thm 2 / 2a:P1, the true value is feasible; $\mathcal E$]
 3. On $\mathcal E$, $\tilde B=c(\beta_0)+\gamma^\top k_0$ lies in $[c(\hat\beta)-\hat k\hat\sigma_c+\min_{\hat\Theta^+}\gamma^\top k,\ c(\hat\beta)+\hat k\hat\sigma_c+\max_{\hat\Theta^+}\gamma^\top k]$. [2; $\mathcal E$; 2b:D2 with sample weights]
 4. $E=\sum_iw_ie_i$ with $e_i$ independent given the design, mean 0, and $\operatorname{Var}(e_i\mid V_i)\le\tfrac14$. So $\operatorname{Var}(E\mid\text{design})\le S_1^2$. [P3-S1; CE; Pop]
-5. $P(\lvert E\rvert>z_{\alpha_E}S_1)\to\le\alpha_E$, provided $\max_iw_i^2/\sum_iw_i^2\to0$. [Lyap; 4]
+5. $\limsup_nP(\lvert E\rvert>z_{\alpha_E}S_1)\le\alpha_E$, provided $\max_iw_i^2/\sum_iw_i^2\to0$. Let $s_n=\operatorname{sd}(E\mid\text{design})\le S_1$ (step 4). It suffices that every subsequence has a further subsequence along which the $\limsup$ is at most $\alpha_E$. Take one along which $s_n/S_1\to\rho\in[0,1]$.
+   * If $\rho=0$: by Chebyshev, $P(\lvert E\rvert>z_{\alpha_E}S_1)\le s_n^2/(z_{\alpha_E}^2S_1^2)\to0$.
+   * If $\rho>0$: the summands $w_ie_i$ are independent with $\lvert w_ie_i\rvert\le\lvert w_i\rvert$, and $\max_i\lvert w_i\rvert/s_n\le2\max_i\lvert w_i\rvert/\big(\rho'(\textstyle\sum_iw_i^2)^{1/2}\big)\to0$ for any $0<\rho'<\rho$ and $n$ large. So Lindeberg's condition holds relative to $s_n$, $E/s_n\Rightarrow N(0,1)$, and $P(\lvert E\rvert>z_{\alpha_E}S_1)\le P(\lvert E\rvert/s_n>z_{\alpha_E})\to\alpha_E$.
+
+   [Lyap; Chebyshev; 4] *(Corrected after review, Batch B, Nov 2026: the earlier step applied a CLT under the weight condition alone, which fails when, e.g., only one summand has positive variance. The subsequence argument, Chebyshev where $s_n/S_1\to0$ and Lindeberg where it is bounded away from 0, is the referee's; the conclusion and the allowance $z_{\alpha_E}S_1$ are unchanged.)*
 6. If $B\notin\mathrm{CI}$, then either $\tilde B$ lies outside the interval in 3, or $\lvert E\rvert>z_{\alpha_E}S_1$. [$B=\tilde B+E$; triangle inequality]
 7. So $P(B\notin\mathrm{CI})\le P(\mathcal E^c)+P(\lvert E\rvert>z_{\alpha_E}S_1)\to\le\alpha_U+\alpha_L+\alpha_E$. [union; 1, 3, 5, 6] ∎
 
@@ -447,6 +455,7 @@ The district shifts are added to both groups' rates, and depend on the district'
 
 ## 10. Open items
 
+* *Closed after review (Batch B, Nov 2026):* (1) P3.5(b2)(ii) now requires a positive definite $\Sigma$ or a reduced full-rank parameterisation; a singular $\hat V$ in the package's projection interval needs a guard (rank check, or $q=\dim\beta$ with a warning). (2) The residual step of P3.5(a) is completed by the Chebyshev/Lindeberg subsequence argument. Both repairs leave every default and every allowance unchanged.
 * Conjecture P3.5(b3): validity of collecting dual vertices by simulation, with $k_p$ computed over the collected set. A proved reduction to (b1) is given; recovery and the $k_p$ effect are open.
 * Boundary cases where Slater fails (implied rates exactly 0 at a vertex): rate and limit of the endpoint estimator.
 * The rate of the hull error $\varphi(\beta_0;\hat A)-\varphi(\beta_0;A)$, and inference for the population-hull endpoint.

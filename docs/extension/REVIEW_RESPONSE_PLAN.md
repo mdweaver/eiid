@@ -24,11 +24,11 @@ These change what gets written, so they come first. The recommended choice is li
 
 | # | Decision | Recommended | Alternative |
 |---|---|---|---|
-| D1 | Covariates $Z$ (R-15) | **Decided (Nov 2026): Option B.** The package gets covariate adjustment. Develop a new Phase 2c with two rungs: (i) $Z$ shifts baselines only, $E[\beta\mid X,N,Z]=M_H(X)+\Gamma(Z)$ with $\Gamma(Z)$ linear in $Z$ (this generalises M1 and JKST App. C, and adds no unidentified dimensions); (ii) $Z$ also modifies contextual effects, $H_c(Z)=H_{c0}+\sum_\ell Z_\ell G_{c\ell}$ (M1′; the skew parts of the $G_{c\ell}$ add $L(C-1)R(R-1)/2$ unidentified dimensions). $\log N$ as a covariate relaxes A3. | — |
-| D2 | Units outside $A$ (R-05) | **Carry $P(X\in A)=1$ through §6 of 2a.** Also add a short Prop. 7′ that writes down what `range = "trim"` already does: the LP over kept units plus Duncan–Davis for dropped units. The code already does this, so the proof is cheap. | Assumption only, with no Prop. 7′. |
-| D3 | Unit-level term under clustering (R-28) | **Both.** State P3.5(a) for independent units (Option A). Add P3.5(c), a cluster allowance (Option B). The package already accepts `cluster`, so Option A alone would leave a published option without a valid interval. | Option A only, and stop `ci_actual` when `cluster` is given. |
+| D1 | Covariates $Z$ (R-15) | **Decided (Nov 2026): wanted in the package, but low priority, because it needs stronger assumptions.** This revision keeps the no-covariate model ($E[\beta\mid X,N]=M_H(X)$, with districts as the only grouping). Covariate adjustment is a planned Phase 2c, after the response (WS8). | — |
+| D2 | Units outside $A$ (R-05) | **Decided (Nov 2026).** **Carry $P(X\in A)=1$ through §6 of 2a.** Also add a short Prop. 7′ that writes down what `range = "trim"` already does: the LP over kept units plus Duncan–Davis for dropped units. The code already does this, so the proof is cheap. | Assumption only, with no Prop. 7′. |
+| D3 | Clustering (R-28) | **Decided (Nov 2026): no superpopulation target, no cluster adjustment.** Inference is conditional on the design *and on the district effects*, so the residuals are taken as independent across units (P3-S1a). Riding-level shocks are fixed features of the observed electorate. Under M1/M2 they are parameters in the mean. Under M0 they are misspecification (Prop. D4), not a variance problem. The response letter explains this, following Abadie, Athey, Imbens and Wooldridge (see R-28). | — |
 | D4 | Default CI in the package (R-29) | **Decided (Nov 2026).** **Keep CLR-type as the default, but compute the critical value over a fixed superset of candidates (see WS3, R-29).** This makes it provably valid. Report the simulated-collection version as an *Algorithm* option. | Make the conservative P3.5(a) interval the default, and keep CLR as an option. |
-| D5 | Formal asymptotic scope (R-31) | **R1 only (fixed $D^\star$, fixed dimension).** State R2/R3 results as conjectures backed by simulation. | Also prove R3 for M0 with growing independent clusters. This is feasible: standard cluster asymptotics. |
+| D5 | Formal asymptotic scope (R-31) | **Decided (Nov 2026).** (i) **M0:** the usual asymptotics in every regime (the dimension is fixed). (ii) **M1/M2 in R1:** fixed-dimension asymptotics. (iii) **M1/M2 in R3:** high-dimensional Gaussian approximation (Chernozhukov–Chetverikov–Kato), with a rate condition. (iv) **All regimes, including R2:** a new finite-sample CI (Theorem P3.8). With the design fixed, each LP constraint value is a linear combination of independent variables bounded in $[0,1]$, so Hoeffding/Bernstein bounds plus a union bound over constraints give valid finite-sample coverage. CLR stays the sharper default, and its R2 coverage is reported as a *simulation finding*. | — |
 
 ---
 
@@ -52,7 +52,7 @@ These change what gets written, so they come first. The recommended choice is li
 | R-12 | 3.4 | S | 2a §4 (before Theorem 1) | Add a remark that sharpness is relative to the continuous latent-rate model, not to the finite set of integer cell counts. | — |
 | R-13 | 4.2 | X | 2a Prop. 5 | Add: the interval is empty unless $0\le Q_{c,rs}$ and $\sum_cQ_{c,rs}=1$ hold, as the probability restrictions require. | — |
 | R-14 | 4.4 | X | 2a Cor. 6.1(c) | Replace "strong contextual effects" with the exact condition: part (b)'s common-sign condition fails, which (given the sum restrictions) means at least one pure-poll extrapolated rate is negative. | — |
-| R-15 | 3.1, rev. 5.1 | S | P1 §1.5, §1.6, A3; new Phase 2c | Apply D1 (Option B): A3 becomes $E[\beta\mid X,N,Z]=E[\beta\mid X,Z]$, matched by the model $E[\beta\mid X,N,Z]=M_{H(Z)}(X)+\Gamma(Z)$. Phases 2a/2b are the special cases with no $Z$ and with $Z$ = district dummies. Until Phase 2c is written, no text may say the covariate case is proved. | New `covariates =` argument (WS2c) |
+| R-15 | 3.1, rev. 5.1 | S | P1 §1.5, §1.6, A3 | Apply D1. Rewrite A3 as $E[\beta\mid X,N]=M_H(X)$ (with district shifts under M1/M2) and remove $Z$ from $\mathcal G$. Move M1′ and continuous covariates to a "Planned extension" paragraph that names the extra assumptions. No text may say the covariate case is proved. | — (WS8, later) |
 | R-16 | 5 | X | 2a Prop. 9 | State the domain: the restrictions on $\Delta$ hold on all of $\Delta^{R-1}$ for the "linear $\Delta=M_{K'}$" characterisation. Move a short version of Prop. 9 into the introduction or §2 as motivation. | — |
 | R-17 | 6 | X | 2a new §4.3 | Add "What Theorem 1 and Prop. 7 each need": the sharp set needs the law of $T$ given $(X,N)$, which in practice means smoothing or pooling because every $(X,N)$ is unique. The outer set needs only the regression. Point to the series-based $\Theta_X$ planned for the second release. | — |
 
@@ -70,16 +70,16 @@ These change what gets written, so they come first. The recommended choice is li
 | R-25 | 4.2 | S | P3 Lemma P3.1 | Add: this holds for a fixed constraint system and objective. It says nothing about joint variation in $(Q,\mu)$ (see R-06). | — |
 | R-26 | 4.3 | S/P | P3 Prop. P3.2 | (i) State convergence along a nested sampling sequence, or add an argument for non-nested hulls. (ii) Call Slater a strict-interiority condition and say it fails when an implied rate is 0 at a vertex. Note that P3.5's coverage does not need Slater (step 2 uses only feasibility). (iii) Split the error into estimation error ($O_p(n^{-1/2})$) and hull error (≥ 0, rate not shown). | Optional: report the minimum LP slack as a boundary flag |
 | R-27 | 4.4 | **E** (minor) | P3 Theorem P3.4(ii) | The non-Gaussian limit requires at least two active gradients with $(g_\lambda-g_{\lambda'})^\top\Sigma(g_\lambda-g_{\lambda'})>0$. Parametrise only $C-1$ outcome columns, so $\Sigma$ is nonsingular. | Check that $\hat\Sigma$ is built on $C-1$ columns (verify `rxc_core.R`) |
-| R-28 | 4.5 | **E** | P3 P3-S1, Theorem P3.5(a) steps 4–5 | Apply D3. Split P3-S1 into (S1a) units independent given the design, and (S1b) districts independent with arbitrary dependence within. P3.5(a) assumes S1a. New **P3.5(c)** under S1b: allowance $S_1^{cl}=\tfrac12(\sum_dW_{dr}^2)^{1/2}$, $W_{dr}=\sum_{i\in d}w_{ir}$; CLT over districts with $D^\star\to\infty$ and $\max_dW_{dr}^2/\sum_dW_{dr}^2\to0$. Cluster Bhatia–Davis version: $\sum_{i\in d}w_ie_i$ lies in an interval of length $W_d$ with mean 0, so its variance is at most $W_d^2\bar m_d(1-\bar m_d)$. Add the reviewer's common-shock example. | **Yes.** With `cluster`, `ci_actual` must use $S_1^{cl}$ (it now uses $\sum_iw_i^2$, see `R/rxc_infer.R:291`). Warn when there are few clusters. |
+| R-28 | 4.5 | **E** (assumption mismatch) | P3 P3-S1, Theorem P3.5(a); P1 A6; P2b D4 | Apply D3. **Docs:** (1) Replace P3-S1 with *S1a: given the design $\{(N_i,X_i,D_i)\}$ and the district effects, the unit residuals $e_i$ are independent.* Delete "arbitrary dependence within districts for M0, cluster-robust variances." (2) New P3 §0.4, "Where the randomness comes from": every precinct and riding is observed, so the uncertainty is neither sampling-based nor design-based in the Abadie et al. sense. It is model-based: the contextual-effects assumption is a statement about $E[\beta\mid V]$, which needs $\beta_i$ to be random given $V_i$. The targets $B$ and $\tilde B$ condition on this electorate, so riding shocks are fixed and belong in the mean (M1/M2), not in the residual. Under M0, a riding shock that is non-affine in composition is the omitted-variable failure of Prop. D4, which clustered SEs would not repair. (3) State the remaining assumption plainly: no dependence within a riding beyond its riding effect (e.g. neighbourhood spillovers). Name it as a limitation. **Response:** accept the reviewer's point that P3.5(a) needed independence, and say that the framework now assumes it explicitly, with the reasons above. Use the reviewer's common-shock example: under our target it is a riding effect, absorbed by M1 and detected by the new M0-vs-M1 test. | Deprecate `cluster` (warn and point to M1). Add a Wald test of M0 against M1 (district shifts zero), so riding shocks are detectable. |
 | R-29 | 4.6 | **E** (claim) | P3 Theorem P3.5(b) | Split it. **(b1) Theorem:** CLR with the full vertex set $\Lambda$, which is finite for a fixed design. **(b2) Algorithm:** collect candidates at simulated draws. **Proof route for a valid (b2):** by weak duality, $\theta_\lambda(\beta_0)\ge\varphi_U(\beta_0)$ for *every* dual-feasible $\lambda$. So $\min_{\lambda\in\hat V}(\hat\theta_\lambda+\hat k\hat\sigma_\lambda)$ covers $\varphi_U$ whenever $\hat k$ controls the maximum over a *fixed* set containing $\hat V$. A data-dependent subset is valid if its critical value is computed over the fixed superset (or the collected set is independent of $\hat\beta$ given the draws, to be checked). Write this as Prop. P3.5(b2) if it closes, otherwise as a Conjecture. List rarely selected vertices, degenerate faces, singular $\Sigma$ and a growing $\lvert\Lambda\rvert$ as the conditions to address. | Per D4: compute the critical value over the union of collected vertices *and* the plug-in vertex; print "algorithmic" when the theorem's conditions are not checked |
 | R-30 | 4.7 | **E** (P1) | P1 §1.6; P3 Prop. P3.6(b) | Fix P1's count to $(D^\star-1)(C-1)R(R-1)/2$, with the derivation $(C-1)R(R+1)/2-(C-1)R$. State the Wald/F test for fixed dimension. Under a growing number of restrictions it becomes a conjecture with simulation support. | Check the df in the Wald test code |
-| R-31 | 4.8–4.9 | **E** (scope) | P3 §0.1, §6, Prop. P3.7 | Apply D5. Replace "results are for R1/R3" with the reviewer's six-row table of what each model and regime supports. P3.7(a), "dropping constraints enlarges the set", stays a proposition. P3.7(b) becomes a conditional statement: *if* the procedure is valid on the kept districts, choosing them from the design alone keeps conditional coverage. "CLR restores coverage" in R2 becomes a *Simulation finding*. | `eiBounds()` note when the median group size is small (R2 warning) |
+| R-31 | 4.8–4.9 | **E** (scope) | P3 §0.1, §6, Prop. P3.7 | Apply D5. Replace "results are for R1/R3" with a table of which result covers each model and regime (D5 (i)–(iv)). Add **Theorem P3.8 (finite-sample CI)**. P3.7(a), "dropping constraints enlarges the set", stays a proposition. P3.7(b) becomes a conditional statement: *if* the procedure is valid on the kept districts, choosing them from the design alone keeps conditional coverage. "CLR restores coverage" in R2 becomes a *Simulation finding*. | `ci_method = "finite"`; note when the median group size is small, pointing to it |
 | R-32 | 4.3, 9 | S | P3 §3–4 | Central point to add: **coverage of the true parameter does not depend on the hull.** The true $k_0$ satisfies the population constraints, which include those at sample-hull vertices ($\hat A_d\subseteq A_d$). So P3.5 step 2 holds with $\hat A$, and the hull affects only width and the distribution of the endpoint estimator. State P3.4 as a fixed-design result for the sample-hull endpoint $\varphi(\beta_0;\hat A)$. | — |
 | R-33 | 4.10 | S/X | P3 §0.2 | Three targets: $B^*$ (superpopulation), $B$ (realised), $\tilde B$ (conditional mean given the design, $=E[B\mid\text{design}]$). Inference is conditional on the design. Covering $B^*$ would also need design-sampling variation, which is left open. Fix "both linear in $K$": only $\tilde B$ is affine in $K$. | Help text for `ci_model`/`ci_actual` |
 | R-34 | 4.11 | S | P3 Prop. S1 | Label it an outer bound under bounded deviations, not the sharp set. | `sensitivity()` doc |
 | R-35 | rev. 5.2 | **E** (inconsistent) | P1 A1; P3 §7 | Change P1 A1 to say turnover is an open extension, as P3 §7 says. Note that it changes both the DD sets and the regression identity. | — |
-| R-36 | rev. 5 | S | P1 A6, A10 | Align A6 with the split S1a/S1b, and A10 with the regime table (R-31). | — |
-| R-37 | rev. 6 | X | P3 §8 | Report Monte Carlo standard errors, and use at least 1000 replications for coverage cells. Add designs: (i) a common shock within districts, showing that P3.5(a) under-covers and P3.5(c) does not; (ii) truth on the boundary, so Slater fails; (iii) R2 with growing $D^\star$, reported as simulation findings. | Benchmark/MC scripts |
+| R-36 | rev. 5 | S | P1 A6, A10 | Align A6 with S1a (D3) and A10 with the regime table (R-31). | — |
+| R-37 | rev. 6 | X | P3 §8 | Report Monte Carlo standard errors, and use at least 1000 replications for coverage cells. Add designs: (i) riding shocks correlated with composition, showing that M0 fails, M1 covers, and the M0-vs-M1 test detects the shocks; (ii) truth on the boundary, so Slater fails; (iii) R2 with growing $D^\star$, comparing the CLR (simulation finding) and finite-sample (theorem) intervals. | Benchmark/MC scripts |
 
 ---
 
@@ -90,33 +90,23 @@ R-04, R-06, R-07, R-23, R-27, R-30, R-35, plus the wording fix in R-33.
 * For each, write the corrected statement, a one-line counterexample to the old statement, and a verification check.
 * **Done when:** every row marked **E** above has a corrected statement, and `verify_*.py` contains a check that fails on the old statement (§3).
 
-### WS2: Scope and assumptions (docs; needs D1, D2)
+### WS2: Scope and assumptions (docs)
 R-01, R-02, R-05, R-10, R-11, R-12, R-15, R-19, R-22, R-25, R-33, R-36.
 * Add a new **P1 §1.7, "Objects and targets"**, cited everywhere: $\Theta_I\subseteq\Theta_X\subseteq\Theta_O$ with the information each uses; the three hulls; the three targets; continuous-rate sharpness.
 * Phases 2a, 2b and 3 then point to it, instead of repeating it.
-
-### WS2c: Covariate adjustment, new Phase 2c (needs D1; may run alongside WS3)
-Derive for both rungs:
-* the identification decomposition: which parts of $\Gamma$ and $G$ are identified, and the unidentified dimension;
-* the estimand (the Lemma 2 analogue, with weights that now involve moments of $(N,X,Z)$);
-* the outer set. Because $M_{H(Z)}(x)$ is bilinear in $(x,z)$, the vertex reduction of 2a Lemma 3(a) does not carry over to the joint hull of $(X,Z)$. The constraints must be imposed at every observed $(X_i,Z_i)$, or at the vertices of $A\times\operatorname{conv}(\operatorname{supp}Z)$ if a product region is assumed;
-* sharpness, via 2b Theorem 1′ with $V=(X,N,Z)$;
-* the pooling result (the D4 analogue, conditioning on $(X,N)$): when omitting $Z$ leaves M0 valid.
-
-Also: a rank condition on the design; inference, which reuses P3 unchanged because the target stays affine in the unknowns; a Monte Carlo design with a confounding covariate; and a `covariates =` argument in `eiBounds()`/`ladder()`, adding the covariate rungs to the ladder.
 
 ### WS3: Proof hardening (docs; may run alongside WS2)
 R-03, R-08, R-09, R-13, R-14, R-16, R-18, R-20, R-26, R-29 (b1 and the weak-duality route for b2), R-34.
 * R-09 produces a citation table, with an edition and page for every † tag. Remove the † marks once checked.
 
-### WS4: Restructure inference in Phase 3 (needs WS1, D3–D5)
-R-28, R-29, R-31, R-32, and the regime table.
+### WS4: Restructure inference in Phase 3 (needs WS1)
+R-28, R-29, R-31, R-32, the new §0.4 on where the randomness comes from, and the regime table.
 
 New layout for P3 §5–6:
 1. **Theorem P3.5(a):** conservative CI; S1a; covers $\tilde B$ and $B$.
 2. **Theorem P3.5(b1):** CLR with the full vertex set.
 3. **Proposition/Conjecture P3.5(b2):** the collected candidate set (weak-duality argument).
-4. **Theorem P3.5(c):** cluster allowance, under S1b with growing $D^\star$.
+4. **Theorem P3.8:** the finite-sample CI (all regimes).
 5. **Proposition P3.7(a)**, plus the conditional statement P3.7(b).
 6. **Table:** what is proved for each model and regime.
 7. **§10 Open items:** add R2/R3 theory, design-sampling inference for $B^*$, the hull-error rate, and boundary cases without Slater.
@@ -125,7 +115,8 @@ New layout for P3 §5–6:
 
 | Change | Files | Item |
 |---|---|---|
-| Cluster allowance ($\tfrac14\sum_dW_d^2$, plus a cluster Bhatia–Davis version) when `cluster` is given. Warn when there are fewer than about 30 clusters. | `R/rxc_infer.R` (`.rxc_fpc_sd`, line ≈291), `R/rxc_api.R` | R-28 |
+| Deprecate `cluster` with a message (D3). Add the M0-vs-M1 Wald test. | `R/rxc_api.R`, `R/rxc_infer.R` | R-28 |
+| `ci_method = "finite"` (Hoeffding/Bernstein + union bound, Theorem P3.8) | `R/rxc_infer.R` | R-31 |
 | Critical value over the fixed superset of candidates. Add an `ndraw` note in the output. Add `ci_method = c("clr", "conservative")`. | `R/rxc_infer.R` (`.rxc_collect`, `.rxc_ci_clr`) | R-29, D4 |
 | Messages naming the failing group for rank and dimension problems (quadric-free support for M0/M2; affinely spanning support for M1; full-dimensional hull). | `R/rxc_core.R` | R-02, R-07, R-19 |
 | Boundary flag (minimum slack at the optimum) and a small-group (R2) note. | `R/rxc_infer.R`, `R/rxc_api.R` | R-26, R-31 |
@@ -134,7 +125,8 @@ New layout for P3 §5–6:
 | Update the theory column and inference defaults in `PHASE4_implementation.md`. | docs | all |
 
 **Tests to add:**
-* the cluster allowance is at least the unit allowance, with equality for singleton clusters;
+* the finite-sample CI contains the CLR CI in large samples, and covers in a small simulation;
+* the M0-vs-M1 test rejects with composition-correlated riding shocks;
 * the critical value over the superset is at least the one over the selected set;
 * a rank error for degenerate designs;
 * the Wald df.
@@ -145,13 +137,33 @@ Then: `R CMD check`, and rerun the JKST replication test to confirm it still mat
 R-37.
 * Rerun `phase3_montecarlo.py` at 1000 or more replications and report Monte Carlo SEs.
 * Add the common-shock, boundary and growing-$D^\star$ designs.
-* Rerun the NZ benchmark with the clustered allowance, using electorates as clusters.
+* Rerun the NZ benchmark with M1 by electorate and with the finite-sample CI.
 * Update `benchmarks/results/ei_datasets_nz_summary.md`.
 
 ### WS7: Exposition and the response letter (last)
 * Exposition items: R-16 (Prop. 9 earlier), R-17 (Theorem 1 vs Prop. 7 information), R-21, R-24 (DiD proposition).
 * Write **`REVIEW_RESPONSE.md`**: for each R-xx, quote the comment, give the response, and point to the new location (file § and result number).
+* **Response to the clustering concern (R-28):** a dedicated section of the letter, not a table row. It should:
+  1. accept that P3.5(a) used independence that P3-S1 did not grant;
+  2. explain, citing Abadie, Athey, Imbens & Wooldridge (2020, *Econometrica*; 2023, *QJE*), that clustering adjustments are justified by clustered sampling or clustered assignment, and EI has neither: all precincts and ridings are observed, and the targets refer to this electorate;
+  3. say the uncertainty is model-based, conditional on the design and the riding effects, so riding shocks are parameters (M1/M2) or misspecification (M0, Prop. D4), not residual dependence;
+  4. state the remaining independence assumption and its limitation (spillovers within a riding beyond the riding effect);
+  5. note that a superpopulation target over riding redraws would need cluster methods and many ridings. We do not pursue that target.
 * Update both "What I regard as established" tables with the new status labels. Rows the reviewer marked *Incorrect* or *Not established* must show either the corrected result or a downgrade to Conjecture or Open.
+
+---
+
+### WS8: Covariate adjustment, new Phase 2c (low priority; after M7)
+Both rungs need stronger assumptions than the current models: linearity in $Z$, and a joint support condition on $(X,Z)$. The plan is kept here so the work is ready when it is scheduled.
+
+Derive for both rungs:
+* the identification decomposition: which parts of $\Gamma$ and $G$ are identified, and the unidentified dimension;
+* the estimand (the Lemma 2 analogue, with weights that now involve moments of $(N,X,Z)$);
+* the outer set. Because $M_{H(Z)}(x)$ is bilinear in $(x,z)$, the vertex reduction of 2a Lemma 3(a) does not carry over to the joint hull of $(X,Z)$. The constraints must be imposed at every observed $(X_i,Z_i)$, or at the vertices of $A\times\operatorname{conv}(\operatorname{supp}Z)$ if a product region is assumed;
+* sharpness, via 2b Theorem 1′ with $V=(X,N,Z)$;
+* the pooling result (the D4 analogue, conditioning on $(X,N)$): when omitting $Z$ leaves M0 valid.
+
+Also: a rank condition on the design; inference, which reuses P3 unchanged because the target stays affine in the unknowns; a Monte Carlo design with a confounding covariate; and a `covariates =` argument in `eiBounds()`/`ladder()`, adding the covariate rungs to the ladder.
 
 ---
 
@@ -166,7 +178,8 @@ Add these to the existing `verify_*.py` scripts and log them in each phase's ver
 | $V(Q,\mu)=\mu Q$ is not jointly concave (finite-difference Hessian) | `verify_phase2a.py` | R-06 |
 | D4(b): $D\perp X$ but $D$ depends on $N$ ⇒ pooled $E[\beta\mid X,N]$ is not of the form $M_{H'}(X)$ | `verify_phase2b.py` | R-23 |
 | M1 df: the rank difference between the M2 and M1 designs equals $(D^\star-1)(C-1)R(R-1)/2$ | `verify_phase2b.py` | R-30 |
-| Common shock: $\operatorname{Var}(E)$ exceeds $S_1^2$ and is at most $(S_1^{cl})^2$ | `verify_phase3.py` | R-28 |
+| D4(b) with fixed riding shocks: M0's pooled mean is not $M_{H'}(X)$, and the M0-vs-M1 restriction fails | `verify_phase2b.py` | R-23, R-28 |
+| Finite-sample bound: the Hoeffding radius dominates the simulated deviation of each constraint | `verify_phase3.py` | R-31 |
 | Any dual-feasible $\lambda$ gives $\theta_\lambda(\beta_0)\ge\varphi_U(\beta_0)$ (weak duality, random LPs) | `verify_phase3.py` | R-29 |
 | Equal active gradients that differ only in null directions of $\Sigma$ give a Gaussian limit | `verify_phase3.py` | R-27 |
 
@@ -183,7 +196,8 @@ Each new check should **fail on the old statement and pass on the new one**, so 
 | M3 | WS2 and WS3 | The P1 §1.7 objects section exists; citation table complete |
 | M4 | WS4 (Phase 3 restructure) | Regime table; every inference result carries a status label |
 | M5 | WS5 (package 0.2.1) | `R CMD check` clean; new tests pass; JKST replication unchanged |
-| M6 | WS6 | Monte Carlo with SEs; the common-shock design shows the fix |
+| M6 | WS6 | Monte Carlo with SEs; the riding-shock and R2 designs reported |
 | M7 | WS7 | `REVIEW_RESPONSE.md` covers R-01…R-37 |
+| M8 | WS8 (covariates, Phase 2c; package 0.3.0) | Later; low priority |
 
 The reviewer's precondition for Phase 3, the link between $\operatorname{supp}P_X$, $A$ and $\hat A$, is closed by R-11 (definitions) and R-32 (the hull does not affect coverage of the parameter). Both are in M3/M4, before any code change that depends on them.

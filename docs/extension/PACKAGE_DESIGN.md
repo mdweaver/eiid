@@ -36,7 +36,7 @@ Notation follows PHASE2a/2c.
 3. **New results** (§5):
    * **(P-S, proved)** For any $R$, pairwise ordering and weighted-local monotonicity for the same pair restrict the *same* linear functional of $K$ from opposite sides. Together they confine it to an interval whose half-width is the identified directional slope of $\tau$. GPT's 3.B is the $R=2$ case.
    * **(P-R, proved for star trees; checked for others)** One pair cuts $R-1$ of the $R(R-1)/2$ unknown directions. A spanning tree of $R-1$ pairs cuts all of them [V7]. This is the precise sense in which more groups give "more opportunity". In 2×2 there is only one direction.
-   * **(P-N, proved, with conjecture C1)** In 2×2 under LCE: signed slopes ⊂ weighted-local ⊂ $\delta_W\ge0$. The second inclusion holds whenever a design point $x^*$ lies in the composition hull; C1 says it always does [V3].
+   * **(P-N, proved, with conjecture C1)** In 2×2 under **pooled** LCE (M0), or within each district: signed slopes ⊂ weighted-local ⊂ $\delta_W\ge0$. The second inclusion holds whenever a design point $x^*$ lies in the composition hull; C1 says it always does [V3].
    * **(DiD-S, proved)** The sandwich lemma applied to *changes* gives a closed-form DiD interval under first-difference LCE. It needs two direction assumptions and no per-period linearity (§7).
 4. **Two ladders.**
    * The assumption ladder (§3) has a common data-only base and three non-nested tracks: direction, smoothness and scale/dispersion.
@@ -122,7 +122,7 @@ Assumptions on different tracks are **non-nested**: report them side by side. Wi
 | T1.3 | joint signs over several columns (M4) | ✓ | proved (2c); [V6] |
 | T1.4 | N2: each group's mean monotone in composition, any shape | ✓ | outer LP (2c) |
 | T1.5 | local-everywhere signs (EGGHM Props 12–13, N2.3) | ✓ | non-nested with T1.2 (V6 of 1b) |
-| T1.6 | unit-level ordering, $\beta_{ir}\ge\beta_{is}$ for each unit (N1/B5) | ✓ | exact (M2) |
+| T1.6 | unit-level ordering, $\beta_{ir}\ge\beta_{is}$ for each unit (N1/B5) | ✓ | sharp for continuous unit tables (M2; integer tables: R15) |
 
 ### Track 2: smoothness (functional form)
 | Rung | Content | Refutable | Status |
@@ -186,7 +186,7 @@ Plausibility tier: 0 data only · 1 direction · 2 shape · 3 parametric · 4 co
 | **M-DISP** (A, §13.5) | V | Binomial voting within cells; residual dispersion ≤ ε; covariance ceilings | unit / second moment | actual | 3 | ✓ (overdispersion slope) | SOCP/LMI or cuts | outer |
 | **M-CAR** (§14) | Q + covariates | Conditional on Z, composition is as-if random up to δ | mean, conditional on Z | model | 3 | partly (§14.3) | rows per Z cell | outer |
 | **M-MULTI** (C) | Con | Contests share contextual structure (contests as districts; single index) | link | model | 3–4 | ✓ | rows | sharp in the LP |
-| **M-PER** (DiD: FD, R1/R2/R4, Δ4) | Per | Changes are linear in composition; one restriction on $\Delta K$; or signs on changes | link | DiD | 1–4 | some (equal quadratics) | rows / union | Δ0, Δ4 exact; FD sharp in the LP |
+| **M-PER** (DiD: FD, R1/R2/R4, Δ4) | Per | Changes are linear in composition; one restriction on $\Delta K$; or signs on changes | link | DiD | 1–4 | some (equal quadratics) | rows / union | Δ0, Δ4 sharp for continuous tables; FD sharp in the LP |
 | shifters (§13.6) | excluded variable | A composition shifter that does not affect rates directly | mean | model | 3 | IV-type test | rows | open |
 
 **Part B: dials, power, practicality, extension and status.**
@@ -195,10 +195,10 @@ Plausibility tier: 0 data only · 1 direction · 2 shape · 3 parametric · 4 co
 |---|---|---|---|---|---|---|---|---|
 | M-DATA | δ (table error) / yes | E4 can point-identify $K$; one table pins $(R-1)(C-1)$ directions (proved) | good | E4 with ≥2 tables of differing composition | per-period tables | published cross-tabs | E4/E5 proved in part (NA §13) | NA §5, §13 |
 | M-SHARP | — | small–medium (NA §9) | series tuning | general | per period | none | consistency open (R9) | NA §6; PHASE4 |
-| M-SIGN | slack $\eta$ on $\delta$ / yes | width ratio 0.67–0.70 on JKST [V2] | good | W1 vs W2 ambiguity for $R\ge3$ | Δ4 (exact) | none | proved (M2–M5) | 2c |
-| M-ORD | slack / yes | large with M-LOC (sandwich) [V5] | good | each pair cuts $R-1$ directions (P-R) | MTR on changes | none | proved (M5(b), M2) | 2c, PHASE4 |
-| M-LOC | slack / yes | median width ratio 0.75–0.90 alone, 0.47–0.77 with M-ORD [V5] | needs hull support in the chosen direction | same functional as M-ORD (P-S) | spillover-sign sandwich (DiD-S) | none | P-S proved; P-N proved apart from C1 | §5 |
-| M-N2 | Lipschitz slack / yes | medium | τ estimation; grid choice | W1/W2; N2 no longer implies $\delta_W$ for $R\ge3$ | N2 on changes | none | outer validity open (R7) | 2c §4 |
+| M-SIGN | slack $\eta$ on $\delta$ / yes | width ratio 0.67–0.70 on JKST [V2] | good | W1 vs W2 ambiguity for $R\ge3$; W2 is one pooled sum | Δ4 (continuous tables) | none | **experimental (0.3.0).** M2 (continuous tables), M3, M5(a)–(b) per rung, M5(c) for M0/within district; R3, R10 for the pooled model; grouped rungs R16 open | 2c, 5a |
+| M-ORD | slack / yes | large with M-LOC (sandwich) [V5] | good | each pair cuts $R-1$ directions (P-R) | MTR on changes | none | proved (M5(b) with district-specific ordering under grouped rungs; M2 for continuous tables) | 2c, PHASE4 |
+| M-LOC | slack / yes | median width ratio 0.75–0.90 alone, 0.47–0.77 with M-ORD [V5] | needs hull support in the chosen direction | same functional as M-ORD (P-S) | spillover-sign sandwich (DiD-S) | none | P-S proved; P-N proved for M0 apart from C1 | §5 |
+| M-N2 | Lipschitz slack / yes | medium | τ estimation; prespecified degree; person-weighted bins (Lemma N2.4) | W1/W2; N2 no longer implies $\delta_W$ for $R\ge3$ | N2 on changes | none | global N2 only (local rows dropped, U4(a)); outer on the empirical support (N2.2); sharp version Conjecture N2.2′; estimated τ open (R7) | 2c §4 |
 | M-LCE | δ (M1δ) / yes | medium–large | good (HC3; CLR with projection alongside) | $\dim\mathcal K=(C-1)\binom R2$ | FD, M1-periods | none | identification proved (2a, 2b). Inference proved for M0 in any regime and grouped models with few large groups (P3 §0.5); CLR as implemented algorithmic; many small groups: simulation only | PHASE1–4 |
 | M-BERN | degree $J$ / — | negative by design (robustness) | good | general | yes | none | designed (NA §4) | NA §4 |
 | M-CEIL | κ, $s$ / endpoint annotation | binds only at small κ in the suffrage data | good | ellipsoid in $K$ | calibrates $\delta$ in FD3 | none (κ benchmarked on covariates) | validity open (R8) | NA §12.3 |
@@ -343,7 +343,7 @@ Let $a=\mu\operatorname{Var}_{w^1}(X)$, $b=(1-\mu)\operatorname{Var}_{w^0}(X)$, 
 | 5 | M-DATA E4/E5 (shared $K$ across validation tables) | NA §13 items | high power, no behavioural assumption |
 | 6 | M-CTX2 B1(M) | R8 (B1 rank condition) | the most practical new rung (NA) |
 | 7 | M-CEIL κ / slope caps; annotate endpoints with their implied κ | R8 | reporting device; DiD dial calibration |
-| 8 | M-N2 grid LP with estimated τ | R7 | needs an argument about estimated τ |
+| 8 | M-N2 **global** LP with estimated τ (no local-derivative rows: the derivative is not identified on a finite support, 2c N2.3; decision U4(a)) | R7 | needs an argument about estimated τ; prespecified degree, person-weighted bins (2c Lemma N2.4) |
 | 9 | M-MULTI (contests) | NA §3 | data-dependent |
 | 10 | M-CAR(Z)-δ | R8 | needs covariates |
 | 11 | M-DISP (A1/A2, covariance ceilings) | NA §1, §13.5 | strong in theory, weak estimability |
@@ -358,7 +358,7 @@ Setting: PHASE2d. Fixed population; rows $v$ (veteran) and $n$; per-period $Q_t,
 
 | Module on changes | Restriction | Effect on DiD | Status |
 |---|---|---|---|
-| M-SIGN-Δ (= Δ4) | sign of $\delta^\Delta_W$ / $\delta^\Delta_B$ / CR on the realised changes | one-sided cuts at Goodman-on-changes and NM-on-changes | proved (Δ4), exact |
+| M-SIGN-Δ (= Δ4) | sign of $\delta^\Delta_W$ / $\delta^\Delta_B$ / CR on the realised changes | one-sided cuts at Goodman-on-changes and NM-on-changes | proved (Δ4), sharp for continuous tables |
 | **M-ORD-Δ** (MTR) | $\Delta m_v(x)\ge\Delta m_n(x)$ on the hull: $\Delta c_1-\Delta w_1+\Delta d_1x\ge0$ | upper bound on $\Delta w_1$ | rows; proved (affine) |
 | **M-LOC-Δ** (weighted spillover sign) | $\Delta w_1+\Delta d_1x\ge0$ on the hull: replacing a non-veteran with a veteran does not lower the composition-weighted change | lower bound on $\Delta w_1$ | rows; proved (affine) |
 | **DiD-S** = ORD-Δ ∩ LOC-Δ | P-S on changes: $\lvert\Delta g(x)\rvert\le\Delta q(x)$ | closed-form interval for $\Delta w_1$, so DiD $\in$ identified $-(r+m_n)\cdot[\max_x(-\Delta d_1x),\ \min_x(\Delta c_1+\Delta d_1x)]$ | **proved** (P-S with $\Delta$); empty iff $\Delta q<0$ somewhere (test) |
@@ -393,19 +393,21 @@ Status: **P** proved · **C** checked numerically · **J** conjecture · **O** o
 | ID | Claim | Status | Strategy / check | Blocks |
 |---|---|---|---|---|
 | R1 | C1: $x^*\in$ hull (2×2), hence weighted-local ⇒ $\delta_W\ge0$ under LCE | J (C [V3]) | pairwise variance representation plus a cancellation argument; try two-point designs first | the M-LOC ⇒ SIGN-W cell |
-| R2 | An added restriction moves an endpoint iff it removes the whole optimal face (one feasibility LP); for one row, iff every optimal dual is positive (a solver's dual alone does not certify); implied ⇔ tightens no target; 2×2 closed form = G2 | **P** (5a §2; `verify_R2.py`; independently reviewed, fixes applied, 5a §4) | — | redundancy diagnostic |
-| R3 | LCE ∩ any closed convex restriction on $k$ is sharp for the model-implied target; CR is a union, a single slab for W1/2×2, and may have a gap otherwise | **P** (5a §1; `verify_R3.py`; independently reviewed, fixes applied, 5a §4) | — | M-SIGN reporting |
+| R2 | An added restriction moves an endpoint iff it removes the whole optimal face (one feasibility LP, with the target intercept); for one row, iff every optimal dual is positive (a solver's dual alone does not certify); implied ⇔ tightens no target; 2×2 closed form = G2; "redundant" = zero gain for this target | **P** (5a §2; `verify_R2.py`; reviewed internally and externally (Batch B), corrections applied) | — | redundancy diagnostic |
+| R3 | **Pooled** LCE ∩ any closed convex restriction on $k$ is sharp for the model-implied target (full law, and for the regression); CR is a union, a single slab for W1/2×2, and may have a gap otherwise; the conjunction can be rejected under LCE (Remark R3.2) | **P** for the pooled model (5a §1; `verify_R3.py`; reviewed internally and externally (Batch B), corrections applied). Grouped rungs: R16 | — | M-SIGN reporting |
 | R4 | Refutability classification for $R\ge3$ (which signs, orderings and local rows can produce emptiness, model-free and under LCE) | O | construct feasible completions; counterexamples | §4.2 codes, tests |
 | R5 | P-R(c): any spanning tree of pairs reaches all directions; behaviour with lower-dimensional support | P (star); C (chain) [V7] | induction on tree leaves; support rank | step 4 |
 | R6 | When joint column restrictions in 2×C are strictly tighter than the best single one; ordinal cumulative version | C [V6] | LP geometry in the $(C-1)$-dimensional $t$-space | step 3 |
-| R7 | N2 grid LP: outer validity with estimated τ; convergence as the grid is refined | O | uniform confidence band for τ, then a monotone envelope | step 8 |
+| R7 | Global N2 LP: outer validity with estimated τ (prespecified degree); binned version via 2c Lemma N2.4 | O (Lemma N2.4 proved; sharp version Conjecture N2.2′) | uniform confidence band for τ, then a monotone envelope | step 8 |
 | R8 | B1(M), κ, CAR-δ: each is a valid outer bound, monotone in its dial; B1 rank condition | partly (NA) | per module | steps 6, 7, 10 |
-| R9 | Consistency of the M-SHARP series bound; never wider than the current $\Theta_X$ | O | sieve argument | step 1b |
-| R10 | CLR validity with added rows, unions (min/max over LPs), near-emptiness, and the actual-rate allowance with new rows | **P** (5a §3: added rows; parallel disjunction = W1/2×2 CR; union of branch CIs at full level; emptiness level; plug-in bracket invalid; MC in `verify_R10.py`; independently reviewed, one error in (d) fixed, 5a §4). Still open: uniformity near point identification, and the CLR candidate collection (Conjecture P3.5(b3)), both inherited from P3. Version (b) statements are theorems for P3.5(b1) only; see 5a §3.2 and `MSIGN_REVIEW_LOG.md` M-2 | — | all code |
+| R9 | Consistency of the M-SHARP series bound; never wider than the current outer set. It conditions on $X$ only, so it is "tighter than $\Theta_O$", not sharp, when size is informative (2c Remark N2.2.1) | O | sieve argument | step 1b |
+| R10 | CLR validity with added rows, unions (min/max over LPs), near-emptiness, and the actual-rate allowance with new rows | By version (5a §3.2 table): conservative (a) **P**; full-candidate CLR (b1) cited, under the augmented Condition P; fixed-superset and projection (b2) **P**; CLR with simulated candidates (b3) **algorithm** (conjecture). (e) naive bracket under-covers: **P** (analytic, referee B). Regime: fixed dimension only (P3 §0.5). Package 0.3.0: projection rank guard and zero-variance-candidate check implemented | — | all code |
 | R11 | DiD: DiD-S sharp within FD; FD4 ∩ Δ4; LCE-levels ∩ sign-Δ; union inference | DiD-S validity P; rest O | as in 2d | §7 |
 | R12 | P-S (sandwich) | P [V4] | — | — |
 | R13 | G2 table (JKST + signs) | P (§2.2) [V1, V2] | — | — |
 | R14 | Single-index dimension $C-1$ | J (NA check) | generic-rank argument | T2.4 |
+| R15 | Integer unit tables: N1 and Δ4 with integer cells (discrete target sets; integer branch feasibility). 2×2 with margins only: lattice of step $1/(N\mu(1-\mu))$ inside the continuous interval (2c Remark M2.1) | O (2×2 margins-only case P) | integer programming; small tables first | integer-exact reporting |
+| R16 | Grouped rungs: R3′ (regression sharpness under M1/M1(δ)/M2 via 2b Thm 1′, with $A_d$ and all free coordinates) and R10′ (inference, with the regime caveat) | O | 2b Thm 1′; tests on noise-free grouped designs | removing "experimental" for grouped M-SIGN |
 
 **Standard for "proved":**
 1. The proof is written in the numbered-step format used in PHASE2c, with a justification tag on each step.

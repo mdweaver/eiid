@@ -300,10 +300,12 @@
 }
 
 # finite-population allowance: sd bound for E = sum_i w_i e_i (one cell)
-# Returns c(clr, projection): the Bhatia-Davis bound with mbar bounded by the CLR interval (used
-# by ci_actual) and by the projection interval from the same candidates (used by proj_actual, so
-# that the projection column rests only on P3.5(b2)); Popoviciu where the interval is missing.
-.rxc_fpc_sd <- function(st, cons, r, c, method, alpha_v, Zs, ndraw) {
+# Returns c(main, projection). With ci = "clr": the Bhatia-Davis bound with mbar bounded by the
+# CLR interval (used by ci_actual) and by the projection interval from the same candidates (used
+# by proj_actual, so that the projection column rests only on P3.5(b2)). With ci =
+# "conservative": mbar bounded by the conservative interval, so that ci_actual rests only on
+# P3.5(a) (decision 3(a), Nov 2026). Popoviciu where the interval is missing.
+.rxc_fpc_sd <- function(st, cons, r, c, method, alpha_v, Zs, ndraw, ci = "clr") {
   wr <- st$w[, r]
   sw2 <- sum(wr^2)
   if (method == "popoviciu") return(rep(0.5 * sqrt(sw2), 2))
@@ -312,7 +314,6 @@
   wpi <- st$w; wpi[, r] <- wr^2 / sw2
   a <- matrix(0, st$R, st$C); a[r, c] <- 1
   tg <- .rxc_target(st, a, w = wpi)
-  ci <- .rxc_ci_clr(st, cons, tg, alpha_v / 2, alpha_v / 2, Zs, ndraw, proj_alpha = alpha_v)
   bd <- function(iv) {
     if (any(is.na(iv))) return(0.5 * sqrt(sw2))
     lo <- max(0, min(1, iv[1])); hi <- max(0, min(1, iv[2]))
@@ -320,7 +321,12 @@
     vmax <- if (lo <= 0.5 && hi >= 0.5) 0.25 else max(lo * (1 - lo), hi * (1 - hi))
     sqrt(sw2 * vmax)
   }
-  c(bd(ci[1:2]), bd(attr(ci, "projection")))
+  if (identical(ci, "conservative")) {
+    cc <- .rxc_ci_conservative(st, cons, tg, alpha_v, Zs)$ci
+    return(rep(bd(cc), 2))
+  }
+  iv <- .rxc_ci_clr(st, cons, tg, alpha_v / 2, alpha_v / 2, Zs, ndraw, proj_alpha = alpha_v)
+  c(bd(iv[1:2]), bd(attr(iv, "projection")))
 }
 
 # JKST CI_x for a target: plug-in candidates at beta-hat, S = S1 (Popoviciu) + se
@@ -425,7 +431,7 @@
               vmax <- if (lo <= 0.5 && hi >= 0.5) 0.25 else max(lo * (1 - lo), hi * (1 - hi))
               rep(sqrt(sum(st$w[, r]^2) * vmax), 2)
             }
-          } else .rxc_fpc_sd(st, base, r, c, fpc, a_v, Zs, ndraw)   # rung + linear rows: valid
+          } else .rxc_fpc_sd(st, base, r, c, fpc, a_v, Zs, ndraw, ci = ci)   # rung + linear rows: valid
         }
         sdE <- sdE + abs(a2[r, c]) * fpc_cache[[key]][1]
         sdEp <- sdEp + abs(a2[r, c]) * fpc_cache[[key]][2]
@@ -591,7 +597,9 @@
 }
 
 # Wald test of M1's testable part (overidentifying restrictions, 2b Lemma D1(b))
-.rxc_m1_test <- function(X, T, N, group, weights = "none", vcov = "HC3") {
+.rxc_m1_test <- function(X, T, N, group, weights = "none", vcov = "HC3", B = 399,
+                         method = c("wild", "chisq", "F")) {
+  method <- match.arg(method)
   st <- tryCatch(.rxc_setup(X, T, N, group, model = "M2", weights = weights, vcov = vcov),
                  error = function(e) NULL)
   if (is.null(st)) return(list(statistic = NA, df = NA, p.value = NA,
@@ -618,6 +626,51 @@
   keep <- e$values > 1e-10 * max(e$values)
   Wd <- sum((t(e$vectors[, keep, drop = FALSE]) %*% d)^2 / e$values[keep])
   df <- sum(keep)
-  list(statistic = Wd, df = df, p.value = stats::pchisq(Wd, df, lower.tail = FALSE),
-       vcov_type = st$vcov_type)
+  n <- nrow(st$X)
+  p_chisq <- stats::pchisq(Wd, df, lower.tail = FALSE)
+  p_F <- stats::pf(Wd / df, df, max(n - p, 1), lower.tail = FALSE)
+  # Restricted wild bootstrap (as for the pooling test, decision 3(b), Nov 2026): fit M1 (the
+  # null), draw Y* = fitted + residual * v with Rademacher v_i shared across equations, refit
+  # M2 and recompute the same HC Wald statistic. The restriction rows act equation by equation
+  # with the same coefficients, so d_c = A' Y_c with A = Zw (Z'Z)^{-1} Rcc'.
+  p_boot <- NA_real_
+  if (method == "wild" && B > 0) {
+    sw <- if (weights == "n") sqrt(st$N) else rep(1, n)
+    Zw <- st$Z * sw; Yw <- st$T[, seq_len(C - 1), drop = FALSE] * sw
+    ZtZi <- solve(crossprod(Zw))
+    h <- rowSums((Zw %*% ZtZi) * Zw)
+    nr1 <- nrow(Rm) / (C - 1)
+    Rcc <- Rm[seq_len(nr1), seq_len(p), drop = FALSE]
+    A <- Zw %*% ZtZi %*% t(Rcc)
+    k <- ncol(Zw); C1 <- C - 1; q <- nr1
+    scale_u <- switch(st$vcov_type, HC3 = 1 / (1 - h), HC1 = rep(sqrt(n / (n - k)), n), rep(1, n))
+    stat <- function(Y) {
+      E <- Y - Zw %*% (ZtZi %*% crossprod(Zw, Y))
+      dd <- as.vector(crossprod(A, Y))
+      Vb <- matrix(0, C1 * q, C1 * q)
+      if (st$vcov_type == "classical") {
+        Vb <- kronecker(crossprod(E) / max(n - k, 1), crossprod(A))
+      } else {
+        U <- E * scale_u
+        for (a in seq_len(C1)) for (b in a:C1) {
+          blk <- crossprod(A, A * (U[, a] * U[, b]))
+          ia <- (a - 1) * q + seq_len(q); ib <- (b - 1) * q + seq_len(q)
+          Vb[ia, ib] <- blk; Vb[ib, ia] <- t(blk)
+        }
+      }
+      ev <- eigen((Vb + t(Vb)) / 2, symmetric = TRUE)
+      kp <- ev$values > 1e-10 * max(ev$values)
+      sum((t(ev$vectors[, kp, drop = FALSE]) %*% dd)^2 / ev$values[kp])
+    }
+    Z0 <- .rxc_design(st$X, st$g, st$G, "shift")$Z * sw
+    F0 <- Z0 %*% qr.coef(qr(Z0), Yw); E0 <- Yw - F0
+    had_seed <- exists(".Random.seed", envir = globalenv(), inherits = FALSE)
+    if (had_seed) old_seed <- get(".Random.seed", envir = globalenv())
+    Wb <- vapply(seq_len(B), function(b) stat(F0 + E0 * sample(c(-1, 1), n, replace = TRUE)), 0)
+    if (had_seed) assign(".Random.seed", old_seed, envir = globalenv())
+    p_boot <- (1 + sum(Wb >= Wd - 1e-12 * abs(Wd))) / (B + 1)
+  }
+  pv <- switch(method, wild = p_boot, chisq = p_chisq, F = p_F)
+  list(statistic = Wd, df = df, p.value = pv, method = method, B = if (method == "wild") B else NA,
+       p.value_chisq = p_chisq, p.value_F = p_F, vcov_type = st$vcov_type)
 }

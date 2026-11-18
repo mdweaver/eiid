@@ -427,8 +427,10 @@ print.eiRxC <- function(x, digits = 3, ...) {
   if (!is.null(x$tests)) {
     if (isTRUE(x$tests$empty_rejected)) cat("\n  Emptiness test: the model is REJECTED at level", x$alpha, "\n")
     if (!is.null(x$tests$m1) && !is.na(x$tests$m1$p.value))
-      cat(sprintf("  Test of M1's testable part: Wald = %.2f, df = %d, p = %.3f\n",
-                  x$tests$m1$statistic, x$tests$m1$df, x$tests$m1$p.value))
+      cat(sprintf("  Test of M1's testable part (vs M2): Wald = %.2f, df = %d, p = %.3f (%s)\n",
+                  x$tests$m1$statistic, x$tests$m1$df, x$tests$m1$p.value,
+                  if (identical(x$tests$m1$method, "wild")) sprintf("wild bootstrap, B = %d", x$tests$m1$B) else
+                    if (is.null(x$tests$m1$method)) "chi-squared" else x$tests$m1$method))
     if (!is.null(x$tests$pool) && !is.na(x$tests$pool$p.value)) {
       pm <- x$tests$pool$method
       cat(sprintf("  Pooling test (M0 vs M1, group shifts = 0): Wald = %.4g, df = %d, p = %.3f (%s)%s\n",

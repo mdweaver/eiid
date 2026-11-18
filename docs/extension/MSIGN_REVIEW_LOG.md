@@ -97,3 +97,19 @@ At the user's request, the questions were put to the session that built M-SIGN (
 | future work | Nothing unpushed. Planned: S11 real-data scripts; PHASE5a §5 proofs on slack monotonicity and the slack slab; slack docs. None touches `rxc_infer.R`/`rxc_core.R` | **user decision**: future M-SIGN work moves to `claude/wizardly-volta-lbh4bm` | **done** |
 
 **Still open (substantive review, not consistency):** M-9 to M-13 and M-16 to M-17 need an external reviewer. M-15 needs re-derivation. See `EXTERNAL_REVIEW_PLAN.md`.
+
+## 8. Batch B external review (Nov 2026): items closed
+
+Two external referee reports reviewed Batch B (`reviews/B_partial_identification_report.md`, `reviews/B_ecological_inference_report.md`). Both recommended major revision. The response plan is `reviews/B_PI_RESPONSE_PLAN.md`; the user's decisions are U1–U8, all as recommended.
+
+| Item | Outcome |
+|---|---|
+| M-9 (R3) | Reviewed. R3 holds for the **pooled** model; grouped rungs are proof item R16 (open). Corrected in 5a §1 (Remarks R3.1, R3.2; "rejects the conjunction"). |
+| M-10 (R2) | Reviewed. Face-test LP intercept fixed in the text (the code already had it); "redundant" now means zero gain for this target. 5a §2. |
+| M-11 (R10) | Reviewed. Status by version (5a §3.2 table). R10(e) is now an analytic theorem (referee's proof, credited). |
+| M-12 (2c) | Reviewed. M2 is sharp for continuous tables only (integer: R15, open beyond 2×2 margins). M3(d) and M5 restated; N2.3 dropped as an observable restriction (U4(a)); Conjecture N2.2′ left open by the user's decision. |
+| M-16 (code) | Partly reviewed through the referees' and the assessment session's code checks (`reviews/checks/check_B_pi_code.R`). Package changes in 0.3.0: experimental labels, rank guard, wild-bootstrap tests, reporting additions. A dedicated code review (batch E) is still to do. |
+| M-17 (coverage MC) | Superseded for R10(e) by the analytic proof. The false-CR experiment (V12) is added to `verify_R10.py`. |
+| M-13 (DiD), M-15 (NEW_AVENUES) | Unchanged: batches C and D. |
+
+Still open: R15, R16, Conjecture N2.2′, batch E (code review).

@@ -396,6 +396,23 @@ No theory item in part II is new: every theory point the EI referee makes is alr
 
 ---
 
+## 4A. Status (19 Nov 2026)
+
+| Workstream | Status |
+|---|---|
+| WS-B0 labels and wording | **done** (package session, `claude/batchB-package`, merged) |
+| WS-B1 5a errata | **done** (theory session, `claude/batchB-theory`, merged) |
+| WS-B2 2c corrections | **done** (theory session); Conjecture N2.2′ left open by the user's decision |
+| WS-B3 core repairs | **done**: proofs (theory session), rank guard and zero-variance check (package session) |
+| WS6 items | **done**: wild-bootstrap pooling test; `proj_actual` from projection; NZ limits in NEWS |
+| Decisions 3(a), 3(b) | **done** (coordinator): conservative `ci_actual` from a conservative interval; M1-vs-M2 test bootstrapped (size 0.054 in S0) |
+| WS-B9 subset (U7(a)) | **done**: all union pieces, base column, weight concentration |
+| WS-B5 register and design docs | **done** (coordinator): PACKAGE_DESIGN §0, §3, §4.1, §6 step 8, §8 (R2, R3, R7, R9, R10; new R15, R16); NEXT_BUILD; MSIGN_REVIEW_LOG §8; EXTERNAL_REVIEW_PLAN |
+| WS-B7 remaining 1b wording | see 1b, corrected in the same pass |
+| WS-B4 grouped proofs (R16) | open |
+| WS-B6 decision-dependent | not started (U1(a), U4(a) chose relabelling and dropping) |
+| WS-B8 responses to the referees | in progress |
+
 ## 5. Decisions needed from the user
 
 **Decided by the user (18 Nov 2026): all eight as recommended, i.e. U1(a), U2(a), U3(a), U4(a), U5 approved, U6(a), U7(a), U8(a).** The user asked that work start only after the WS6 Monte Carlo session finished (done; merged). WS6 adds three items to this plan, to be placed when the work starts:

@@ -39,6 +39,8 @@ Each batch is sent as a frozen commit (a git tag, e.g. `review-B-2026-12`). It i
 
 ### Batch B: M-SIGN theory (highest priority among the unreviewed)
 
+**Status (Nov 2026): reviewed.** Two external reports (partial identification; ecological inference), both major revision. Corrections were applied in theory and code (0.3.0); see `reviews/B_PI_RESPONSE_PLAN.md`. Responses to the referees are being written (WS-B8). **Lesson for later batches:** the internal fresh-session review of PHASE5a §4 had accepted it with fixes, and missed the integer-table, district-slope, derivative-identification and binning problems, all in 2c, which it had not been asked to cover. Every batch should give the pre-screen the full scope that the external reviewers get.
+
 *Already shipped and exported, so it is the largest exposure.*
 
 * **Documents:** `PHASE2c_monotone.md` (all); `PHASE5a_sign_module.md` §§1–3.

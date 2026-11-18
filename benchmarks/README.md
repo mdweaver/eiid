@@ -51,3 +51,9 @@ Not included: `ei_SCO_2007`, also in `ei.Datasets`, whose candidate columns carr
 Rscript benchmarks/pooling_test_size.R 2000 399 4   # replications, bootstrap draws, cores (about 5 minutes on 4 cores)
 ```
 
+`m1_test_size.R` does the same for the test of M1's testable part (M1 against M2; 19 restrictions in design S0, where M1 holds). With 1,000 replications and $B=199$ (`results/m1_test_size_output.txt`): $\chi^2$ 0.057, F 0.055, wild bootstrap 0.054 (Monte Carlo SE 0.007).
+
+```sh
+Rscript benchmarks/m1_test_size.R 1000 199 4
+```
+

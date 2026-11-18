@@ -433,6 +433,21 @@ Numerical re-checks by the reviewer: the identities in R3 step 11 hold for every
 
 **Run:** R 4.3 (Ubuntu apt) in the build session: full `testthat` suite 0 failures (skips: `ei.Datasets` not installed, slow MC unless enabled); the slow MC was run once with the result above; `R CMD check --no-manual --no-vignettes`: no errors (pre-existing notes: unused imports `MASS`/`eco`, unavailable Suggests; a locale warning from the container). The vignette was rendered with `rmarkdown::render`.
 
+**Release 0.3.0 (response to the Batch B referees, Nov 2026).** Changes since the table above (`package/eiPartialID/NEWS.md`; tests in `tests/testthat/test-batchB.R`):
+
+| Item | Status in 0.3.0 |
+|---|---|
+| Proof status of `assoc` and `cr` | **experimental**; `print()` shows the EXPERIMENTAL flag |
+| Grouped rungs (M1, M1(δ), M2, L4 with groups) | enabled, with a fit-time note: each sign is one pooled restriction across groups; sharpness proved for the pooled model only (R16 open). `print()` says "outer set; sharpness under grouped rungs not yet proved" |
+| Refutation wording | "always feasible" only in the model-free problem with continuous tables; under the rung the combination can be rejected (R3(e), Remark R3.2). Next to a joint rejection, the output says whether the rung alone is rejected. An empty plug-in is "a sample diagnostic, not a test" |
+| CR confidence interval | CLR branch union by default, labelled **algorithmic** on its line; the projection branch union (proved, P3.5(b2)) is printed beside it |
+| Reporting | every union piece printed (three or more included); `base_*` columns with the rung-only estimate and CIs; weight concentration per signed association in `eiRedundancy()$concentration` (largest unit weight, effective number of units) |
+| Redundancy verdicts | "empty at the point estimate (see the emptiness test)"; "cuts the set, not this target" means zero gain for this target, not that the row is implied (R2(e)) |
+| W2 | labelled "pooled over groups"; a per-group version is planned (decision U8(a)) |
+| Projection and CLR guards | candidates whose gradients use a numerical null direction of $\hat V$ are dropped from the projection interval (the reduced parameterisation of P3.5(b2)(ii-b)); a zero-variance CLR candidate is exact only if its gradient is zero |
+| Slack $\eta$ on $\delta$ | implemented (`sensitivity(dial = "slack")`) |
+| Not yet | the drop-one display; the L5/L6 sign check at the fitted point; per-group W2 rows |
+
 **Open / not done:**
 * Uniformity near point identification remains P3's open item; the CLR candidate collection is unchanged apart from the relaxation above.
 * With several non-W1 CRs, systems grow as $2^m$; no pruning.

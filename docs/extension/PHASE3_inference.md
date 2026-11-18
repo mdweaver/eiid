@@ -228,6 +228,20 @@ Until this is settled, the CLR-type interval as implemented is an *Algorithm* wi
 
 (b) is the standard Wald test [OLS]. Its $\chi^2$ calibration is established for fixed dimension (R1). Under R2/R3 the number of restrictions grows with $D^\star$. The F-form with HC3, or a wild bootstrap, is then a practical choice with simulation support only.
 
+**Calibration in the package (0.3.0; added after the Batch B review and the WS6 Monte Carlo, Nov 2026).** In moderate dimension the HC3 Wald statistic against $\chi^2$ over-rejects: for the pooling test (c) in design S0 of §8.3 (38 restrictions), 0.078 at nominal 5%, and 0.072 for the F form. The package therefore calibrates both (b) and (c) by a **restricted wild bootstrap**:
+* fit the null model (M0 for (c); M1 for (b));
+* draw $Y^*=\hat Y_0+\hat e_0v$ with Rademacher $v_i$, one per unit, shared across the $C-1$ equations;
+* refit the larger model and recompute the same HC Wald statistic; $p=(1+\#\{W^*\ge W\})/(B+1)$, with $B=399$ by default.
+
+The $\chi^2$ and F p-values are reported as well. Rejection rates at nominal 5% in design S0 (MC standard errors in parentheses):
+
+| Test | Restrictions | Replications | $\chi^2$ | F | Wild bootstrap |
+|---|---|---|---|---|---|
+| (c) pooling, M0 vs M1 | 38 | 2000 ($B=399$) | 0.078 (0.006) | 0.072 (0.006) | **0.043** (0.005) |
+| (b) M1 vs M2 | 19 | 1000 ($B=199$) | 0.057 (0.007) | 0.055 (0.007) | **0.054** (0.007) |
+
+Scripts: `benchmarks/pooling_test_size.R`, `benchmarks/m1_test_size.R` (outputs in `benchmarks/results/`). The bootstrap is a practical calibration supported by simulation; its validity as the number of restrictions grows is not proved.
+
 *Proof of (c).*
 1. Under M1 and P3-S1a, $E[\beta_i\mid\text{design}]=M_H(X_i)+Z_{D_i}$, with $Z_d=[\zeta_{c,d,r}]_{rc}$. [Def M1; 2b §0.1]
 2. M0 holds for the observed units iff there is $H'$ with $M_{H'}(X_i)=M_H(X_i)+Z_{D_i}$ for all $i$, i.e. $G_cX_i=\zeta_{c,D_i}$ with $G=H'-H$. [Def M0]
@@ -345,7 +359,7 @@ Checked: a nonlinear undetectable violation with $\eta=0.02$ stays inside the bo
 * **plug-in**: the estimate of the identified set (not a CI);
 * **conservative** (Thm P3.5(a));
 * **CLR** as implemented (Conjecture P3.5(b3)), for $B$ with the Bhatia–Davis allowance (the package default) and for $\tilde B$;
-* **projection** (Prop. P3.5(b2)(ii)): $k=\sqrt{\chi^2_{q,1-\alpha}}$ with $q=\operatorname{rank}\hat\Sigma$, applied to the same candidates as CLR. For $B$ it follows the package: estimation part at level 0.04, plus the Bhatia–Davis allowance;
+* **projection** (Prop. P3.5(b2)(ii)): $k=\sqrt{\chi^2_{q,1-\alpha}}$ with $q=\operatorname{rank}\hat\Sigma$, applied to the same candidates as CLR. In every 2×2 design here $\hat\Sigma$ has full rank, so $q=\dim\beta$ and this is case (ii-a) of the corrected proposition. (Since 0.3.0 the package also drops candidates whose gradients use a numerical null direction of $\hat V$, which is case (ii-b).) For $B$ it follows the package: estimation part at level 0.04, plus the Bhatia–Davis allowance;
 * **finite-sample** (Thm P3.8), in the 2×2 M1 designs.
 
 Conventions:
@@ -362,7 +376,7 @@ Conventions:
 * CLR: Conjecture P3.5(b3) everywhere. All its figures are simulation findings.
 * The projection interval for $B$ uses the Bhatia–Davis allowance, whose variance bound comes from a CLR interval (as in the package). Strictly, only the version with the Popoviciu allowance is fully covered by P3.5(b2).
 
-**Rank of $\hat\Sigma$ in the projection interval** (`phase3_montecarlo_rank.py`, `phase3_montecarlo_rank_output.txt`; same seeds, 1000 replications per design). Prop. P3.5(b2)(ii) uses $q=\operatorname{rank}\hat\Sigma$. If $\hat\Sigma$ were singular while the estimation error had a component in its null space, those directions would not be controlled. The numerical rank (eigenvalues above $10^{-10}$ times the largest) equals $\dim\beta$ in every replication of every 2×2 design, from $\dim\beta=3$ to 401.
+**Rank of $\hat\Sigma$ in the projection interval** (`phase3_montecarlo_rank.py`, `phase3_montecarlo_rank_output.txt`; same seeds, 1000 replications per design). Prop. P3.5(b2)(ii) uses $q=\operatorname{rank}\hat\Sigma$, and since the Batch B correction it requires either a positive definite $\Sigma$ (ii-a) or a reduced parameterisation with exactly zero error in the null directions (ii-b). If $\hat\Sigma$ were singular while the estimation error had a component in its null space, those directions would not be controlled. The numerical rank (eigenvalues above $10^{-10}$ times the largest) equals $\dim\beta$ in every replication of every 2×2 design, from $\dim\beta=3$ to 401.
 * Conditioning: the smallest-to-largest eigenvalue ratio is 0.005–0.04 for the pooled fits, and falls with the number of districts, to a minimum of $2.6\times10^{-8}$ at 200 × 10. That is still far above the rank threshold.
 * Design B fits all three columns ($\dim\beta=18$) and has $q=12$ in every replication. The six null directions are the adding-up constraint: summed across columns, the coefficients are the regression of 1 on the design, which has no error. So the estimation error lies in the range of $\hat\Sigma$, and nothing is left uncontrolled.
 * On the $C-1$ free columns (Remark P3.4.1, as the package fits), $\hat\Sigma$ has full rank 12 in every replication.
@@ -432,7 +446,7 @@ The district shifts are added to both groups' rates, and depend on the district'
 7. **Riding shocks (R-37(i)).**
    * **Common non-affine shock (S2):** every M0 interval fails, for $B$ and for $\tilde B$. CLR for $\tilde B$ covers 0.9%, and is empty (ends crossing, so M0 is rejected) 96% of the time. For $B$, CLR covers 16% and projection 21% (the residual allowance widens them), and the conservative interval 4%; again most failures are empty intervals. M1 covers in every replication, and the pooling test rejects in every replication.
    * **Affine shifts (S1):** the pooling test rejects in every replication, because M0 is false for the observed design (P3.6(c)), but M0's intervals still cover. Shifts affine in composition change the pooled conditional mean only through terms the pooled model absorbs (2b Prop. D4(b)), approximately, so M0's bias is small here. A rejection of the pooling test therefore says that M0 is wrong, not that its intervals are.
-   * **Size of the pooling test (S0): 0.090 (SE 0.009) at nominal 0.05,** with 38 restrictions and 50 polls per district. The HC3 Wald statistic has mean 39.7 and variance 100, against 38 and 76 for $\chi^2_{38}$. The F form ($W/\text{df}$ against $F_{38,959}$) gives 0.079. This is consistent with P3.6, whose $\chi^2$ calibration is established for fixed dimension only, but the test over-rejects in a moderate-dimension R1 design. It errs towards M1, the safer rung.
+   * **Size of the pooling test (S0): 0.090 (SE 0.009) at nominal 0.05,** with 38 restrictions and 50 polls per district. The HC3 Wald statistic has mean 39.7 and variance 100, against 38 and 76 for $\chi^2_{38}$. The F form ($W/\text{df}$ against $F_{38,959}$) gives 0.079. This is consistent with P3.6, whose $\chi^2$ calibration is established for fixed dimension only, but the test over-rejects in a moderate-dimension R1 design. It errs towards M1, the safer rung. *(Follow-up, 0.3.0: the restricted wild bootstrap rejects 0.043 (SE 0.005) here; P3.6, calibration paragraph.)*
 8. **The residual term is a large part of the width.** Targeting $\tilde B$ instead of $B$ narrows CLR by 0.06–0.10 in the 3×3 design and 0.06–0.11 in the 2×2 M1 designs with 30 or more polls per district; with 10 polls per district, by 0.08–0.19.
 9. **Bhatia–Davis versus Popoviciu.** In the boundary design C, Bhatia–Davis narrows CLR for $B$ from 0.086 to 0.057. In the Slater design E it narrows it from 0.221 to 0.207. Elsewhere the plausible range of rates includes 0.5, the allowance equals Popoviciu's, and the interval is up to 0.015 wider (the α share spent on the variance bound). It remains the package default.
 10. **Real data** (NZ benchmark, `benchmarks/results/ei_datasets_nz_summary.md`).
@@ -449,7 +463,7 @@ The district shifts are added to both groups' rates, and depend on the district'
 2. Build the LP (2a Prop. 7 / 2b Thm 2) and report the plug-in bound, labelled as an estimate of the identified set, not a confidence interval.
 3. Report the CLR confidence interval for $\tilde B$ (default) and for $B$, labelled algorithmic (Conjecture P3.5(b3)). Report the projection interval (P3.5(b2)(ii)) alongside it as the interval with an asymptotic guarantee. Intersect both with Duncan–Davis, which is valid because $B\in DD$ always.
 4. Theorem P3.8 gives a finite-sample guarantee in every regime. In the designs tried, its width is that of the logical range, so it is not yet worth reporting by default. With many small districts (R2), say that the CLR interval's coverage there rests on simulation (§0.5).
-5. Report the emptiness test and, for M1, the test of its testable part (P3.6(b)) and the pooling test (P3.6(c)). The pooling test over-rejects somewhat with many restrictions (9% at nominal 5% with 38 restrictions, §8.4), which errs towards M1. A rejection says M0 is wrong for this design, not that its intervals fail (§8.3, S1).
+5. Report the emptiness test and, for M1, the test of its testable part (P3.6(b)) and the pooling test (P3.6(c)). The $\chi^2$ version of the pooling test over-rejects with many restrictions (9% at nominal 5% with 38 restrictions, §8.4); since 0.3.0 the package calibrates both tests by a restricted wild bootstrap (4.3% and 5.4% in design S0; P3.6). A rejection says M0 is wrong for this design, not that its intervals fail (§8.3, S1).
 6. Report the sensitivity curves in $\eta$ (and $\delta$), with the breakdown value of the headline conclusion.
 7. With few units per district, apply P3.7 selection, or prefer M1($\delta$) or coarser groups, and say so.
 
@@ -468,7 +482,7 @@ The district shifts are added to both groups' rates, and depend on the district'
   * Bhatia–Davis;
   * uneven $\alpha$ splits.
 * CLR when Slater fails: coverage fell to the nominal level (0.944, SE 0.007) in design E of §8, as expected without slack. Whether it holds uniformly near point identification is the Stoye-type question above.
-* Calibration of the pooling and M1 tests in moderate and high dimension: the HC3 Wald $\chi^2$ test over-rejects (9% at 5% with 38 restrictions, §8.4). Candidates: the F form, HC-robust wild bootstrap, or a degrees-of-freedom correction.
+* Calibration of the pooling and M1 tests in moderate and high dimension. The HC3 Wald $\chi^2$ test over-rejects (9% at 5% with 38 restrictions, §8.4). *Partly addressed (0.3.0):* both tests now use a restricted wild bootstrap, which is close to nominal in design S0 (P3.6, calibration paragraph). Open: a proof for a growing number of restrictions.
 * Inference under R2 with a hierarchical model for the district shifts.
 * Dependence within districts beyond the district effect (spillovers; §0.4).
 * Joint relaxation for population turnover.

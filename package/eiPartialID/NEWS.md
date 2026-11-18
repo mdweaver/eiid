@@ -63,6 +63,16 @@
   rejection rate at 5% is 0.078 for chi-squared, 0.072 for F and 0.043 for the
   wild bootstrap (Monte Carlo SE about 0.005;
   `benchmarks/pooling_test_size.R`).
+* Test of M1's testable part (M1 against M2): calibrated by the same
+  restricted wild bootstrap (null fit M1, refit M2); chi-squared and F
+  p-values still returned. In design S0 (19 restrictions, 1,000 replications)
+  the rejection rate at 5% is 0.057 for chi-squared, 0.055 for F and 0.054 for
+  the wild bootstrap (`benchmarks/m1_test_size.R`).
+* With `ci = "conservative"`, `ci_actual` now takes its Bhatia-Davis variance
+  bound from a conservative interval rather than a CLR interval, so the
+  conservative actual-rate interval rests only on the proved result (P3.5(a)).
+  Conservative `ci_actual` values change slightly; CLR and projection output is
+  unchanged.
 * The `cluster` argument was removed in the earlier review response (no
   clustered variance; inference is conditional on the design and the group
   effects).

@@ -84,7 +84,7 @@ Here:
 **Application.** The partisan COVID-vaccination gap across 3,115 counties.
 * MOB gives $[-77.4,52.8]$ points.
 * CR gives $[-47.9,-5.5]$, i.e. $[D_{ER},D_{NM}]$, with 95% CI $[-51.8,-5.1]$.
-* The signs of $\delta_B$ and $\delta_W$ are validated on a linked individual-level auxiliary sample.
+* EGGHM report validating the signs of $\delta_B$ and $\delta_W$ on a linked individual-level auxiliary sample. That validates the signs only for the population the auxiliary sample represents, and a sign on the pooled association does not validate a sign for every unit or every group. *(Corrected after review, Batch B, Nov 2026.)*
 
 ## A2. How it relates to what we have
 
@@ -93,9 +93,9 @@ $$\delta_W=a\,(w_1+d_1)+b\,w_1,\qquad a=E_N[X]\operatorname{Var}_{w^1}(X),\ \ b=
 $$\delta_B=E_N\big[X(1-X)(c_1-w_1+d_1X)\big].$$
 Consequences:
 * Each EGGHM sign restriction is **one half-space in $K$**, i.e. one more LP row in 2a Prop. 7.
-* CR is a **union of two polyhedra**. It is not convex, but it is two LPs whose intervals are joined.
+* CR is a **union of two polyhedra**. In general it is two LPs whose intervals are joined. *Superseded:* for W1 and in 2×2 the union is a single slab, one LP (5a R3(d)). *(Corrected after review, Batch B, Nov 2026.)*
 * $\delta_W$ is a *positively weighted combination of both groups' contextual slopes*. Signing it is weaker than signing each slope (MENU B6, the package's `sign=`).
-* EGGHM's ER is the *linear* projection. JKST use the *quadratic* fit and get a set rather than a point because the quadratic separates $\delta_W$ into slope pieces. The two approaches use different moments, so neither nests the other.
+* EGGHM's ER is the *linear* projection. JKST use the *quadratic* fit and get a set rather than a point because the quadratic separates $\delta_W$ into slope pieces. The two approaches use different moments. That alone does not show that neither nests the other; nesting has to be checked case by case (2c §5, 5a R3). *(Corrected after review, Batch B, Nov 2026.)*
 
 **(b) Sharp and outer sets (2a).** EGGHM's information set is "data alone + a linear inequality on the unit-level rates". In R×C language:
 * the feasible set is $\{\beta=(\beta_i)_i:\beta_i\in S(X_i,T_i)\ \forall i,\ G\beta\ge0\}$, the product of unit Duncan–Davis polytopes cut by aggregate half-spaces, because $\delta_B$ and $\delta_W$ are linear in $(\beta_i)$;
@@ -117,7 +117,7 @@ Consequences:
 |---|---|---|
 | B5 group ordering, unit level ($\beta_{ic}^{r}\ge\beta_{ic}^{s}$ for each $i$) | local $\delta_{B,n}\ge0$ (Prop. 11; Manski 2018) | identical in 2 groups **at mixed units** ($0<X_i<1$). At a pure unit the local between association $X_i(1-X_i)D_i$ is identically 0, so the local sign restricts nothing there, while a unit-level ordering still constrains the (unobserved) absent group's rate. *(Caveat added after review, Batch B, Nov 2026.)* |
 | B5 ordering, mean level (package `order=`: $M_H(x)_{rc}\ge M_H(x)_{sc}$ on $A$) | $\delta_B\ge0$ is its $X(1-X)$-weighted average | mean-level order ⇒ $\delta_B\ge0$ (*proved*: a weighted average of non-negative terms) |
-| B6 sign of each row's contextual slope (package `sign=`) | $\delta_W\ge0$ is a positively weighted sum of the two rows' slopes | sign on both rows ⇒ $\delta_W\ge0$ (*proved* under LCE from A2(a); nonparametrically via V5) |
+| B6 sign of each row's contextual slope (package `sign=`) | $\delta_W\ge0$ is a positively weighted sum of the two rows' slopes | sign on both rows ⇒ $\delta_W\ge0$ (*proved* under pooled LCE from A2(a), and within each district; under district rungs the pooled $\delta_W$ also has a between-district term and can reverse, 2c M5(c); nonparametrically via V5) |
 | B8 monotone nonparametric contextual effects | Prop. 12, local $\delta_W(x)\ge0$ | "each $m_r$ nondecreasing" ⇒ local sign ⇒ … but **local sign everywhere does not imply aggregate $\delta_W\ge0$** (V6 counterexample), so the local and aggregate rungs are non-nested |
 | — (new) | contextual reinforcement | sign-free: needs no direction, only agreement |
 
@@ -306,7 +306,7 @@ Pre-war "veterans" are *future* veterans. Many were too young to vote before the
 
 With two rows (veteran / non-veteran) the two definitions coincide. They differ once a third row appears, which happens here if we add an "entered" or "exited" row (B4 option 2).
 * **W1 (one-vs-rest, the paper's).** For veterans: "do veterans' yes-rates, and the yes-rates of *everyone else taken together*, rise with the town's veteran share?" Simple, but "everyone else" is a mix whose make-up changes from town to town. Its sign is therefore harder to argue from substance.
-* **W2 (each group separately).** For each group and each composition share: "does this group's yes-rate rise with that share?" Each sign is a statement about one identifiable group. It is also exactly what biases Goodman's multiple regression.
+* **W2 (pooled over groups).** For a focal share $X_A$: "do yes-rates rise with A's share, *averaged over all groups* with weights $\mu_s$?" It signs one pooled sum $\Delta_A=\sum_s\mu_s\operatorname{Cov}_{w^s}(X_A,m_s)$, whose summands can have different signs; it is **not** a sign for each group separately, and W1 and W2 can have opposite signs (2c check C14). A direction for each named group needs separate restrictions (planned: per-group rows, decision U8(a)). $\Delta$ enters the bias of Goodman's multiple regression through $M^{-1}$, so signing $\Delta_A$ does not in general sign the bias of A's Goodman coefficient (2c M1(a)). *(Corrected after review, Batch B, Nov 2026.)*
 
 **Recommendation:** W1 as the default (it reproduces the paper), with W2 as an option once rows ≥ 3.
 
@@ -314,8 +314,8 @@ With two rows (veteran / non-veteran) the two definitions coincide. They differ 
 
 "How a group votes may depend on who its neighbours are. N2 assumes this dependence runs **one way only**: for example, the more veterans in a town, the higher (never lower) the veterans' yes-rate, and likewise for non-veterans. It may be any shape: flat and then rising, a step, a curve. The linear rung instead assumes a straight line."
 * **If wrong:** with a reversal (rates highest in middling towns, or backlash where a group is a large minority) the bound can miss the truth.
-* **Check:** an empty bound refutes it. Plot town yes-share against veteran share and look for reversals.
-* **Practical form:** the overall town pattern is fitted with a polynomial curve of data-chosen degree, and the uncertainty statement treats that curve's shape as correct.
+* **Check:** an empty bound refutes it. A plot of town yes-share against veteran share can suggest problems, but a reversal in the aggregate yes-share is not evidence that a group's own rate reverses (the aggregate mixes both groups' rates with changing weights), and a monotone aggregate does not show that each group's rate is monotone. *(Corrected after review, Batch B, Nov 2026.)*
+* **Practical form:** the overall town pattern is fitted with a polynomial curve of a **prespecified** degree (a degree chosen from the same data would invalidate the fixed-degree uncertainty statement, 2c §6), or with person-weighted bins (2c Lemma N2.4). Only the global N2 restriction is used; local slope restrictions are dropped because the slope is not identified on a finite set of compositions (2c N2.3, decision U4(a)). *(Corrected after review, Batch B, Nov 2026.)*
 
 ### D.3 Model-implied vs actual DiD
 

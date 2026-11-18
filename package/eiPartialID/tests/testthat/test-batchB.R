@@ -257,3 +257,41 @@ test_that("weight concentration per signed association (P-E25, U7(a))", {
   expect_equal(wc$n_eff[1], 1 / sum(u^2))
   expect_output(print(f$sign), "Weight concentration")
 })
+
+# ---------------------------------------------------------------------------------------------
+# Decisions 3(a) and 3(b) (Nov 2026): conservative ci_actual and the M1-vs-M2 test
+# ---------------------------------------------------------------------------------------------
+test_that("conservative ci_actual takes its Bhatia-Davis bound from the conservative interval (3(a))", {
+  s <- sim2(seed = 3)
+  f <- eiBounds(x = s$x, t = s$t, n = s$n, targets = list(a = c(1, 1)), seed = 1, tests = FALSE)
+  st <- f$setup
+  cons <- eiPartialID:::.rxc_constraints(st)
+  set.seed(5); Zs <- eiPartialID:::.rxc_zdraws(st$V, 2000)
+  sdc <- eiPartialID:::.rxc_fpc_sd(st, cons, 1, 1, "bhatia-davis", 0.005, Zs, 50, ci = "conservative")
+  wr <- st$w[, 1]; wpi <- st$w; wpi[, 1] <- wr^2 / sum(wr^2)
+  tg <- eiPartialID:::.rxc_target(st, matrix(c(1, 0, 0, 0), 2), w = wpi)
+  cc <- eiPartialID:::.rxc_ci_conservative(st, cons, tg, 0.005, Zs)$ci
+  lo <- max(0, min(1, cc[1])); hi <- max(0, min(1, cc[2]))
+  expect_equal(sdc, rep(sqrt(sum(wr^2) * (if (lo <= 0.5 && hi >= 0.5) 0.25 else max(lo * (1 - lo), hi * (1 - hi)))), 2))
+  fc <- eiBounds(x = s$x, t = s$t, n = s$n, targets = list(a = c(1, 1)), seed = 1, tests = FALSE, ci = "conservative")
+  expect_true(fc$table$ci_actual_lower <= fc$table$ci_model_lower + 1e-9)
+  expect_true(fc$table$ci_actual_lower >= fc$table$dd_lower - 1e-9 && fc$table$ci_actual_upper <= fc$table$dd_upper + 1e-9)
+})
+
+test_that("M1-vs-M2 test: wild bootstrap by default, chi^2 and F reported, RNG untouched (3(b))", {
+  d <- simg(zeta_sd = 0.08, seed = 7)
+  set.seed(11); r1 <- stats::runif(1)
+  set.seed(11); mt <- eiPartialID:::.rxc_m1_test(d$X, d$T, d$N, d$g, B = 99); r2 <- stats::runif(1)
+  expect_equal(r1, r2)
+  expect_equal(mt$method, "wild")
+  expect_equal(mt$df, (6 - 1) * (2 - 1) * 2 * 1 / 2)
+  expect_true(all(c("p.value_chisq", "p.value_F") %in% names(mt)))
+  mc <- eiPartialID:::.rxc_m1_test(d$X, d$T, d$N, d$g, method = "chisq")
+  expect_equal(mc$statistic, mt$statistic)
+  expect_equal(mc$p.value, mc$p.value_chisq)
+  rej <- vapply(1:30, function(s) {
+    d0 <- simg(zeta_sd = 0.08, seed = 400 + s)                  # M1 holds (shifts, common slopes)
+    eiPartialID:::.rxc_m1_test(d0$X, d0$T, d0$N, d0$g, B = 99)$p.value <= 0.05
+  }, logical(1))
+  expect_lte(mean(rej), 0.2)
+})

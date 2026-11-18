@@ -241,12 +241,12 @@ test_that("refutation is joint: empty sets name the combination", {
                                                  list(type = "dB", row = 1, col = 1, sign = 1))))
   expect_true(f$table$empty)
   expect_true(any(grepl("the rung \\(M0\\) \\+ delta_W\\(X vs rest\\) for 'T' >= 0 \\+ delta_B", f$notes)))
-  expect_true(any(grepl("never a restriction on its own", f$notes)))
+  expect_true(any(grepl("does not say which part fails", f$notes)))
   expect_true(f$tests$empty_rejected)
   expect_false(f$tests$empty_detail$rung_alone_rejected)
   expect_true(any(grepl("rung alone is not rejected", f$notes)))
   expect_true(any(grepl("not reassurance", f$notes)))
-  expect_equal(f$sign$verdicts$verdict_last, rep("empty: refuted jointly with the base", 2))
+  expect_equal(f$sign$verdicts$verdict_last, rep("empty at the point estimate (see the emptiness test)", 2))
   # each alone is fine
   for (sp in list(list(type = "dW", row = 1, col = 1, sign = 1), list(type = "dB", row = 1, col = 1, sign = 1))) {
     g <- eiBounds(x = v$prop_republican, t = v$prop_covid_vax, n = v$total_votes, weights = "n", targets = Dgap,

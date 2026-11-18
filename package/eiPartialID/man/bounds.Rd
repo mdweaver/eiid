@@ -38,9 +38,8 @@ List object with the CI_0.5 bounds:
 simple wrapper around calling generateBounds() followed by evaluateBounds(). Here, the returned object only contains the CI_0.5 bounds.
 }
 \examples{
-library("MASS")
-library("eco")
-data("census")
+if (requireNamespace("eco", quietly = TRUE)) {
+data("census", package = "eco")
 inputDataSet <- census
 x <- inputDataSet$X
 t <- inputDataSet$Y
@@ -48,6 +47,7 @@ n <- inputDataSet$N
 trueBetaB <- inputDataSet$W1
 outputList <- bounds(x, t, n, trueBetaB=trueBetaB)
 print(outputList)
+}
 
 # > print(outputList)
 # $CI_0.5_lower

@@ -42,3 +42,12 @@ The package test `tests/testthat/test-benchmark-ei-datasets.R` checks the table 
 Any dataset with known cell counts can be added as an entry `list(data, rows, cols, truth, group = NULL, meta = list(...))` and passed to `eiBenchmark()`. `truth` is the R×C matrix of true aggregate counts, with rows and columns in the order of `rows` and `cols`.
 
 Not included: `ei_SCO_2007`, also in `ei.Datasets`, whose candidate columns carry names but not party affiliations.
+
+## Size of the pooling test
+
+`pooling_test_size.R` simulates design S0 of `docs/extension/PHASE3_inference.md` §8.3 (2×2, 20 districts × 50 polls, no shifts; 38 restrictions) and reports the rejection rate of the pooling test at nominal 5% for the HC3 Wald statistic against $\chi^2$, the F form and the restricted wild bootstrap (the default from 0.3.0). With 2,000 replications and $B=399$ (`results/pooling_test_size_output.txt`): $\chi^2$ 0.078, F 0.072, wild bootstrap 0.043 (Monte Carlo SE 0.005–0.006).
+
+```sh
+Rscript benchmarks/pooling_test_size.R 2000 399 4   # replications, bootstrap draws, cores (about 5 minutes on 4 cores)
+```
+

@@ -16,11 +16,17 @@ restrictions, else the first).}
 
 \item{ci}{compute CIs in the "already implied" table (uses the fit's CI method).}
 
-\item{tol}{numerical tolerance for verdicts.}
+\item{tol}{numerical tolerance for verdicts.
+The \code{concentration} table gives, for each signed association, the
+largest unit weight, that unit, and the effective number of units
+\eqn{1/\sum_i u_i^2}, where \eqn{u_i} is unit \eqn{i}'s share of the
+association's design weights (pure units get zero weight in
+\eqn{\delta_B}).}
 }
 \value{
 a list of class \code{"eiRedundancy"} with data frames
-  \code{verdicts}, \code{implied}, \code{cr} and \code{descriptive}.
+  \code{verdicts}, \code{implied}, \code{cr}, \code{descriptive} and
+  \code{concentration}.
 }
 \description{
 For an \code{eiRxC} fit, \code{eiRedundancy()} reports what each optional
@@ -28,10 +34,13 @@ restriction buys (PHASE5a, R2). For each restriction and target it gives a
 verdict, computed by the face test (one feasibility LP per endpoint; solver
 dual values are never used for the verdict):
 \code{"implied (buys nothing)"} (the data and the rung already imply it, for
-every target), \code{"cuts the set, not this target"}, or
-\code{"tightens this target"}. Verdicts and width gains are reported with
-the restriction added first (to the rung alone) and added last (to all the
-other restrictions).
+every target), \code{"cuts the set, not this target"} (zero gain for this
+target; this does not mean the restriction is implied: it may narrow other
+targets), \code{"tightens this target"}, or \code{"empty at the point
+estimate (see the emptiness test)"} (a sample diagnostic at
+\eqn{\hat\beta}, not a level-controlled rejection). Verdicts and width
+gains are reported with the restriction added first (to the rung alone) and
+added last (to all the other restrictions).
 }
 \details{
 It also returns the "already implied by the data" table (each association's
@@ -39,7 +48,7 @@ interval and CI under the rung alone, flagged where it excludes 0), the CR
 table (both branch intervals and the connectivity certificate) and the
 descriptive EGGHM quantities: the tau-based \eqn{\widehat{ER}},
 \eqn{\widehat{NM} = \gamma\widehat{ER}}, \eqn{\gamma} and the bracket
-\eqn{[\gamma\widehat{ER}, \widehat{ER}]}. The bracket is descriptive only:
+\eqn{\mathrm{hull}\{\gamma\widehat{ER}, \widehat{ER}\}}. The bracket is descriptive only:
 never intersect it with a confidence interval (that under-covers, PHASE5a
 R10(e)). Our \eqn{\widehat{ER}} uses the fitted \eqn{E[T|X]}; it equals the
 EGGHM \eqn{T}-based estimate when the regression is \eqn{N}-weighted

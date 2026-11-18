@@ -370,7 +370,7 @@
   res <- list(verdict = NA_character_, lower_gain = NA_real_, upper_gain = NA_real_,
               width_gain = NA_real_, method = "face")
   if (is.null(IF$union)) { res$verdict <- "base set empty"; return(res) }
-  if (is.null(IN$union)) { res$verdict <- "empty: refuted jointly with the base"; return(res) }
+  if (is.null(IN$union)) { res$verdict <- "empty at the point estimate (see the emptiness test)"; return(res) }
   if (IF$unbounded || IN$unbounded) { res$verdict <- "unbounded"; return(res) }
   res$lower_gain <- hN$lower - hF$lower; res$upper_gain <- hF$upper - hN$upper
   res$width_gain <- .rxc_union_len(IF$union) - .rxc_union_len(IN$union)
@@ -515,6 +515,40 @@
   do.call(rbind, rows)
 }
 
+# Weight concentration of each signed association (P-E3, P-E25). An association is
+# sum_i sum_s W[i, s] m_s(X_i); unit i's weight is u_i = sum_s |W[i, s]| / sum_{i,s} |W[i, s]|
+# (design only: p_i X_ir (1 - X_ir) for delta_B one-vs-rest, so pure units get zero weight).
+# Reported: the largest weight, its unit, and the effective number of units 1 / sum u_i^2.
+.rxc_weight_table <- function(st, ex, rl) {
+  items <- list()
+  add <- function(nm, type, v, r, other = NULL)
+    items[[length(items) + 1]] <<- list(nm = nm, type = type, v = v, r = r, other = other)
+  for (a in ex$assoc) {
+    nm <- if (a$type == "dB") {
+      if (a$version == "pair") sprintf("delta_B(%s, %s)", rl[a$row], rl[a$other]) else sprintf("delta_B(%s vs rest)", rl[a$row])
+    } else if (a$version == "W2") sprintf("Delta_W(%s) [W2]", rl[a$row]) else sprintf("delta_W(%s vs rest)", rl[a$row])
+    add(nm, a$type, a$version, a$row, a$other)
+  }
+  for (cr in ex$cr) {
+    if (cr$version == "pair") add(sprintf("delta_B(%s, %s)", rl[cr$row], rl[cr$other]), "dB", "pair", cr$row, cr$other)
+    else add(sprintf("delta_B(%s vs rest)", rl[cr$row]), "dB", "W1", cr$row)
+    if (cr$version == "W1") add(sprintf("delta_W(%s vs rest)", rl[cr$row]), "dW", "W1", cr$row)
+    else add(sprintf("Delta_W(%s) [W2]", rl[cr$row]), "dW", "W2", cr$row)
+  }
+  if (!length(items)) return(NULL)
+  keys <- vapply(items, function(it) it$nm, "")
+  items <- items[!duplicated(keys)]
+  rows <- lapply(items, function(it) {
+    W <- .rxc_assoc_W(st, it$type, it$v, it$r, it$other)
+    u <- rowSums(abs(W)); u <- u / sum(u)
+    j <- which.max(u)
+    data.frame(association = it$nm, units = sum(u > 0), max_weight = u[j], unit_max = j,
+               n_eff = 1 / sum(u^2), stringsAsFactors = FALSE)
+  })
+  out <- do.call(rbind, rows); rownames(out) <- NULL
+  out
+}
+
 # descriptive EGGHM quantities (tau-based ER, NM = gamma ER, bracket) -- not restrictions
 .rxc_descriptive <- function(st, cols, rl, cl) {
   R <- st$R
@@ -582,17 +616,20 @@
 #' verdict, computed by the face test (one feasibility LP per endpoint; solver
 #' dual values are never used for the verdict):
 #' \code{"implied (buys nothing)"} (the data and the rung already imply it, for
-#' every target), \code{"cuts the set, not this target"}, or
-#' \code{"tightens this target"}. Verdicts and width gains are reported with
-#' the restriction added first (to the rung alone) and added last (to all the
-#' other restrictions).
+#' every target), \code{"cuts the set, not this target"} (zero gain for this
+#' target; this does not mean the restriction is implied: it may narrow other
+#' targets), \code{"tightens this target"}, or \code{"empty at the point
+#' estimate (see the emptiness test)"} (a sample diagnostic at
+#' \eqn{\hat\beta}, not a level-controlled rejection). Verdicts and width
+#' gains are reported with the restriction added first (to the rung alone) and
+#' added last (to all the other restrictions).
 #'
 #' It also returns the "already implied by the data" table (each association's
 #' interval and CI under the rung alone, flagged where it excludes 0), the CR
 #' table (both branch intervals and the connectivity certificate) and the
 #' descriptive EGGHM quantities: the tau-based \eqn{\widehat{ER}},
 #' \eqn{\widehat{NM} = \gamma\widehat{ER}}, \eqn{\gamma} and the bracket
-#' \eqn{[\gamma\widehat{ER}, \widehat{ER}]}. The bracket is descriptive only:
+#' \eqn{\mathrm{hull}\{\gamma\widehat{ER}, \widehat{ER}\}}. The bracket is descriptive only:
 #' never intersect it with a confidence interval (that under-covers, PHASE5a
 #' R10(e)). Our \eqn{\widehat{ER}} uses the fitted \eqn{E[T|X]}; it equals the
 #' EGGHM \eqn{T}-based estimate when the regression is \eqn{N}-weighted
@@ -607,8 +644,15 @@
 #'   restrictions, else the first).
 #' @param ci compute CIs in the "already implied" table (uses the fit's CI method).
 #' @param tol numerical tolerance for verdicts.
+#' The \code{concentration} table gives, for each signed association, the
+#' largest unit weight, that unit, and the effective number of units
+#' \eqn{1/\sum_i u_i^2}, where \eqn{u_i} is unit \eqn{i}'s share of the
+#' association's design weights (pure units get zero weight in
+#' \eqn{\delta_B}).
+#'
 #' @return a list of class \code{"eiRedundancy"} with data frames
-#'   \code{verdicts}, \code{implied}, \code{cr} and \code{descriptive}.
+#'   \code{verdicts}, \code{implied}, \code{cr}, \code{descriptive} and
+#'   \code{concentration}.
 #' @export
 eiRedundancy <- function(object, targets = NULL, cols = NULL, ci = TRUE, tol = 1e-7) {
   st <- object$setup
@@ -628,6 +672,7 @@ eiRedundancy <- function(object, targets = NULL, cols = NULL, ci = TRUE, tol = 1
                                  ndraw = object$settings$ndraw, nz_draw = object$settings$nz_draw),
     cr = .rxc_cr_table(st, tl, labels, tol),
     descriptive = .rxc_descriptive(st, cols, object$rows, object$cols),
+    concentration = .rxc_weight_table(st, ex, object$rows),
     weights = object$settings$weights, model = object$model), class = "eiRedundancy")
 }
 
@@ -638,8 +683,11 @@ print.eiRedundancy <- function(x, digits = 3, ...) {
     cat("What each restriction buys (face test at the point estimate; PHASE5a R2)\n")
     print(r(x$verdicts[, c("restriction", "target", "verdict_first", "gain_first", "verdict_last", "gain_last")]),
           row.names = FALSE, right = FALSE)
-    cat("  gain = reduction in the width of the estimated set; first = added to the rung alone,\n")
-    cat("  last = added to all other restrictions\n")
+    cat("  gain = reduction in the width of the estimated set; first = added to the rung (",
+        x$model, ") alone,\n", sep = "")
+    cat("  last = added to the rung and all other restrictions. \"cuts the set, not this target\" means zero\n")
+    cat("  gain for this target, not that the restriction is implied; \"empty at the point estimate\" is a\n")
+    cat("  sample diagnostic, not a test\n")
     nt <- x$verdicts[!is.na(x$verdicts$near_tie) & x$verdicts$near_tie, , drop = FALSE]
     if (nrow(nt)) cat("  NEAR TIE: implied at the point estimate but not at the confidence bound for:",
                       paste(unique(nt$restriction), collapse = "; "), "\n")
@@ -662,7 +710,13 @@ print.eiRedundancy <- function(x, digits = 3, ...) {
     print(r(x$descriptive), row.names = FALSE, right = FALSE)
     cat("  ER, NM are tau-based (fitted E[T|X]); they equal the EGGHM T-based estimates under\n")
     cat("  N-weighted regression", if (identical(x$weights, "n")) " (used here).\n" else " (not used here: weights = \"none\").\n", sep = "")
-    cat("  Never intersect the bracket [gamma ER, ER] with a confidence interval: it under-covers.\n")
+    cat("  Never intersect the bracket hull{gamma ER, ER} with a confidence interval: it under-covers.\n")
+    cat("\n")
+  }
+  if (!is.null(x$concentration)) {
+    cat("Weight concentration of each signed association (design only): largest unit weight,\n")
+    cat("its unit, and the effective number of units 1 / sum(weight^2)\n")
+    print(r(x$concentration), row.names = FALSE, right = FALSE)
   }
   invisible(x)
 }

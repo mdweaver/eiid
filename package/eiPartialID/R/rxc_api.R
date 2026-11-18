@@ -113,10 +113,22 @@
 #' interval as implemented collects candidate endpoints by simulation and is
 #' \emph{algorithmic} (its coverage is a conjecture supported by simulation);
 #' the projection interval and the conservative interval have an asymptotic
-#' guarantee for a fixed-dimensional regression (M0 in any design; grouped models
-#' with few, large groups). Inference is conditional on the design and on the
+#' guarantee for a fixed-dimensional regression with a nonsingular covariance
+#' matrix \eqn{\hat V} (M0 in any full-rank design; grouped models with few,
+#' large groups). If \eqn{\hat V} is numerically singular, candidate endpoints
+#' whose gradients use its null directions are dropped from the projection and
+#' CLR intervals (a valid, wider interval) and a note says so. The
+#' \code{proj_actual} allowance for unit-level deviations uses a variance bound
+#' taken from a projection interval, so the projection columns rest only on
+#' P3.5(b2). Inference is conditional on the design and on the
 #' group effects; units are assumed independent given them, and no clustered
 #' variance is used (group-level shocks belong in the mean: use M1 or M2).
+#'
+#' Sign and contextual-reinforcement restrictions (\code{assoc}, \code{cr};
+#' the M-SIGN module) are \strong{experimental} in this release: both referee
+#' reports of review batch B are being answered. Under grouped rungs (M1,
+#' M1delta, M2, L4 with groups) each sign is one pooled restriction across
+#' groups, and sharpness (PHASE5a R3(b)) is proved only for the pooled model M0.
 #'
 #' @param formula optional formula \code{cbind(column counts) ~ cbind(row counts)}.
 #' @param data data frame with counts (and the grouping variable).
@@ -143,15 +155,22 @@
 #'   \eqn{\delta_B} (version \code{"W1"}, row vs the rest, default; or
 #'   \code{"pair"}, row vs \code{other}), \code{"dW"} the within-group
 #'   (contextual) association \eqn{\delta_W} (version \code{"W1"}, one-vs-rest,
-#'   default; or \code{"W2"}, \eqn{\Delta_r}). \code{cr} is a list of
+#'   default; or \code{"W2"}, \eqn{\Delta_r}, the within-group associations
+#'   of every original group with the row's share, \emph{pooled} into one sum:
+#'   its sign does not sign each group's association). \code{cr} is a list of
 #'   contextual-reinforcement restrictions (\eqn{\delta_B} and \eqn{\delta_W}
 #'   have the same sign, which is not assumed known), each \code{list(row, col,
 #'   version = "W1", "W2" or "pair", other)}. W1 (and every 2 x 2 CR) is one LP
 #'   (a slab); W2 and pair are a union of two branches and may give two disjoint
 #'   intervals. All associations are model-implied (LCE) means with design
-#'   weights \eqn{N_i}. Signs on \eqn{\delta_W} can be refuted by the data;
-#'   with two rows a sign on \eqn{\delta_B} and CR cannot be refuted by
-#'   aggregates on their own (refutation is always joint with the rung).
+#'   weights \eqn{N_i}. Signs on \eqn{\delta_W} can be refuted by the data.
+#'   A sign on \eqn{\delta_B} and CR are always feasible only in the
+#'   model-free problem with continuous unit tables (Duncan-Davis margins, no
+#'   linear rung, no other restrictions); with the linear rung they can be
+#'   rejected jointly with it, and with integer counts or other restrictions
+#'   CR can be refuted outright. An empty set rejects the combination; it does
+#'   not say which part fails (the fit's notes say whether the rung alone is
+#'   rejected).
 #' @param alpha 1 - confidence level.
 #' @param ci \code{"clr"} (default; reported with the projection interval
 #'   alongside), \code{"conservative"} or \code{"none"}.
@@ -168,19 +187,26 @@
 #' @param range_offset shrink the observed range by this amount (two-row tables
 #'   only; Jiang et al. use 1e-5).
 #' @param mismatch \code{"error"} or \code{"rescale"} when row and column totals differ.
-#' @param union with CR restrictions the estimate and CIs can be two disjoint
-#'   intervals: \code{"pieces"} (default) reports the hull in
-#'   \code{*_lower}/\code{*_upper} and the excluded gap in \code{*_gap_lower}/
-#'   \code{*_gap_upper}; \code{"hull"} reports the hull only (valid, wider or equal).
+#' @param union with CR restrictions the estimate and CIs can be a union of
+#'   disjoint intervals: \code{"pieces"} (default) reports the hull in
+#'   \code{*_lower}/\code{*_upper}, the number of pieces in \code{n_pieces} and
+#'   the \emph{widest} excluded gap in \code{*_gap_lower}/\code{*_gap_upper};
+#'   \code{print()} shows every piece, and \code{fit$pieces} holds them all;
+#'   \code{"hull"} reports the hull only (valid, wider or equal).
 #' @param diagnostics compute \code{eiRedundancy()} diagnostics and store them in
 #'   \code{$sign} (default: when \code{assoc} or \code{cr} restrictions are given).
+#' @param base also fit the rung alone (without the optional restrictions) and
+#'   report its estimate and CIs in the \code{base_*} columns, printed beside
+#'   the restricted result (default: when restrictions are given).
 #' @return an object of class \code{"eiRxC"}.
 #' @references Jiang, W., King, G., Schmaltz, A. and Tanner, M. A. (2019).
 #'   Ecological Regression with Partial Identification. Political Analysis.
 #' @examples
-#' library(eco); data(census)
-#' fit <- eiBounds(x = census$X, t = census$Y, n = census$N, model = "M0", seed = 1)
-#' fit
+#' if (requireNamespace("eco", quietly = TRUE)) {
+#'   data("census", package = "eco")
+#'   fit <- eiBounds(x = census$X, t = census$Y, n = census$N, model = "M0", seed = 1)
+#'   fit
+#' }
 #' @export
 eiBounds <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL,
                      x = NULL, t = NULL, n = NULL, group = NULL,
@@ -193,7 +219,7 @@ eiBounds <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL,
                      jkst_x = seq(0, 2, by = 0.25), eta = 0, ndraw = 100, nz_draw = 4000,
                      seed = NULL, tests = TRUE, range_offset = 0,
                      mismatch = c("error", "rescale"), union = c("pieces", "hull"),
-                     diagnostics = NULL) {
+                     diagnostics = NULL, base = NULL) {
   cl <- match.call()
   union <- match.arg(union)
   model <- match.arg(model); range <- match.arg(range); weights <- match.arg(weights)
@@ -235,9 +261,9 @@ eiBounds <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL,
   combo <- if (length(mlabels)) paste0("the rung (", model, ") + ", paste(mlabels, collapse = " + ")) else
     paste0("the rung (", model, ")")
   if (any(est$table$empty))
-    notes <- c(notes, paste0("empty bound: ", combo, " is contradicted by the data (or by sampling noise; ",
-                             "see the emptiness test). Refutation is joint: the combination is rejected, ",
-                             "never a restriction on its own"))
+    notes <- c(notes, paste0("empty estimate: at the point estimate ", combo, " has no solution. ",
+                             "This is a sample diagnostic, not a test (see the emptiness test). An empty ",
+                             "set rejects the combination; it does not say which part fails"))
   if (isTRUE(tst$empty_rejected)) {
     ra <- tst$empty_detail$rung_alone_rejected
     notes <- c(notes, paste0("emptiness test rejects ", combo,
@@ -245,10 +271,20 @@ eiBounds <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL,
                                if (identical(ra, FALSE)) "; the rung alone is not rejected" else ""))
   }
   sign_like <- c(vapply(extra$assoc, function(a) a$type == "dB", TRUE), rep(TRUE, length(extra$cr)))
-  if (length(sign_like) && all(sign_like) && length(rl) == 2 &&
+  if (length(sign_like) && all(sign_like) &&
       (any(est$table$empty) || isTRUE(tst$empty_rejected)))
-    notes <- c(notes, "with two rows a sign on delta_B and CR can never be refuted by aggregate data on their own; the rejection concerns their combination with the linear-contextual-effects rung")
+    notes <- c(notes, paste0("a sign on delta_B and CR are always feasible only in the model-free problem with ",
+                             "continuous tables (no linear rung, no other restrictions). With the rung (", model,
+                             ") they can be rejected jointly with it, and with integer counts CR can be ",
+                             "refuted outright. The rejection is of the combination; it is not evidence that the belief holds"))
   if (length(extra$assoc) || length(extra$cr)) {
+    if (st$G > 1 && model %in% c("M1", "M2", "M1delta", "L4"))
+      notes <- c(notes, paste0("sign/CR restrictions under a grouped rung (", model, ") are experimental: ",
+                               "each sign is one pooled restriction across groups, not one per group, and ",
+                               "sharpness (PHASE5a R3(b)) is proved only for the pooled model M0"))
+    if (any(vapply(c(extra$assoc, extra$cr), function(a) identical(a$version, "W2"), TRUE)))
+      notes <- c(notes, paste0("W2 signs one pooled sum over the original groups; it does not sign each ",
+                               "group's association (a per-group version is planned)"))
     if (any(est$table$ci_rejected) || any(est$table$empty) || isTRUE(tst$empty_rejected))
       notes <- c(notes, "a narrow interval after a (near-)rejection is not reassurance: coverage holds only if the restrictions are true")
     if (st$nz == 0) notes <- c(notes, "sign/CR restrictions are not imposed on point-identified rungs (L5, L6)")
@@ -263,11 +299,14 @@ eiBounds <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL,
   if (any(is.na(est$table$estimate_lower) & !est$table$empty))
     notes <- c(notes, "unbounded estimate: some composition range is not full-dimensional in the simplex (2a Lemma 3(b)); add units with more varied compositions or restrict the targets")
   if (ci == "clr")
-    notes <- c(notes, "CLR intervals are algorithmic (candidate endpoints collected by simulation; coverage supported by simulation, not proved). proj_* columns: projection intervals from the same candidates, with an asymptotic guarantee (P3 Prop. P3.5(b2))")
+    notes <- c(notes, "CLR intervals are algorithmic (candidate endpoints collected by simulation; coverage supported by simulation, not proved). proj_* columns: projection intervals from the same candidates, with an asymptotic guarantee for a nonsingular V-hat in a fixed-dimension design (P3 Prop. P3.5(b2))")
+  if (isTRUE(est$proj_dropped > 0))
+    notes <- c(notes, sprintf("the estimated covariance matrix of the regression is numerically singular in directions that %d candidate endpoint(s) use; they were dropped from the CLR and projection intervals (valid, wider; P3.5(b2)(ii) covers only the range of V-hat)", est$proj_dropped))
   if (st$vcov_type != vcov) notes <- c(notes, paste0("variance estimator fell back from ", vcov, " to ", st$vcov_type))
   if (any(!st$keep)) notes <- c(notes, sprintf("%d units trimmed; their contribution to the actual rate is bounded by Duncan-Davis, and the model-implied rate refers to the kept units", sum(!st$keep)))
   if (any(est$table$ci_rejected))
-    notes <- c(notes, "a confidence interval lies wholly outside the logically possible range: the rung is contradicted by the data (reported as --)")
+    notes <- c(notes, paste0("a confidence interval is empty or lies wholly outside the logically possible range: ",
+                             combo, " is contradicted by the data (reported as --)"))
   if (model %in% c("L5", "L6") && any(est$table$estimate_lower < 0 | est$table$estimate_upper > 1, na.rm = TRUE))
     notes <- c(notes, "point estimate outside [0, 1]: constancy is contradicted by the data")
   out <- structure(list(call = cl, model = model, delta = delta, rows = rl, cols = cll,
@@ -283,6 +322,22 @@ eiBounds <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL,
   if (is.null(diagnostics)) diagnostics <- length(extra$assoc) + length(extra$cr) > 0
   if (diagnostics) out$sign <- tryCatch(eiRedundancy(out, ci = ci != "none"),
                                         error = function(e) { warning("diagnostics failed: ", conditionMessage(e)); NULL })
+  # the rung alone, beside the restricted result (computed last: it does not change the draws
+  # used above)
+  if (is.null(base)) base <- !is.null(extra) && length(extra) > 0
+  if (base && !is.null(extra)) {
+    st0 <- st; st0$extra <- NULL
+    if (!is.null(seed)) set.seed(seed)      # the same draws as a separate fit of the rung alone
+    b <- .rxc_estimate(st0, tl, alpha = alpha, ci = ci, fpc = fpc, eta = eta, ndraw = ndraw,
+                       nz_draw = nz_draw, union = union)$table
+    for (v in c("estimate_lower", "estimate_upper", "ci_model_lower", "ci_model_upper",
+                "ci_actual_lower", "ci_actual_upper"))
+      out$table[[paste0("base_", v)]] <- b[[v]]
+    out$table$base_empty <- b$empty
+    if (any(est$table$empty))
+      out$notes <- c(out$notes, if (any(b$empty)) "the rung alone also has an empty estimate" else
+        paste0("the rung alone (", model, ") has a non-empty estimate (base_* columns)"))
+  }
   out
 }
 
@@ -308,9 +363,19 @@ print.eiRxC <- function(x, digits = 3, ...) {
   if (x$eta > 0) cat(sprintf("Sensitivity: eta = %g (undetectable nonlinearity allowed)\n", x$eta))
   tb <- x$table
   f <- .rxc_fmt_iv(digits)
-  g <- function(p) if (paste0(p, "_gap_lower") %in% names(tb))
-    f(tb[[paste0(p, "_lower")]], tb[[paste0(p, "_upper")]], tb[[paste0(p, "_gap_lower")]], tb[[paste0(p, "_gap_upper")]]) else
-    f(tb[[paste0(p, "_lower")]], tb[[paste0(p, "_upper")]])
+  hull <- identical(x$settings$union, "hull")
+  # every piece of a union (P-E15): from fit$pieces when available, else hull + widest gap
+  g <- function(p) {
+    out <- if (paste0(p, "_gap_lower") %in% names(tb))
+      f(tb[[paste0(p, "_lower")]], tb[[paste0(p, "_upper")]], tb[[paste0(p, "_gap_lower")]], tb[[paste0(p, "_gap_upper")]]) else
+      f(tb[[paste0(p, "_lower")]], tb[[paste0(p, "_upper")]])
+    if (!hull && !is.null(x$pieces)) for (i in seq_len(nrow(tb))) {
+      u <- x$pieces[[tb$target[i]]][[p]]
+      if (!is.null(u) && nrow(u) > 2 && !is.na(tb[[paste0(p, "_lower")]][i]))
+        out[i] <- paste(f(u[, 1], u[, 2]), collapse = " U ")
+    }
+    out
+  }
   out <- data.frame(target = tb$target,
                     estimate = ifelse(tb$empty, "empty", g("estimate")),
                     ci_model = g("ci_model"), ci_actual = g("ci_actual"),
@@ -322,32 +387,56 @@ print.eiRxC <- function(x, digits = 3, ...) {
     out <- out[, c("target", "estimate", "ci_model", "proj_model", "ci_actual", "proj_actual", "duncan_davis")]
   }
   print(out, row.names = FALSE, right = FALSE)
+  has_base <- "base_estimate_lower" %in% names(tb)
+  if (has_base) {
+    cat("\nThe rung alone (", x$model, ", without the optional restrictions), for comparison:\n", sep = "")
+    print(data.frame(target = tb$target,
+                     estimate = ifelse(tb$base_empty, "empty", f(tb$base_estimate_lower, tb$base_estimate_upper)),
+                     ci_model = f(tb$base_ci_model_lower, tb$base_ci_model_upper),
+                     ci_actual = f(tb$base_ci_actual_lower, tb$base_ci_actual_upper), stringsAsFactors = FALSE),
+          row.names = FALSE, right = FALSE)
+  }
   ex <- x$setup$extra
-  if (length(ex$assoc) || length(ex$cr)) {
+  has_cr <- length(ex$cr) > 0
+  if (length(ex$assoc) || has_cr) {
     cat("\nSign / CR restrictions (model-implied mean associations, design-weighted):\n")
     for (lb in .rxc_module_labels(list(assoc = ex$assoc, cr = ex$cr), x$rows, x$cols)) cat("  ", lb, "\n")
-    if (any(!is.na(tb$estimate_gap_lower)) || any(!is.na(tb$ci_model_gap_lower)))
-      cat("  'U' marks a union of two disjoint intervals (CR branches; use union = \"hull\" for the hull)\n")
-    cat("  estimate is sharp for the regression (PHASE5a R3(b))\n")
+    if (any(tb$n_pieces > 1, na.rm = TRUE) || any(!is.na(tb$ci_model_gap_lower)))
+      cat("  'U' marks a union of disjoint intervals (CR branches; every piece is shown; use union = \"hull\" for the hull)\n")
+    if (identical(x$setup$type, "pooled"))
+      cat("  estimate is sharp for the regression (PHASE5a R3(b), pooled model)\n") else
+      cat("  estimate is an outer set for the regression; sharpness under grouped rungs is not yet proved\n")
+    if (any(vapply(c(ex$assoc, ex$cr), function(a) identical(a$version, "W2"), TRUE)))
+      cat("  W2 is one pooled sum over the original groups, not a sign for each group\n")
   }
   if (!is.null(x$modules)) {
     exp <- x$modules[!grepl("^proved", x$modules$proof_status), , drop = FALSE]
     for (k in seq_len(nrow(exp))) cat(sprintf("  EXPERIMENTAL module %s: %s\n", exp$restriction[k], exp$proof_status[k]))
   }
+  clr <- identical(x$ci, "clr")
   cat("\n  estimate:  estimated outer identified set for the model-implied rate (not a confidence interval)\n")
-  cat("  ci_model:  CI for the rate implied by the model at the observed compositions\n")
-  cat(sprintf("  ci_actual: CI for the actual rate in these units (unit-level allowance: %s)\n", x$fpc))
-  if (has_proj) cat("  proj_*:    projection intervals (asymptotic guarantee); ci_* with CLR are algorithmic\n")
+  cat("  ci_model:  CI for the rate implied by the model at the observed compositions",
+      if (clr) "\n             (CLR: algorithmic, coverage supported by simulation, not proved)" else "", "\n", sep = "")
+  cat(sprintf("  ci_actual: CI for the actual rate in these units (unit-level allowance: %s)%s\n", x$fpc,
+              if (clr) "; CLR, algorithmic" else ""))
+  if (has_cr && clr) cat("  with CR, ci_* are the union of the CLR branch intervals (algorithmic); proj_* are the\n",
+                         "  union of the projection branch intervals\n", sep = "")
+  if (has_proj) cat("  proj_*:    projection intervals (asymptotic guarantee for a nonsingular V-hat in a\n",
+                    "             fixed-dimension design: M0, or few large groups; P3.5(b2))\n", sep = "")
   cat("  duncan_davis: model-free bounds for the actual rate\n")
   if (!is.null(x$tests)) {
     if (isTRUE(x$tests$empty_rejected)) cat("\n  Emptiness test: the model is REJECTED at level", x$alpha, "\n")
     if (!is.null(x$tests$m1) && !is.na(x$tests$m1$p.value))
       cat(sprintf("  Test of M1's testable part: Wald = %.2f, df = %d, p = %.3f\n",
                   x$tests$m1$statistic, x$tests$m1$df, x$tests$m1$p.value))
-    if (!is.null(x$tests$pool) && !is.na(x$tests$pool$p.value))
-      cat(sprintf("  Pooling test (M0 vs M1, group shifts = 0): Wald = %.4g, df = %d, p = %.3f%s\n",
+    if (!is.null(x$tests$pool) && !is.na(x$tests$pool$p.value)) {
+      pm <- x$tests$pool$method
+      cat(sprintf("  Pooling test (M0 vs M1, group shifts = 0): Wald = %.4g, df = %d, p = %.3f (%s)%s\n",
                   x$tests$pool$statistic, x$tests$pool$df, x$tests$pool$p.value,
+                  if (identical(pm, "wild")) sprintf("wild bootstrap, B = %d", x$tests$pool$B) else
+                    if (is.null(pm)) "chi-squared" else pm,
                   if (isTRUE(x$tests$pool$spanning)) "" else " (some group's compositions are not affinely spanning)"))
+    }
   }
   for (nt in x$notes) cat("  Note:", nt, "\n")
   invisible(x)
@@ -433,7 +522,7 @@ ladder <- function(..., rungs = c("DD", "M0", "M2", "M1delta", "M1", "L4", "L5",
   out <- list()
   run <- function(model, d = 0, restr = NULL, label = NULL) {
     a <- args; a$model <- model; a$delta <- d; a$seed <- seed; a$row_constant <- row_constant
-    a$tests <- FALSE; a$diagnostics <- FALSE
+    a$tests <- FALSE; a$diagnostics <- FALSE; a$base <- FALSE
     if (!is.null(restr)) a$restrictions <- c(a$restrictions, restr)
     fit <- tryCatch(do.call(eiBounds, a), error = function(e) e)
     if (inherits(fit, "error")) {
@@ -649,6 +738,7 @@ eiBenchmark <- function(datasets, rungs = c("M0", "M2", "M1", "L5", "L6"), cores
       args <- utils::modifyList(common, rungs[[rg]])
       if (is.function(args$restrictions)) args$restrictions <- args$restrictions(d)
       if (args$model %in% c("M2", "M1delta", "M1", "L5") && is.null(d$group)) next
+      if (is.null(args$base)) args$base <- FALSE
       args <- c(list(data = d$data, rows = d$rows, cols = d$cols, group = d$group, tests = FALSE), args)
       fit <- tryCatch(do.call(eiBounds, args), error = function(e) e)
       if (inherits(fit, "error")) { warning(nm, "/", rg, ": ", conditionMessage(fit)); next }

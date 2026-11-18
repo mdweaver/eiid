@@ -176,8 +176,33 @@
   list(G = Gr, ic = ic)
 }
 
+# Which candidates use directions in which V-hat is numerically singular (PHASE5a §3.1;
+# P3.5(b2)(ii), referee report B, P-B23 and P-B40)? For each row g of Gr: TRUE when g has a
+# non-negligible component in the numerical null space of V. A candidate with sigma-hat = 0 is
+# "exact" only if its gradient is (numerically) zero; a nonzero gradient with sigma-hat = 0 means
+# that V-hat cannot see the candidate's sampling error. Convention: when V-hat is identically
+# zero (every residual is zero, so the regression fits exactly) every candidate is exact.
+.rxc_null_use <- function(Gr, V, tol = 1e-6) {
+  Gr <- rbind(Gr)
+  ev <- eigen((V + t(V)) / 2, symmetric = TRUE)
+  lmax <- max(ev$values)
+  if (!is.finite(lmax) || lmax <= 0) return(rep(FALSE, nrow(Gr)))
+  null <- ev$values <= 1e-10 * lmax
+  if (!any(null)) return(rep(FALSE, nrow(Gr)))
+  gn <- sqrt(rowSums(Gr^2))
+  nc <- sqrt(rowSums((Gr %*% ev$vectors[, null, drop = FALSE])^2))
+  gn > 0 & nc > tol * gn
+}
+
 # upper confidence bound for theta_U = min_j theta_j (CLR 2013, analytic, with selection)
+# Candidates whose gradient uses a null direction of V-hat (.rxc_null_use) are dropped: each
+# candidate bounds theta_U at the truth (weak duality), so the minimum over the others is still
+# an upper bound, only wider. If none is left the bound is +Inf (no information).
 .rxc_clr_min <- function(theta, Gr, Zs, alpha, n) {
+  Gr <- rbind(Gr)
+  bad <- .rxc_null_use(Gr, Zs$V)
+  if (all(bad)) return(Inf)
+  if (any(bad)) { theta <- theta[!bad]; Gr <- Gr[!bad, , drop = FALSE] }
   se <- sqrt(pmax(rowSums((Gr %*% Zs$V) * Gr), 0))
   if (length(theta) == 1) {
     return(theta + stats::qnorm(1 - alpha) * se)
@@ -229,14 +254,24 @@
 
 # Projection interval (P3.5(b2)(ii)) from collected candidates: upper end min_j(theta_j + k se_j),
 # lower end max_j(theta_j - k se_j), k = sqrt(qchisq(1 - alpha, q)), q = rank of V.
+# Rank guard (referee report B, P-B40): the Scheffe-type event covers gradients in the range of
+# V-hat only, so the interval works in the reduced (full-rank) parameterisation given by that
+# range. Candidates whose gradients use a numerically null direction of V-hat are dropped
+# (valid, wider); an end with no candidate left is -Inf / +Inf, i.e. the logical range after
+# clipping. Attribute "dropped": number of candidates dropped. With a nonsingular V-hat (every
+# full-rank design in practice; P3 section 8) nothing changes.
 .rxc_projection <- function(st, cu, cl, Zs, alpha) {
   ev <- eigen((Zs$V + t(Zs$V)) / 2, symmetric = TRUE, only.values = TRUE)$values
   q <- max(1L, sum(ev > 1e-10 * max(ev)))
   k <- sqrt(stats::qchisq(1 - alpha, q))
+  bu <- .rxc_null_use(cu$G, Zs$V); bl <- .rxc_null_use(cl$G, Zs$V)
   seU <- sqrt(pmax(rowSums((cu$G %*% Zs$V) * cu$G), 0))
   seL <- sqrt(pmax(rowSums((cl$G %*% Zs$V) * cl$G), 0))
-  c(max(as.vector(cl$G %*% st$beta) + cl$ic - k * seL),
-    min(as.vector(cu$G %*% st$beta) + cu$ic + k * seU))
+  lo <- as.vector(cl$G %*% st$beta) + cl$ic - k * seL
+  up <- as.vector(cu$G %*% st$beta) + cu$ic + k * seU
+  out <- c(if (all(bl)) -Inf else max(lo[!bl]), if (all(bu)) Inf else min(up[!bu]))
+  attr(out, "dropped") <- sum(bu) + sum(bl)
+  out
 }
 
 # conservative version (Theorem P3.5(a)): inflate every constraint simultaneously
@@ -265,20 +300,27 @@
 }
 
 # finite-population allowance: sd bound for E = sum_i w_i e_i (one cell)
+# Returns c(clr, projection): the Bhatia-Davis bound with mbar bounded by the CLR interval (used
+# by ci_actual) and by the projection interval from the same candidates (used by proj_actual, so
+# that the projection column rests only on P3.5(b2)); Popoviciu where the interval is missing.
 .rxc_fpc_sd <- function(st, cons, r, c, method, alpha_v, Zs, ndraw) {
   wr <- st$w[, r]
   sw2 <- sum(wr^2)
-  if (method == "popoviciu") return(0.5 * sqrt(sw2))
+  if (method == "popoviciu") return(rep(0.5 * sqrt(sw2), 2))
   # Bhatia-Davis: Var(e_i) <= m_i (1 - m_i); by concavity sum pi_i m_i(1-m_i) <= mbar(1-mbar)
   # with pi_i = w_i^2 / sum w^2 and mbar = sum pi_i m_i, bounded by its own CI.
   wpi <- st$w; wpi[, r] <- wr^2 / sw2
   a <- matrix(0, st$R, st$C); a[r, c] <- 1
   tg <- .rxc_target(st, a, w = wpi)
-  ci <- .rxc_ci_clr(st, cons, tg, alpha_v / 2, alpha_v / 2, Zs, ndraw)
-  if (any(is.na(ci))) return(0.5 * sqrt(sw2))
-  lo <- max(0, min(1, ci[1])); hi <- max(0, min(1, ci[2]))
-  vmax <- if (lo <= 0.5 && hi >= 0.5) 0.25 else max(lo * (1 - lo), hi * (1 - hi))
-  sqrt(sw2 * vmax)
+  ci <- .rxc_ci_clr(st, cons, tg, alpha_v / 2, alpha_v / 2, Zs, ndraw, proj_alpha = alpha_v)
+  bd <- function(iv) {
+    if (any(is.na(iv))) return(0.5 * sqrt(sw2))
+    lo <- max(0, min(1, iv[1])); hi <- max(0, min(1, iv[2]))
+    if (lo > hi) return(0.5 * sqrt(sw2))
+    vmax <- if (lo <= 0.5 && hi >= 0.5) 0.25 else max(lo * (1 - lo), hi * (1 - hi))
+    sqrt(sw2 * vmax)
+  }
+  c(bd(ci[1:2]), bd(attr(ci, "projection")))
 }
 
 # JKST CI_x for a target: plug-in candidates at beta-hat, S = S1 (Popoviciu) + se
@@ -331,7 +373,7 @@
   if (fpc == "popoviciu") { a_est <- a_est + a_v; a_v <- 0 }      # no variance-bound CI needed
   zE <- stats::qnorm(1 - a_E / 2)
   point <- st$nz == 0
-  fpc_cache <- list()
+  fpc_cache <- list(); proj_dropped <- 0
   out <- list(); jk <- list(); pieces <- list()
   usum <- function(u) {
     sm <- .rxc_union_summary(u)
@@ -365,14 +407,14 @@
       a2 <- sweep(a, 1, share, "*")
       tg2 <- .rxc_target(st, a2)
       # unit-level allowance and trimmed part do not depend on the system
-      sdE <- 0
+      sdE <- 0; sdEp <- 0                     # CLR-based and projection-based allowances
       for (r in seq_len(R)) for (c in seq_len(C)) {
         if (a2[r, c] == 0) next
         key <- paste(r, c)
         if (is.null(fpc_cache[[key]])) {
           fpc_cache[[key]] <- if (point) {
             # point rungs: Bhatia-Davis at the CI of the cell's own rate (or Popoviciu)
-            if (fpc == "popoviciu") 0.5 * sqrt(sum(st$w[, r]^2)) else {
+            if (fpc == "popoviciu") rep(0.5 * sqrt(sum(st$w[, r]^2)), 2) else {
               wpi <- st$w; wpi[, r] <- st$w[, r]^2 / sum(st$w[, r]^2)
               e1 <- matrix(0, R, C); e1[r, c] <- 1
               tgp <- .rxc_target(st, e1, w = wpi)
@@ -381,11 +423,12 @@
               lo <- max(0, min(1, m - stats::qnorm(1 - a_v / 2) * sem))
               hi <- max(0, min(1, m + stats::qnorm(1 - a_v / 2) * sem))
               vmax <- if (lo <= 0.5 && hi >= 0.5) 0.25 else max(lo * (1 - lo), hi * (1 - hi))
-              sqrt(sum(st$w[, r]^2) * vmax)
+              rep(sqrt(sum(st$w[, r]^2) * vmax), 2)
             }
           } else .rxc_fpc_sd(st, base, r, c, fpc, a_v, Zs, ndraw)   # rung + linear rows: valid
         }
-        sdE <- sdE + abs(a2[r, c]) * fpc_cache[[key]]
+        sdE <- sdE + abs(a2[r, c]) * fpc_cache[[key]][1]
+        sdEp <- sdEp + abs(a2[r, c]) * fpc_cache[[key]][2]
       }
       tr <- if (!is.null(dd_trim)) {
         a3 <- sweep(a, 1, 1 - share, "*")
@@ -407,6 +450,7 @@
           cm <- .rxc_ci_clr(st, sy, tg, alpha / 2, alpha / 2, Zs, ndraw, proj_alpha = alpha)
           ce <- .rxc_ci_clr(st, sy, tg2, a_est / 2, a_est / 2, Zs, ndraw, proj_alpha = a_est)
           pm <- attr(cm, "projection"); pe <- attr(ce, "projection")
+          proj_dropped <- proj_dropped + sum(attr(pm, "dropped"), attr(pe, "dropped"))
         } else {
           cm <- .rxc_ci_conservative(st, sy, tg, alpha, Zs)$ci
           ce <- .rxc_ci_conservative(st, sy, tg2, a_est, Zs)$ci
@@ -419,8 +463,8 @@
         cas[[length(cas) + 1]] <- c(max(lo, dd[1]), min(hi, dd[2]))
         if (!is.null(pm)) {
           pms[[length(pms) + 1]] <- c(max(pm[1] - wid_eta, rng[1]), min(pm[2] + wid_eta, rng[2]))
-          plo <- pe[1] - zE * sdE + tr[1] - eta * sum(abs(a2))
-          phi <- pe[2] + zE * sdE + tr[2] + eta * sum(abs(a2))
+          plo <- pe[1] - zE * sdEp + tr[1] - eta * sum(abs(a2))
+          phi <- pe[2] + zE * sdEp + tr[2] + eta * sum(abs(a2))
           pas[[length(pas) + 1]] <- c(max(plo, dd[1]), min(phi, dd[2]))
         }
       }
@@ -448,7 +492,7 @@
   }
   res <- do.call(rbind, out); rownames(res) <- NULL
   list(table = res, jkst = if (jkst) jk else NULL, cons = cons, pieces = pieces,
-       slack = if (point) NA_real_ else .rxc_slack(base, st$beta))
+       slack = if (point) NA_real_ else .rxc_slack(base, st$beta), proj_dropped = proj_dropped)
 }
 
 # Emptiness test (Proposition P3.6(a), conservative version): reject iff the inflated set is
@@ -477,21 +521,73 @@
 # Pooling test (P3 Prop. P3.6(c)): conditional on the design, with every group's compositions
 # affinely spanning, M0 holds for the observed units iff all group shifts are zero. Wald test of
 # zeta = 0 in the M1 regression; (G - 1)(C - 1)R restrictions.
-.rxc_pool_test <- function(X, T, N, group, weights = "none", vcov = "HC3") {
+# Calibration: the HC3 Wald statistic against chi^2 over-rejects in moderate dimension (P3 section
+# 8.4: 9% at nominal 5% with 38 restrictions; the F form, 8%). The default p-value is therefore a
+# restricted wild bootstrap: fit the regression under zeta = 0, draw Y* = fitted + residual * v
+# with Rademacher v_i (one per unit, shared across the C - 1 equations), refit M1 and recompute
+# the same Wald statistic with the same variance estimator; p = (1 + #{W* >= W}) / (B + 1).
+# The chi^2 and F (W / df against F(df, n - k)) p-values are returned as well. The random
+# number stream is restored afterwards, so the test does not change any other output.
+.rxc_pool_test <- function(X, T, N, group, weights = "none", vcov = "HC3", B = 399,
+                           method = c("wild", "chisq", "F")) {
+  method <- match.arg(method)
   st <- tryCatch(.rxc_setup(X, T, N, group, model = "M1", weights = weights, vcov = vcov),
                  error = function(e) NULL)
   if (is.null(st)) return(list(statistic = NA, df = NA, p.value = NA,
                                note = "M1 regression not estimable"))
-  R <- st$R; C <- st$C; m <- st$m; p <- st$p
-  idx <- unlist(lapply(seq_len(C - 1), function(c) (c - 1) * p + m + seq_len(R * (st$G - 1))))
-  d <- st$beta[idx]; Vd <- st$V[idx, idx, drop = FALSE]
-  e <- eigen((Vd + t(Vd)) / 2, symmetric = TRUE)
-  keep <- e$values > 1e-10 * max(e$values)
-  Wd <- sum((t(e$vectors[, keep, drop = FALSE]) %*% d)^2 / e$values[keep])
-  df <- sum(keep)
+  R <- st$R; C <- st$C; m <- st$m; p <- st$p; n <- nrow(st$X)
+  sh <- m + seq_len(R * (st$G - 1))                       # shift columns within an equation
+  idx <- unlist(lapply(seq_len(C - 1), function(c) (c - 1) * p + sh))
+  wald <- function(d, Vd) {
+    e <- eigen((Vd + t(Vd)) / 2, symmetric = TRUE)
+    keep <- e$values > 1e-10 * max(e$values)
+    list(W = sum((t(e$vectors[, keep, drop = FALSE]) %*% d)^2 / e$values[keep]), df = sum(keep))
+  }
+  w0 <- wald(st$beta[idx], st$V[idx, idx, drop = FALSE])
+  Wd <- w0$W; df <- w0$df
   spans <- all(vapply(seq_len(st$G), function(gg) qr(st$X[st$g == gg, , drop = FALSE])$rank == R, TRUE))
-  list(statistic = Wd, df = df, p.value = stats::pchisq(Wd, df, lower.tail = FALSE),
-       vcov_type = st$vcov_type, spanning = spans)
+  p_chisq <- stats::pchisq(Wd, df, lower.tail = FALSE)
+  p_F <- stats::pf(Wd / df, df, max(n - p, 1), lower.tail = FALSE)
+  p_boot <- NA_real_
+  if (method == "wild" && B > 0) {
+    sw <- if (weights == "n") sqrt(st$N) else rep(1, n)
+    Zw <- st$Z * sw; Yw <- st$T[, seq_len(C - 1), drop = FALSE] * sw
+    ZtZi <- solve(crossprod(Zw))
+    h <- rowSums((Zw %*% ZtZi) * Zw)
+    A <- Zw %*% ZtZi[, sh, drop = FALSE]                  # d_c = A' Y_c (shift coefficients)
+    k <- ncol(Zw); C1 <- C - 1; q <- length(sh)
+    scale_u <- switch(st$vcov_type, HC3 = 1 / (1 - h), HC1 = rep(sqrt(n / (n - k)), n), rep(1, n))
+    stat <- function(Y) {
+      Bc <- ZtZi %*% crossprod(Zw, Y)
+      E <- Y - Zw %*% Bc
+      d <- as.vector(crossprod(A, Y))
+      Vd <- matrix(0, C1 * q, C1 * q)
+      if (st$vcov_type == "classical") {
+        Vd <- kronecker(crossprod(E) / max(n - k, 1), crossprod(A))
+      } else {
+        U <- E * scale_u
+        for (a in seq_len(C1)) for (b in a:C1) {
+          blk <- crossprod(A, A * (U[, a] * U[, b]))
+          ia <- (a - 1) * q + seq_len(q); ib <- (b - 1) * q + seq_len(q)
+          Vd[ia, ib] <- blk; Vd[ib, ia] <- t(blk)
+        }
+      }
+      wald(d, Vd)$W
+    }
+    Z0 <- Zw[, -sh, drop = FALSE]
+    F0 <- Z0 %*% qr.coef(qr(Z0), Yw); E0 <- Yw - F0
+    had_seed <- exists(".Random.seed", envir = globalenv(), inherits = FALSE)
+    if (had_seed) old_seed <- get(".Random.seed", envir = globalenv())
+    Wb <- vapply(seq_len(B), function(b) {
+      v <- sample(c(-1, 1), n, replace = TRUE)
+      stat(F0 + E0 * v)
+    }, 0)
+    if (had_seed) assign(".Random.seed", old_seed, envir = globalenv())
+    p_boot <- (1 + sum(Wb >= Wd - 1e-12 * abs(Wd))) / (B + 1)
+  }
+  pv <- switch(method, wild = p_boot, chisq = p_chisq, F = p_F)
+  list(statistic = Wd, df = df, p.value = pv, method = method, B = if (method == "wild") B else NA,
+       p.value_chisq = p_chisq, p.value_F = p_F, vcov_type = st$vcov_type, spanning = spans)
 }
 
 # Wald test of M1's testable part (overidentifying restrictions, 2b Lemma D1(b))

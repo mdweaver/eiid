@@ -408,10 +408,10 @@ No theory item in part II is new: every theory point the EI referee makes is alr
 | Decisions 3(a), 3(b) | **done** (coordinator): conservative `ci_actual` from a conservative interval; M1-vs-M2 test bootstrapped (size 0.054 in S0) |
 | WS-B9 subset (U7(a)) | **done**: all union pieces, base column, weight concentration |
 | WS-B5 register and design docs | **done** (coordinator): PACKAGE_DESIGN §0, §3, §4.1, §6 step 8, §8 (R2, R3, R7, R9, R10; new R15, R16); NEXT_BUILD; MSIGN_REVIEW_LOG §8; EXTERNAL_REVIEW_PLAN |
-| WS-B7 remaining 1b wording | see 1b, corrected in the same pass |
+| WS-B7 remaining wording (1b, guide, vignette) | **done** (coordinator): 1b items, guide §2 and §9 additions, vignette "Reading the output" |
 | WS-B4 grouped proofs (R16) | open |
 | WS-B6 decision-dependent | not started (U1(a), U4(a) chose relabelling and dropping) |
-| WS-B8 responses to the referees | in progress |
+| WS-B8 responses to the referees | **done**: `B_partial_identification_response.md`, `B_ecological_inference_response.md` |
 
 ## 5. Decisions needed from the user
 

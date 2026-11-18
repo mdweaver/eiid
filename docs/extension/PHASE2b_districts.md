@@ -236,7 +236,7 @@ Verified numerically. As a consequence, M2 widths add across districts. This is 
 3. (c): $\delta$ enters only the right-hand side of the LP, linearly. [LP-par]
 4. (d): at $\delta=0$ the M1($\delta$) rows become $k^{(d)}=\bar k+c_d$, which are the M1 equalities. The objective is identical. [Def; D2; Thm 2(b)] ∎
 
-Note on (d): M1(0) does not impose the testable restrictions of D1(b). So it stays defined even when the data reject M1's symmetric part; it is "M1 without its testable implication".
+Note on (d): M1(0) does not impose the testable restrictions of D1(b). So it stays defined even when the data reject M1's symmetric part; it is "M1 without its testable implication". It is therefore a **sensitivity benchmark**, not a substantive rung on a par with M1: it separates a failure of M1's testable implications from uncertainty about the unidentified contextual effects. *(Emphasis added after review.)*
 
 **Proposition D7 (the most restrictive rungs).**
 (a) **L5** point-identifies the target:
@@ -263,14 +263,26 @@ Verified: under a DGP with zero contextual effects, the L5 point equals the trut
 
 ## 5. Remarks on scope
 
-**Remark 6.1 (estimation regimes).** Everything above is population identification. With about 10 polls per riding (BC stage 2), each $Q^{(d)}$ and $\zeta_d$ is noisy. The plug-in intersection in Theorem 2(b) then takes a max/min over many noisy constraints and is biased inward (P1 §7.1: 72% coverage). Remark D1.1 (fewer parameters per district under M1) and M1($\delta$) with $\delta>0$ (which softens the max) both help. A valid procedure needs Phase 3: precision-corrected intersection bounds (Chernozhukov, Lee & Rosen 2013), cluster-robust variances, and inference for LP values with non-unique solutions.
+**Remark 6.1 (estimation regimes).** Everything above is population identification. With about 10 polls per riding (BC stage 2), each $Q^{(d)}$ and $\zeta_d$ is noisy. The plug-in intersection in Theorem 2(b) then takes a max/min over many noisy constraints and is biased inward (P1 §7.1: 72% coverage). Remark D1.1 (fewer parameters per district under M1) and M1($\delta$) with $\delta>0$ (which softens the max) both help. A valid procedure needs Phase 3: precision-corrected intersection bounds (Chernozhukov, Lee & Rosen 2013) and inference for LP values with non-unique solutions. *(Revised: an earlier version also listed cluster-robust variances. Inference is conditional on the design and the district effects, with no clustered variance; P3 §0.4.)*
 
 **Remark 6.2 (periods as districts: the DiD link).** Take "districts" to be election periods: the same counties observed twice, $D\in\{\text{pre},\text{post}\}$.
 * **M1** then says the contextual effects are the same in both periods, with only baselines shifting, which is exactly the "contextual effects unchanged" assumption in `ASSUMPTION_MENU.md` item 18.
-* Lemma D1(b) identifies the baseline shifts $\zeta$. When the units, $X$ and $N$ are the same in both periods ($\mu^{(\text{pre})}=\mu^{(\text{post})}$), the common $K$ cancels in $B^*_\text{post}-B^*_\text{pre}$ by Lemma D2, so the change is point-identified. That recovers your earlier result as a special case of M1.
+* Lemma D1(b) identifies the baseline shifts $\zeta$, and Proposition D8 below gives the exact condition under which the change $B^*_\text{post}-B^*_\text{pre}$ is point-identified. That recovers the owner's earlier result as a special case of M1.
 * Theorem 2(b) adds that the *levels* in both periods are bounded by the intersection of the two periods' sets.
 * **M1($\delta$)** is the bounded-change version (item 19).
 * The overidentifying restrictions of D1(b) are the testable part, "equal quadratic coefficients across periods" (menu note to item 18).
+
+**Proposition D8 (the DiD under M1 with periods as districts; promoted from Remark 6.2 after review).** Let $D\in\{\text{pre},\text{post}\}$, assume M1, (S1)–(S2-d), $P(X\in A_D)=1$ and (A5-M1). For period $t$ write $\mu^{[t]}_{rs}=E[NX_rX_s\mid D=t]$, $\mu^{[t]}_r=E[NX_r\mid D=t]$ and $B^*_{rc,t}=E[NX_r\beta_{rc}\mid D=t]/\mu^{[t]}_r$. Then
+$$B^*_{rc,\text{post}}-B^*_{rc,\text{pre}}=\text{(identified)}+\sum_{s\ne r}K_{c,rs}\Big(\frac{\mu^{[\text{post}]}_{rs}}{\mu^{[\text{post}]}_r}-\frac{\mu^{[\text{pre}]}_{rs}}{\mu^{[\text{pre}]}_r}\Big).$$
+So the change is point-identified, whatever the identified set for $K$, iff
+$$\frac{\mu^{[\text{post}]}_{rs}}{\mu^{[\text{post}]}_r}=\frac{\mu^{[\text{pre}]}_{rs}}{\mu^{[\text{pre}]}_r}\qquad\text{for all }s\ne r.$$
+This holds in particular when the size-and-composition moments are equal across the periods, $\mu^{[\text{post}]}=\mu^{[\text{pre}]}$. It is a condition on the $NX_rX_s$ and $NX_r$ moments, not merely on similar-looking distributions of vote shares.
+*Proof.*
+1. Within period $t$, Lemma D2 applied to the conditional law gives $B^*_{rc,t}=\big[\sum_sQ^{(t)}_{c,rs}\mu^{[t]}_{rs}+\sum_{s\ne r}K^{(t)}_{c,rs}\mu^{[t]}_{rs}\big]/\mu^{[t]}_r$. [D2; cond-D]
+2. Under M1, $Q^{(t)}$ and $\operatorname{skew}(\zeta_{\cdot,t}\mathbf 1^\top)$ are identified, and $K^{(t)}=K+\operatorname{skew}(\zeta_{\cdot,t}\mathbf 1^\top)$ with $K$ common. [D1(b), D1(d)]
+3. Subtracting the two periods, every term except $\sum_{s\ne r}K_{c,rs}(\cdot)$ is identified. [1–2; lin]
+4. If every coefficient is zero, the change does not depend on $K$, so it is point-identified. If some coefficient is nonzero, the change moves with the corresponding entry of $K$, so it is point-identified only if the identified set happens to fix that linear combination. "Point-identified for every $K$" in the statement means: whatever the identified set for $K$ is. [3; alg] ∎
+*Reading.* The DiD of transition rates is point-identified when the contextual effects are unchanged across periods (M1) and the electorate's size-weighted composition moments are the same in both periods. With changing composition the change is only bounded; the bound is the projection of the common identified set for $K$ (Theorem 2(b)) through the coefficients above.
 
 **Remark 6.3 (other groupings).** Nothing above uses the nesting being geographic. Groups can be states (with counties as units), demographic strata of units, or time.
 

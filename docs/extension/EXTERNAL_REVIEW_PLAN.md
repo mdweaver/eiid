@@ -21,6 +21,8 @@ Each batch is sent as a frozen commit (a git tag, e.g. `review-B-2026-12`). It i
 
 ### Batch A: new results introduced by the review response (return to the original reviewer)
 
+**Status (Nov 2026): ready to send.** The response letter is `REVIEW_RESPONSE.md`. It includes the three core corrections found in Batch B.
+
 *Send with the response letter (WS7). The reviewer knows the context, so this is the cheapest batch and closes the current review.*
 
 * **2a:** Remarks 5.1–5.2 (S3 and dimension counterexamples); Remark 4.2 (continuous vs integer rates; part 2 is a sketch); §4.3; **Prop. 7′** (units outside $A$); Theorem 1 facts F1–F7; the §0.4 citation table.

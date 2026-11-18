@@ -17,8 +17,8 @@
    * `proj_actual` took its Bhatia–Davis variance bound from a CLR interval. **Done in 0.3.0:** projection-based for `proj_actual`, conservative-based for conservative `ci_actual`;
    * on the NZ data, M0 and M1 by electorate are both rejected; a non-empty CLR interval missed the truth in 8% of cells of the pooled M1 fit.
 
-2. **WS7, response letter** (`REVIEW_RESPONSE.md`), with batch A of `EXTERNAL_REVIEW_PLAN.md`. It now includes three core corrections found by the Batch B referee (2a support of the restricted measure; projection under a singular covariance; residual CLT).
-2b. **WS-B8, responses to the two Batch B referees** (`reviews/B_partial_identification_response.md`, `reviews/B_ecological_inference_response.md`). The corrections themselves are done (WS-B0 to WS-B3, Nov 2026).
+2. **WS7, response letter — done** (`REVIEW_RESPONSE.md`), to go with batch A of `EXTERNAL_REVIEW_PLAN.md`. It now includes three core corrections found by the Batch B referee (2a support of the restricted measure; projection under a singular covariance; residual CLT).
+2b. **WS-B8, responses to the two Batch B referees — done** (`reviews/B_partial_identification_response.md`, `reviews/B_ecological_inference_response.md`). The corrections themselves are done (WS-B0 to WS-B3, Nov 2026).
 3. **Release hygiene — done (0.3.0):** version and `NEWS.md`; M-SIGN flagged `experimental`; `MASS` removed and `eco` moved to Suggests (the NOTE is gone). Remaining: pull request to `master` and a version tag, after items 2 and 2b.
 
 ### Next: the first new module

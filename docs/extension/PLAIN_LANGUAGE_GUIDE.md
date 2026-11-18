@@ -20,11 +20,12 @@ In the formal documents, the unknown "who is behind it" numbers are called $K$. 
 
 ## 2. Foundations shared by every method
 
-These apply to every rung below. If one fails, *all* the bounds can be off.
+These apply to the rungs below that use them; Duncan–Davis needs only the first. If one that a rung uses fails, that rung's bounds can be off. *(Corrected after review, Batch B, Nov 2026: not every requirement is shared by every rung.)*
 
 | Assumption | Plain meaning | If it fails | How to check / fix |
 |---|---|---|---|
 | **Same people in both margins** (A1) | The row shares and column shares describe the same population. For transitions, the same electorate in both elections; for veterans, the same eligible men. | The arithmetic that links rows to columns is wrong, so the bounds can miss the truth. Turnover between elections, people moving, deaths, new voters and boundary changes all cause this. | Use one base for both margins (e.g. registered voters). Add rows or columns for "entered" and "left". Use an abstain column instead of dropping non-voters. |
+| *Which rungs need what* | Duncan–Davis needs only the first row of this table. The straight-line rungs need all three. The sign rungs without straight lines (N1) need no regression at all. | — | Each rung's section states its own requirements. |
 | **Rates don't depend on unit size**, once composition is accounted for (A3) | Big polls and small polls with the same mix behave alike. | The province-wide rate is biased, because big units carry more weight. | Add (log) size as a covariate (2b-style grouping or the appendix of the original paper). |
 | **Enough variation in composition** (A5) | Units differ enough in their group shares to fit the patterns. | Bounds are wide and unstable. This was the original paper's problem with gender, which is about 50/50 everywhere. | Look at the spread of compositions and the condition number of the regression. |
 
@@ -228,3 +229,8 @@ Pinned in `ASSUMPTION_MENU.md` and not yet derived: structural zeros (a party no
   * narrows this quantity, and by how much,
 
   both when it is added first and when it is added last. It also lists which directions the data already settle under the rung alone, and how concentrated each belief's weights are (the largest unit's weight and the effective number of units). These verdicts are estimates: when a belief only just matters, compare widths rather than trusting the label.
+* **What a sign does not mean.** A sign is about a weighted average over units. It does not say that every precinct, every district or every rival group goes the same way, and it is not an ordering at every composition. Within-unit patterns also reflect how voters sort across precincts and where campaigns target, so a causal reading needs a separate design. Under district rungs the sign is one pooled restriction across districts, not one per district. The straight-line rung also assumes rates don't depend on precinct size; weighting does not remove that assumption.
+* **Columns and denominators.** A sign on "yes" is the opposite sign on "no" in a two-column table; restrictions on several columns must respect that the columns add to one. With abstention as a column, the eligible population is the denominator: loyalty among voters can coexist with a negative gap in the eligible-population rate.
+* **Reading the printout.** The estimated set and the confidence interval are different things. Values in a gap between estimated pieces are ruled out by the assumptions, but the confidence interval may still cover them; the pieces carry no probability weights, and the hull includes the gaps. The neighbourhood and Goodman values in the "descriptive only" table are never imposed. The 8–10% miss rates quoted for the hand-made interval are for one design; the failure itself is proved to persist in large samples.
+* **Other methods.** A King's EI or hierarchical R × C estimate that falls inside a sign bound is not independent support for the sign: both use the same aggregates. The useful check is a benchmark with known truth, with the signs chosen in advance on other units.
+

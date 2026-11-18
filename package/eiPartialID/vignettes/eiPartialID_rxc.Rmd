@@ -267,7 +267,42 @@ How to read and report these:
 * **Weight concentration.** `fit$sign$concentration` gives, for each signed
   association, the largest unit weight and the effective number of units.
 * Our $\widehat{ER}$ uses the fitted $E[T \mid X]$; it equals the EGGHM
-  $T$-based $\widehat{ER}$ when `weights = "n"`.
+  $T$-based $\widehat{ER}$ when `weights = "n"`. In the "descriptive only"
+  table, $\widehat{ER}$ is the weighted aggregate regression slope and
+  $\widehat{NM}=\gamma\widehat{ER}$ the neighbourhood-model gap, for the named
+  focal group; neither is imposed. The `voter_vax` agreement is an arithmetic
+  check, not a validation of the beliefs.
+
+**Reading the output.**
+
+* The estimate is a set and the confidence interval is a different object;
+  read them on separate lines. When there are several pieces, values in a gap
+  between estimated pieces are excluded by the assumptions, but a confidence
+  interval may still cover them. The pieces carry no probability weights, and
+  the hull (`union = "hull"`) includes the gaps.
+* **What a sign does not mean.** A sign on $\delta_W$ is a statement about a
+  weighted average over units. It does not say that every precinct, every
+  district, or every rival group satisfies the direction, and it is not an
+  ordering at every composition. Within-unit covariances also reflect sorting
+  of voters across precincts, campaign targeting and other differences between
+  precincts, so a causal reading ("neighbours change how people vote") needs
+  a separate design. A sign that the rung already implies (see the "already
+  implied" table) adds nothing.
+* **Columns and orientation.** Restrictions on several columns must respect
+  that the columns add to one: a sign on "yes" is the opposite sign on "no" in
+  a two-column table, and a 2 × 3 table (two groups, three outcomes) is not the
+  same problem as a 3 × 2 table. "Both signs" in the ladder means both weakly
+  positive or both weakly negative.
+* **Turnout.** If abstention is a column, the eligible population is the
+  denominator. Loyalty among those who voted can then coexist with a negative
+  gap in the eligible-population rate, so state which denominator a belief is
+  about.
+* **Other methods.** King's EI and hierarchical R × C models produce point
+  estimates with posterior intervals. A posterior mean that falls inside a
+  sign bound is not independent support for the sign, since both rest on the
+  same aggregates. The useful check is a benchmark with known truth
+  (aggregated individual-level panels or linked surveys), with the sign
+  choices fixed in advance on other units.
 
 `ladder()` takes sign and CR rungs through `sign_rungs`, e.g.
 `sign_rungs = list("M0 + CR" = list(restrictions = list(cr = list(list(row = 1, col = 1)))))`.

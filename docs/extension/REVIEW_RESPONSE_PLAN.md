@@ -215,7 +215,7 @@ R-37.
   * NZ, one table per election with electorates as groups: M1 (and M0) are rejected by the data (empty estimates; pooling and M1 tests $p\approx0$). CLR is rejected in 21% of cells and misses in 8%; projection never misses but is as wide as DD. Per electorate, M0's CLR and projection intervals cover all 4302 cells, at about DD width.
 * **Not done:** a finite-sample column in the NZ benchmark (Theorem P3.8 is not implemented in the package, `ci_method = "finite"` was deferred in WS5, and the Monte Carlo shows it is $[0,1]$ in every grouped design).
 
-### WS7: Exposition and the response letter (last)
+### WS7: Exposition and the response letter (last) — **done (Nov 2026):** `REVIEW_RESPONSE.md`, including the three core corrections from Batch B and the M1(0) and DiD (2b Prop. D8) exposition items.
 * Exposition items: R-16 (Prop. 9 earlier), R-17 (Theorem 1 vs Prop. 7 information), R-21, R-24 (DiD proposition).
 * Write **`REVIEW_RESPONSE.md`**: for each R-xx, quote the comment, give the response, and point to the new location (file § and result number).
 * **Response to the clustering concern (R-28):** a dedicated section of the letter, not a table row. It should:

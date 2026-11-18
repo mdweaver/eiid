@@ -1,6 +1,6 @@
 # Phase 3: estimation, inference and sensitivity
 
-*Builds on P1, 2a and 2b. Proof steps carry justification tags (2a §0.3, 2b §0.3, plus §0.3 below). Theorems marked "(cited)" apply a published result whose conditions are verified here but whose proof is not repeated. Checks: `verify_phase3.py` (11/11 PASS; `verify_phase3_output.txt`). Monte Carlo: `phase3_montecarlo.py` (`phase3_montecarlo_output.txt`).*
+*Builds on P1, 2a and 2b. Proof steps carry justification tags (2a §0.3, 2b §0.3, plus §0.3 below). Theorems marked "(cited)" apply a published result whose conditions are verified here but whose proof is not repeated. Checks: `verify_phase3.py` (13/13 PASS; `verify_phase3_output.txt`). Monte Carlo: `phase3_montecarlo.py` (`phase3_montecarlo_output.txt`).*
 
 ---
 
@@ -9,9 +9,9 @@
 ### 0.1 Sampling
 
 * There are $n$ units with observables $W_i=(N_i,X_i,T_i,D_i)$.
-* **(P3-S1)** Units are independent across districts. Within a district they are independent conditionally on the district (rungs M1/M2 carry district parameters). For the pooled model M0, allow arbitrary dependence within districts and use cluster-robust variances.
+* **(P3-S1a)** Given the design and the district effects, the unit rates $\beta_i$ are independent across units, with $E[\beta_i\mid\text{design}]=m(V_i)$. Equivalently, the residuals $e_i=\beta_i-m(V_i)$ are independent with mean zero. No dependence is allowed within a district beyond the district effect, and no clustered variance is used. §0.4 explains why. *(Revised after review: the earlier P3-S1 allowed arbitrary within-district dependence for M0 while Theorem P3.5's residual allowance assumed independence.)*
 * **(P3-S2)** The design is conditioned on: inference is conditional on $\{(N_i,X_i,D_i)\}$, so the vertices of the sample hulls $\hat A_d$ are fixed.
-* **Regimes** (P1 A10): (R1) $D^\star$ fixed, $n_d\to\infty$; (R2) $D^\star\to\infty$, $n_d$ bounded; (R3) both grow. Results below are for R1/R3 unless stated. R2 is treated in §6.
+* **Regimes** (P1 A10): (R1) $D^\star$ fixed, $n_d\to\infty$; (R2) $D^\star\to\infty$, $n_d$ bounded; (R3) both grow. Which result holds where is in §0.5.
 
 ### 0.2 Targets
 
@@ -39,13 +39,46 @@ $\tilde B$ is the right target when the question is about behaviour rather than 
 | [Pop] | Popoviciu: $\operatorname{Var}(Y)\le(b-a)^2/4$ for $Y\in[a,b]$; [BD] Bhatia–Davis: $\operatorname{Var}(Y)\le(M-\mu)(\mu-m)$ |
 | [Lyap] | Lyapunov CLT for independent bounded summands with $\max_iw_i^2/\sum_iw_i^2\to0$ |
 | [union] | $P(A\cup B)\le P(A)+P(B)$ |
-| [OLS] | consistency and asymptotic normality of OLS with heteroskedasticity- or cluster-robust variance, under full rank and finite fourth moments |
+| [OLS] | consistency and asymptotic normality of OLS for a fixed-dimensional parameter, with heteroskedasticity-robust (HC) variance, independent units, a full-rank design and bounded outcomes |
+| [BR] | the multivariate CLT holds uniformly over all convex sets of $\mathbb R^p$ (Bhattacharya & Rao 1976, *Normal Approximation and Asymptotic Expansions*, Thm 17.5, standard) |
+| [Hoeff] | Hoeffding's inequality: for independent $Y_i\in[a_i,b_i]$, $P\big(\sum_i(Y_i-EY_i)\ge t\big)\le\exp\{-2t^2/\sum_i(b_i-a_i)^2\}$ (Hoeffding 1963, *JASA* 58:13–30, Thm 2) |
+| [CCK] | Gaussian approximation for maxima of high-dimensional sums (Chernozhukov, Chetverikov & Kato 2017, *Ann. Probab.* 45:2309–2352) |
+
+### 0.4 Where the randomness comes from (added after review)
+
+Abadie, Athey, Imbens and Wooldridge (2020, *Econometrica*; 2023, *QJE*) distinguish two sources of uncertainty:
+* **Sampling-based:** the units are a sample from a larger population.
+* **Design-based:** some assignment is random.
+
+They show that clustered standard errors are justified by clustered sampling or clustered assignment, not by the mere fact that residuals are correlated. EI has neither. Every precinct and riding of the electorate is observed, and nothing is assigned. In a purely design-based view, nothing is random at all: $B$ is a fixed unknown, and the only valid bound is Duncan–Davis.
+
+The contextual-effects assumption is a statement about a conditional expectation, $E[\beta\mid V]=M_H(X)$. That only has content if the precinct rates are treated as random given the precinct's characteristics. The uncertainty here is therefore **model-based, conditional on the design**: the $\beta_i$ are random given $V_i$, and the design is held fixed (P3-S2). Abadie, Imbens and Zheng (2014) give the parallel fixed-regressor framework for regression.
+
+Within this framework:
+* **District shocks are fixed features of this electorate.** The targets $B$ and $\tilde B$ refer to this electorate, so a shock common to a riding (candidate, campaign, local swing) is not re-drawn.
+  * Under M1/M2 it is a district effect, part of the mean $m(V_i)$.
+  * Under M0 a district shock is not a variance problem but a misspecification. Conditional on the design, M0's mean model holds for the observed units only if the district shifts are zero (Prop. P3.6(c)). Clustered standard errors would not repair it.
+* **What remains assumed** (P3-S1a): no dependence within a district beyond its district effect. Neighbourhood spillovers between adjacent precincts would violate it. This is a stated limitation. A partial check is residual correlation between neighbouring precincts after fitting M1.
+* **A superpopulation target that averages over re-drawn district shocks** ("behaviour in a typical riding") would need cluster methods and many districts. It is not pursued.
+
+### 0.5 Which result holds in which regime
+
+| Model | Regime | Formal result | Status |
+|---|---|---|---|
+| any rung | any (R1, R2, R3), any $n$ | Theorem P3.8: finite-sample CI; finite-sample emptiness test | Theorem; currently uninformative in width (§5.1) |
+| M0 | any ($\dim\beta$ fixed) | P3.2, P3.4, P3.5(a), (b1), (b2) | Theorem (asymptotic, $n\to\infty$) |
+| M1, M2 | R1 ($D^\star$ fixed) | P3.2, P3.4, P3.5(a), (b1), (b2) | Theorem (asymptotic) |
+| M1, M2 | R3 | the same, with a high-dimensional Gaussian approximation [CCK] under a rate condition on $D^\star$ versus $n_d$ | Conjecture |
+| M1 | R2 | coverage of the CLR interval | Simulation finding (§8) |
+| any | any | the CLR interval as implemented (candidates by simulation) | Conjecture P3.5(b3) |
+
+Under M0 the number of constraints grows with the number of hull vertices, but the regression has fixed dimension $p$. Every constraint term is a linear functional of one $p$-dimensional asymptotically normal vector. The relevant events, $\{\max_j(\cdot)\le k\}$, are convex sets in $\mathbb R^p$, and the multivariate CLT holds uniformly over convex sets [BR]. So the growth in constraints does not matter. Under M1/M2 in R2 or R3, $\dim\beta$ grows with $D^\star$, and that argument no longer applies.
 
 ---
 
 ## 1. Estimators
 
-1. **Regression.** Fit each column $T_c$ by OLS on the homogeneous quadratic monomials $X_rX_s$ ($r\le s$) for M0. For M1, also include the district shifts $1\{D=d\}X_r$, $d\ge2$; this imposes the overidentifying restrictions of 2b Lemma D1(b). For M2, fit one regression per district. The coefficients are $\hat\beta$, and the estimated columns are coherent automatically (2a Remark 1.2). Use an HC3 covariance $\hat\Sigma$ (cluster-robust for M0 with clustered units).
+1. **Regression.** Fit each column $T_c$ by OLS on the homogeneous quadratic monomials $X_rX_s$ ($r\le s$) for M0. For M1, also include the district shifts $1\{D=d\}X_r$, $d\ge2$; this imposes the overidentifying restrictions of 2b Lemma D1(b). For M2, fit one regression per district. The coefficients are $\hat\beta$, and the estimated columns are coherent automatically (2a Remark 1.2). Use an HC3 covariance $\hat\Sigma$ (P3-S1a; no clustering, §0.4). Only $C-1$ columns are needed; column $C$ follows by adding up (Remark P3.4.1).
 2. **Constraint terms.** For each district $d$, vertex $v\in\operatorname{vert}(\hat A_d)$, row $r$ and column $c$, the constraint is $s_j(\beta)+a_j^\top k\ge0$, with $s_j$ linear in $\beta$ and $a_j$ fixed (2a Prop. 7, 2b Thm 2(b)).
 3. **Target.** $\tilde B(k)=c(\beta)+\gamma^\top k$, with $c$ linear in $\beta$ and $\gamma$ computed from the sample weights (2a Lemma 2, 2b Lemma D2).
 4. **Plug-in bound.** $[\hat\varphi_L,\hat\varphi_U]=c(\hat\beta)+[\min,\max]\{\gamma^\top k:s(\hat\beta)+Ak\ge0\}$.
@@ -162,7 +195,7 @@ The same coverage bound holds. With $\alpha_E=0$ and no $S_1$ term, either versi
 Until this is settled, the CLR-type interval as implemented is an *Algorithm* with simulation support (§8). The intervals of (a) and (b2) carry the formal guarantee.
 
 *Proof of (a).*
-1. Let $\mathcal E$ be the event that $s_j(\beta_0)\le s_j(\hat\beta)+\hat k\hat\sigma_{s_j}$ for all $j$ and $\lvert c(\beta_0)-c(\hat\beta)\rvert\le\hat k\hat\sigma_c$. Then $P(\mathcal E)\to\ge1-\alpha_U-\alpha_L$. [OLS; linear maps of an asymptotically normal $\hat\beta$; Def of $\hat k$; $\hat\Sigma$ consistent]
+1. Let $\mathcal E$ be the event that $s_j(\beta_0)\le s_j(\hat\beta)+\hat k\hat\sigma_{s_j}$ for all $j$ and $\lvert c(\beta_0)-c(\hat\beta)\rvert\le\hat k\hat\sigma_c$. Then $P(\mathcal E)\to\ge1-\alpha_U-\alpha_L$. [OLS; linear maps of an asymptotically normal $\hat\beta$, uniformly over the convex events of §0.5 (BR); Def of $\hat k$; $\hat\Sigma$ consistent. For M1/M2 this needs $\dim\beta$ fixed, i.e. R1]
 2. On $\mathcal E$, the true $k_0$ satisfies $s(\beta_0)+Ak_0\ge0$, hence $s(\hat\beta)+\hat k\hat\sigma_s+Ak_0\ge0$, i.e. $k_0\in\hat\Theta^+$. [2b:Thm 2 / 2a:P1, the true value is feasible; $\mathcal E$]
 3. On $\mathcal E$, $\tilde B=c(\beta_0)+\gamma^\top k_0$ lies in $[c(\hat\beta)-\hat k\hat\sigma_c+\min_{\hat\Theta^+}\gamma^\top k,\ c(\hat\beta)+\hat k\hat\sigma_c+\max_{\hat\Theta^+}\gamma^\top k]$. [2; $\mathcal E$; 2b:D2 with sample weights]
 4. $E=\sum_iw_ie_i$ with $e_i$ independent given the design, mean 0, and $\operatorname{Var}(e_i\mid V_i)\le\tfrac14$. So $\operatorname{Var}(E\mid\text{design})\le S_1^2$. [P3-S1; CE; Pop]
@@ -180,29 +213,91 @@ Until this is settled, the CLR-type interval as implemented is an *Algorithm* wi
 **Proposition P3.6 (tests).**
 (a) **Emptiness test.** Reject the model (rung, foundations) at level $\alpha_U+\alpha_L$ if $\hat\Theta^+$ is empty.
 (b) **Test of M1's testable part.** Run a Wald/F test of the M1 regression against M2 (the overidentifying restrictions of 2b D1(b)), with $(D^\star-1)(C-1)R(R-1)/2$ restrictions. In 2×2: equal curvature across districts.
+(c) **Test of M0 against M1 (pooling).** Conditional on the design, suppose each district's observed compositions contain $R$ affinely independent points. Under M1, M0's mean model holds for the observed units iff all district shifts vanish, $\zeta_{c,d}=0$. So pooling is tested by a Wald/F test of $\zeta=0$ in the M1 regression, with $(D^\star-1)(C-1)R$ restrictions. *(Added after review. 2b Prop. D4(b) gives a weaker condition, $E[Z_D\mid X,N]$ affine in $X$. That condition averages over the district labels, so it describes the superpopulation pooled over re-drawn districts, which §0.4 does not target. Conditional on the observed labels, only $\zeta=0$ makes M0 correct.)*
 *Proof of (a).*
 1. Under the model, $k_0\in\hat\Theta^+$ on $\mathcal E$. [P3.5(a) step 2]
 2. So $P(\hat\Theta^+=\emptyset)\le P(\mathcal E^c)\to\le\alpha_U+\alpha_L$. [1]
 
-(b) is the standard Wald test [OLS]. Under R2 the number of restrictions grows with $D^\star$, so use the F-form with HC3 or a wild bootstrap. ∎
+(b) is the standard Wald test [OLS]. Its $\chi^2$ calibration is established for fixed dimension (R1). Under R2/R3 the number of restrictions grows with $D^\star$. The F-form with HC3, or a wild bootstrap, is then a practical choice with simulation support only.
+
+*Proof of (c).*
+1. Under M1 and P3-S1a, $E[\beta_i\mid\text{design}]=M_H(X_i)+Z_{D_i}$, with $Z_d=[\zeta_{c,d,r}]_{rc}$. [Def M1; 2b §0.1]
+2. M0 holds for the observed units iff there is $H'$ with $M_{H'}(X_i)=M_H(X_i)+Z_{D_i}$ for all $i$, i.e. $G_cX_i=\zeta_{c,D_i}$ with $G=H'-H$. [Def M0]
+3. Within district $d$, $(G_c-\zeta_{c,d}\mathbf 1^\top)X_i=0$ for every $i$ in $d$ (using $\mathbf 1^\top X_i=1$). The $X_i$ include $R$ affinely independent points, which are linearly independent because they lie in $\{\mathbf 1^\top x=1\}$. So $G_c=\zeta_{c,d}\mathbf 1^\top$. [alg]
+4. This holds for every $d$, and $\zeta_{c,1}=0$, so $G_c=0$ and every $\zeta_{c,d}=0$. Conversely, $\zeta=0$ gives M0 with $H'=H$. [3; Def M1]
+5. The $\zeta$ are coefficients of the M1 regression, identified by 2b Lemma D1(d). The Wald test of $\zeta=0$ has $(D^\star-1)(C-1)R$ restrictions for the $C-1$ free columns. [D1(d); OLS] ∎
+
+### 5.1 A finite-sample interval, valid in every regime
+
+**Theorem P3.8 (finite-sample CI and emptiness test).** Fix a rung and condition on the design. Assume P3-S1a, that the rung's mean model holds, and that its regression design $Z$ has full column rank. Fit the $C-1$ free columns by OLS, $\hat\beta_c=(Z^\top Z)^{-1}Z^\top T_{\cdot c}$.
+
+*Hoeffding radius of a linear functional.* Every linear functional $f(\beta)=f_0+\sum_{c<C}b_c^\top\beta_c$ satisfies $f(\hat\beta)=f_0+\sum_i\sum_{c<C}w_{ic}(f)T_{ic}$, with $w_{ic}(f)=b_c^\top(Z^\top Z)^{-1}z_i$. Put $w_{iC}(f):=0$, $\rho_i(f):=\max_cw_{ic}(f)-\min_cw_{ic}(f)$, and
+$$h(f;\delta)=\Big(\tfrac12\log(1/\delta)\sum_i\rho_i(f)^2\Big)^{1/2}.$$
+
+*Interval.* Let $J$ be the number of constraint rows and $\delta=\alpha_s/(J+2)$. Put $h_j=h(s_j;\delta)$, $h_c=h(c;\delta)$, $t_E=\big(\tfrac12\log(2/\alpha_E)\sum_iw_{ir}^2\big)^{1/2}$, and
+$$\hat\Theta^{\rm fin}=\{k:s_j(\hat\beta)+h_j+a_j^\top k\ge0\ \ \forall j\},$$
+$$\mathrm{CI}^{\rm fin}=\Big[c(\hat\beta)-h_c+\min_{\hat\Theta^{\rm fin}}\gamma^\top k-t_E,\ \ c(\hat\beta)+h_c+\max_{\hat\Theta^{\rm fin}}\gamma^\top k+t_E\Big].$$
+Then, **for every $n$** and in every regime:
+(a) $P(B_{rc}\in\mathrm{CI}^{\rm fin}\mid\text{design})\ge1-\alpha_s-\alpha_E$;
+(b) without $t_E$, $P(\tilde B_{rc}\in\mathrm{CI}^{\rm fin}\mid\text{design})\ge1-\alpha_s$;
+(c) rejecting the rung when $\hat\Theta^{\rm fin}=\emptyset$ is a test of exact level at most $\alpha_s$;
+(d) intersecting with Duncan–Davis keeps (a), since $B\in DD$ always.
+
+*Proof.*
+1. $T_i\in\Delta^{C-1}$, so $Y_i(f):=\sum_cw_{ic}(f)T_{ic}$ is a convex combination of the $w_{ic}(f)$. It lies in an interval of length $\rho_i(f)$. [S1; Def]
+2. Under the mean model and full rank, OLS is conditionally unbiased: $E[f(\hat\beta)\mid\text{design}]=f(\beta_0)$. [linearity of OLS; $E[T_{ic}\mid\text{design}]=z_i^\top\beta_{c,0}$]
+3. The $Y_i(f)$ are independent given the design, so $P\big(f(\beta_0)-f(\hat\beta)\ge h(f;\delta)\big)\le\delta$, and the same for the other side. [P3-S1a; Hoeff; 1–2]
+4. Let $\mathcal E$ be the event that $s_j(\beta_0)\le s_j(\hat\beta)+h_j$ for all $j$ and $\lvert c(\beta_0)-c(\hat\beta)\rvert\le h_c$. It is an intersection of $J+2$ one-sided events, so $P(\mathcal E^c)\le(J+2)\delta=\alpha_s$. [3; union]
+5. On $\mathcal E$, the true $k_0$ satisfies $s(\beta_0)+Ak_0\ge0$, hence $k_0\in\hat\Theta^{\rm fin}$, and $\tilde B=c(\beta_0)+\gamma^\top k_0$ lies in the interval without $t_E$. That proves (b), and (c), since $\hat\Theta^{\rm fin}\ne\emptyset$ on $\mathcal E$. [P3.5(a) steps 2–3]
+6. $E=\sum_iw_{ir}e_{irc}$ with independent $e_{irc}\in[-m_{rc}(V_i),1-m_{rc}(V_i)]$, an interval of length 1. So $P(\lvert E\rvert\ge t_E)\le2\exp(-2t_E^2/\sum_iw_{ir}^2)=\alpha_E$. [P3-S1a; Hoeff]
+7. $B=\tilde B+E$. A union bound over 4 and 6 gives (a). (d) holds because $B\in DD$ surely. [union; 2b:D0] ∎
+
+*Remarks.*
+* **What it needs, and what it does not.**
+  * Needs: independence given the design (P3-S1a), a correctly specified mean model, and a full-rank design.
+  * Does not need: Gaussian approximation, a fixed dimension, Slater, or any regime.
+
+  It is therefore the only formal guarantee for M1 with many small districts (R2), where the asymptotic results are not established.
+* **Width: valid but currently uninformative.** In a 2×2 test design with linear means, Beta-distributed rates and composition ranges of 0.2–0.45 per district, the interval clipped to $[0,1]$ had median width 1.0 in every configuration tried:
+  * pooled, with 900 and with 5,000 polls;
+  * 5 districts × 200 polls;
+  * 10 × 93;
+  * 30 × 8.
+
+  Two costs combine:
+  1. Hoeffding uses the worst-case variance $\tfrac14$ for each $T_{ic}$, where the true variance was about 0.01.
+  2. The separate union bound over all $J$ constraints and the constant inflates each radius, and each radius is then divided by the distance from the vertex to a pure composition.
+
+  An *oracle* Gaussian union bound with the true variances still gave widths of 0.76–0.87, and 1.0 at 30 × 8. So most of the cost is the constraint-by-constraint union bound, which the conservative asymptotic interval P3.5(a) shares. Theorem P3.8 settles validity in R2, but it does not yet give useful intervals there. Informative finite-sample inference for R2 is open (§10).
+
+Checked (`verify_phase3.py`): in the 30 × 8 design, coverage of $\tilde B$ and $B$ was 100% in 300 replications each, and the interval was never empty.
+* **Possible refinements, not proved here.**
+  * An empirical-Bernstein bound (Maurer & Pontil 2009) would replace the ranges $\rho_i$ by estimated variances.
+  * A Bhatia–Davis version of $t_E$, as in §5.
+  * Splitting $\alpha_s$ unevenly across constraints, e.g. giving less to constraints that cannot bind.
 
 ---
 
 ## 6. Many districts with few units (regime R2)
 
-**Proposition P3.7 (dropping constraints is conservative; design-based selection is valid).** For any subset $\mathcal D'$ of districts, $\Theta^{M1}_O(\mathcal D')\supseteq\Theta^{M1}_O$. If $\mathcal D'$ is chosen as a function of the design $\{(N_i,X_i,D_i)\}$ only, every result of §§3–5 holds conditionally on $\mathcal D'$.
+**Proposition P3.7.**
+(a) *(Dropping constraints is conservative.)* For any subset $\mathcal D'$ of districts, $\Theta^{M1}_O(\mathcal D')\supseteq\Theta^{M1}_O$.
+(b) *(Design-based selection preserves conditional validity.)* Suppose $\mathcal D'$ is chosen as a function of the design $\{(N_i,X_i,D_i)\}$ only. Then any procedure that has (finite-sample or asymptotic) coverage when applied with a fixed set of districts keeps that coverage conditionally on the selected $\mathcal D'$. In particular, Theorem P3.8 holds for any design-selected $\mathcal D'$. The asymptotic results of §§3–5 transfer only if their own regime conditions (§0.5) hold for the retained districts. Selection does not by itself supply them: retained districts with bounded $n_d$ are still in R2.
 *Proof.*
 1. Fewer constraints give a weakly larger feasible set. [Def; 2b:Thm 2(b)]
-2. Conditioning on the design fixes $\mathcal D'$, so the proofs apply with $\mathcal D'$ in place of all districts. [P3-S2] ∎
+2. Conditioning on the design fixes $\mathcal D'$. A procedure's conditional coverage given the design, for the fixed set $\mathcal D'$, is therefore its coverage given the design and $\mathcal D'$. [P3-S2] ∎
+
+*(Revised after review: the earlier statement said every result of §§3–5 holds conditionally on $\mathcal D'$, which overstated what selection achieves.)*
 
 **What happens under R2.**
 * Each district's shifts $\hat\zeta_d$ come from about $n_d$ units, and their sampling error does not shrink.
 * The number of candidates grows with $D^\star$.
 * The plug-in is badly too narrow: in the Monte Carlo (§8) it covers almost never, and is empty about 40% of the time. This is the Theorem P3.4(ii) bias, compounded across many districts.
-* The CLR version restores coverage by inflating each candidate in proportion to its own standard error. Noisy districts therefore rarely bind, which is precision weighting built into the method.
+* In the Monte Carlo (§8), the CLR interval covered in every R2 design. This is a *simulation finding* (§0.5), not a theorem. CLR inflates each candidate in proportion to its own standard error, so noisy districts rarely bind, which is precision weighting built into the method.
+* The formal guarantee in R2 is Theorem P3.8, at the cost of width.
 * The price is width. With 10 units per district, the valid interval is about as wide as Duncan–Davis, so the identification gain from district dummies (2b) is consumed by sampling noise.
 
-Practical options, all valid:
+Practical options. Each keeps the identified set valid (P3.7(a)). Their inference is formally covered by Theorem P3.8, and asymptotically only under §0.5's conditions:
 * (i) Keep the constraints of districts with enough units or composition spread (P3.7).
 * (ii) Use M1($\delta$), $\delta>0$, which bounds how far any one district can pull the shared parameter.
 * (iii) Pool districts into larger groups.
@@ -236,7 +331,7 @@ Checked: a nonlinear undetectable violation with $\eta=0.02$ stays inside the bo
 
 ## 8. Monte Carlo
 
-`phase3_montecarlo.py`, 200 replications per design. Unit rates are Beta/Dirichlet draws whose conditional means are exactly linear, so the model holds. Each design reports the plug-in bound, the conservative CI (Thm P3.5(a)), the CLR CI (P3.5(b)) for $B$, and the CLR CI for $\tilde B$, all at nominal 95%.
+`phase3_montecarlo.py`, 200 replications per design. Unit rates are Beta/Dirichlet draws whose conditional means are exactly linear, so the model holds. Each design reports the plug-in bound, the conservative CI (Thm P3.5(a)), the CLR CI as implemented (Conjecture P3.5(b3)) for $B$, and the CLR CI for $\tilde B$, all at nominal 95%.
 
 Coverage is the share of 200 replications containing the truth; width is the median. The DD width is shown for reference; every CI may be intersected with DD.
 
@@ -257,7 +352,7 @@ Coverage is the share of 200 replications containing the truth; width is the med
    * With many districts and few units it almost never covers: 5.5% at 93 × 10, where it is also empty 44% of the time. At 93 × 30 it covers 66.5%.
    * It covers 66% in the boundary design.
    * It is fine only with a few large districts, or pooled data with the truth in the interior.
-2. **Both CIs are valid in every design**, including the boundary case. That case is the informative one: with the truth at an endpoint, the CLR CI for $\tilde B$ covers 99%, close to its nominal level. The 100% elsewhere reflects truths in the interior of the identified set (§4).
+2. **Both CIs covered in every design** (a simulation finding; formal status in §0.5), including the boundary case. That case is the informative one: with the truth at an endpoint, the CLR CI for $\tilde B$ covers 99%, close to its nominal level. The 100% elsewhere reflects truths in the interior of the identified set (§4).
 3. **CLR is much narrower than the conservative version**: 0.571 vs 1.048 at 93 × 10, for example. It should be the default.
 4. **The residual term is a large part of the width.** Targeting $\tilde B$ instead of $B$ narrows the 3×3 intervals by 0.09–0.10 and the 2×2 M1 intervals by 0.06–0.10.
 5. **With 10 units per district the valid CI for $B$ is no narrower than DD** (0.571 vs 0.56), and for $\tilde B$ it is 0.471. The identification gain of M1 is mostly consumed by sampling noise in this regime (§6). With 93 units per district, the CI for $\tilde B$ is 0.424 against DD's 0.62.
@@ -268,12 +363,13 @@ Coverage is the share of 200 replications containing the truth; width is the med
 
 ## 9. Practical recipe (input to Phase 4)
 
-1. Fit the rung's regression (M0 / M1 / M2) with HC3 or cluster-robust covariance, and the sample hulls.
+1. Fit the rung's regression (M0 / M1 / M2) on $C-1$ columns with HC3 covariance (no clustering, §0.4), and the sample hulls.
 2. Build the LP (2a Prop. 7 / 2b Thm 2) and report the plug-in bound, labelled as an estimate of the identified set, not a confidence interval.
-3. Report the CLR confidence interval for $\tilde B$ (default) and for $B$, intersected with Duncan–Davis (valid because $B\in DD$ always).
-4. Report the emptiness test and, for M1, the test of its testable part.
-5. Report the sensitivity curves in $\eta$ (and $\delta$), with the breakdown value of the headline conclusion.
-6. With few units per district, apply P3.7 selection, or prefer M1($\delta$) or coarser groups, and say so.
+3. Report the CLR confidence interval for $\tilde B$ (default) and for $B$, labelled algorithmic (Conjecture P3.5(b3)). Report the projection interval (P3.5(b2)(ii)) alongside it as the interval with an asymptotic guarantee. Intersect both with Duncan–Davis, which is valid because $B\in DD$ always.
+4. Theorem P3.8 gives a finite-sample guarantee in every regime. In the designs tried, its width is that of the logical range, so it is not yet worth reporting by default. With many small districts (R2), say that the CLR interval's coverage there rests on simulation (§0.5).
+5. Report the emptiness test and, for M1, the test of its testable part (P3.6(b)) and the pooling test (P3.6(c)).
+6. Report the sensitivity curves in $\eta$ (and $\delta$), with the breakdown value of the headline conclusion.
+7. With few units per district, apply P3.7 selection, or prefer M1($\delta$) or coarser groups, and say so.
 
 ## 10. Open items
 
@@ -282,6 +378,13 @@ Coverage is the share of 200 replications containing the truth; width is the med
 * The rate of the hull error $\varphi(\beta_0;\hat A)-\varphi(\beta_0;A)$, and inference for the population-hull endpoint.
 * Inference for the superpopulation target $B^*$, which needs design-sampling variation.
 * Uniform validity near point identification for the CLR version (Stoye-type adaptation).
+* Asymptotic theory for M1/M2 in R3 (high-dimensional Gaussian approximation; §0.5) and in R2.
+* **Informative finite-sample inference in R2.** Theorem P3.8 is valid but uninformative in the designs tried. Candidates:
+  * bound the endpoint directly rather than every constraint, e.g. a finite-sample version of (b2) with a data-dependent dual;
+  * variance-adaptive bounds (empirical Bernstein);
+  * Bhatia–Davis;
+  * uneven $\alpha$ splits.
 * Inference under R2 with a hierarchical model for the district shifts.
+* Dependence within districts beyond the district effect (spillovers; §0.4).
 * Joint relaxation for population turnover.
 * Coverage of the plug-in under misspecification, with the menu's dials.

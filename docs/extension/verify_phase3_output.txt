@@ -10,3 +10,6 @@ PASS Breakdown: claim holds just below eta* and fails just above
 PASS Thm P3.4(ii): two active gradients equal on supp(Z) give mean 0.0006 (normal limit; the earlier 'non-singleton => negative mean' fails), distinct ones give -0.4009 ~ -0.3989
 PASS Prop P3.5(b2) step 1: every dual-feasible lambda gives an upper bound at beta_0 (500 random duals)
 PASS Prop P3.5(b2)(ii): projection upper bound with a data-dependent candidate covers 1.000 >= 0.95 (one-candidate z-bound: 0.945)
+     Thm P3.8, M1 2x2, 30 districts x 8 polls: CI for B~ covers 1.000, for B 1.000; empty 0; median unclipped width 9.12 (valid but uninformative; see P3 section 5.1)
+PASS Thm P3.8: finite-sample CI covers B~ and B at >= 95% in an R2 design (300 reps each); emptiness rate <= 5%
+PASS Prop P3.6(c): nonzero district shifts are not of the form G X_i (residual > 0); zero shifts are

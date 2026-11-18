@@ -27,7 +27,7 @@ These change what gets written, so they come first. The recommended choice is li
 | D1 | Covariates $Z$ (R-15) | **Decided (Nov 2026): wanted in the package, but low priority, because it needs stronger assumptions.** This revision keeps the no-covariate model ($E[\beta\mid X,N]=M_H(X)$, with districts as the only grouping). Covariate adjustment is a planned Phase 2c, after the response (WS8). | — |
 | D2 | Units outside $A$ (R-05) | **Decided (Nov 2026).** **Carry $P(X\in A)=1$ through §6 of 2a.** Also add a short Prop. 7′ that writes down what `range = "trim"` already does: the LP over kept units plus Duncan–Davis for dropped units. The code already does this, so the proof is cheap. | Assumption only, with no Prop. 7′. |
 | D3 | Clustering (R-28) | **Decided (Nov 2026): no superpopulation target, no cluster adjustment.** Inference is conditional on the design *and on the district effects*, so the residuals are taken as independent across units (P3-S1a). Riding-level shocks are fixed features of the observed electorate. Under M1/M2 they are parameters in the mean. Under M0 they are misspecification (Prop. D4), not a variance problem. The response letter explains this, following Abadie, Athey, Imbens and Wooldridge (see R-28). | — |
-| D4 | Default CI in the package (R-29) | **Decided (Nov 2026).** **Keep CLR-type as the default, but compute the critical value over a fixed superset of candidates (see WS3, R-29).** This makes it provably valid. Report the simulated-collection version as an *Algorithm* option. | Make the conservative P3.5(a) interval the default, and keep CLR as an option. |
+| D4 | Default CI in the package (R-29) | **Decided (Nov 2026): option 1.** Keep the CLR interval as the default, labelled algorithmic (Conjecture P3.5(b3)). Report the projection interval (P3.5(b2)(ii)), which has an asymptotic guarantee, alongside it. | — |
 | D5 | Formal asymptotic scope (R-31) | **Decided (Nov 2026).** (i) **M0:** the usual asymptotics in every regime (the dimension is fixed). (ii) **M1/M2 in R1:** fixed-dimension asymptotics. (iii) **M1/M2 in R3:** high-dimensional Gaussian approximation (Chernozhukov–Chetverikov–Kato), with a rate condition. (iv) **All regimes, including R2:** a new finite-sample CI (Theorem P3.8). With the design fixed, each LP constraint value is a linear combination of independent variables bounded in $[0,1]$, so Hoeffding/Bernstein bounds plus a union bound over constraints give valid finite-sample coverage. CLR stays the sharper default, and its R2 coverage is reported as a *simulation finding*. | — |
 
 ---
@@ -70,7 +70,7 @@ These change what gets written, so they come first. The recommended choice is li
 | R-25 | 4.2 | S | P3 Lemma P3.1 | Add: this holds for a fixed constraint system and objective. It says nothing about joint variation in $(Q,\mu)$ (see R-06). | — |
 | R-26 | 4.3 | S/P | P3 Prop. P3.2 | (i) State convergence along a nested sampling sequence, or add an argument for non-nested hulls. (ii) Call Slater a strict-interiority condition and say it fails when an implied rate is 0 at a vertex. Note that P3.5's coverage does not need Slater (step 2 uses only feasibility). (iii) Split the error into estimation error ($O_p(n^{-1/2})$) and hull error (≥ 0, rate not shown). | Optional: report the minimum LP slack as a boundary flag |
 | R-27 | 4.4 | **E** (minor) | P3 Theorem P3.4(ii) | The non-Gaussian limit requires at least two active gradients with $(g_\lambda-g_{\lambda'})^\top\Sigma(g_\lambda-g_{\lambda'})>0$. Parametrise only $C-1$ outcome columns, so $\Sigma$ is nonsingular. | Check that $\hat\Sigma$ is built on $C-1$ columns (verify `rxc_core.R`) |
-| R-28 | 4.5 | **E** (assumption mismatch) | P3 P3-S1, Theorem P3.5(a); P1 A6; P2b D4 | Apply D3. **Docs:** (1) Replace P3-S1 with *S1a: given the design $\{(N_i,X_i,D_i)\}$ and the district effects, the unit residuals $e_i$ are independent.* Delete "arbitrary dependence within districts for M0, cluster-robust variances." (2) New P3 §0.4, "Where the randomness comes from": every precinct and riding is observed, so the uncertainty is neither sampling-based nor design-based in the Abadie et al. sense. It is model-based: the contextual-effects assumption is a statement about $E[\beta\mid V]$, which needs $\beta_i$ to be random given $V_i$. The targets $B$ and $\tilde B$ condition on this electorate, so riding shocks are fixed and belong in the mean (M1/M2), not in the residual. Under M0, a riding shock that is non-affine in composition is the omitted-variable failure of Prop. D4, which clustered SEs would not repair. (3) State the remaining assumption plainly: no dependence within a riding beyond its riding effect (e.g. neighbourhood spillovers). Name it as a limitation. **Response:** accept the reviewer's point that P3.5(a) needed independence, and say that the framework now assumes it explicitly, with the reasons above. Use the reviewer's common-shock example: under our target it is a riding effect, absorbed by M1 and detected by the new pooling test. | **Remove `cluster` outright** (decided Nov 2026: no existing users). Add a **pooling test** under M1 of D4(b)'s condition: regress the estimated shifts $\hat Z_{D_i}$ on $X_i$ and $N_i$, and test that they are affine in $X$ and free of $N$. Testing $\zeta=0$ is not enough, because M0 can hold with $\zeta\neq0$ (e.g. $D\perp(X,N)$). |
+| R-28 | 4.5 | **E** (assumption mismatch) | P3 P3-S1, Theorem P3.5(a); P1 A6; P2b D4 | Apply D3. **Docs:** (1) Replace P3-S1 with *S1a: given the design $\{(N_i,X_i,D_i)\}$ and the district effects, the unit residuals $e_i$ are independent.* Delete "arbitrary dependence within districts for M0, cluster-robust variances." (2) New P3 §0.4, "Where the randomness comes from": every precinct and riding is observed, so the uncertainty is neither sampling-based nor design-based in the Abadie et al. sense. It is model-based: the contextual-effects assumption is a statement about $E[\beta\mid V]$, which needs $\beta_i$ to be random given $V_i$. The targets $B$ and $\tilde B$ condition on this electorate, so riding shocks are fixed and belong in the mean (M1/M2), not in the residual. Under M0, a riding shock that is non-affine in composition is the omitted-variable failure of Prop. D4, which clustered SEs would not repair. (3) State the remaining assumption plainly: no dependence within a riding beyond its riding effect (e.g. neighbourhood spillovers). Name it as a limitation. **Response:** accept the reviewer's point that P3.5(a) needed independence, and say that the framework now assumes it explicitly, with the reasons above. Use the reviewer's common-shock example: under our target it is a riding effect, absorbed by M1 and detected by the new pooling test. | **Remove `cluster` outright** (decided Nov 2026: no existing users). Add a **pooling test**: the Wald test of $\zeta=0$ in the M1 regression (P3.6(c)). Conditional on the design, M0 holds iff $\zeta=0$. *(Revised in WS4: an earlier version tested D4(b)'s condition, which is a superpopulation statement.)* |
 | R-29 | 4.6 | **E** (claim) | P3 Theorem P3.5(b) | Split it. **(b1) Theorem:** CLR with the full vertex set $\Lambda$, which is finite for a fixed design. **(b2) Algorithm:** collect candidates at simulated draws. **Proof route for a valid (b2):** by weak duality, $\theta_\lambda(\beta_0)\ge\varphi_U(\beta_0)$ for *every* dual-feasible $\lambda$. So $\min_{\lambda\in\hat V}(\hat\theta_\lambda+\hat k\hat\sigma_\lambda)$ covers $\varphi_U$ whenever $\hat k$ controls the maximum over a *fixed* set containing $\hat V$. A data-dependent subset is valid if its critical value is computed over the fixed superset (or the collected set is independent of $\hat\beta$ given the draws, to be checked). Write this as Prop. P3.5(b2) if it closes, otherwise as a Conjecture. List rarely selected vertices, degenerate faces, singular $\Sigma$ and a growing $\lvert\Lambda\rvert$ as the conditions to address. | Per D4: compute the critical value over the union of collected vertices *and* the plug-in vertex; print "algorithmic" when the theorem's conditions are not checked |
 | R-30 | 4.7 | **E** (P1) | P1 §1.6; P3 Prop. P3.6(b) | Fix P1's count to $(D^\star-1)(C-1)R(R-1)/2$, with the derivation $(C-1)R(R+1)/2-(C-1)R$. State the Wald/F test for fixed dimension. Under a growing number of restrictions it becomes a conjecture with simulation support. | Check the df in the Wald test code |
 | R-31 | 4.8–4.9 | **E** (scope) | P3 §0.1, §6, Prop. P3.7 | Apply D5. Replace "results are for R1/R3" with a table of which result covers each model and regime (D5 (i)–(iv)). Add **Theorem P3.8 (finite-sample CI)**. P3.7(a), "dropping constraints enlarges the set", stays a proposition. P3.7(b) becomes a conditional statement: *if* the procedure is valid on the kept districts, choosing them from the design alone keeps conditional coverage. "CLR restores coverage" in R2 becomes a *Simulation finding*. | `ci_method = "finite"`; note when the median group size is small, pointing to it |
@@ -119,7 +119,7 @@ R-03, R-08, R-09, R-13, R-14, R-16, R-18, R-20, R-26, R-29 (b1 and the weak-dual
   2. Make (a) the default, with CLR as an option.
   3. Enumerate vertices when there are few, otherwise fall back to 1 or 2.
 
-### WS4: Restructure inference in Phase 3 (needs WS1)
+### WS4: Restructure inference in Phase 3 (needs WS1) — **done (Nov 2026)**
 R-28, R-29, R-31, R-32, the new §0.4 on where the randomness comes from, and the regime table.
 
 New layout for P3 §5–6:
@@ -131,13 +131,32 @@ New layout for P3 §5–6:
 6. **Table:** what is proved for each model and regime.
 7. **§10 Open items:** add R2/R3 theory, design-sampling inference for $B^*$, the hull-error rate, and boundary cases without Slater.
 
+**WS4 status.**
+* **Done:**
+  * P3-S1a (independence given the design and district effects).
+  * New §0.4 on where the randomness comes from (Abadie et al.).
+  * New §0.5 regime table.
+  * Cluster wording removed throughout P3 and P1.
+  * [OLS] restated for fixed dimension, with uniformity over convex sets, so a growing number of hull constraints is harmless under M0.
+  * P3.6(b): fixed-dimension status.
+  * **New P3.6(c):** pooling test.
+  * **New Theorem P3.8:** finite-sample CI and emptiness test, every regime.
+  * P3.7 split into (a) and a conditional (b).
+  * "CLR restores coverage" restated as a simulation finding.
+  * §9 recipe and §10 open items updated.
+  * Checks: P3 13/13.
+* **Change of plan, pooling test.** Conditional on the design, with affinely spanning districts, M0 holds iff the district shifts are zero (P3.6(c)). So the package's pooling test is the Wald test of $\zeta=0$ in the M1 regression. 2b D4(b)'s weaker condition averages over district labels, a superpopulation statement that this framework does not target. This supersedes the earlier "test D4(b)'s condition" item.
+* **Finding, Theorem P3.8.** It is valid in every regime (100% coverage at 30 × 8), but uninformative: width 1.0 after clipping in every design tried, including 900 pooled polls. Even an oracle Gaussian union bound gives 0.76–0.87. The constraint-by-constraint union bound is the main cost.
+  * D5's "finite-sample CIs for R2" holds formally, not practically.
+  * In the package, `ci_method = "finite"` is deferred until a sharper version exists (§10 of P3).
+
 ### WS5: Package changes (`eiPartialID`; needs WS4)
 
 | Change | Files | Item |
 |---|---|---|
-| Remove `cluster` and the CR1 branch of `.rxc_vcov` (D3). Add the pooling test of D4(b). | `R/rxc_api.R`, `R/rxc_infer.R` | R-28 |
-| `ci_method = "finite"` (Hoeffding/Bernstein + union bound, Theorem P3.8) | `R/rxc_infer.R` | R-31 |
-| Critical value over the fixed superset of candidates. Add an `ndraw` note in the output. Add `ci_method = c("clr", "conservative")`. | `R/rxc_infer.R` (`.rxc_collect`, `.rxc_ci_clr`) | R-29, D4 |
+| Remove `cluster` and the CR1 branch of `.rxc_vcov` (D3). Add the pooling test of P3.6(c): Wald test of $\zeta=0$ in the M1 regression. | `R/rxc_api.R`, `R/rxc_infer.R` | R-28 |
+| Report the projection interval (P3.5(b2)(ii)) alongside the CLR default (D4). `ci_method = "finite"` (Theorem P3.8) is deferred: it is valid but uninformative. | `R/rxc_infer.R`, print/summary | R-29, R-31 |
+| Label the CLR interval "algorithmic" in print/summary. Add `ci_method = c("clr", "projection", "conservative")`, with CLR plus projection reported by default (D4). | `R/rxc_infer.R` (`.rxc_collect`, `.rxc_ci_clr`) | R-29, D4 |
 | Messages naming the failing group for rank and dimension problems (quadric-free support for M0/M2; affinely spanning support for M1; full-dimensional hull). | `R/rxc_core.R` | R-02, R-07, R-19 |
 | Boundary flag (minimum slack at the optimum) and a small-group (R2) note. | `R/rxc_infer.R`, `R/rxc_api.R` | R-26, R-31 |
 | Wording: "outer bounds"; M1(0) as a benchmark; S1 as an outer bound; $\tilde B$ vs $B$ in help. | `R/rxc_api.R` roxygen, vignettes, README | R-10, R-21, R-33, R-34 |
@@ -146,7 +165,7 @@ New layout for P3 §5–6:
 
 **Tests to add:**
 * the finite-sample CI contains the CLR CI in large samples, and covers in a small simulation;
-* the pooling test rejects with composition- or size-correlated riding shocks, and not under $D\perp(X,N)$;
+* the pooling test (Wald, $\zeta=0$) rejects with nonzero riding shifts, and has about nominal size when $\zeta=0$;
 * the critical value over the superset is at least the one over the selected set;
 * a rank error for degenerate designs;
 * the Wald df.

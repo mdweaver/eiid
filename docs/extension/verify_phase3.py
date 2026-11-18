@@ -165,3 +165,77 @@ for _ in range(reps_):
     cover_naive += phiU0 <= lam @ bh + norm.ppf(0.95) * se
 ok(f"Prop P3.5(b2)(ii): projection upper bound with a data-dependent candidate covers {cover_proj / reps_:.3f} "
    f">= 0.95 (one-candidate z-bound: {cover_naive / reps_:.3f})", cover_proj / reps_ >= 0.95)
+
+# ---------- Workstream 4: Theorem P3.8 (finite-sample CI), regime R2: M1, 2x2, 30 districts x 8 polls ----------
+def p38_once(rng_, D=30, nd=8, a_s=0.05, a_E=0.01, target="Btilde"):
+    Hr = np.array([[0.7, 0.5], [0.3, 0.2]])                    # column-1 rates: (H x)_r = Hr[r,0] x1 + Hr[r,1] x2
+    zeta = np.vstack([np.zeros(2), rng_.uniform(-0.08, 0.08, (D - 1, 2))])
+    X1, Dl, Nn_ = [], [], []
+    for d in range(D):
+        a = rng_.uniform(0.05, 0.5); b = min(0.95, a + rng_.uniform(0.2, 0.45))
+        X1.append(rng_.uniform(a, b, nd)); Dl += [d] * nd; Nn_.append(rng_.integers(200, 1000, nd))
+    X1 = np.concatenate(X1); X2 = 1 - X1; Dl = np.array(Dl); Nn_ = np.concatenate(Nn_).astype(float)
+    m = np.column_stack([Hr[0, 0] * X1 + Hr[0, 1] * X2 + zeta[Dl, 0], Hr[1, 0] * X1 + Hr[1, 1] * X2 + zeta[Dl, 1]])
+    conc = 15.0
+    beta = rng_.beta(m * conc, (1 - m) * conc)
+    T1 = X1 * beta[:, 0] + X2 * beta[:, 1]
+    # M1 regression: pooled quadratic + district x X_r shifts (d >= 2)
+    Zs = [X1 ** 2, 2 * X1 * X2, X2 ** 2]
+    for d in range(1, D):
+        Zs += [(Dl == d) * X1, (Dl == d) * X2]
+    Z = np.column_stack(Zs); L = np.linalg.solve(Z.T @ Z, Z.T)  # beta_hat = L @ T1
+    bh = L @ T1
+    def zidx(d, r): return None if d == 0 else 3 + 2 * (d - 1) + r
+    def rad(b, delta):                                          # Hoeffding radius of b'beta_hat (column 1 only)
+        w = b @ L
+        return np.sqrt(0.5 * np.log(1 / delta) * np.sum(w ** 2))
+    cons = []                                                   # (b vector, f0, a): s = f0 + b'beta, constraint s + a kappa >= 0
+    for d in range(D):
+        xs_d = X1[Dl == d]
+        for t in (xs_d.min(), xs_d.max()):
+            b1 = np.zeros(Z.shape[1]); b1[0] = t; b1[1] = 1 - t
+            if d: b1[zidx(d, 0)] = 1
+            b2 = np.zeros(Z.shape[1]); b2[1] = t; b2[2] = 1 - t
+            if d: b2[zidx(d, 1)] = 1
+            cons += [(b1, 0.0, 1 - t), (b2, 0.0, -t), (-b1, 1.0, -(1 - t)), (-b2, 1.0, t)]
+    J = len(cons); delta = a_s / (J + 2)
+    lo, hi = -np.inf, np.inf
+    for b, f0, a in cons:
+        sh = f0 + b @ bh + rad(b, delta)
+        if a > 0: lo = max(lo, -sh / a)
+        else: hi = min(hi, sh / (-a))
+    om = Nn_ * X1 / np.sum(Nn_ * X1)
+    bc = np.zeros(Z.shape[1]); bc[0] = om @ X1; bc[1] = om @ X2
+    for d in range(1, D): bc[zidx(d, 0)] = om[Dl == d].sum()
+    gam_k = om @ X2
+    hc = rad(bc, delta)
+    Bt = om @ m[:, 0]; Br = om @ beta[:, 0]
+    if lo > hi: return None, Bt, Br
+    tE = np.sqrt(0.5 * np.log(2 / a_E) * np.sum(om ** 2)) if target == "B" else 0.0
+    ci = (bc @ bh - hc + gam_k * lo - tE, bc @ bh + hc + gam_k * hi + tE)
+    return ci, Bt, Br
+
+r8 = np.random.default_rng(88)
+cov_t = cov_b = empty = 0; wid = []
+reps8 = 300
+for _ in range(reps8):
+    ci, Bt, Br = p38_once(r8, target="Btilde")
+    if ci is None: empty += 1; continue
+    cov_t += ci[0] <= Bt <= ci[1]; wid.append(ci[1] - ci[0])
+for _ in range(reps8):
+    ci2, Bt2, Br2 = p38_once(r8, a_s=0.04, a_E=0.01, target="B")
+    if ci2 is not None: cov_b += ci2[0] <= Br2 <= ci2[1]
+print(f"     Thm P3.8, M1 2x2, 30 districts x 8 polls: CI for B~ covers {cov_t / reps8:.3f}, for B {cov_b / reps8:.3f}; "
+      f"empty {empty}; median unclipped width {np.median(wid):.2f} (valid but uninformative; see P3 section 5.1)")
+ok("Thm P3.8: finite-sample CI covers B~ and B at >= 95% in an R2 design (300 reps each); emptiness rate <= 5%",
+   cov_t / reps8 >= 0.95 and cov_b / reps8 >= 0.95 and empty / reps8 <= 0.05)
+
+# Prop P3.6(c): with affinely spanning districts, district shifts that are constant within district cannot be
+# written as G X_i unless they are all zero (conditional-on-design pooling test).
+Xd = [rng.dirichlet(np.ones(3), 4) for _ in range(3)]
+zs = [np.zeros(3), np.array([0.05, -0.02, 0.01]), np.array([-0.03, 0.04, 0.0])]
+Xs_ = np.vstack(Xd); Zt = np.vstack([np.tile(z, (4, 1)) for z in zs])
+G_, res_, *_ = np.linalg.lstsq(Xs_, Zt, rcond=None)
+Zt0 = np.zeros_like(Zt); _, res0, *_ = np.linalg.lstsq(Xs_, Zt0, rcond=None)
+ok("Prop P3.6(c): nonzero district shifts are not of the form G X_i (residual > 0); zero shifts are",
+   res_.sum() > 1e-6 and (len(res0) == 0 or res0.sum() < 1e-20))

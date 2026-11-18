@@ -242,11 +242,11 @@ i.e. $\operatorname{supp}P_X\cap A$ lies in no quadric of the simplex. This is a
 **A10. Asymptotic regime (a choice, not a fact):** (R1) $D$ fixed, $p_d\to\infty$; (R2) $D\to\infty$, $p_d$ bounded; (R3) both grow.
 *Role:* under R2 the $\zeta_d$ are incidental parameters that cannot be estimated consistently, and $\max_d\hat\ell_{c,d}$ is biased upward. This needs intersection-bounds methods with precision correction (Chernozhukov, Lee & Rosen 2013) or a hierarchical restriction on $\zeta$.
 *Transitions:* the answer depends on your design (see the questions at the end).
-*Coverage of each regime (decided after review; P3 to be revised accordingly):*
+*Coverage of each regime (after review; full table in P3 §0.5):*
 * M0: fixed-dimension asymptotics in every regime.
 * M1/M2 in R1: fixed-dimension asymptotics.
 * M1/M2 in R3: high-dimensional Gaussian approximation under a rate condition.
-* Every regime, including R2: a finite-sample confidence interval from Hoeffding/Bernstein bounds (P3 Theorem P3.8, planned).
+* Every regime, including R2: a finite-sample confidence interval (P3 Theorem P3.8). It is valid, but uninformative in width in the designs tried (P3 §5.1).
 * CLR coverage in R2: a simulation finding only.
 
 **Assumptions explicitly not made:** no distributional form for $\beta$ (unlike King's truncated bivariate normal), no independence between $\beta$ and $X$ (contextual effects are the point), no stationarity over time, and no point-identifying nonlinearity.

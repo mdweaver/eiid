@@ -24,10 +24,10 @@ These change what gets written, so they come first. The recommended choice is li
 
 | # | Decision | Recommended | Alternative |
 |---|---|---|---|
-| D1 | Covariates $Z$ in the main paper (R-15) | **Option A.** The conditional mean depends on $X$ only, $E[\beta\mid X,N,Z]=M_H(X)$. Discrete districts get their own model (2b). Continuous covariates (M1′, $\log N$) go in an "Extensions" section and are labelled open. | Option B: develop $M_H(X,Z)$ now. This is a new Phase 2c. |
+| D1 | Covariates $Z$ (R-15) | **Decided (Nov 2026): Option B.** The package gets covariate adjustment. Develop a new Phase 2c with two rungs: (i) $Z$ shifts baselines only, $E[\beta\mid X,N,Z]=M_H(X)+\Gamma(Z)$ with $\Gamma(Z)$ linear in $Z$ (this generalises M1 and JKST App. C, and adds no unidentified dimensions); (ii) $Z$ also modifies contextual effects, $H_c(Z)=H_{c0}+\sum_\ell Z_\ell G_{c\ell}$ (M1′; the skew parts of the $G_{c\ell}$ add $L(C-1)R(R-1)/2$ unidentified dimensions). $\log N$ as a covariate relaxes A3. | — |
 | D2 | Units outside $A$ (R-05) | **Carry $P(X\in A)=1$ through §6 of 2a.** Also add a short Prop. 7′ that writes down what `range = "trim"` already does: the LP over kept units plus Duncan–Davis for dropped units. The code already does this, so the proof is cheap. | Assumption only, with no Prop. 7′. |
 | D3 | Unit-level term under clustering (R-28) | **Both.** State P3.5(a) for independent units (Option A). Add P3.5(c), a cluster allowance (Option B). The package already accepts `cluster`, so Option A alone would leave a published option without a valid interval. | Option A only, and stop `ci_actual` when `cluster` is given. |
-| D4 | Default CI in the package (R-29) | **Keep CLR-type as the default, but compute the critical value over a fixed superset of candidates (see WS3, R-29).** This makes it provably valid. Report the simulated-collection version as an *Algorithm* option. | Make the conservative P3.5(a) interval the default, and keep CLR as an option. |
+| D4 | Default CI in the package (R-29) | **Decided (Nov 2026).** **Keep CLR-type as the default, but compute the critical value over a fixed superset of candidates (see WS3, R-29).** This makes it provably valid. Report the simulated-collection version as an *Algorithm* option. | Make the conservative P3.5(a) interval the default, and keep CLR as an option. |
 | D5 | Formal asymptotic scope (R-31) | **R1 only (fixed $D^\star$, fixed dimension).** State R2/R3 results as conjectures backed by simulation. | Also prove R3 for M0 with growing independent clusters. This is feasible: standard cluster asymptotics. |
 
 ---
@@ -52,7 +52,7 @@ These change what gets written, so they come first. The recommended choice is li
 | R-12 | 3.4 | S | 2a §4 (before Theorem 1) | Add a remark that sharpness is relative to the continuous latent-rate model, not to the finite set of integer cell counts. | — |
 | R-13 | 4.2 | X | 2a Prop. 5 | Add: the interval is empty unless $0\le Q_{c,rs}$ and $\sum_cQ_{c,rs}=1$ hold, as the probability restrictions require. | — |
 | R-14 | 4.4 | X | 2a Cor. 6.1(c) | Replace "strong contextual effects" with the exact condition: part (b)'s common-sign condition fails, which (given the sum restrictions) means at least one pure-poll extrapolated rate is negative. | — |
-| R-15 | 3.1, rev. 5.1 | S | P1 §1.5, §1.6, A3 | Apply D1: rewrite A3 as $E[\beta\mid X,N,Z]=M_H(X)$. Mark M1′ and continuous $Z$ as open. Remove any wording that says the covariate case is proved. | — |
+| R-15 | 3.1, rev. 5.1 | S | P1 §1.5, §1.6, A3; new Phase 2c | Apply D1 (Option B): A3 becomes $E[\beta\mid X,N,Z]=E[\beta\mid X,Z]$, matched by the model $E[\beta\mid X,N,Z]=M_{H(Z)}(X)+\Gamma(Z)$. Phases 2a/2b are the special cases with no $Z$ and with $Z$ = district dummies. Until Phase 2c is written, no text may say the covariate case is proved. | New `covariates =` argument (WS2c) |
 | R-16 | 5 | X | 2a Prop. 9 | State the domain: the restrictions on $\Delta$ hold on all of $\Delta^{R-1}$ for the "linear $\Delta=M_{K'}$" characterisation. Move a short version of Prop. 9 into the introduction or §2 as motivation. | — |
 | R-17 | 6 | X | 2a new §4.3 | Add "What Theorem 1 and Prop. 7 each need": the sharp set needs the law of $T$ given $(X,N)$, which in practice means smoothing or pooling because every $(X,N)$ is unique. The outer set needs only the regression. Point to the series-based $\Theta_X$ planned for the second release. | — |
 
@@ -94,6 +94,16 @@ R-04, R-06, R-07, R-23, R-27, R-30, R-35, plus the wording fix in R-33.
 R-01, R-02, R-05, R-10, R-11, R-12, R-15, R-19, R-22, R-25, R-33, R-36.
 * Add a new **P1 §1.7, "Objects and targets"**, cited everywhere: $\Theta_I\subseteq\Theta_X\subseteq\Theta_O$ with the information each uses; the three hulls; the three targets; continuous-rate sharpness.
 * Phases 2a, 2b and 3 then point to it, instead of repeating it.
+
+### WS2c: Covariate adjustment, new Phase 2c (needs D1; may run alongside WS3)
+Derive for both rungs:
+* the identification decomposition: which parts of $\Gamma$ and $G$ are identified, and the unidentified dimension;
+* the estimand (the Lemma 2 analogue, with weights that now involve moments of $(N,X,Z)$);
+* the outer set. Because $M_{H(Z)}(x)$ is bilinear in $(x,z)$, the vertex reduction of 2a Lemma 3(a) does not carry over to the joint hull of $(X,Z)$. The constraints must be imposed at every observed $(X_i,Z_i)$, or at the vertices of $A\times\operatorname{conv}(\operatorname{supp}Z)$ if a product region is assumed;
+* sharpness, via 2b Theorem 1′ with $V=(X,N,Z)$;
+* the pooling result (the D4 analogue, conditioning on $(X,N)$): when omitting $Z$ leaves M0 valid.
+
+Also: a rank condition on the design; inference, which reuses P3 unchanged because the target stays affine in the unknowns; a Monte Carlo design with a confounding covariate; and a `covariates =` argument in `eiBounds()`/`ladder()`, adding the covariate rungs to the ladder.
 
 ### WS3: Proof hardening (docs; may run alongside WS2)
 R-03, R-08, R-09, R-13, R-14, R-16, R-18, R-20, R-26, R-29 (b1 and the weak-duality route for b2), R-34.

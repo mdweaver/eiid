@@ -1,0 +1,5 @@
+design S0, 2000 replications, B = 399, df = 38
+Wald statistic: mean 39.6, variance 95.8 (chi^2_38: 38, 76)
+rejection at 5%, chisq: 0.078 (MC SE 0.006)
+rejection at 5%, F    : 0.072 (MC SE 0.006)
+rejection at 5%, wild : 0.043 (MC SE 0.005)

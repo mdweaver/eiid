@@ -36,7 +36,8 @@ eiBounds(
   range_offset = 0,
   mismatch = c("error", "rescale"),
   union = c("pieces", "hull"),
-  diagnostics = NULL
+  diagnostics = NULL,
+  base = NULL
 )
 }
 \arguments{
@@ -79,15 +80,22 @@ version, other)}: \code{"dB"} is the between-group association
 \eqn{\delta_B} (version \code{"W1"}, row vs the rest, default; or
 \code{"pair"}, row vs \code{other}), \code{"dW"} the within-group
 (contextual) association \eqn{\delta_W} (version \code{"W1"}, one-vs-rest,
-default; or \code{"W2"}, \eqn{\Delta_r}). \code{cr} is a list of
+default; or \code{"W2"}, \eqn{\Delta_r}, the within-group associations
+of every original group with the row's share, \emph{pooled} into one sum:
+its sign does not sign each group's association). \code{cr} is a list of
 contextual-reinforcement restrictions (\eqn{\delta_B} and \eqn{\delta_W}
 have the same sign, which is not assumed known), each \code{list(row, col,
 version = "W1", "W2" or "pair", other)}. W1 (and every 2 x 2 CR) is one LP
 (a slab); W2 and pair are a union of two branches and may give two disjoint
 intervals. All associations are model-implied (LCE) means with design
-weights \eqn{N_i}. Signs on \eqn{\delta_W} can be refuted by the data;
-with two rows a sign on \eqn{\delta_B} and CR cannot be refuted by
-aggregates on their own (refutation is always joint with the rung).}
+weights \eqn{N_i}. Signs on \eqn{\delta_W} can be refuted by the data.
+A sign on \eqn{\delta_B} and CR are always feasible only in the
+model-free problem with continuous unit tables (Duncan-Davis margins, no
+linear rung, no other restrictions); with the linear rung they can be
+rejected jointly with it, and with integer counts or other restrictions
+CR can be refuted outright. An empty set rejects the combination; it does
+not say which part fails (the fit's notes say whether the rung alone is
+rejected).}
 
 \item{alpha}{1 - confidence level.}
 
@@ -117,13 +125,19 @@ only; Jiang et al. use 1e-5).}
 
 \item{mismatch}{\code{"error"} or \code{"rescale"} when row and column totals differ.}
 
-\item{union}{with CR restrictions the estimate and CIs can be two disjoint
-intervals: \code{"pieces"} (default) reports the hull in
-\code{*_lower}/\code{*_upper} and the excluded gap in \code{*_gap_lower}/
-\code{*_gap_upper}; \code{"hull"} reports the hull only (valid, wider or equal).}
+\item{union}{with CR restrictions the estimate and CIs can be a union of
+disjoint intervals: \code{"pieces"} (default) reports the hull in
+\code{*_lower}/\code{*_upper}, the number of pieces in \code{n_pieces} and
+the \emph{widest} excluded gap in \code{*_gap_lower}/\code{*_gap_upper};
+\code{print()} shows every piece, and \code{fit$pieces} holds them all;
+\code{"hull"} reports the hull only (valid, wider or equal).}
 
 \item{diagnostics}{compute \code{eiRedundancy()} diagnostics and store them in
 \code{$sign} (default: when \code{assoc} or \code{cr} restrictions are given).}
+
+\item{base}{also fit the rung alone (without the optional restrictions) and
+report its estimate and CIs in the \code{base_*} columns, printed beside
+the restricted result (default: when restrictions are given).}
 }
 \value{
 an object of class \code{"eiRxC"}.
@@ -165,15 +179,29 @@ Status of the intervals (PHASE3_inference.md, sections 0.5 and 5): the CLR
 interval as implemented collects candidate endpoints by simulation and is
 \emph{algorithmic} (its coverage is a conjecture supported by simulation);
 the projection interval and the conservative interval have an asymptotic
-guarantee for a fixed-dimensional regression (M0 in any design; grouped models
-with few, large groups). Inference is conditional on the design and on the
+guarantee for a fixed-dimensional regression with a nonsingular covariance
+matrix \eqn{\hat V} (M0 in any full-rank design; grouped models with few,
+large groups). If \eqn{\hat V} is numerically singular, candidate endpoints
+whose gradients use its null directions are dropped from the projection and
+CLR intervals (a valid, wider interval) and a note says so. The
+\code{proj_actual} allowance for unit-level deviations uses a variance bound
+taken from a projection interval, so the projection columns rest only on
+P3.5(b2). Inference is conditional on the design and on the
 group effects; units are assumed independent given them, and no clustered
 variance is used (group-level shocks belong in the mean: use M1 or M2).
+
+Sign and contextual-reinforcement restrictions (\code{assoc}, \code{cr};
+the M-SIGN module) are \strong{experimental} in this release: both referee
+reports of review batch B are being answered. Under grouped rungs (M1,
+M1delta, M2, L4 with groups) each sign is one pooled restriction across
+groups, and sharpness (PHASE5a R3(b)) is proved only for the pooled model M0.
 }
 \examples{
-library(eco); data(census)
-fit <- eiBounds(x = census$X, t = census$Y, n = census$N, model = "M0", seed = 1)
-fit
+if (requireNamespace("eco", quietly = TRUE)) {
+  data("census", package = "eco")
+  fit <- eiBounds(x = census$X, t = census$Y, n = census$N, model = "M0", seed = 1)
+  fit
+}
 }
 \references{
 Jiang, W., King, G., Schmaltz, A. and Tanner, M. A. (2019).

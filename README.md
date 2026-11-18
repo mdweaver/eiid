@@ -1,4 +1,4 @@
-### Code Version 0.2.0
+### Code Version 0.3.0
 
 This repo includes the R package for replicating the results in:
 
@@ -11,6 +11,10 @@ The Dataverse archive also includes all of the data analyzed in the paper.
 For convenience, this repo only includes the standalone R package (eiPartialID) in the folder 'package' (which is similar to that in the Dataverse archive, with some minor differences to conform to CRAN policies). The package should be installed locally from source. An overview of usage is provided in the following HTML vignette, which can be viewed in your browser:
 
 [package/eiPartialID/vignettes/rendered_html_archive/2019_02_04/eiPartialID_usage_2019_02_04.html](package/eiPartialID/vignettes/rendered_html_archive/2019_02_04/eiPartialID_usage_2019_02_04.html)
+
+### New in 0.3.0: signs on associations and contextual reinforcement (experimental)
+
+`eiBounds(restrictions = list(assoc = ..., cr = ...))` adds signs on mean associations and contextual reinforcement (the M-SIGN module, `docs/extension/PHASE5a_sign_module.md`). The module is **experimental** while two referee reports on it are answered (`docs/extension/reviews/B_PI_RESPONSE_PLAN.md`); `print()` flags it, and under grouped rungs each sign is one pooled restriction across groups. This release also adds a rank guard for the projection intervals, a projection-based variance bound in `proj_actual`, a wild-bootstrap pooling test, every piece of a union in the printout, and the rung-only result beside restricted results. See `package/eiPartialID/NEWS.md`.
 
 ### New in 0.2.0: R x C tables, grouped units and an assumption ladder
 

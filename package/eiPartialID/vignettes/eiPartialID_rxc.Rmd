@@ -11,14 +11,19 @@ vignette: >
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 has_eipack <- requireNamespace("eiPack", quietly = TRUE)
+has_eco <- requireNamespace("eco", quietly = TRUE)
+library(eiPartialID)
 ```
 
-Version 0.2.0 adds `eiBounds()`, which extends the 2 x 2 method of Jiang,
+Version 0.2.0 added `eiBounds()`, which extends the 2 x 2 method of Jiang,
 King, Schmaltz and Tanner (2019) to R x C tables, to units nested in groups
 (e.g. polls within ridings, precincts within counties), and to a ladder of
 assumptions running from Duncan–Davis bounds (no model) to Goodman constancy.
 The derivations, proofs and simulations are in `docs/extension/` of the source
 repository. `PLAIN_LANGUAGE_GUIDE.md` there explains every rung in plain terms.
+Version 0.3.0 adds signs on mean associations and contextual reinforcement
+(experimental; see below), a rank guard for the projection intervals and a
+bootstrap pooling test; `NEWS.md` lists the changes.
 
 ## What is reported
 
@@ -41,8 +46,13 @@ Lee and Rosen 2013). The candidate endpoints are collected by simulation, so the
 interval as implemented is *algorithmic*: its coverage is supported by
 simulation but not proved. Alongside it, `proj_model` and `proj_actual` give
 projection intervals built from the same candidates. These have an asymptotic
-guarantee for a fixed-dimensional regression (M0 in any design; grouped models
-with few, large groups) and are usually only slightly wider.
+guarantee for a fixed-dimensional regression with a nonsingular estimated
+covariance matrix (M0 in any full-rank design; grouped models with few, large
+groups) and are usually only slightly wider. If the covariance matrix is
+numerically singular, candidates that use its null directions are dropped (the
+interval stays valid and gets wider) and a note says so. The unit-level
+allowance in `proj_actual` uses a variance bound taken from a projection
+interval, so the projection columns rest only on the proved result.
 `ci = "conservative"` gives the other proved interval. Jiang et al.'s CI_x
 intervals are also available (`jkst = TRUE`).
 
@@ -50,14 +60,16 @@ Inference is conditional on the observed compositions and on the group effects.
 Units are assumed independent given them, and no clustered variance is used.
 A shock shared by the units of a group belongs in the mean: use M1 or M2. With
 groups, `eiBounds()` also reports a pooling test of M0 against M1 (all group
-shifts zero) and the test of M1's testable part against M2.
+shifts zero) and the test of M1's testable part against M2. The pooling test's
+p-value comes from a restricted wild bootstrap: the chi-squared version
+over-rejects when there are many groups (9% at a nominal 5% with 38
+restrictions in the Phase 3 Monte Carlo).
 
 ## Two-by-two: the original method
 
-```{r census}
+```{r census, eval = has_eco}
 library(eiPartialID)
-library(eco)
-data(census)
+data(census, package = "eco")
 fit <- eiBounds(x = census$X, t = census$Y, n = census$N, model = "M0",
                 targets = list(black_literate = c(1, 1)), jkst = TRUE, seed = 1)
 fit
@@ -147,22 +159,42 @@ any linear restriction on the contextual-effect matrices.
 
 ## Signs on associations and contextual reinforcement
 
-Two kinds of "monotone EI" belief (Elzayn et al., *Monotone Ecological
-Inference*) can be added to the linear-contextual-effects rungs as extra rows:
+**Status: experimental in 0.3.0.** The M-SIGN module is under revision after
+two referee reports (`docs/extension/reviews/B_PI_RESPONSE_PLAN.md`), and
+`print()` flags it. Two kinds of "monotone EI" belief (Elzayn et al.,
+*Monotone Ecological Inference*) can be added to the linear-contextual-effects
+rungs as extra rows:
 
 * the **between** association $\delta_B$: within the same unit, group $r$ is
-  on average more (or less) likely than the rest to choose column $c$;
-* the **within** (contextual) association $\delta_W$: group rates rise (or
-  fall) on average with the group's own share of the unit;
+  on average more (or less) likely than the rest to choose column $c$. It is a
+  weighted average over units with weights $N_i x_{ir}(1 - x_{ir})$, so pure
+  units get no weight and one large mixed unit can dominate; it is not an
+  ordering in every unit;
+* the **within** (contextual) association $\delta_W$: with the default
+  one-vs-rest version (`"W1"`), the rates of group $r$, and of everyone else,
+  rise (or fall) on average with **group $r$'s share** of the unit (the
+  predictor is $r$'s share in both parts). With `"W2"`, $\Delta_r$ is the
+  within-group association of every original group with $r$'s share,
+  **pooled into one sum**: its sign does not sign each group's association
+  (W1 and W2 can even have opposite signs while every group's rate rises).
+  A direction for each named group separately needs separate restrictions,
+  which are not yet available;
 * **contextual reinforcement (CR)**: $\delta_B$ and $\delta_W$ have the same
   sign, without saying which.
 
 All three are model-implied means with design weights $N_i$. A sign is one
 linear row; CR is a union of two branches. With the one-vs-rest version (`"W1"`,
 the default, and every 2 x 2 table) CR is a single slab
-$D^r \in [\gamma_r ER^r, ER^r]$, so it stays one LP. The other pairings (`"W2"`,
-`"pair"`) can give **two disjoint intervals**; they are printed as
-`[a, b] U [c, d]` (use `union = "hull"` for the hull).
+$D^r \in \operatorname{hull}\{\gamma_r ER^r, ER^r\}$ (the order of the two
+ends depends on the sign of $ER^r$), so it stays one LP. The other pairings
+(`"W2"`, `"pair"`) can give **disjoint intervals**; every piece is printed,
+`[a, b] U [c, d]` (use `union = "hull"` for the hull). The `*_gap_*` columns of
+`fit$table` keep only the widest gap; `fit$pieces` has every piece.
+
+Under grouped rungs (M1, M1(delta), M2, L4 with groups) a sign is **one pooled
+restriction across groups**, not one per group; the rows are the correct
+district functionals, but sharpness is proved only for the pooled model M0, and
+a note says so at fit time.
 
 ```{r sign}
 set.seed(2)
@@ -197,23 +229,43 @@ cr$sign$verdicts[, c("restriction", "verdict_first", "gain_first")]
 
 How to read and report these:
 
-* **The estimate is sharp for the regression.** Under the linear rung plus
-  sign rows, the LP interval is exactly the set of values consistent with the
-  fitted regression and the beliefs (PHASE5a R3).
+* **Report the rung alone beside the belief.** When restrictions are given,
+  `print()` shows the rung-only estimate and CIs (`base_*` columns) next to
+  the restricted result, so the price of the belief is visible.
+* **What the estimate is.** For M0, the estimate is the estimated bound, given
+  the fitted regression and the design, for the model-implied quantity
+  (PHASE5a R3(b)); it is sharp relative to the regression, not to the full
+  joint distribution, which can be smaller. Under grouped rungs it is an outer
+  set.
 * **What the data can and cannot check.** A sign on $\delta_W$ can be refuted
-  by aggregate data. With two groups, a sign on $\delta_B$ and CR can never be
-  refuted by aggregates on their own: an empty set refutes their combination
-  with the linear rung, and messages name the whole combination. Their
-  credibility rests on substantive argument or individual-level data.
-* **They can buy a lot.** In the PHASE5a Monte Carlo (2 x 2, truth on the CR
-  edge) the CR interval had median width 0.36 against 1.1 for the linear rung
-  alone, with coverage 0.99.
-* **Never intersect the estimated bracket $[\gamma\widehat{ER}, \widehat{ER}]$
-  with a confidence interval.** Treating the estimated bracket as known
-  under-covers (about 0.90 at the CR edge, and it does not improve with $n$).
-  The package inflates every piece instead: the conservative CI inflates each
-  piece of the slab before taking the maximum; the CLR CI (default; algorithmic, see "What is reported") takes the
-  union of the two branch CIs, each at the full level.
+  by aggregate data. A sign on $\delta_B$ and CR are always feasible only in
+  the model-free problem with continuous unit tables (Duncan–Davis margins, no
+  linear rung, no other restriction). With the linear rung they can be
+  rejected jointly with it, and with integer counts, known cells or other
+  restrictions CR can be refuted outright. An empty plug-in set is a sample
+  diagnostic; the emptiness test is the level-controlled rejection; the notes
+  say whether the rung alone is rejected. A rejection of the combination is
+  not evidence that the belief holds.
+* **What they can buy, and the price.** In the PHASE5a Monte Carlo (2 x 2,
+  truth on the CR edge) the **conservative** CR interval had median width
+  0.36 against 1.1 for the linear rung alone, with coverage 0.99. The default
+  CR interval is the CLR branch union, which is **algorithmic** (coverage
+  supported by simulation, not proved); `print()` shows the projection
+  interval beside it. If CR is false, the interval stays narrow, non-empty and
+  wrong: in the referee's experiment at 600 units it covered 0 of 400 times
+  under a moderate departure, while the linear rung alone covered every time.
+* **Never intersect the estimated bracket
+  $\operatorname{hull}\{\gamma\widehat{ER}, \widehat{ER}\}$ with a confidence
+  interval.** Treating the estimated bracket as known under-covers at the CR
+  edge, and the failure does not go away as $n$ grows (the 8–10% miss rates
+  in PHASE5a are for its design). The package inflates every piece instead:
+  the conservative CI inflates each piece of the slab before taking the
+  maximum; the CLR CI takes the union of the two branch CIs, each at the full
+  level.
+* **"Cuts the set, not this target"** means zero gain for this target; it
+  does not mean the restriction is implied (it may narrow other targets).
+* **Weight concentration.** `fit$sign$concentration` gives, for each signed
+  association, the largest unit weight and the effective number of units.
 * Our $\widehat{ER}$ uses the fitted $E[T \mid X]$; it equals the EGGHM
   $T$-based $\widehat{ER}$ when `weights = "n"`.
 
@@ -222,7 +274,7 @@ How to read and report these:
 
 ## Sensitivity and breakdown
 
-```{r sens}
+```{r sens, eval = has_eco}
 sv <- sensitivity(fit, eta = c(0, 0.02, 0.05))
 sv[, c("eta", "estimate_lower", "estimate_upper")]
 breakdown(fit, "black_literate", threshold = 0.5, which = "ci_model")

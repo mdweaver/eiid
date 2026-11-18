@@ -54,9 +54,8 @@ List object with the bounds and summary statistics:
 and to apply the heuristics presented in Jiang et al. 2019.
 }
 \examples{
-library("MASS")
-library("eco")
-data("census")
+if (requireNamespace("eco", quietly = TRUE)) {
+data("census", package = "eco")
 inputDataSet <- census
 x <- inputDataSet$X
 t <- inputDataSet$Y
@@ -64,6 +63,7 @@ n <- inputDataSet$N
 trueBetaB <- inputDataSet$W1
 outputList <- generateBounds(x, t, n, trueBetaB=trueBetaB, useXRangeOffset=TRUE,
     returnAdditionalStats=FALSE, printSummary=TRUE)
+}
 
 # True B: 0.674809
 # Duncan-Davis bounds: [0.535618, 0.974010]

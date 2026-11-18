@@ -13,7 +13,9 @@ test_that("registry: every restriction type has meta; fits report their active m
   m <- eiModules()
   expect_setequal(m$type, c("zeros", "order", "sign", "slope", "linear", "external", "assoc", "cr"))
   expect_true(all(c("source", "object", "target", "refutable", "form", "sharp", "dial", "proof_status") %in% names(m)))
-  expect_true(all(grepl("^proved", m$proof_status)))
+  # M-SIGN (assoc, cr) is experimental until the batch-B referee reports are resolved
+  expect_true(all(grepl("^proved", m$proof_status[!m$type %in% c("assoc", "cr")])))
+  expect_true(all(grepl("^experimental", m$proof_status[m$type %in% c("assoc", "cr")])))
   s <- sim()
   f <- eiBounds(x = s$x, t = s$t, n = s$n, targets = Dg, ci = "none", tests = FALSE, diagnostics = FALSE,
                 restrictions = list(slope = 2, cr = list(list(row = 1, slack = 0.01)),

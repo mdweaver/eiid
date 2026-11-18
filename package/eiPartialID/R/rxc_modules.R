@@ -11,6 +11,11 @@
 # eiBounds() parses restrictions through the registry, .rxc_extra_rows() builds the rows,
 # and fit$modules / eiModules() report the meta.
 
+# Proof status of M-SIGN (assoc, cr): experimental until both batch-B referee reports are
+# resolved; print() shows an EXPERIMENTAL line for every module whose status is not "proved".
+.rxc_msign_status <- paste("experimental (referee reports B under revision; see",
+                           "docs/extension/reviews/B_PI_RESPONSE_PLAN.md)")
+
 .rxc_meta <- function(source, object, target, refutable, form, sharp, dial, proof_status)
   list(source = source, object = object, target = target, refutable = refutable, form = form,
        sharp = sharp, dial = dial, proof_status = proof_status)
@@ -170,10 +175,13 @@
       .rxc_add_row(acc, s$sign * f$coef, s$sign * f$const + s$slack * sc, s$sign * f$a, "assoc", md)
     },
     label = function(s, rl, cl) .rxc_assoc_label(s, rl, cl),
-    meta = .rxc_meta("belief (M-SIGN)", "mean association (model-implied, N-weighted)", "model",
-                     "delta_W: yes; delta_B: only jointly with the rung (never alone with 2 rows)",
-                     "rows", "sharp for the regression (PHASE5a R3(b))", "slack (probability units)",
-                     "proved (PHASE5a R3, R10(a); 2c M2-M5)")),
+    meta = .rxc_meta("belief (M-SIGN)", "mean association (model-implied, N-weighted; W2 pooled over groups)",
+                     "model",
+                     paste("delta_W: yes; delta_B: jointly with the rung (with continuous tables and no",
+                           "linear rung it is always feasible; with integer counts or other restrictions",
+                           "it can be refuted)"),
+                     "rows", "sharp for the regression (PHASE5a R3(b); pooled M0 only)",
+                     "slack (probability units)", .rxc_msign_status)),
   cr = list(
     union = TRUE,
     parse = function(s, ctx) {
@@ -183,11 +191,13 @@
            other = .rxc_other_arg(s[["other"]], r, v, "cr", ctx), slack = .rxc_slack_arg(s, "cr"))
     },
     label = function(s, rl, cl) .rxc_cr_label(s, rl, cl),
-    meta = .rxc_meta("belief (M-SIGN, contextual reinforcement)", "mean associations (model-implied, N-weighted)",
-                     "model", "only jointly with the rung (never alone with 2 rows)",
+    meta = .rxc_meta("belief (M-SIGN, contextual reinforcement)",
+                     "mean associations (model-implied, N-weighted; W2 pooled over groups)", "model",
+                     paste("jointly with the rung (with continuous tables and no linear rung it is",
+                           "always feasible; with integer counts or other restrictions it can be refuted)"),
                      "W1 / 2x2: slab (one LP); W2 / pair: union of two LPs",
-                     "sharp for the regression (PHASE5a R3(b, c))", "slack (probability units)",
-                     "proved (PHASE5a R3(c, d), R10(b, c))"))
+                     "sharp for the regression (PHASE5a R3(b, c); pooled M0 only)",
+                     "slack (probability units)", .rxc_msign_status))
 )
 
 # parse user restrictions through the registry

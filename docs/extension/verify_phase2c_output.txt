@@ -1,0 +1,14 @@
+PASS  C1 Lemma M1 (a)-(c): Goodman/NM bias formulas, 1'Delta=0, one-vs-rest collapse (R=C=3)  [max err 6.2e-15]
+PASS  C2 Prop M3: 2x2 closed forms = LP; NM = gamma*ER; dB-sign sets never empty  [max err 5.6e-15]
+PASS  C2 Prop M3(b): dW>=0 set empty exactly when ER < MOB-  [2 empty cases]
+PASS  C2 Prop M3(d): CR never empty, exactly one branch (ER != 0)
+PASS  C2 Prop M3(d): under realised CR, sign(D) = sign(ER)  [152 populations satisfy CR]
+PASS  C3 Prop M4: joint <= single (nested), and strictly narrower in some cases  [75/139 strict; max width gain 0.273]
+PASS  C4 Prop M5: superpopulation associations affine in k (R=C=3)  [max err 5.6e-17]
+PASS  C4 Prop M5(a): mean-level ordering => dB*(r,s) >= 0
+PASS  C5(a) N2 outer bound contains the truth under a monotone nonlinear DGP
+PASS  C5(b) M0 + signed slopes (outer) is inside N2 (outer) when tau is quadratic  [47 cases]
+PASS  C5(c) R=3: m nondecreasing in x_0 but Cov(m, X_0) < 0 (no Chebyshev nesting)  [Cov = -0.0194]
+PASS  C6 Prop N2.3: local identity and local CR <=> D(x) between 0 and tau'(x)
+
+12/12 PASS

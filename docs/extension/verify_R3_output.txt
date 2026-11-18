@@ -1,0 +1,7 @@
+S1 constructive sharpness (3x2, LCE + true delta^0_B, delta^0_W signs): 1000 target values, worst violation 1.8e-15  PASS
+S2 2x2 CR branches: exactly one non-empty 2000, both degenerate 0, both non-empty 0  PASS
+S3 3x2 CR (W1, row 0, target B_0): both branches non-empty 0; disjoint images (hole) 0; gap/hull width median 0.000, max 0.000
+S4 3x2 CR pairing oneVrestB+W2 (target B_0): both branches non-empty 357/1000; hole 0; gap/hull width median 0.000, max 0.000
+S4 3x2 CR pairing pairB+W2 (target B_0): both branches non-empty 614/1000; hole 0; gap/hull width median 0.000, max 0.000
+S5 adversarial (3 bases x 2 pairings x 3 targets): 3600 problems; both branches non-empty 951; certificate (Theta meets g_B=g_W=0) holds 945; holes 3
+   hole gap/hull median 0.017, max 0.019; certificate held in a hole case: False

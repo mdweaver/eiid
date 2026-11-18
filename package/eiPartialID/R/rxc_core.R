@@ -212,20 +212,22 @@
 # Constraint system
 # ---------------------------------------------------------------------------
 
-.rxc_add_row <- function(acc, coef, const, a, kind) {
+.rxc_add_row <- function(acc, coef, const, a, kind, module = NA_character_) {
   acc$S[[length(acc$S) + 1]] <- coef
   acc$s0 <- c(acc$s0, const)
   acc$A[[length(acc$A) + 1]] <- a
   acc$kind <- c(acc$kind, kind)
+  acc$module <- c(acc$module, module)
   acc
 }
 
 .rxc_constraints <- function(st, eta = 0) {
-  acc <- list(S = list(), s0 = numeric(0), A = list(), kind = character(0))
+  acc <- list(S = list(), s0 = numeric(0), A = list(), kind = character(0),
+              module = character(0))
   R <- st$R; C <- st$C
   if (st$type %in% c("goodman", "goodman_block")) {
     return(list(S = matrix(0, 0, st$nbeta), s0 = numeric(0), A = matrix(0, 0, 0),
-                kind = character(0)))
+                kind = character(0), module = character(0)))
   }
   # (1) implied rates are valid probabilities at every vertex of each group's range
   for (g in seq_len(st$G)) {
@@ -268,85 +270,16 @@
       acc <- .rxc_add_row(acc, -coef, -const, -a, "L4")
     }
   }
-  # (4) optional restrictions
+  # (4) optional restrictions (linear rows, including sign rows on associations)
   acc <- .rxc_extra_rows(st, acc)
   S <- do.call(rbind, acc$S); A <- do.call(rbind, acc$A)
   if (is.null(dim(A))) A <- matrix(A, ncol = st$nz)
-  list(S = S, s0 = acc$s0, A = A, kind = acc$kind)
+  # (5) contextual reinforcement: either/or restrictions, kept apart (see rxc_sign.R)
+  list(S = S, s0 = acc$s0, A = A, kind = acc$kind, module = acc$module,
+       cr = .rxc_cr_parts(st))
 }
 
-# optional restrictions; each is applied in every group (shifts cancel in differences)
-.rxc_extra_rows <- function(st, acc) {
-  R <- st$R; C <- st$C; e <- diag(R)
-  ex <- st$extra
-  if (is.null(ex)) return(acc)
-  groups <- seq_len(st$G)
-  rate_diff <- function(g, c, r1, v1, r2, v2) {
-    a1 <- .rxc_rate(st, g, c, r1, v1); a2 <- .rxc_rate(st, g, c, r2, v2)
-    list(coef = a1$coef - a2$coef, const = a1$const - a2$const, a = a1$a - a2$a)
-  }
-  # structural zeros: rate of row r to column c is 0 throughout the range
-  for (zr in ex$zeros) {
-    gs <- if (is.null(zr$group)) groups else zr$group
-    for (g in gs) {
-      Vg <- st$vertices[[g]]
-      for (k in seq_len(nrow(Vg))) {
-        rt <- .rxc_rate(st, g, zr$col, zr$row, Vg[k, ])
-        acc <- .rxc_add_row(acc, -rt$coef, -rt$const, -rt$a, "zero")
-      }
-    }
-  }
-  # ordering: mean rate of row 'high' to column c >= that of row 'low', at every vertex
-  for (od in ex$order) {
-    for (g in groups) {
-      Vg <- st$vertices[[g]]
-      for (k in seq_len(nrow(Vg))) {
-        d <- rate_diff(g, od$col, od$high, Vg[k, ], od$low, Vg[k, ])
-        acc <- .rxc_add_row(acc, d$coef, d$const, d$a, "order")
-      }
-    }
-  }
-  # sign of a contextual effect: moving composition from row 'from' to row 'to'
-  # changes the mean rate of row r to column c in the direction 'sign'
-  for (sg in ex$sign) {
-    for (g in groups) {
-      d <- rate_diff(g, sg$col, sg$row, e[sg$to, ], sg$row, e[sg$from, ])
-      acc <- .rxc_add_row(acc, sg$sign * d$coef, sg$sign * d$const, sg$sign * d$a, "sign")
-    }
-  }
-  # bounded slopes: |H_c[r, s] - H_c[r, s']| <= lambda for all r, c, s, s'
-  if (!is.null(ex$slope)) {
-    lam <- ex$slope
-    for (g in groups) for (c in seq_len(C)) for (r in seq_len(R)) {
-      for (s1 in seq_len(R - 1)) for (s2 in (s1 + 1):R) {
-        d <- rate_diff(g, c, r, e[s2, ], r, e[s1, ])
-        acc <- .rxc_add_row(acc, d$coef, d$const + lam, d$a, "slope")
-        acc <- .rxc_add_row(acc, -d$coef, -d$const + lam, -d$a, "slope")
-      }
-    }
-  }
-  # generic linear restrictions on H entries: sum value * H_c[r, s] >= rhs
-  for (lc in ex$linear) {
-    gs <- if (is.null(lc$group)) groups else lc$group
-    for (g in gs) {
-      coef <- numeric(st$nbeta); const <- 0; a <- numeric(st$nz)
-      for (q in seq_len(nrow(lc$terms))) {
-        tq <- lc$terms[q, ]
-        rt <- .rxc_rate(st, g, tq[["col"]], tq[["row"]], e[tq[["context"]], ])
-        coef <- coef + tq[["value"]] * rt$coef; const <- const + tq[["value"]] * rt$const
-        a <- a + tq[["value"]] * rt$a
-      }
-      acc <- .rxc_add_row(acc, coef, const - lc$rhs, a, "linear")
-    }
-  }
-  # external benchmarks on a target functional: lower <= phi <= upper
-  for (eb in ex$external) {
-    tg <- .rxc_target(st, eb$weights)
-    acc <- .rxc_add_row(acc, tg$cvec, tg$c0 - eb$lower, tg$gamma, "external")
-    acc <- .rxc_add_row(acc, -tg$cvec, eb$upper - tg$c0, -tg$gamma, "external")
-  }
-  acc
-}
+# optional restrictions: built through the module registry (rxc_modules.R)
 
 # Target sum_{r,c} a_rc * Btilde_rc with sample weights w_ir = N_i X_ir / sum N X_r
 # (or user-supplied row weights w, each column summing to one)
@@ -386,7 +319,9 @@
 }
 
 # plug-in bounds for a target at coefficient vector beta
+# (either/or "disjunctive" rows in cons$disj are evaluated at beta first; rxc_sign.R)
 .rxc_plugin <- function(cons, tg, beta) {
+  if (length(cons$disj)) cons <- .rxc_fix_disj(cons, beta)
   s <- as.vector(cons$S %*% beta) + cons$s0
   cb <- sum(tg$cvec * beta) + tg$c0
   up <- .rxc_dual(s, cons$A, tg$gamma)

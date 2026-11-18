@@ -1,0 +1,935 @@
+# New avenues: what else in the data can tighten the bounds?
+
+*A Phase-1 research proposal. It surveys ways to extract more identifying information from ecological data, states what each one assumes, and ranks them. Nothing here is a finished derivation. Every claim is labelled **proved** (with a short argument that Phase 2 will write out with tags), **conjecture**, or **heuristic**. Verification scripts and their outputs are in `docs/extension/new_avenues/`. Notation follows P1 and 2a: $H_c=Q_c+K_c$; $Q$ is identified; $K\in\mathcal K$ is not; $m_{rc}(x)=e_r^\top H_cx$ is the conditional-mean rate.*
+
+*Out of scope, because other sessions cover them: monotone EI, difference-in-differences and other cross-period restrictions, and links to Bayesian EI (Imai–Lu–Strauss, `eco`, Stan). Where an avenue touches one of these, the boundary is noted.*
+
+---
+
+## 0. Summary
+
+**The diagnosis.** The data enter the current machinery in two ways:
+
+* through the quadratic regression $E[T\mid X]$, which identifies $Q$; and
+* (sharp set only) through the conditional law of $T$ given $X$, via Duncan–Davis kinks.
+
+Every avenue below finds information that **neither of these uses**, or imports some from outside. There are four kinds:
+
+1. **Unit size.** Sampling noise in a poll of $n$ voters shrinks like $1/n$. How fast it shrinks reveals how different the rows are *within* polls. (Avenue A)
+2. **Context measured at another scale.** Any contextual variable other than the poll's own composition has *row-specific* effects that are identified. Only own-composition effects suffer from the "who is behind the pattern" problem. (Avenue B)
+3. **Known tables at another level.** In New Zealand, for example, the electorate cross-tabulation is published. (Avenue E)
+4. **Several contests sharing the same rows.** (Avenue C)
+
+Three structural facts frame the search:
+
+* **(proved)** joint ballot-level margins across contests add nothing without a cross-contest assumption;
+* **(proved)** a known aggregate table pins only $(R-1)(C-1)$ of the $(C-1)R(R-1)/2$ unknown directions;
+* **(proved)** independent poll-level shocks, however well deconvolved, never reveal $K$.
+
+**Ranking** (details in §9):
+
+| # | Avenue | New information used | Extra assumption | Identifying power | Estimability today |
+|---|---|---|---|---|---|
+| A | Unit size and second moments | $\operatorname{Var}(T\mid X,N)$ and its $1/N$ slope | binomial voting within poll-row cells (A1-rung); poll shocks not negatively correlated across rows (A2-rung) | **large**: one endpoint moves to the truth (A1), near-point (A2) | **weak**: needs many small units; plug-in is badly biased |
+| B | Context at a second scale | a neighbourhood composition $z\neq x$ | own-poll effects bounded relative to the identified neighbourhood effects (dial $M$) | **large**, smooth in $M$ | good (few constraints) |
+| E | Known tables at another level | published cross-tabs (e.g. NZ electorate tables) | the model holds within the area whose table is known | large for sub-area targets; point-identifies $K$ when $R=2$ | good |
+| C | Several contests | other contests on the same ballot | cross-contest structure (contests as "districts", or single index) | medium–large | data-dependent |
+| D | Polynomial (Bernstein) ladder | — (robustness, not tightening) | weaker than LCE | negative: widens, by design | good: an outer/inner LP pair (§4.2) |
+| F | Computing the sharp set | $P_{T\mid X}$ (already pinned) | none | small–medium | good |
+| G–J | Symmetry, deconvolution, entropy/OT, Choquet | — | various | small or none | — |
+
+**Main messages.**
+
+* **A is the most interesting avenue scientifically, and it is not a new assumption to most of the EI literature.** Every likelihood-based EI model (King, Wakefield, Brown–Payne, Greiner–Quinn, Imai–Lu–Strauss) already assumes binomial or multinomial voting within poll-row cells.
+* **A works in New Zealand.** In 31,359 NZ polling places the $1/n$ term is clearly present and binomial-sized: the slope on its binomial prediction is 0.69–0.81, with SE about 0.10 (§1.6).
+* **But A is statistically expensive.** The information sits in the smallest units, and naive plug-in bounds are badly biased inward.
+* **B is the most practical new rung.** It uses one more variable that analysts usually have, and its dial $M$ fits the existing sensitivity machinery.
+
+---
+
+## 1. Avenue A: unit size and the second moments of $T$ given $X$
+
+### 1.1 Plain language
+
+* **What it is.** In a poll of 30 voters the outcome shares bounce around much more than in a poll of 3,000. The amount of bouncing depends on how different the voting groups in the poll are from each other.
+  * If every group voted P with probability 0.5, small polls would be very noisy.
+  * If in-party voters almost always vote P and others almost never do, a small poll's outcome is nearly fixed by its composition, so there is little noise.
+
+  So **comparing how noisy small and large polls are reveals how far apart the groups' rates are.** That spread is exactly what the regression cannot see.
+* **Key assumption.** Within a poll, voters of the same group vote independently given that poll's group-level propensities. Formally: binomial or multinomial voting, and the poll-level propensities do not depend on poll size.
+* **If it is wrong.** Correlated voting within a poll, e.g. households or a local get-out-the-vote drive, makes small polls *noisier* than binomial. The method then reads that noise as "groups are similar", and the bound becomes too narrow, possibly excluding the truth. Small polls that differ systematically (hospitals, rural booths) also bias it.
+* **What can be checked.**
+  * The binomial slope can be compared with its binomial prediction; slopes above 1 signal correlated voting (§1.6).
+  * The constraint must leave a non-empty set.
+  * The size–variance relationship can be inspected directly.
+
+### 1.2 The information we currently discard
+
+The regression uses $E[T\mid X]$. The sharp set $\Theta_I$ uses all of $P_{T\mid X,N}$, but only through the realised unit polytopes $S(X,T)$, i.e. under the *realised-share* model. Neither uses the fact that $T_i$ is an average of $n_i$ individual choices. Under the propensity model that fact gives a variance decomposition with a known dependence on $n$.
+
+### 1.3 Three rungs (decreasing plausibility)
+
+Fix a column $c$ and drop it from the notation. Write $\tau(x)=E[T\mid x]$ and $W(m;x)=\sum_rx_r\big(m_r(x)-\tau(x)\big)^2$, the $x$-weighted *between-row* spread of the mean rates. $W$ is a convex quadratic function of $K$.
+
+**A0. No new assumption (realised shares, A3 only).** For every $(x,n)$ in the support:
+$$\textstyle\sum_rx_r\,m_r(x)^2\ \le\ \tau(x)-\operatorname{Var}(T\mid X=x,N=n). \tag{A0}$$
+
+* *Status:* **proved**. Sketch:
+  1. $W_i:=\sum_rx_r\beta_{ir}^2-T_i^2\le\sum_rx_r\beta_{ir}-T_i^2=T_i(1-T_i)$, since $\beta^2\le\beta$ on $[0,1]$.
+  2. $E[W_i\mid x,n]=W(m;x)+\sum_rx_r\operatorname{Var}(\beta_r)-\operatorname{Var}(T)$.
+  3. $\operatorname{Var}(T)=\operatorname{Var}(\sum_r x_r\beta_r)\le\sum_rx_r\operatorname{Var}(\beta_r)$, by Jensen with weights $x_r$.
+  4. Combining: $W(m;x)\le E[T(1-T)\mid x,n]$, which rearranges to (A0).
+* It is implied by $\Theta_X$, so it is a cheap *outer approximation* of the sharp set, not new identification.
+* In the simulation it never bound (§1.5): realised-share variance in polls of 20 or more voters is too small.
+
+**A1. Binomial voting.** Assume:
+* (i) given poll-row propensities $\pi_{ir}$, the $N_{ir}$ voters choose independently;
+* (ii) the law of $\pi_i$ given $(X,N)$ does not depend on $N$. This is A3 strengthened from the mean to the law; only the first two moments are needed.
+
+Then $\operatorname{Var}(T\mid x,n)=A(x)+B(x)/n$ exactly, with
+
+* $A(x)=\operatorname{Var}(\sum_rx_r\pi_r\mid x)$, and
+* $B(x)=\sum_rx_rE[\pi_r(1-\pi_r)\mid x]$.
+
+Both are identified from variation in $n$ at fixed $x$. Extrapolating to $n=1$ gives
+$$W(m;x)\ \le\ \omega(x):=\tau(1-\tau)-A(x)-B(x). \tag{A1}$$
+
+* *Status:* **proved**. $\omega(x)=E[\sum_rx_r(\pi_r-\tau_i)^2\mid x]$, the expected within-poll between-row variance of propensities, and $W(m)\le\omega$ by the same Jensen step as A0.
+* **Reading.** A0 evaluated at a poll of one voter. Since $\omega-W(m)=\sum_rx_r\operatorname{Var}(\pi_r)-A(x)$ is the poll-level heterogeneity, the constraint is **tight at the truth when polls are homogeneous given $x$**.
+* It caps how *different* the rows can be. In 2×2 it reads $|m_1(x)-m_0(x)|\le\sqrt{\omega(x)/(x(1-x))}$.
+* With the ordering $m_1\ge m_0$ (a pinned modifier), this is a **linear row in $\kappa$**, so the LP machinery applies unchanged.
+* In R×C it is a convex quadratic (an SOCP row) per $(x,c)$. The cross-column version is a matrix inequality,
+  $$\textstyle\sum_rx_r(m_{r\cdot}-\tau)(m_{r\cdot}-\tau)^\top\preceq\Omega(x),$$
+  an LMI, with $\Omega$ identified from the $1/n$ slope of $\operatorname{Cov}(T\mid x,n)$. Polyhedral outer approximations by tangent cuts keep everything an LP.
+
+**A2. Poll shocks are not negatively correlated across rows.** Assume additionally $\operatorname{Cov}(\pi_r,\pi_s\mid x)\ge0$. Poll-level shocks such as candidate popularity or local swing move the groups together. This is the same flavour as the "non-negative correlation" option agreed for the unit-level term (P4, second release).
+
+Then the heterogeneity is bounded by the identified $A(x)$. In 2×2,
+$$(m_1-m_0)^2\ \ge\ \frac{\omega(x)}{x(1-x)}-\frac{A(x)}{\min(x,1-x)^2},$$
+a **lower** bound on the spread, so both sides are now bounded. With ordering it is again a linear row.
+
+* *Status:* **proved** in 2×2. The steps are $\operatorname{Var}(\pi_1-\pi_0)\le V_1+V_0$ and $A\ge x^2V_1+(1-x)^2V_0$. The R×C version is a **conjecture**: a matrix analogue via $\operatorname{diag}$ dominance.
+
+**A3 (extension). Higher factorial moments.**
+
+* At fixed $x$, the $k$-th factorial moment of the counts is a polynomial in $n$ of degree $k$. Its $k$ non-constant coefficients identify $k$ linear functionals of the $k+1$ degree-$k$ mixed moments $E[\pi_1^j\pi_0^{k-j}\mid x]$. One direction per degree stays free, mirroring the single free $\kappa$ (**proved** for 2×2 by direct expansion; this is the $k$-th-order version of Plackett's ambiguity).
+* Requiring these to be moments of *some* law on $[0,1]^2$ is a Hausdorff moment problem: positive semidefinite moment and localising matrices, an SDP (Lasserre hierarchy).
+* **Conjecture:** in the no-heterogeneity limit, A1 plus x-variation point-identifies $K$ up to a finite set for every $R$. For $R=2$ this is **proved**: $(g(x)+\kappa)^2=D(x)$ for all $x$ has a unique solution when the regression's $x^2$ coefficient is non-zero, and a sign ambiguity otherwise. The ambiguity is resolved by ordering.
+
+### 1.4 Ladder position
+
+* A0 is implied by the existing model.
+* A1 and A2 are **modifiers that apply to any rung** (M0, M1, …). They are nested: $\Theta\cap A2\subseteq\Theta\cap A1\subseteq\Theta$.
+* They restrict the *within-poll* behaviour of individuals, not contextual effects, so they are orthogonal to the existing ladder.
+* They are not refutable from $E[T\mid X]$, but they are partly testable (§1.6).
+* **Three separate assumptions** (added after review; §13.7). Any presentation should keep them apart:
+  1. **Independence:** individual choices are independent within poll × group cells.
+  2. **Size invariance:** the law of group propensities does not depend on poll size, given composition.
+  3. **No offsetting shocks (A2):** poll-level shocks to different groups are not negatively correlated.
+
+  The NZ slope (§1.6) is consistent with (1) but tests neither (2) nor (3). (3) is the most influential and least defensible.
+* **Make the correlation dial central.** Replace "not negatively correlated" by "correlation ≥ −r". The A2 ceilings then scale by $1/\sqrt{1-r^2}$ (§12.3 g; proved). Report results as a function of $r$, not at $r=0$ only.
+
+### 1.5 Verification (`new_avenues/sim_second_moments.py`)
+
+**Design.**
+* 2×2, with true loyalty $0.75+0.15x$ and crossover $0.05+0.20x$.
+* Poll propensities are Beta with dispersion $\phi$ (heterogeneity), correlated across rows through a Gaussian copula with correlation $\rho$.
+* Votes are binomial, and poll sizes are NZ-like (median 300, log-sd 0.9).
+* Target: model-implied loyalty, with truth 0.840.
+
+**Identification (population moments).** These are bounds on loyalty, and the pattern is the same in all four designs, including large heterogeneity:
+
+| constraint set | bound | width / width(O) |
+|---|---|---|
+| O (outer set, current package) | [0.521, 0.941] | 1.00 |
+| O + A0 (polls of ≥ 20) | [0.521, 0.941] | 1.00 |
+| O + A1 | [0.521, **0.841**] | 0.76 |
+| O + ordering | [0.578, 0.941] | 0.86 |
+| O + A1 + ordering | [0.578, **0.841**] | 0.62 |
+| O + A1 + A2 + ordering | [0.839, 0.841] | ≈ 0.00 |
+| high heterogeneity ($\phi=8$), O + A1 + A2 + ordering | [0.832, 0.845] | 0.03 |
+
+**Estimation.**
+
+* **The pointwise plug-in fails.** It takes a minimum over a grid of noisy constraints, which is the Phase-3 inward-bias phenomenon at its worst. It covers the truth in only 4–17% of replications and is often empty.
+* **A valid integrated version** averages the constraint over $x$ and moves its right-hand side by 1.645 standard errors. It covers (93–98%), but buys almost nothing until $p$ is in the thousands:
+
+  * **O + A1 + ord (valid):** the O + ordering width (0.36) at 64 and 500 units in every design. At 5,000 units, widths are 0.30–0.31 in the two low-heterogeneity, NZ-size designs and there is no gain otherwise.
+  * **O + A1 + A2 + ord (valid):** in the two low-heterogeneity, NZ-size designs, widths of 0.18 at 500 units and 0.08–0.09 at 5,000. Coverage is only 0.74–0.80 at 500 and 0.88–0.91 at 5,000.
+  * **High heterogeneity or large units (median 3,000):** little or no gain even at 5,000 units.
+
+**Honest summary.** The identifying power is large. It is concentrated in the smallest units, and exploiting it needs far more units than one electorate provides: pooling across many tables, or national precinct files. It also needs a proper moment-inequality treatment. The A2 interval's coverage below 95% at moderate $p$ shows that the simple correction is not enough.
+
+### 1.6 Real-data feasibility check (`new_avenues/nz_diagnostics.py`, D1)
+
+**Data.** 450 NZ 3×3 tables with 31,359 polling places: median size 262, and 29% have fewer than 100 voters.
+
+**Method.** Leverage-corrected squared residuals of the within-table quadratic fit are regressed on:
+* table fixed effects;
+* a quadratic in $x$ (for $A$); and
+* $b_i/n_i$, where $b_i=\sum_rx_{ir}B_{rc}(1-B_{rc})$ is built from the true aggregate rates.
+
+**Result.** The slope is **0.69 (LAB), 0.81 (NAT), 0.69 (OTH)**, with cluster SE about 0.10.
+
+**Reading.** The $1/n$ term is unmistakably present, and smaller than the binomial ceiling. A slope below 1 is what binomial voting with some poll heterogeneity predicts. There is **no sign of over-dispersion** from correlated voting, the main threat to A1. This is evidence of feasibility, not a test of A1 itself.
+
+### 1.7 References
+
+* **Plackett (1977, *Biometrika*), "The marginal totals of a 2×2 table".** Identification from the distribution of a sum of two binomials. *Citation to verify.*
+* **Wakefield (2004, *JRSS A* 167), "Ecological inference for 2×2 tables".** The convolution likelihood, and information from small areas.
+* **Brown & Payne (1986, *JASA* 81), aggregated-data model for voting transitions.** Dirichlet-multinomial over-dispersion used in estimation. The closest precedent; *verify volume and pages*.
+* Lasserre (2001, *SIAM J. Optim.*) and Schmüdgen / Putinar for the moment-problem SDP.
+* Bhatia & Davis (2000, *Amer. Math. Monthly*).
+
+**What is new here** relative to those references:
+* an inequality (partial-identification) version that needs no Dirichlet or other parametric law;
+* its integration with the LP ladder; and
+* the two-sided A2 rung.
+
+**Boundary with the Bayesian-link session:** these are frequentist moment inequalities, not a likelihood.
+
+---
+
+## 2. Avenue B: context measured at a second scale
+
+### 2.1 Plain language
+
+* **What it is.** Suppose loyalty depends on the political make-up of the *neighbourhood* (from adjacent polls, the census or the riding) as well as on the poll itself. The data can tell apart *which group* responds to the neighbourhood: in-party loyalty or out-party crossover. They can never do this for the poll's own make-up.
+* **Using it.** We then assume that the poll's own make-up matters no more than $M$ times as much as the neighbourhood's, for each group. $M$ is a dial.
+* **Key assumption.** Own-poll context effects are bounded by a multiple of neighbourhood context effects. At the extremes:
+  * $M=0$: the poll's own composition doesn't matter beyond the neighbourhood (Goodman with neighbourhood context);
+  * proportional effects: context works the same way at both scales, only more or less strongly.
+* **If it is wrong.** If own-poll effects are larger than $M$ times the neighbourhood effects, the bound can exclude the truth. The simulation shows exactly that failure at $\lambda=1.5$, $M=1$.
+* **What can be checked.**
+  * "No own effect" is testable: in 2×2 the $x^2$ coefficient must be zero; in the simulation it was rejected (empty set), as it should be.
+  * Proportionality is testable in R×C.
+  * The *identified* half of the own effect can be compared with the identified neighbourhood effect, which is evidence about the size of $M$.
+
+### 2.2 Mathematical idea
+
+Let $z_i\in\Delta^{R-1}$ be a second composition: the neighbourhood, the riding, or census blocks. Consider
+$$E[\beta_{rc}\mid x,z]=e_r^\top H_cx+e_r^\top\Gamma_cz\quad\Longrightarrow\quad E[T_c\mid x,z]=x^\top Q_cx+x^\top\Gamma_cz.$$
+
+**Proposition B1 (proved; sketch).** If the support of $(x,z)$ is rich enough, then:
+
+* the bilinear form identifies $\Gamma_c$ up to $\Gamma_c\mapsto\Gamma_c-v\mathbf 1^\top$ together with $H_c\mapsto H_c+v\mathbf 1^\top$. This is the same function, because $\mathbf 1^\top x=\mathbf 1^\top z=1$, so it is just an intercept normalisation;
+* hence the row-specific neighbourhood effects $\partial_zE[\beta_{rc}\mid x,z]$ are **identified**;
+* only $K$, the own-composition skew part, is not.
+
+This generalises Lemma D1 (district intercepts identified) and JKST App. C (covariate coefficients identified). **The "who is behind the pattern" problem is confined to the poll's own composition.**
+
+The precise rank condition is "no non-zero $(S,G)$ with $S$ symmetric, $x^\top Sx+x^\top Gz\equiv0$ on the support, other than the normalisation". **Conjecture:** it holds whenever $z$ is not an affine function of $x$ on the support.
+
+### 2.3 Rungs (decreasing plausibility)
+
+* **B0.** $M_0+\Gamma z$: weaker than M0, which is the case $\Gamma=0$. The bound may widen.
+* **B1(M), relative magnitudes.** $|H$-effect of row $r|\le M\,|\Gamma$-effect of row $r|$, entry-wise in a chosen parametrisation (e.g. slopes in 2×2). These are LP rows, nested in $M$. The idea is the EI analogue of Rambachan & Roth's (2023) relative magnitudes: the unidentified component is calibrated by an identified one.
+  * **Parametrisation-invariant version** (added after review). Entry-wise comparisons of coefficients change meaning when $x$ or $z$ is rescaled or re-based. Define instead, for each group $r$ and column $c$:
+    * $\text{Own}_{rc}$: the range, or $L_2$ norm, over the observed $x$-support of the own-composition part of $E[\beta_{rc}\mid x,z]$, holding $z$ fixed;
+    * $\text{Area}_{rc}$: the same over the observed $z$-support for the area part.
+
+    Impose $\text{Own}_{rc}\le M\,\text{Area}_{rc}$. In 2×2 with linear effects this is $|b_r|\,\text{range}(x)\le M|g_r|\,\text{range}(z)$, still an LP row. Then $M$ reads "own-unit context moves rates at most $M$ times as much as area context does, across the data we actually see".
+    * The Wisconsin numbers in `apply_B_suffrage_output.md` use the entry-wise form. Converting needs the ratio of the observed ranges of $x$ and $z$, which is larger than 1 there because $z$ varies less.
+* **B2, proportionality.** $H_c^{\text{(slopes)}}=\lambda\,\Gamma_c^{\text{(slopes)}}$.
+  * The symmetric part identifies $\lambda$, and then $K=\lambda\,\operatorname{skew}(\Gamma)$ is **point-identified** (**proved** in 2×2: $\lambda=d/(g_1-g_0)$).
+  * In R×C, one scalar $\lambda$ must reconcile several identified symmetric entries per column, so B2 is overidentified and testable. The exact count, after the intercept normalisation, is for Phase 2.
+* **B3, no own effect.** A point, refutable.
+
+### 2.4 Verification (`new_avenues/sim_two_scale_context.py`)
+
+**Design.** 2×2; 93 neighbourhoods × 10 polls; $z$ = the neighbourhood's mean poll composition. Truth: own slopes are $\lambda\times$ neighbourhood slopes.
+
+**Case $\lambda=0.4$** (assumption $M\ge0.4$ true). Truth is 0.727; DD is [0.31, 0.88].
+
+| rung | identification | width | estimated: width / coverage (plug-in) |
+|---|---|---|---|
+| B0 (O) | [0.495, 0.805] | 0.31 | 0.33 / 1.00 |
+| B1(2) | [0.637, 0.805] | 0.17 | 0.18 / 0.97 |
+| B1(1) | [0.693, 0.805] | 0.11 | 0.10 / 0.84 |
+| B1(0.5) | [0.722, 0.778] | 0.06 | 0.05 / 0.30 |
+| B3 | empty (refuted) | — | always empty |
+| B2 | point 0.727 | 0 | median abs. error 0.04, but 5–95% error range [−0.54, 0.39] |
+
+**Case $\lambda=1.5$.** B1(1) and B1(0.5) **exclude the truth**, as they should: the assumption is false. B1(2) covers it.
+
+**Reading.**
+* The gain is large and degrades smoothly in $M$.
+* Plug-in coverage drops as constraints become nearly binding, which is expected; Phase 3's CLR applies directly, since there are few constraints.
+* The proportional point is a ratio of estimated curvatures, so it is **weakly identified with heavy tails**. It should be reported only as a diagnostic or with weak-IV-robust inference.
+
+### 2.5 Data needs and relation to existing rungs
+
+* $z$ must vary *within* the groups used for M1. Otherwise the riding dummies absorb it.
+* Candidates: k-nearest-poll composition, census dissemination areas (BC), meshblocks (NZ).
+* $z$ that includes poll $i$ itself is fine, as long as $z\neq x$.
+* Not the same as M1′ (riding covariates moderating $H$). That is a cross-group restriction; this is an exclusion or magnitude restriction at the unit level.
+
+### 2.6 References
+
+* Achen & Shively (1995), *Cross-Level Inference*, Chicago. Contextual models with distinct regressors. *Verify the chapter.*
+* King (1997), *A Solution to the EI Problem*, ch. 9: covariates in EI.
+* Rambachan & Roth (2023, *REStud*).
+
+---
+
+## 3. Avenue C: several contests sharing the same rows
+
+### 3.1 Plain language
+
+On one ballot people vote in several contests: president, senate, referenda. Every contest is a separate EI problem with the same rows.
+
+* **On its own,** this helps not at all. Even ballot-level records showing how each contest's votes combine do not help without an assumption tying the contests together.
+* **With such an assumption** it can help a lot. For example:
+  * "context shapes all contests in the same way, up to scale", which treats contests like the districts of M1; or
+  * "each group's support across many referenda lines up on one left–right dimension".
+* **If wrong:** a realignment specific to one contest (e.g. a candidate with cross-party appeal) is read as structure.
+* **Checks:**
+  * the symmetric parts must satisfy the same cross-contest relation (testable);
+  * the intersection must be non-empty;
+  * with many referenda, a unit-level overidentification test.
+
+### 3.2 Results and ideas
+
+**C1 (proved; verified in `check_structural_claims.py`, 300 random tables, max difference 2e−16).** Joint margins (cast-vote records, CVRs) of contests 1 and 2 do not tighten the Duncan–Davis bound for a contest-1 cell.
+
+*Reason:* fix the $(r,y_1)$ margin. For each $y_1$, a non-negative $R\times C_2$ array with row sums $n_{\cdot y_1}$ and column sums $t_{12}(y_1,\cdot)$ exists, because the totals match: a transportation polytope is non-empty iff the totals agree.
+
+The same argument shows that a third election's one-way margin does not tighten a two-election transition table. So **gains need a cross-contest assumption**, and with only margins the data are a product.
+
+**C2. Contests as districts (linear).** Suppose $H^{(j)}=a_jJ+b_jH^{(1)}$, i.e. context works the same way up to level and scale.
+
+* Then $Q^{(j)}=a_jJ+b_jQ^{(1)}$, which is **testable**, and $K^{(j)}=b_jK^{(1)}$.
+* The bound is $\bigcap_j\{K:\ Q^{(j)}+b_jK\ \text{feasible}\}$.
+* This is the M1 intersection mechanism with contests in place of ridings. Contests with extreme baselines (a lopsided referendum) pin $K$ for all.
+* LP; **proved** by the same argument as 2b Thm 2.
+* *Caveat:* a common *linear* factor across contests cannot create information about $K$ on its own, because each contest reveals only its own symmetric part. The gain comes solely from the intersection of feasibility regions.
+
+**C3. Single index (nonlinear).** Suppose $\beta^{(j)}_{ir}=F_j(\alpha_{ir})$, with $F_j$ monotone and known up to identified parameters: one latent position per poll-group and contest-specific cut-points.
+
+* With $J\ge R$ contests, each unit gives $J$ equations in $R$ unknowns.
+* **Conjecture:** generic unit-level point identification when $J\ge R$ (Jacobian rank), and $J-R$ overidentifying restrictions per unit when $J>R$.
+* A partial-identification weakening, "the ordering of groups is the same in every contest", is a disjunction of LP rows given an ordering.
+
+**C4. Tensor / Kruskal.** With $\ge3$ contests, CVRs and local independence of contest choices given (poll, group), the poll-level $\beta$'s are identified up to label switching.
+
+* Known $x$ resolves the labels (Kruskal 1977; Allman, Matias & Rhodes 2009, *Ann. Statist.*).
+* **Implausible for partisan contests:** partisanship correlates choices within a group. It is listed for completeness.
+
+**Verification.** C1 is numeric (above). C2–C4 need data with several contests per ballot; none is in the repository. A simulation is proposed for Phase 2.
+
+**Data.** US CVRs (e.g. the cast-vote-record collections assembled by Kuriwaki and co-authors; *citation to verify*), Swiss multi-referendum days, and California propositions. BC has a single contest per ballot. NZ's 2020 referenda were reported at polling-place level (*to verify*).
+
+---
+
+## 4. Avenue D: a polynomial ladder with exact LP certificates (weaker rungs)
+
+### 4.1 Plain language
+
+LCE assumes straight lines. We can allow gentle curves (quadratic, cubic) instead. This *widens* the bound: it is a robustness rung above L1, not a tightening. What is new is a cheap and exact way to compute it.
+
+* **Key assumption:** contextual effects are polynomials of degree $k$ on the hull.
+* **If wrong:** the same as L1, but less likely.
+* **Check:** the degree-$(k+1)$ regression fit.
+
+### 4.2 Content
+
+**Dimension (proved, by counting).** With degree-$k$ homogeneous contextual effects, the unidentified dimension is
+$$d_k=(C-1)\Big[R\binom{R+k-1}{k}-\binom{R+k}{k+1}\Big].$$
+
+* Check: $d_0=0$ (Goodman) and $d_1=(C-1)R(R-1)/2$ (LCE). For $k=2$ and $R=2$, $d_2=2(C-1)$.
+* The argument: the map $(m_r)_r\mapsto\sum_rx_rm_r$ from $R$-tuples of degree-$k$ forms onto degree-$(k+1)$ forms is surjective, so the kernel dimension is the difference.
+
+**A convergent LP hierarchy, not exact at finite degree** (corrected after review). "$m(x)\in$ simplex on $A$" becomes polynomial non-negativity on a polytope.
+
+* On the simplex, non-negative Bernstein coefficients are a **sufficient** certificate. Degree elevation strengthens it, and Pólya's theorem (Pólya 1928; Powers & Reznick 2001) gives convergence for *strictly* positive polynomials. At a fixed degree it can miss non-negative polynomials, especially ones with zeros on $A$, and zeros are exactly where bounds bind.
+* On a general polytope $A$, Handelman's theorem plays the same role, with the same caveat.
+* **Consequence for validity.** A sufficient certificate shrinks the feasible set of contextual effects, so it gives an **inner** approximation of the identified set and bounds that can be *too narrow*. A valid (outer) bound needs **necessary** conditions, e.g. non-negativity checked on a finite grid or at the vertices of a subdivision of $A$.
+  * Report the pair: outer (grid) and inner (Bernstein degree $k$). The identified set lies between them, and the gap shrinks as the grid is refined and $k$ raised.
+* Both are **LP rows**, so the package needs no new solver.
+* Monotonicity and convexity are sign conditions on Bernstein differences, also LP rows. This makes pinned item 8 (shape-restricted effects) computable.
+
+**Conjecture.** As $k\to\infty$ with no smoothness bound, the bound tends to the model-free (DD) bound. With a bound on the $(k+1)$-th derivative, it interpolates. This gives a **curvature dial** that is more interpretable than P3's $\sup\lVert\Delta\rVert$.
+
+**Already pinned (L1′, item 8).** What is new here is the dimension formula, an outer/inner LP pair via grids and Bernstein/Handelman certificates, and the curvature dial.
+
+---
+
+## 5. Avenue E: known tables at another level (data combination)
+
+### 5.1 Plain language
+
+* **What it is.** Sometimes the cross-tabulation we want is published for a *larger* area. NZ publishes each electorate's party-by-candidate table, and US states publish some exit-poll or registration tables. We then want rates for *sub*-areas (urban vs rural booths) or for areas without a table.
+* **Using it.** If the same contextual model holds across the larger area, its known table pins part of the unknown "who is behind the pattern", and sub-area bounds tighten a lot.
+* **Key assumption:** the model, with shared $K$, holds within the area whose table is known.
+* **If wrong:** the sub-area bounds can exclude the truth.
+* **Checks:**
+  * the known table must lie inside the model's bound for the larger area (testable, a free specification test);
+  * emptiness.
+
+### 5.2 Content
+
+**E1 (proved; verified in `check_structural_claims.py` for 7 table shapes).** $K\mapsto B^*(K)$ has rank $(R-1)(C-1)$.
+
+*Reason:* in each column, the $\mu_r$-weighted sum of the $K$-terms cancels, giving $C-1$ independent columns times $R-1$ independent rows.
+
+A known aggregate table therefore pins:
+* **all of $K$ when $R=2$**, so any sub-area target is point-identified under M0 within the area;
+* only $(R-1)(C-1)$ of $(C-1)R(R-1)/2$ directions when $R\ge3$. For 3×3, 4 of 6 directions are pinned and 2 remain free.
+
+These are **equality rows** in the LP.
+
+**E2. Transfer.** $\lVert K_{\text{target}}-K_{\text{known}}\rVert\le\delta$ across areas, a dial.
+
+* This overlaps with cross-period stability, which is the DiD session's topic. Only the *cross-area* version is proposed here.
+* **Exploratory evidence** (`nz_diagnostics.py`, D2): the part of each NZ table that M0 must attribute to $K$ is large (median absolute value 0.11–0.15 for the main cells). Its correlation across consecutive elections in the same electorate is only 0.03–0.51.
+* So a transfer dial would need a large $\delta$. Strong stability of $K$ is not supported in NZ. *This is shared with the DiD session as a data point.*
+
+**E3. Nested geography with margins only adds nothing (proved, trivial).** Coarse margins are sums of fine margins, so they carry no new information. Gains need either cross-tabs at some level, or categories cut differently across levels. The latter is a multi-way Fréchet / data-fusion problem; see Ridder & Moffitt (2007, *Handbook of Econometrics* 6B) and Fan, Sherman & Shum (2014, *Econometrica*).
+
+**Verification for the benchmark:** NZ has the electorate truth but no sub-electorate truth. Phase 2 can validate E1 by splitting each electorate into pseudo-sub-areas in simulation, and on NZ by "leave-one-electorate-out transfer".
+
+---
+
+## 6. Avenue F: better use of $P_{T\mid X}$ (sharp set; already pinned)
+
+The series-based $\Theta_X$ is agreed for the second release. This proposal adds:
+
+* **A0 (§1.3)** as a closed-form, low-dimensional outer approximation of $\Theta_X$. In our designs it was not binding.
+* **A finite core-determining class (conjecture).** For fixed $x$, the transportation polytopes $S(x,t)$ take finitely many combinatorial types as $t$ varies. Hence (T1) needs only the finitely many directions $u$ in the common refinement of their normal fans, and $\Theta_X$ with $x$ discretised is an exact finite LP.
+  * Related: core-determining classes (Galichon & Henry 2011, *REStud*); Beresteanu, Molchanov & Molinari (2011).
+* **Diagnostic:** a "kink mass" statistic, the share of units whose $T$ lies on both sides of a DD kink within an $x$-neighbourhood. It predicts when $\Theta_X$ will beat $\Theta_O$ (P2a Prop. 3). In NZ, removing small booths from the composition range (`M0 trim`) lowers the share of empty plug-in sets from 46% to 21%. *Heuristic reading:* small units carry much of the extreme-composition and kink information, and also much of the noise.
+
+---
+
+## 7. Lower-ranked avenues
+
+**G. Label symmetry (equivariance).** When rows and columns share labels (NZ: party × candidate), assume the model is invariant under swapping Labour and National. Then $K$ lies in the invariant subspace, roughly halving $d$ (**proved** as linear algebra).
+* The $Q$-side analogue is testable.
+* Plausibility is low in asymmetric party systems; it is more natural for yes/no referenda framed symmetrically.
+
+**H. Deconvolution (proved negative).** If $\beta_r=m_r(x)+e_r$ with $e$ independent of $x$, then the law of $T\mid x$ is the law of $\tau(x)+\sum_rx_re_r$, which does not involve $K$.
+* Kotlarski-type arguments (row-independent $e$) identify the shock laws.
+* $K$ enters only through the support condition $m_r(x)+\operatorname{supp}e_r\subseteq[0,1]$. That tightens Θ_O's rows from $m\ge0$ to $m\ge-\min e_r$. It is small, and row-independence is implausible.
+
+**I. Spatial structure (pinned item 10).** The new use is as *replicates* for Avenue A: neighbouring polls with similar $x$ give local estimates of $\operatorname{Var}(T\mid x,n)$ without a global polynomial.
+
+**J. Entropy, optimal transport and Choquet (reporting, no identifying power).**
+* The maximum-entropy point of the identified set is a *selection*, not an estimate. It is the information-projection idea of Judge, Miller & Cho (2004, in King, Rosen & Tanner (eds.), *Ecological Inference: New Methodological Strategies*; *verify chapter*). In OT language it is the entropic (Sinkhorn) projection onto the Aumann set.
+* It may be offered as a labelled default point with its distance to each endpoint.
+* Capacity (Choquet) characterisations (Artstein 1983) are equivalent to Theorem 1, so they are useful only computationally (F).
+
+---
+
+## 8. What would fail, and why (cross-cutting)
+
+* **A's inward bias** is the Phase-3 problem squared: there are many nearly binding, noisy constraints that depend on second moments. The integrated (averaged) constraint is the only version shown valid so far. Phase 3 for A needs moment-inequality inference for conditional variance functions:
+  * Andrews & Shi (2013, *Econometrica*), conditional moment inequalities;
+  * CLR (2013), already used.
+* **A is invalid under within-poll dependence.** A design-effect allowance $\text{deff}\in[1,\bar d]$ replaces $B$ by $B/\bar d$ in (A1). That is a sensitivity dial, and NZ's slope below 1 suggests $\bar d$ near 1 there.
+* **B, C and E are all assumptions about the unidentified $K$.** They are calibrated, or partially tested, by identified quantities, but never fully testable (Prop. 9 still applies).
+
+## 9. Ranking (criteria from the brief)
+
+Scores run 1–5, where 5 is best.
+
+| Avenue | Power | Plausibility (no new assumption = 5) | Computability / LP fit | Testability | Overall |
+|---|---|---|---|---|---|
+| **A** unit size (A1; A2) | 5 | 3 (A1), 2 (A2) | 4 (2×2 LP with ordering; SOCP/LMI or cuts in R×C) | 4 (overdispersion slope, emptiness) | **1st for research, 3rd for near-term use** |
+| **B** two-scale context | 4 | 3 | 5 (LP rows, few constraints) | 3 (B3 and B2 testable; B1 calibrated) | **1st for near-term use** |
+| **E** known tables / transfer | 4 (sub-areas) | 4 (E1 within area) / 2 (E2) | 5 (equality rows) | 4 | **2nd** |
+| **C** several contests | 3–5 (data-dependent) | 3 (C2) / 2 (C3) / 1 (C4) | 5 (C2) / 3 | 4 | 4th |
+| **D** Bernstein ladder | — (robustness) | 5 | 5 | 3 | 5th (useful infrastructure) |
+| **F** sharp-set computation | 2 | 5 | 3 | — | 6th (already pinned) |
+| G / H / I / J | 1 | 2–5 | 3–5 | 2 | low |
+
+**Suggested Phase 2 order:**
+1. **B**: Prop. B1 with the R×C rank condition, the B1(M) LP, and B2's overidentification test.
+2. **A**: the A1/A2 rungs in R×C, an LMI or cut formulation, and the identification of $A(x)$, $B(x)$ with a minimal functional form.
+3. **E1**: equality rows and sub-area targets.
+4. **C2.**
+
+D can be done at any point, as infrastructure.
+
+*This order is revised in §13.8 after an external review. Multiple validation tables, partially overlapping margins and covariance (second-moment) restrictions move up.*
+
+## 10. Clarifying questions
+
+1. **Binomial voting as a rung (Avenue A).**
+   * Are you willing to put "independent voting within poll × group cells" on the ladder, given that every likelihood-based EI model assumes it?
+   * Would you rather present A only with the design-effect dial?
+2. **Data for Avenue B.** For BC stage 2, is a sub-riding composition $z$ available? Options are census dissemination areas or the composition of adjacent polls, which would need poll geography. For NZ, meshblock-level data?
+3. **Pooling for Avenue A.** A needs thousands of units. Is a "variance structure shared across electorates (or ridings)" assumption acceptable? It is much weaker than sharing $K$: it shares only the over-dispersion and heterogeneity ratio.
+4. **Several contests (C).** Do you have, or want, a multi-contest dataset? Candidates are US CVRs, Swiss referendum days, NZ 2020 referenda by booth, or BC's 2018 electoral-reform referendum by poll, if published. Without one, C stays theoretical.
+5. **Solvers.** In R×C, A1 is a second-order-cone or semidefinite constraint. Is a dependency such as `CVXR`, `ROI` or `scs` acceptable, or should everything stay in `lpSolve` via tangent-cut outer approximations (valid but slightly wider)?
+6. **Scope boundary with the DiD session.** E2 (transfer of $K$) overlaps with temporal stability. Should I hand the NZ persistence evidence (D2) to that session and keep only cross-area transfer here?
+
+## 11. Files
+
+| File | What it checks | Result |
+|---|---|---|
+| `new_avenues/sim_second_moments.py` → `_output.md` | Avenue A, identification and estimation, four designs | large identification gain; valid estimation needs many units |
+| `new_avenues/sim_two_scale_context.py` → `_output.md` | Avenue B, rungs B0–B3, true and false $M$ | smooth gain in $M$; correct failure when $M<\lambda$ |
+| `new_avenues/check_structural_claims.py` → `_output.md` | C1 (CVRs add nothing), E1 (rank of $K\mapsto B^*$) | PASS / PASS |
+| `new_avenues/export_nz_units.R`, `new_avenues/nz_diagnostics.py` → `_output.md` | D1: binomial slope in NZ; D2: persistence of the K-part | slope 0.69–0.81 (SE ≈ 0.10); persistence 0.03–0.51 |
+| `new_avenues/sim_size_grid.py` → `_output.md` | Avenue A: how many units, and how small | needs thousands of units with median size of a few hundred or less |
+| `new_avenues/check_nesting.py` → `_output.md` | outcome nesting, no model (§12.3) | no change to a single outcome; contrast width 0.39 of no-nesting (median) |
+| `new_avenues/check_nesting_lce.py` → `_output.md` | outcome nesting under linear contextual effects | no change to a single outcome in 400 designs |
+| `new_avenues/check_single_index_dim.py` → `_output.md` | single-index rung: unidentified dimension (§12.3) | C−1 directions instead of (C−1)R(R−1)/2 |
+| `new_avenues/sim_local_near_constancy.py` → `_output.md` | neighbour and all-pairs similarity dials (§12.3) | neighbour-only: no gain; all-pairs: modest gain |
+| `new_avenues/apply_B_suffrage.py` → `_output.md` | Avenue B on the WI/IA suffrage data (data not committed) | WI gap signed at M ≤ 1 (yes column); IA 1868 empty at every rung |
+| `new_avenues/check_review_items.py` → `_output.md` | §13: multiple validation tables (rank), crossing partitions, stratified margins, covariance from Var(T\|x) on WI | 2 tables identify K for R ≤ 4; crossing partitions and strata tighten DD with no model; WI covariance fragile |
+| `new_avenues/apply_kappa_suffrage.py` → `_output.md` | κ dial on the suffrage data (§12.3) | binds only for κ ≲ 0.1–0.25; floors 0.001–0.015 |
+| `new_avenues/check_car_sensitivity.py` → `_output.md` | §14: invisible CAR violations; omitted-confounder bound when the confounder tracks composition; CAR-δ width versus overlap | invisible violation biases β by 0.08 with an exactly linear CEF; benchmark-sized $C_\alpha$ understates bias up to 12×; LP matches the overlap factor exactly |
+
+To reproduce the NZ diagnostics:
+
+```sh
+Rscript docs/extension/new_avenues/export_nz_units.R <dir>   # needs ei.Datasets
+python3 docs/extension/new_avenues/nz_diagnostics.py <dir>
+```
+
+---
+
+## 12. What survives a review of outside suggestions, and what combines
+
+*Added after reviewing a series of proposals from an external AI system that claimed to tighten bounds "without assumptions". These used optimal transport, copulas and rank correlations, maximum entropy, nuclear-norm completion, line-arrangement corridors, Rademacher caps, sub-sample intersections, conformal pruning, persistent homology, a "segregation anchor" and variance-based ceilings. Only what is useful for this project is recorded here. Claims are labelled as in the rest of the document.*
+
+### 12.1 Two rules that settle most proposals
+
+1. **Nothing in the data tightens the sharp set by itself (proved).**
+   * Every point of the identified set reproduces the observed law exactly. This is Prop. 9 for the model, and D0 for groupings.
+   * So any tightening restricts the *offsetting* directions: in 2×2, group A's rate moves up by $(1-x)h(x)$ while group B's moves down by $x\,h(x)$.
+   * Test for any proposal: what does it assume about those directions?
+   * A corollary: **data-implied quantities never tighten.** This covers a floor $\kappa_{\min}$, a maximum $\kappa_{\max}$ over the set, or $\varepsilon_{\min}$. Each holds for every element of the set. Only ceilings imposed as assumptions narrow it. In particular, imposing the linear model's own $\kappa_{\max}$ leaves the linear bound unchanged.
+2. **Local restrictions don't touch the smooth ambiguity (heuristic, supported by simulation).**
+   * The offsetting direction can be smooth, so constraints on *differences between neighbouring units* let it drift along chains of units.
+   * Only restrictions on its *slope, level or total size*, or on its relation to an identified quantity, bite.
+
+### 12.2 The map: three axes
+
+| axis | options (decreasing plausibility) | status |
+|---|---|---|
+| **shape** of $E[\beta_r\mid X]$ | any → single index (reduced rank) → linear (JKST/M0) → constant (Goodman) | single index new (§12.3 b) |
+| **size** of contextual variation | free → relative to an identified analogue (B's $M$) → slope or variance cap ($s$, $\kappa$) → zero | $\kappa$ new as a nonparametric rung (§12.3 a) |
+| **unit dispersion** around the mean | free → capped ($\varepsilon$, item 13), ceiling from residual variance (§12.3 g) → none | ceiling new |
+
+* Rungs combine by intersection.
+* The shape and size axes are complementary:
+  * linearity *eliminates* invisible directions but leaves $K$'s size free;
+  * a size cap *shrinks* all invisible directions but eliminates none.
+* Linear and nonparametric-capped are **not nested**, so report them side by side; their intersection is "linear with capped slopes".
+
+### 12.3 New or sharpened rungs and modifiers
+
+**(a) Variance-capped contextual effects (nonparametric $\kappa$).**
+* *Assumption:* $\operatorname{Var}_X(E[\beta_r\mid X])\le\kappa\operatorname{Var}(Y)$ for each group, with any shape. It is better reported as a maximum slope $s$ or a maximum range.
+* *Plain language:* group rates may vary with composition in any pattern, but not by much.
+* *Why it bites where local similarity fails:* every offsetting direction varies with $x$, so it costs variance.
+* *Computation:* with $x$ binned, a convex program (SOCP; or LP with tangent cuts).
+* *Ladder:*
+  * $\kappa=0$ is Goodman;
+  * under linearity it is the pinned slope cap, item 7. In 2×2 that gives LP rows; in R×C an ellipsoid in $K$.
+* *Suffrage data* (`apply_kappa_suffrage.py`, pooled linear model, plug-in): it binds only below $\kappa\approx0.25$ (WI 1865) or $0.1$ (WI 1857, IA 1857). The WI 1865 gap is positive once each group's yes rate moves at most about 3.7 points per 10 points of veteran share.
+* *Reporting device (new):* annotate each bound endpoint with the $\kappa$ (or $s$) it requires. Readers then see what extreme answers demand, without anyone committing to a ceiling.
+
+**(b) Single-index (reduced-rank) contextual effects.** Salvaged from the matrix-completion proposal.
+* *Assumption:* rates depend on composition only through one index $c^\top x$, i.e. $H_j=m_j\mathbf 1^\top+d_jc^\top$.
+* *Plain language:* context matters through one dimension of a place's make-up.
+* *Ladder:* Goodman (rank 1) ⊂ single index (rank 2) ⊂ linear (rank $\le R$).
+* *Gain (generic local count, `check_single_index_dim.py`; conjecture until proved):* the unidentified dimension falls to $C-1$ from $(C-1)R(R-1)/2$. For 3×3 that is 2 instead of 6.
+* *Testable* when $R\ge3,C\ge3$ or $R\ge4$.
+* *Computation:* nonconvex, but an LP for each direction $c$ over a small grid.
+* *If wrong:* different groups' shares have distinct effects.
+
+**(c) Bounded within-unit association (odds-ratio dial).** Salvaged from the copula proposal.
+* *Assumption:* each unit's group-by-outcome odds ratio lies in $[\psi_L,\psi_U]$. Group ordering is $\psi_L=1$.
+* *Computation:* with a unit's margins fixed, its cell is monotone in the odds ratio, so this is a unit-level interval: linear rows that tighten even the sharp set.
+* *Limitation:* untestable when the dial contains 1.
+* The *ecological* rank correlation cannot calibrate it: by the law of total covariance it measures only the between-unit part of the association.
+
+**(d) Outcome nesting with slack $\varepsilon$ (ordered contests).**
+* *Assumption:* the more extreme choice implies the less extreme one, e.g. suffrage yes ⇒ Republican, except for at most $\varepsilon$.
+* *Results (verified):*
+  * no change to the bound on a single outcome, with no model (`check_nesting.py`) or under linear contextual effects (`check_nesting_lce.py`, 400 designs);
+  * it narrows cross-outcome contrasts (yes minus Republican; the share of Republicans voting no) to a median 0.39 of their no-nesting width.
+* *Test:* county-level, yes ≤ Republican after roll-off.
+
+**(e) Distance to an explicit reference (KL ball).** The honest form of the maximum-entropy proposals.
+* *Assumption:* the truth lies within KL distance $b$ of a defensible reference table: a survey, a prior election, or a jurisdiction with a published table.
+* Never use the independence table. Maximum entropy at fixed margins *is* "no within-unit association", so an entropy budget pulls bounds away from polarised truths.
+* *Computation:* convex.
+
+**(f) All-pairs similarity with a slope allowance.**
+* *Assumption:* $\lvert\beta_i-\beta_j\rvert\le e+L\lvert x_i-x_j\rvert$ for all pairs. This is items 7 and 13 without a parametric mean.
+* *Results (`sim_local_near_constancy.py`):*
+  * a neighbour-only version gives no gain;
+  * the all-pairs version gives 0.5–0.6 of the DD width at best, with large units and low heterogeneity only.
+* The data floor $e_{\min}$ is a refutation threshold, not a calibration: the truth needed 1.1–3.5 times the floor.
+
+**(g) A data-informed ceiling on unit dispersion (proved).** Corrects the "binomial deductible" and "total-variance" ceiling proposals, which placed contextual variation in the residual.
+* Let $A(x)=\operatorname{Var}(T\mid x)$, optionally minus the binomial term under A1; without the subtraction it is a conservative upper bound.
+* If poll-level shocks to the two groups are not negatively correlated (the A2 assumption), then
+  $$\operatorname{Var}(\beta_A\mid x)\le A(x)/x^2,\qquad \operatorname{Var}(\beta_B\mid x)\le A(x)/(1-x)^2.$$
+* This gives item 13's dispersion cap a ceiling from the data. It caps dispersion, **not** $\kappa$.
+* **Relaxing the assumption (proved).** If the correlation may be as negative as $-r$, the ceilings become $A(x)/(x^2(1-r^2))$ and $A(x)/((1-x)^2(1-r^2))$.
+  * Allowing $r=0.5$ widens the SD ceiling by 15%, $r=0.8$ by 67%, and $r	o1$ removes it.
+  * The assumption is essential only against near-perfect offsetting.
+* **Correction.** A *variance* ceiling does not give hard unit-level bounds: a few units may still sit far out. Hard unit-level bounds need item 13's sup-norm form. The variance form restricts the sharp set ($\Theta_I$) through the dispersion of selections (conjecture: the gain is concentrated where similar units straddle DD kinks; untested).
+* **Suffrage data (WI, yes rate, units ≥ 100 men).**
+  * The leftover SD of the yes share given composition is 0.15 (1857) and 0.10 (1865); coin-flip noise is only about 0.02.
+  * At $r=0$, the SD ceilings at the mean composition are 0.42/0.37 for veterans (the smaller group, so divided by $x\approx0.3$) and 0.23/0.13 for non-veterans.
+  * Weak for veterans, modest for non-veterans: townships differ a lot beyond composition.
+
+**(h) Finite-sample inference and diagnostics** (not identification).
+* Concentration inequalities (Rademacher / Hoeffding, using shares in $[0,1]$) and split-conformal prediction for *observables* give finite-sample-valid bands for $E[Y\mid X]$ and an outlier screen for bad units (e.g. Iowa's negative counts).
+* A Phase-3 option for regimes with few units.
+
+**Computation only.** Regularised optimal-transport support functions are a possible way to compute $\Theta_X/\Theta_I$ (Avenue F). Persistent homology, line arrangements and sub-sample intersections add no identifying power; sub-sample intersections are the group rungs (M1/L5) under another name.
+
+### 12.4 Combinations that can actually tighten
+
+Each entry is a ceiling (assumption) meeting a rung. The source of the ceiling is the bridge that lets the data inform it. With no bridge, the ceiling is pure judgement and should be reported with its breakdown value.
+
+| combination | mechanism | where the ceiling comes from | status |
+|---|---|---|---|
+| linear (JKST/M0) ∩ $\kappa$ or slope cap $s<s_{\max}$ | shrinks the $K$ box | judgement; or a bridge below | LP rows (2×2) / ellipsoid (R×C) |
+| **no offsetting** (both groups' rates move the same way with $x$) + ordering | $x\,m_A'+(1-x)m_B'=\tau'-\text{gap}\le\tau'$, so $m_A'\le\tau'/x$, $m_B'\le\tau'/(1-x)$, gap $\le\tau'$ | **the observed slope $\tau'$**: a data-informed slope ceiling, which then tightens the linear and $\kappa$ rungs (proved in 2×2) | overlaps the DiD session's "contextual reinforcement"; derive there |
+| coin-flip voting (A1/A2) + accounting | pointwise bounds on the gap give $m_A=\tau+(1-x)\text{gap}$, $m_B=\tau-x\,\text{gap}$, hence bounds on each rate and on $\kappa$ | the $1/n$ variance slope | needs many smallish units (`sim_size_grid.py`) |
+| linear + nonlinearity slack $\eta$ (P3 `sensitivity()`) + $\kappa$ | stops the slack-induced widening toward DD | judgement or the bridges above | a robust rung: "roughly linear, not wildly varying" |
+| M1 (group dummies) + B1(M) with $z$ varying within groups | dummies absorb group baselines; $M$ caps own-unit effects against identified neighbourhood effects | identified area-level effects | needs a sub-group $z$ (e.g. neighbouring towns) |
+| B0 with $z$ = group composition instead of dummies | far fewer noisy parameters than M1 | — | precision fix for few units per group |
+| unit-dispersion ceiling (§12.3 g) + item 13 + any mean rung | caps spread around the mean; tightens the sharp set (conjecture); hard unit bounds need the sup-norm form | residual variance, under non-negative shock correlation | new; derive the sharp-set form |
+| single index ∩ B or M1 | dimension reduction, then intersection | — | for $R\ge3$ |
+| nesting + ordering (+ linear) | joint table of contests | county-level yes ≤ Republican | for contrasts only |
+| odds-ratio dial + sharp set | unit-level rows | judgement ($\psi_U$) | cheap; next to ordering |
+| validation tables (E) → empirical distribution of $\kappa$, $\delta$, $M$ | calibrates any dial | known tables elsewhere | NZ tables as a reference set |
+
+**Non-combinations** (checked; no gain):
+* imposing a rung's own data-implied $\kappa_{\max}$ or $\kappa_{\min}$;
+* nesting for a single outcome;
+* neighbour-only similarity;
+* sub-sample intersections without a shared-parameter assumption;
+* joint ballot-level margins without a cross-contest restriction.
+
+### 12.5 Suggested additions to the Phase-2 list
+
+In order of expected value:
+1. The no-offsetting slope ceiling, with the DiD session.
+2. Nonparametric $\kappa$ and $\kappa$-annotated endpoints.
+3. The single-index rung.
+4. The unit-dispersion ceiling (§12.3 g) and its unit-level bounds.
+5. The odds-ratio dial.
+
+Items 2 and 5 are cheap given the existing LP machinery. Item 3 is the largest structural gain for tables with three or more groups.
+
+---
+
+## 13. External review: response, checks and revised priorities
+
+*An external review agreed with the central principle (§12.1): every tightening must restrict the unidentified component, or bring in new information. It argued that the largest gains lie in **data fusion**, combining several imperfect sources about the same population, and in **second-moment restrictions** more general than binomial voting. This section records what was checked, what was adopted, and where this document disagrees. Checks are in `new_avenues/check_review_items.py` (→ `_output.md`). Citations supplied by the review have **not** been verified (§13.9).*
+
+### 13.1 Several validation tables under a shared $K$ (new E4; adopted, high priority)
+
+**Plain language.** One published cross-tab for a larger area pins part of "who is behind the pattern" (E1). A second published table, for an area with a different mix of groups, pins *other* parts. Together they can pin all of it, if the contextual split really is the same in both areas.
+
+**Result** (verified numerically: generic rank of the stacked map $K\mapsto B^*(K)$; a proof is for Phase 2):
+* Each table contributes $(R-1)(C-1)$ equations, and with differing compositions the equations from different tables point in different directions.
+* **Two tables identify $K$ for $R=3$ and $R=4$** ($C=2,3$); $R=5$ needs three.
+* With $J$ tables there are $J(R-1)(C-1)-\dim K$ overidentifying restrictions. That is 1 for 3×2 and 2 for 3×3 at $J=2$: **the shared-$K$ assumption becomes testable.**
+
+| table | dim K | rank with 1 / 2 / 3 tables |
+|---|---|---|
+| 3×2 | 3 | 2 / 3 / 3 |
+| 3×3 | 6 | 4 / 6 / 6 |
+| 4×3 | 12 | 6 / 12 / 12 |
+| 5×3 | 20 | 8 / 16 / 20 |
+
+**A clarification of the review.** What matters is not one composition vector per table but each table's composition *second-moment* matrix $\mu^{(j)}_{rs}=E_j[NX_rX_s]$, which enters through $\mu^{(j)}_{rs}/\mu^{(j)}_r$. Tables whose populations have proportional $\mu$-structure add no rank. The Phase-2 proposition should state the rank condition in terms of these matrices.
+
+**Caveats.**
+1. A published table is the finite-population rate $B$, not the model-implied $B^*$. The equalities need a slack of the size of the finite-population term (P3).
+2. Shared $K$ is the substantive assumption. NZ evidence on persistence *across elections* is weak (§5.2 E2). Across *areas* within one election it is untested.
+3. Relax it with $\lVert K_j-K\rVert\le\delta$, which the M1($\delta$) machinery already implements.
+
+**Data.** NZ publishes every electorate's table. A **leave-one-electorate-out test** is the natural Phase-2 check: estimate $K$ from other electorates' tables, bound the held-out one, check coverage.
+
+**Distinct from E2.** E2 transfers $K$ to an area without a table. E4 uses several tables jointly to identify $K$, and tests the sharing.
+
+### 13.2 Partially overlapping margins (new E5; adopted, high priority; no new assumption)
+
+These are **new data, not transformations of old data**. They escape D0 and Prop. 9 because the observed law itself is richer.
+
+**(a) Stratified margins within units.**
+* *Example:* each unit reports group × age and outcome × age, but not group × outcome.
+* *Bound:* Duncan–Davis applies within each age band and is summed. This is Cross–Manski conditioning on a covariate known at the unit level.
+* *Check:* with 4 age bands related to the outcome, the width for the aggregate rate fell to **0.68** of plain Duncan–Davis.
+
+**(b) Crossing partitions of the same individuals.**
+* *Example:* votes reported by precinct and by ward with crossing boundaries, with composition known for the intersections (e.g. census blocks).
+* *Bound:* each partition's Duncan–Davis bound is valid for the same total, so they intersect, and a joint LP over the intersections can do better.
+* *Check (60 atoms, 12 units each way):* width fell from 0.91 to 0.81 of the unit DD with homogeneous atoms, and only slightly with heterogeneous atoms. It is assumption-free but modest with random crossings. Gains grow when the crossings separate groups.
+
+**(c) The general case.** A latent multi-way table (group × outcome × covariates × geography) with every observed margin imposed. Sharp bounds are an LP, and shape restrictions are LP rows. This is where the review's pointers lead: Fan, Sherman & Shum on data combination; Moon (2026) on marginals of several covariates (§13.9). E3's "margins only add nothing" applies to *nested* coarsenings of the *same* classification; (a)–(c) are not that.
+
+### 13.3 Validation microdata (new E6; adopted, data-dependent)
+
+A sample in which group and outcome are jointly observed (exit poll, linked records, a validation survey) gives direct information on the missing cells.
+
+| validation data | treatment |
+|---|---|
+| probability sample | confidence-set constraints on the cells; LP rows with sampling allowance |
+| sample of selected units | bounds for those units; transfer via E2/E4 machinery |
+| selected individuals | **selection-odds dial $\Gamma$**: inclusion probabilities may differ across group × outcome cells by at most a factor $\Gamma$. Linear-fractional, so an LP after a Charnes–Cooper change of variables |
+| some areas only | common or bounded-difference parameters across areas (E2/E4) |
+
+Report how much identification comes from the validation data versus the representativeness assumption: the bound as a function of $\Gamma$, with $\Gamma=1$ meaning representative. **For the suffrage application:** poll books linked to service records in a few townships would be exactly this kind of data.
+
+### 13.4 Conditional coarsening at random (CAR) as a rung with a dial (adopted, medium–high)
+
+**What CAR is, in this framework.** $E[B\mid X,Z,N]=E[B\mid Z]$ says group rates don't depend on composition once covariates $Z$ are held fixed. That is **Goodman within $Z$**: Cho–Manski's instrumental-variable assumption, and our L5 with a continuous, possibly high-dimensional $Z$. By the identification principle of Avenue B (§2.2), each group's rate as a function of $Z$ is identified under CAR.
+
+**Ladder:** no model ⊃ linear contextual effects + $Z$ (B0 with general $Z$) ⊃ CAR($Z$) (a point).
+
+**The relaxation proposed in the review.** $E[B\mid X,Z,N]=\eta(Z)+\Delta(X,Z,N)$ with $\lVert\Delta\rVert\le\delta$. This is P3's sup-norm sensitivity (Prop. S1), centred on CAR instead of on linearity: LP rows, a point at $\delta=0$, Duncan–Davis as $\delta\to\infty$.
+
+**Value.**
+* It brings in non-compositional covariates (age, wealth, nativity, denomination) as confounder adjustment, the role the review emphasises.
+* It gives a dial with a familiar meaning: how much rates may still depend on composition after adjustment.
+* Positivity (composition varying within $Z$) is the binding data requirement.
+
+Using semiparametric estimators of the nuisance functions inside the LP is a Phase-3 question.
+
+### 13.5 Covariance of unit-level rates from composition (adopted for theory; fragile in practice)
+
+**The insight from the review.** The covariance matrix $\Sigma$ of unit-level group rates is **symmetric**. A quadratic form identifies a symmetric matrix completely, so $\operatorname{Var}(T\mid x)=x^\top\Sigma x$ reveals all of $\Sigma$, including the cross-group correlation. The mean coefficients are different: their skew part is invisible.
+
+**Adapted to this framework, without CAR.** Assume linear contextual effects for the means plus **homoskedastic deviations**: the covariance of unit rates around the mean does not depend on composition. Then
+
+$$\operatorname{Var}(T\mid x)=x^\top\Sigma x+\text{coin-flip term}.$$
+
+$\Sigma$ is identified, and the correlation that A2 merely *assumed* to be non-negative is **estimated**. The ceilings of §12.3(g) become estimated variances.
+
+**Status:**
+* Local, not global: it informs the dispersion of unit rates and the sharp set, not $K$ directly (§13.7 D).
+* Homoskedasticity in $x$ is testable by adding terms.
+* It needs compositional support near the vertices and midpoints of the simplex.
+
+**Wisconsin check** (yes rate, units ≥ 100 men, coin-flip upper bound removed):
+* **1857:** the estimated $\Sigma$ is **not positive semidefinite** (implied "correlation" 3.35; bootstrap interval [1.0, 11.9]). The quadratic-form structure fails, or noise dominates.
+* **1865:** SDs 0.22 (veterans) and 0.11 (non-veterans), correlation −0.16, 90% cluster-bootstrap interval **[−0.49, 0.70]**. The data cannot even sign the correlation.
+
+**Assessment:** a clean theoretical bridge, and the right replacement for A2's sign assumption, but data-hungry. It should not displace E4/E5.
+
+### 13.6 Excluded composition shifters (exploratory)
+
+* If an external factor shifts composition but not group rates, $E[T\mid Z]=x(Z)^\top\mu$ identifies $\mu$. This is Cross–Manski's instrument.
+* **Caution:** with contextual effects, anything that changes the composition people live among also changes their context, so exclusion fails.
+* **The clean case** is a shifter that changes *how people are aggregated* without changing *their environment*: re-aggregation of the same individuals. That is §13.2(b), and it needs no exclusion assumption.
+* Boundary changes over time add turnover (A1).
+* Bounded violations $\lvert\mu_r(z)-\mu_r(z')\rvert\le\delta$ give an LP dial.
+
+### 13.7 Responses to the review's qualifications
+
+* **A. Avenue A's evidence is suggestive, not definitive.** Agreed. §1.4 now separates the three assumptions (independence, size invariance, no offsetting) and makes the correlation dial $r$ central. §13.5 offers a route to estimate the correlation instead of assuming it.
+* **B. A parametrisation-invariant M.** Agreed. §2.3 now defines $M$ through ranges ($L_2$ or sup) of predicted rate changes over the observed supports of $x$ and $z$.
+* **C. Bernstein/Handelman exactness.** Agreed, with a sharper correction (§4.2): finite-degree certificates are *sufficient*, so they give *inner* sets and possibly too-narrow bounds. Valid bounds need necessary conditions (grids or vertices); report both.
+* **D. Global versus local versus inference.** Agreed. Classification:
+
+| class | items |
+|---|---|
+| **global** (shrinks the set for aggregate targets / $K$) | linear and single-index shape; $\kappa$ and slope caps; B1(M); M1 and $\delta$; E1/E4 validation tables; CAR($Z$)-$\delta$; no-offsetting slope ceiling; nesting (for contrasts); KL-to-reference; excluded shifters |
+| **local** (restricts unit-level rates; feeds the sharp set; gives unit bounds in sup-norm form) | odds-ratio dial; unit ordering; dispersion caps (item 13) and their ceilings (§12.3 g); covariance from $\operatorname{Var}(T\mid x)$ (§13.5); A1/A2 coin-flip rungs (local gap, which becomes global through accounting); all-pairs similarity |
+| **new data** (enlarges the observed law) | stratified margins, crossing partitions, multi-way margins (§13.2); validation microdata (§13.3); several contests with a cross-contest link |
+| **inference only** | CLR; concentration and conformal bands; regularised-OT computation of $\Theta_X/\Theta_I$ |
+
+* **Items the review would not prioritise.** Agreed throughout: separate copula or deconvolution approaches (A3 covers the moment route), OT/entropy as identification, neighbour-only similarity. Monotone EI stays with the other session.
+
+### 13.8 Revised priorities
+
+| priority | avenue | why | depends on |
+|---|---|---|---|
+| 1 | **E4** several validation tables (+ $\delta$) | rank result above: point identification and a testable shared-$K$ | tables for areas of differing composition (NZ: yes) |
+| 2 | **E5** stratified / crossing / multi-way margins | no new assumption; LP | richer published margins |
+| 3 | **B** second-scale context | simplest near-term implementation; interpretable $M$ (§2.3) | a sub-group $z$ |
+| 4 | **CAR($Z$)-$\delta$** | confounder adjustment with a dial | covariates with positivity |
+| 5 | **E6** validation microdata with $\Gamma$ | direct cell information | a sample |
+| 6 | §13.5 covariance identification → dispersion ceilings | replaces A2's sign assumption | many units; homoskedasticity |
+| 7 | no-offsetting slope ceiling; single index; $\kappa$ (§12) | data-informed ceilings; dimension reduction | — (with the DiD session) |
+| 8 | **A** coin-flip rungs | strong identification, weak estimability | thousands of small units |
+| 9 | excluded shifters | exploratory | a credible shifter |
+
+**Where this document differs from the review.**
+* It ranks the covariance route (CAR2-type) lower. In the Wisconsin data the estimate was non-PSD in one year and unsigned in the other, and it is a local restriction.
+* It keeps B ahead of CAR for near-term implementation, because B's identified area effects come with a natural yardstick.
+
+### 13.9 Citations supplied by the review (first three now read; see §14.1)
+
+* McCartan & Kuriwaki (2026), *Identification and Semiparametric Estimation of Conditional Means from Aggregate Data* (arXiv): CAR and CAR2, the polarisation identity, sensitivity analysis.
+* Kuriwaki & McCartan (2026): a reassessment emphasising confounding in EI (arXiv).
+* Moon (2026): partial identification with only the marginals of several covariates.
+* *Functional Ecological Inference* (2025, ScienceDirect): an operator-theoretic minimum-dependence solution, i.e. a selection, not tightening.
+* Elzayn et al. (2026, *Political Analysis*): monotone EI (the other session's topic).
+* Fan, Sherman & Shum: data combination for EI and treatment effects (exact paper and year to confirm).
+
+Each must be read and checked before it is relied on in Phase 2. McCartan & Kuriwaki, Kuriwaki & McCartan and Moon have now been read; §14.1 gives the verified details and corrections.
+
+---
+
+## 14. CAR, CAR2 and omitted-confounder sensitivity (after reading the sources)
+
+This section follows a reading of McCartan & Kuriwaki, Kuriwaki & McCartan, Moon, and Cinelli & Hazlett (2020). It asks three things: what CAR and CAR2 can and cannot do; how McCartan & Kuriwaki's sensitivity analysis relates to Cinelli & Hazlett's partial-$R^2$ bounds; and what that relation suggests for our ladder. Checks are in `new_avenues/check_car_sensitivity.py` → `_output.md`.
+
+### 14.1 What the sources say (verified by reading)
+
+* **McCartan & Kuriwaki**, *Identification and Semiparametric Estimation of Conditional Means from Aggregate Data*, arXiv:2509.20194 (v2, 30 Apr 2026). R package `seine`.
+  * **CAR** is $E[B_G\mid Z_G,X_G,N_G]=E[B_G\mid Z_G]$. It has two parts: composition is mean-independent of rates given $(Z,N)$, and rates are mean-independent of size given $(X,Z)$. The size part is the "size invariance" assumption of Avenue A (§1.4). A weaker size-weighted version is CAR-U, and an individual-level sufficient condition is CAR-IND.
+  * **Identification (Thm 2.1).** Under CAR the CEF is partially linear, $E[Y\mid X,Z]=\eta(Z)^\top X$, and $\beta_j$ is a weighted mean of $\gamma_0(e_j,Z)$.
+  * **Positivity (POS).** The density of $X$ given $Z$ must be bounded below *on the whole simplex*. The second moment of the Riesz representer is the overlap diagnostic.
+  * **Estimator.** DML with series ridge nuisances restricted to the partially linear class, without cross-fitting.
+  * **CAR2 (§4.1).** $E[BB^\top\mid X,Z,N]=E[BB^\top\mid Z]$. It identifies $\Sigma(z)$ through the polarisation identity (Prop. 4.1). It is used **only for local (unit-level) confidence regions**: Chebyshev, plus an oblique projection of $\hat\eta(Z_g)$ onto the tomography line along $\hat\Sigma$. The authors anticipate non-PSD estimates and recommend clipping negative eigenvalues.
+  * **Sensitivity (§4.2, Thm 4.2).** This imports Chernozhukov, Cinelli, Newey, Sharma & Syrgkanis: $\lvert\beta^*_j-\beta_j\rvert\le\rho\,S\,C_\gamma C_\alpha$. It comes with contour plots, a robustness value and benchmarking against observed covariates.
+  * **A test of the partially linear form** (App. A), which the authors call "approximate … limited power".
+* **Kuriwaki & McCartan**, *The Role of Confounders and Linearity in Ecological Inference: A Reassessment*, arXiv:2601.07668 (v2, Jul 2026).
+  * It recasts EI as confounder adjustment: Goodman with $X$ fully interacted with $Z$ (their eq. 12).
+  * It notes that King's projection angle is set by the covariance of $B_g$, so CAR2 is King's tomography projection with $\Sigma$ estimated rather than assumed.
+  * **Validation finding:** all methods overstate racial polarisation, "because racial minorities are typically more Democratic-leaning in concentrated areas than in diverse ones". That is a *contextual* violation of CAR.
+  * In their sensitivity plots the `state` benchmark implies a bias near 1 on a $[-1,1]$ scale.
+  * They deliberately set partial identification aside, while noting that Duncan–Davis bounds can falsify the assumption.
+* **Moon**, *Partial Identification of Individual-Level Parameters Using Aggregate Data in a Nonparametric Model*, arXiv:2403.07236 (v8, Dec 2025; the review's "2026" is probably a later version or publication).
+  * Sharp bounds from marginals (not joints) of several covariates are an LP, with room for polyhedral shape restrictions.
+  * Subgroup pass-rate data tighten the bounds. A homogeneity restriction gives *empty* estimated sets in the Rhode Island data.
+  * This confirms §13.2 / E5.
+* **Cinelli & Hazlett (2020)**, *Making Sense of Sensitivity: Extending Omitted Variable Bias*, JRSSB 82(1): 39–67. **Chernozhukov et al.**, *Long Story Short: Omitted Variable Bias in Causal Machine Learning*, arXiv:2112.13398 / NBER w30302. Listed as forthcoming in *REStat*; publication status *to verify*.
+
+**Corrections to §13.**
+* §13.4 is consistent with the source.
+* §13.5 differs from McCartan & Kuriwaki in two ways: our version drops CAR for the means but keeps homoskedastic deviations, and it gives the covariance a global role. Theirs is conditional on $Z$ and purely local.
+* The Wisconsin 1857 non-PSD estimate is a case they anticipate. Clipping would hide it, and it may be evidence against CAR2 (§14.6).
+
+### 14.2 Plain-language entry
+
+* **What it is.** CAR: among areas that look alike on the covariates, the group mix tells you nothing about how each group behaves.
+* **Key assumption.** No contextual effects, and no unmeasured factor that sorts people into areas *and* shapes their behaviour, once the covariates are held fixed.
+* **What goes wrong.**
+  * Contextual effects: minorities in concentrated areas vote differently.
+  * Sorting on unmeasured traits.
+  * The first is the threat EI is known for, and §14.4 shows it is the case the standard confounder-sensitivity tools handle worst.
+* **What can be checked.**
+  * Only the part of a violation that bends the aggregate regression (§14.3).
+  * Overlap, i.e. whether units with similar covariates span the range of compositions.
+  * Whether the point estimate lies inside the Duncan–Davis bounds.
+
+### 14.3 What a CAR test can and cannot see (proved)
+
+Write a violation as $E[B\mid X,Z,N]=\eta(Z)+\Delta(X,Z,N)$. The data see $\Delta$ only through $X^\top\Delta$. Any $\Delta$ with $x^\top\Delta(x,z)=0$ leaves $E[Y\mid X,Z]=\eta(Z)^\top X$ **exactly**, so it passes every test of the partially linear form, yet it biases $\beta$ by $E[u\,\Delta_j]$. This is Prop. 9 restated around CAR.
+
+* With $Z$ empty and linear contextual effects, the invisible class is exactly the skew part $K$.
+* **Check (Part 1).** $\Delta=k(1-x_1,\,-x_1)$ with $k=0.2$ and $x_1\sim$ Beta(2,2) gives $\max\lvert E[Y\mid X]-\eta^\top X\rvert=10^{-16}$ and a bias of $+0.080$ (formula $k(1-E x_1^2/E x_1)=0.080$).
+
+So McCartan & Kuriwaki's "limited power" is structural, not a small-sample problem: the test has *zero* power against a whole subspace of violations. This is why a sensitivity analysis, not a test, has to carry the weight. They recommend the same.
+
+### 14.4 How this relates to Cinelli & Hazlett
+
+**The chain.**
+* Cinelli & Hazlett (CH) write the omitted-variable bias of an OLS coefficient in terms of two partial $R^2$s: confounder–outcome $R^2_{Y\sim U\mid D,X}$ and confounder–treatment $R^2_{D\sim U\mid X}$.
+* From these they derive a **robustness value**, an **extreme-scenario** analysis and **formal benchmarking** ($k_D$, $k_Y$: the confounder is at most $k$ times as strong as an observed covariate, measured by partial $R^2$).
+* Chernozhukov et al. extend this to any linear functional with a Riesz representer: $C_\gamma^2$ is the outcome partial $R^2$, and $C_\alpha^2$ is the relative gain in the representer's variance, which is roughly increasing in $R^2_{D\sim U\mid X}$.
+* McCartan & Kuriwaki apply that extension to EI. So **the user's intuition is right, and it has already been implemented in `seine`**. The mapping:
+
+| Cinelli–Hazlett (OLS) | EI via McCartan & Kuriwaki |
+|---|---|
+| treatment $D$ | composition $X_j$ |
+| outcome $Y$ | aggregate outcome $Y_g$ |
+| $R^2_{Y\sim U\mid D,X}$ | $C_\gamma^2=R^2_{Y\sim A\mid X,Z}$ |
+| $R^2_{D\sim U\mid X}$ | $C_\alpha^2\approx R^2_{X_j\sim A\mid Z}/(1-R^2_{X_j\sim A\mid Z})$ |
+| benchmark covariate $X_j$ ($k_D,k_Y$) | observed $Z_k$ (`ei_bench`) |
+| coefficient $\tau$ | $\beta_j$, an extrapolation of $\gamma_0$ to the vertex $e_j$ |
+
+CH's closed forms apply directly only when $\beta_j$ is a single OLS coefficient. Under Goodman-with-interactions, $\beta_j$ is a weighted *combination* of coefficients, so the Chernozhukov et al. form is the right one.
+
+**Three features specific to EI.**
+
+1. **The outcome dial is set by the problem: $C_\gamma=1$ is attained (proved).**
+   * $Y_g=B_g^\top X_g$ has no error term beyond heterogeneity in the rates. Taking $A=B$ makes CAR hold given $A$ trivially, with $R^2_{Y\sim A\mid X,Z}=1$.
+   * CH's "extreme scenario" (the confounder explains all residual outcome variance) is therefore the *natural* case in EI, not a stress test.
+   * EI sensitivity collapses to **one dial: how strongly the omitted factor predicts composition**. CH show the bias factor is unbounded in this dial.
+
+2. **Contextual effects are confounders that track composition, and benchmarks understate them (proved structure, simulated magnitudes).**
+   * A pure contextual effect is a "confounder" that *is* composition.
+   * In Part 2 the confounder is $A=x_1+\tau\nu$ and rates depend on $A$. The short CEF is exactly linear (invisible, §14.3), the true bias is 0.080 for every $\tau$, and the bound with the true parameters is tight (0.082):
+
+| $\tau$ | $R^2(x_1\sim A)$ | $C_\alpha$ | bound with benchmark-sized $C_\alpha=0.65$ | true bias |
+|---|---|---|---|---|
+| 0.02 | 0.99 | 8.4 | 0.006 | 0.080 |
+| 0.05 | 0.95 | 3.4 | 0.016 | 0.080 |
+| 0.10 | 0.83 | 1.7 | 0.032 | 0.080 |
+| 0.30 | 0.36 | 0.56 | 0.096 | 0.080 |
+
+   * As the violation becomes a pure contextual effect, $S\to0$ and $C_\alpha\to\infty$. A $C_\alpha$ calibrated on an ordinary covariate understates the bias by up to 12×.
+   * No observed covariate is as collinear with $X$ as $X$ itself, so **benchmarking against observed $Z_k$ is systematically optimistic about EI's signature threat**.
+   * CH's own caution applies with extra force. They note the data can rule out large $k_D$ when an observed covariate already explains much of $D$. In EI the dangerous confounder sits right at that ceiling.
+
+3. **The bound ignores logical bounds, and intersection is valid.**
+   * $\hat\beta\pm\rho SC_\gamma C_\alpha$ can leave $[0,1]$: the `state` benchmark in Kuriwaki & McCartan gives a bias near 1.
+   * Duncan–Davis / LP outer bounds hold with no assumptions. Intersecting them with the sensitivity interval is valid under the sensitivity assumption.
+   * In Part 2 Duncan–Davis gives $[0.20, 0.81]$ for $\beta_1$. The sensitivity interval with honest parameters is far narrower, so the two are complementary.
+   * Imposing the $(C_\gamma,C_\alpha)$ restriction *inside* the LP is not linear in $K$ and is probably nonconvex (*conjecture*). Intersection is the practical form.
+
+### 14.5 Native EI dials in the same spirit (proposal)
+
+The lesson from §14.4 is to parametrise the violation **directly in outcome units**, i.e. on $\Delta$, instead of through a hypothetical confounder's link to composition. These are the dials already on the ladder, now centred on CAR($Z$):
+
+| dial | restriction | form | combines with DD/LP | benchmark |
+|---|---|---|---|---|
+| CAR($Z$)-$\delta$ (§13.4) | $\lVert\Delta\rVert_\infty\le\delta$ | LP rows | yes | $\delta_k$ from dropping $Z_k$ (below) |
+| CAR($Z$)-$\kappa$ | $E[\Delta_j^2]\le\kappa_j\operatorname{Var}(Y)$ (an $R^2$-type share) | SOCP | yes | $\kappa_k$ from dropping $Z_k$ |
+| B1($M$) (§2.3) | own-composition effect ≤ $M\times$ the identified area-level effect | LP | yes | **built in**: composition at a second scale |
+| Chernozhukov–Cinelli $(C_\gamma,C_\alpha)$ | omitted confounder strengths | closed form $\pm$ | intersection only | observed $Z_k$ (optimistic for contextual effects, §14.4) |
+
+* **Formal benchmarking for $\delta$/$\kappa$ (proposal).** Under CAR($Z$), dropping $Z_k$ creates an *identified* violation of CAR($Z_{-k}$): $\Delta^{(-k)}(x,z_{-k})=E[\eta(Z)\mid X=x,Z_{-k}]-E[\eta(Z)\mid Z_{-k}]$. Set $\delta_k=\sup\lvert\Delta^{(-k)}\rvert$ and $\kappa_k=E[(\Delta^{(-k)}_j)^2]/\operatorname{Var}(Y)$. "The unobserved violation is at most $m$ times covariate $k$'s" then gives $\delta=m\delta_k$.
+  * This is CH's $k$-benchmark in outcome units. It meets their criterion that the relative-strength measure must be the one that determines the bias.
+  * Caveats:
+    * it is computed under CAR($Z$) itself;
+    * comparisons remain judgement;
+    * like any covariate benchmark, it cannot calibrate contextual effects.
+* **B1($M$) is the benchmark of the right kind.** The identified effect of composition at the county scale is a measured contextual effect. Bounding the township-scale effect by $M$ times it is CH-style relative-strength reasoning, with a comparison variable of the same nature as the threat. This is the strongest argument for keeping B ahead of CAR (§13.8).
+* **Overlap is identification-relevant under CAR-$\delta$ (proved, 2×2).**
+  * With composition confined to $[a,b]$, the identified half-width of the vertex rate is $\delta\,(2-a-b)/(b-a)$, and the LP in Part 3 matches it exactly. For example, $[0.3,0.7]$ multiplies $\delta$ by 2.5 and $[0.4,0.6]$ by 5.
+  * The aggregate $\beta_1$ is affected about as much.
+  * This is the partial-identification counterpart of McCartan & Kuriwaki's Riesz-representer norm: weak positivity within $Z$ inflates *every* CAR relaxation.
+  * The general $R\times C$ factor (an operator norm of the extrapolation from the observed support to the vertices) is a *conjecture* for Phase 2.
+
+**Ladder positions.**
+* No model ⊃ CAR($Z$)-$\delta$ / CAR($Z$)-$\kappa$ ⊃ CAR($Z$) (a point).
+* With linear $\eta$, CAR($Z$) is B0 with the own-composition effect set to zero, i.e. B1($M=0$). So B1($M$) is a CAR relaxation whose dial is benchmarked by the area-level effect.
+
+### 14.6 CAR2 / covariance, reconsidered
+
+* **What it is for.** In McCartan & Kuriwaki, CAR2 serves local inference only: unit-level regions, or King's projection with an estimated angle. It does not move aggregate bounds, and §13.7 D (local) stands.
+* **Data demands.** $\Sigma(z)$ via polarisation needs $\operatorname{Var}(Y\mid X,Z)$ at vertices *and* edge midpoints for each $z$. That is positivity twice over, plus fourth moments.
+* **It is more testable than CAR (proved implications).**
+  * $\operatorname{Var}(Y\mid X,Z)$ must be quadratic in $X$ (no cubic or quartic terms), and the implied $\Sigma(z)$ must be PSD.
+  * Wisconsin 1857: implied correlation 3.35, bootstrap interval [1.0, 11.9]. That is borderline evidence *against* CAR2, or against the quadratic form with unequal unit sizes.
+  * Clipping eigenvalues, as recommended, would hide this. Report the test before clipping.
+* **A new role (proposal): the scale for an $R^2$ dial on group rates.**
+  * If only the *variance* is assumed invariant, $\operatorname{Var}(B\mid X,Z)=\Sigma(Z)$, with no CAR on means, then $\operatorname{Var}(Y\mid X,Z)=X^\top\Sigma(Z)X$ still identifies $\Sigma$. The conditional variance is taken around $E[Y\mid X,Z]$, which absorbs mean violations.
+  * This yields a CH-like dial in the units that matter: $E_X[\Delta_j^2]\le\frac{r^2}{1-r^2}\Sigma_{jj}(Z)$. In words, composition explains at most a share $r^2$ of group $j$'s rate variation given $Z$.
+  * It is convex (SOCP) and global, and its denominator is identified rather than borrowed from $\operatorname{Var}(Y)$.
+  * It inherits CAR2's data hunger. In Wisconsin it would have failed in 1857.
+* **Verdict.** It is still limited for tightening aggregate bounds. It has three uses: local intervals; replacing A2's sign assumption (§13.5); and scaling an $R^2$ dial when there are many units with good overlap.
+
+### 14.7 Consequences for the priorities (§13.8)
+
+* **CAR($Z$)-$\delta$ stays at priority 4.** Implementation (Phase 3–4) should report, side by side:
+  1. the $\delta$ and $\kappa$ curves intersected with the LP outer set;
+  2. the overlap factor;
+  3. $\delta_k$/$\kappa_k$ benchmarks for each covariate;
+  4. B1($M$) as the contextual benchmark;
+  5. `seine`'s $(C_\gamma,C_\alpha)$ contour, for comparability with the literature, flagged with §14.4(2).
+* **Phase-2 derivations to add:**
+  * the invisible-violation class under CAR($Z$), in general $R\times C$ (§14.3);
+  * the overlap factor beyond 2×2 (§14.5);
+  * the SOCP form of the $\kappa$ and $r^2$ dials;
+  * whether imposing $(C_\gamma,C_\alpha)$ jointly with the LP is tractable.
+* **For the suffrage data:** the binding requirement is township-level covariates $Z$ with composition varying *within* $Z$ (positivity). County-level $Z$ alone puts us back in Avenue B.

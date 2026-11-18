@@ -106,7 +106,7 @@ Listed from **most** to **least** plausible. Each rung's bound sits inside the o
 
 ## 4. Optional extras that apply to any rung
 
-Pinned in `ASSUMPTION_MENU.md` and not yet derived: structural zeros (a party not running), survey benchmarks, group ordering (in-party voters at least as likely to vote P as out-party voters), sign restrictions on contextual effects, stability across elections, similarity of neighbouring units, and sensitivity dials for each.
+Pinned in `ASSUMPTION_MENU.md` and not yet derived: structural zeros (a party not running), survey benchmarks, group ordering (in-party voters at least as likely to vote P as out-party voters), sign restrictions on contextual effects, stability across elections, similarity of neighbouring units, and sensitivity dials for each. (Signs on the average between and within associations, and contextual reinforcement, are now derived and implemented: see §9.)
 
 ## 5. Reading results
 
@@ -129,3 +129,100 @@ Pinned in `ASSUMPTION_MENU.md` and not yet derived: structural zeros (a party no
   * Say which one you report.
 * **An empty confidence set is a real rejection.** If even the widened constraints cannot be satisfied, the assumptions are rejected at the stated level [P3 Prop 6].
 * **Sensitivity in one number.** For a headline claim (e.g. "loyalty above 30%"), report the *breakdown value*: how far average rates could depart from straight lines, undetectably, before the claim fails [P3 §7].
+
+---
+
+## 7. Proposed tools (Phase 1, awaiting review; not yet derived or implemented)
+
+*Details in `PHASE1b_monotone_did.md`. Entries will be finalised after Phase 2.*
+
+### Monotone EI: sign of the gap within units ("between" association)
+
+* **What it is:** assume that, on average across units, members of group A are more likely than members of group B *living in the same unit* to choose an outcome. Example: Labour party voters are more likely than other voters at the same polling place to vote for the Labour candidate. From Elzayn et al., "Monotone Ecological Inference".
+* **Key assumption:** only the *direction* of the average within-unit gap, not its size, and no straight-line model.
+* **If wrong:** one end of the bound is cut in the wrong place, so the bound can exclude the truth.
+* **Check:** an empty bound refutes it. Survey or individual-level data on a subsample (as Elzayn et al. do) can support it.
+
+### Monotone EI: sign of the contextual effect ("within" association)
+
+* **What it is:** assume that, on average, each group's rate moves in a known direction as a unit's composition changes. Example: both parties' voters are more likely to back candidate P where P's party is stronger. It needs no straight-line model.
+* **Key assumption:** the direction of the averaged contextual effect.
+* **If wrong:** the bound can exclude the truth. Goodman's regression then errs in the opposite direction from the one assumed.
+* **Check:** an empty bound refutes it (this happens when Goodman's estimate falls outside the no-model range on the "wrong" side).
+
+### Contextual reinforcement
+
+* **What it is:** assume the two directions above *agree*, without saying which way they go. The answer then lies between the neighbourhood model and Goodman's regression, and its sign is identified.
+* **Key assumption:** contextual effects reinforce individual differences, through social norms, local policies or peer effects. They do not counteract them.
+* **If wrong:** with opposing forces (e.g. backlash in mixed areas), the bound can exclude the truth.
+* **Check:** largely untestable from aggregates alone; an empty bound refutes it.
+
+### Monotone contextual effects without straight lines
+
+* **What it is:** each group's average rate is assumed to rise (or fall) steadily with the unit's composition, in any shape, not necessarily a straight line. This is Manski and Pepper's "monotone instrument" idea, with composition as the instrument.
+* **Key assumption:** no reversals. For example, a group's loyalty never falls as its own share rises.
+* **If wrong:** U-shapes or tipping points can push the truth outside the bound.
+* **Check:** an empty bound refutes it; plot the estimated regression for reversals.
+
+### Difference-in-differences: what each assumption buys
+
+* **No link between periods.** The bound for the change is the difference of the two periods' bounds, so the widths add. Always valid.
+* **Contextual effects on *changes* are straight lines.** This allows each county its own persistent political culture, which need not follow any line. With one more assumption the DiD becomes a single number. Example: the change among non-veterans does not depend on how many veterans live nearby, i.e. no differential spillover.
+  * *If wrong:* a confident, wrong number.
+  * *Check:* the single assumption is not testable on its own. Adding "veterans' change does not depend on it either" is testable (equal curvature in both periods).
+* **Bounded change δ.** The unidentified part may change by at most δ. The answer is the point ± a multiple of δ. Report how large δ must be to overturn the conclusion.
+* **Monotone EI on changes.** If the spillover and the veteran–non-veteran gap in changes point the same way, the DiD lies between two simple regression-based numbers. No straight lines are needed.
+* **Parallel trends (for the causal claim).** Future veterans would have changed like non-veterans had there been no war. This is a separate assumption from all of the above. Spillovers from veterans to non-veterans violate it.
+* **Composition.** Before the war, "veterans" are future veterans; many were too young to vote, and deaths and migration change the electorate. The two periods must describe the same people, or the change must be bounded over who might be who.
+
+### Model-implied vs actual rates (and DiD)
+
+* **Actual:** the rate among the actual people in these units, including local idiosyncrasies no model explains.
+* **Model-implied:** what the systematic pattern (the average behaviour of units with this composition) implies for these units.
+* Bounds that use no fitted model (Duncan–Davis, the monotone-EI signs) are automatically about the actual rate and have no sampling error. Bounds that use a fitted regression report both. The actual one is wider because it must allow for local luck, in both periods for a DiD.
+
+### Which single assumption identifies the DiD (veterans example)
+
+* **R1, no differential spillover:** non-veterans changed equally in veteran-heavy and veteran-light towns.
+* **R2, no home-network effect:** veterans changed equally whether they came home to many or few fellow veterans.
+* **R4, no average contextual change:** a straight line through the towns' changes gives the answer (Goodman on changes).
+* **R1 + R2 ("contextual effects unchanged"):** testable, through equal curvature in both elections.
+* Each gives one number; different rules give different numbers. Report all of them, plus how large a violation of R1 would overturn the conclusion. If population counts change between elections, each becomes a short interval rather than a point.
+
+## 8. What Phase 2 established for the new tools (`PHASE2c_monotone.md`, `PHASE2d_did.md`)
+
+* **Which monotone-EI assumptions the data can contradict.** With two groups, only the "within" (contextual) sign can be contradicted by aggregate data. The "between" sign and contextual reinforcement never produce an empty bound. Their credibility rests entirely on substantive argument, or on individual-level data for a subsample [2c Prop. M3].
+* **Imposing signs on several outcomes at once helps.** Signing the contextual effect for two outcome columns jointly narrowed bounds in about half of random test cases [2c Prop. M4].
+* **No straight lines, but no reversals (N2).** This rung is weaker than "straight lines with signed slopes". Its bound always contains the straight-line one [2c Prop. N2.2].
+* **DiD: the rules R1, R2 and R4.** R4 (Goodman's regression on changes) always gives an answer between R1's and R2's [2d Prop. FD2]. None of them needs straight lines in *levels*: each township may keep its own persistent political culture. Only the *changes* must follow straight lines.
+* **Goodman on changes is a bound, not just an estimate.** If spillovers from veterans pushed their neighbours towards suffrage, it *overstates* the DiD. If there was backlash, it understates it. If the spillover and the veteran gap point the same way (contextual reinforcement), it gets the *sign* right [2d Prop. D4].
+* **When population counts change between elections,** even R1 gives a short interval instead of a point [2d Prop. D6].
+* **Aging-in.** Using the post-war base in both years adds the term (1 − stayer share of veterans) × veterans' pre-war yes-rate, minus the same for non-veterans, to the DiD. That term is small when pre-war support was near zero [2d Prop. C2].
+* **Party and suffrage.** "Democrats never voted yes" does not by itself tighten the veteran bounds. Adding "before the war, within each party, future soldiers voted like their neighbours" (selection on party only) does, often substantially [2d Props P2–P3].
+* **The causal step.** "Service did not lower support", "no decline absent service" and "soldiers would have been at least as supportive as non-veterans" together bound the effect between 0 and an upper limit. If the data make all three impossible at once, they are rejected [2d Prop. CL].
+
+---
+
+## 9. Now in the package: sign beliefs and contextual reinforcement (build step 1, `PHASE5a_sign_module.md`)
+
+`eiBounds(..., restrictions = list(assoc = ..., cr = ...))` adds the Monotone EI beliefs of §7 to the straight-line rungs (M0, M1, M2, ...).
+
+* **What you can say.**
+  * "Group A is on average more likely than others *in the same unit* to choose P": `assoc = list(list(type = "dB", row = "A", col = "P", sign = 1))`.
+  * "Rates for P rise with A's share of the unit": `type = "dW"`.
+  * "These two point the same way, whichever way that is": `cr = list(list(row = "A", col = "P"))`.
+  * With three or more groups, choose the comparison: A against everyone else (`version = "W1"`, the default), A against one other group B (`version = "pair"`, `other = "B"`), or the contextual effect on each group separately (`version = "W2"`).
+* **The bound is exact for what the regression knows.** Given the straight-line rung and the beliefs, the reported range contains every value consistent with the fitted regression, and nothing else.
+* **What the data can check.**
+  * A belief about the *contextual* direction (`dW`) can be contradicted by the data: the bound comes out empty.
+  * With two groups, the *between* direction (`dB`) and reinforcement (CR) can never be contradicted by aggregate data on their own. If the bound is empty, it is the *combination* with straight lines that is contradicted, and the package says so. Their credibility rests on argument, or on individual-level data for a subsample.
+* **They can buy a lot.** In simulations of a 2×2 table, reinforcement shrank the confidence interval for the gap between groups from about 1.1 to about 0.36, and it still contained the truth 99% of the time. But that gain rests on a belief the data cannot check.
+* **Reinforcement can give two separate ranges.** With three or more groups and the `"W2"` or `"pair"` comparisons, "both positive" and "both negative" can lead to two separate ranges with a gap between them. The package prints both (`[a, b] U [c, d]`); `union = "hull"` reports one range covering both. With the default comparison, and always with two groups, it is one range.
+* **Do not do this by hand.** Elzayn et al. give the reinforcement range as lying between the "neighbourhood model" and Goodman's regression. Plugging in the *estimated* values of those two and intersecting with a confidence interval is not a valid confidence interval: it misses the truth too often (8–10% of the time instead of 5% when the truth is at the edge), however large the sample. The package widens each piece by its own uncertainty instead. It still reports the estimated neighbourhood and Goodman values, marked as descriptive only.
+* **What each belief buys.** `eiRedundancy(fit)` (also stored in `fit$sign`) says, for each belief and each quantity, whether the belief
+  * is already implied by the data and the rung (it buys nothing);
+  * narrows the set of possible tables but not this quantity; or
+  * narrows this quantity, and by how much,
+
+  both when it is added first and when it is added last. It also lists which directions the data already settle under the rung alone. These verdicts are estimates: when a belief only just matters, compare widths rather than trusting the label.
+

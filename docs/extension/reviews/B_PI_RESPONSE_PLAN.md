@@ -398,6 +398,15 @@ No theory item in part II is new: every theory point the EI referee makes is alr
 
 ## 5. Decisions needed from the user
 
+**Decided by the user (18 Nov 2026): all eight as recommended, i.e. U1(a), U2(a), U3(a), U4(a), U5 approved, U6(a), U7(a), U8(a).** The user asked that work start only after the WS6 Monte Carlo session finished (done; merged). WS6 adds three items to this plan, to be placed when the work starts:
+* **pooling test over-rejection** (9% at 5% with 38 restrictions; P3 §10): use the F form or a wild bootstrap, and report its size (with WS-B3);
+* **`proj_actual`** takes its Bhatia–Davis bound from a CLR interval, so the projection column is not fully covered by P3.5(b2): compute that bound from a projection interval, or use Popoviciu, in the projection column (with the WS-B3 projection guard);
+* **NZ grouped fits**: M0 and M1 by electorate are both rejected, and non-empty M1 CLR intervals missed in 5/63 cells. Report this beside the M-SIGN "experimental" labelling, and use it in the release notes (WS-B0/WS-B9).
+
+The V-hat rank check found no numerical rank drop in any replication of any design (P3 §8), so the projection guard (P-B40) is a safeguard for degenerate designs, not a fix for an observed failure.
+
+### Original decision list
+
 1. **U1, integer tables (N1, and Δ4 by inheritance).**
    * (a) Recommended: relabel N1 and Δ4 as sharp for **continuous** unit tables. Add the 2×2 lattice remark and an "integer check" item to the backlog. N1 is not built, and in 2×2 with margins only the difference is below one lattice step (about $10^{-5}$ at realistic sizes).
    * (b) Implement integer N1 as an integer program with discrete target sets (new R15; L effort; integer programs are much slower at Wisconsin scale).

@@ -20,7 +20,7 @@
 
 They differ by the residual term
 $$E_{rc}=B_{rc}-\tilde B_{rc}=\sum_iw_{ir}e_{irc},\qquad e=\beta-m.$$
-$\tilde B$ is the right target when the question is about behaviour rather than the particular electorate. Both are linear in $K$ with the *sample* weights $w$, so $\mu$ is never estimated.
+$\tilde B$ is the right target when the question is about behaviour rather than the particular electorate. Only $\tilde B$ is affine in $K$, with the *sample* weights $w$, so $\mu$ is never estimated. $B$ is $\tilde B$ plus the residual term $E$, which does not depend on $K$ and is handled separately (§5). *(Corrected after review: an earlier version said both are linear in $K$.)*
 
 ### 0.3 Additional tags
 
@@ -96,7 +96,7 @@ Checked: concavity and piecewise linearity along random directions (`verify_phas
 $$\sqrt n\big(\hat\varphi_U-\varphi_U(\beta_0)\big)\Rightarrow\min_{\lambda\in\Lambda^*}\big(c+S^\top\lambda\big)^\top\mathcal Z,$$
 where $\Lambda^*\subseteq\Lambda$ is the set of optimal dual vertices at $\beta_0$.
 * (i) If $\Lambda^*$ is a singleton (JKST's tie-breaking), the limit is $N(0,g^{*\top}\Sigma g^*)$ with $g^*=c+S^\top\lambda^*$.
-* (ii) Otherwise it is the minimum of correlated normals, which has negative mean. The plug-in upper endpoint is then biased *downward*, and the lower endpoint upward, both by order $n^{-1/2}$. That is, the plug-in bound is too narrow.
+* (ii) If two active gradients differ in a direction in which the estimator varies, i.e. $(g_\lambda-g_{\lambda'})^\top\Sigma(g_\lambda-g_{\lambda'})>0$ for some $\lambda,\lambda'\in\Lambda^*$, the limit is a minimum of correlated normals that are not a.s. equal, and it has strictly negative mean. The plug-in upper endpoint is then biased *downward*, and the lower endpoint upward, both by order $n^{-1/2}$. That is, the plug-in bound is too narrow. If instead all active gradients agree on the support of $\mathcal Z$, all the $g_\lambda^\top\mathcal Z$ are a.s. equal and the limit is normal, as in (i), even though $\Lambda^*$ is not a singleton. *(Corrected after review: an earlier version claimed a negative mean whenever $\Lambda^*$ is not a singleton.)*
 * (iii) In case (ii) the standard bootstrap is inconsistent (Fang & Santos 2019, Cor. 3.1†).
 
 *Proof.*
@@ -104,10 +104,12 @@ where $\Lambda^*\subseteq\Lambda$ is the set of optimal dual vertices at $\beta_
 2. Such a map is Lipschitz, and its directional derivative is $h\mapsto\min_{\lambda\in\Lambda^*}g_\lambda^\top h$. A Lipschitz map with directional derivatives in finite dimensions is Hadamard directionally differentiable. [minLin]
 3. Apply the directional delta method. [dDM; 1–2]
 4. (i): the minimum over a singleton is linear, giving a normal limit. [3]
-5. (ii): for two or more non-identical $g_\lambda$, $E\min_\lambda g_\lambda^\top\mathcal Z<\min_\lambda E\,g_\lambda^\top\mathcal Z=0$ (strict Jensen for the concave min). [3; alg]
-6. (iii): the derivative is nonlinear, so the condition for bootstrap consistency fails. [Fang & Santos 2019†] ∎
+5. (ii): let $Y=g_\lambda^\top\mathcal Z$ and $Y'=g_{\lambda'}^\top\mathcal Z$ with $\operatorname{Var}(Y-Y')=(g_\lambda-g_{\lambda'})^\top\Sigma(g_\lambda-g_{\lambda'})>0$. Then $E\min_{\Lambda^*}g^\top\mathcal Z\le E\min(Y,Y')=\tfrac12E(Y+Y')-\tfrac12E\lvert Y-Y'\rvert=-\tfrac12E\lvert Y-Y'\rvert<0$. If $\operatorname{Var}(g_\lambda^\top\mathcal Z-g_{\lambda'}^\top\mathcal Z)=0$ for all active pairs, the minimum equals each $g_\lambda^\top\mathcal Z$ a.s., which is normal. [3; $\min(a,b)=\frac{a+b}2-\frac{\lvert a-b\rvert}2$; $Y-Y'$ is a nondegenerate normal]
+6. (iii): in case (ii) the derivative is nonlinear on the support of $\mathcal Z$, so the condition for bootstrap consistency fails. [Fang & Santos 2019†] ∎
 
-Checked: with two tied constraints and unit noise, the mean plug-in error is $-0.564\approx-1/\sqrt\pi$; with a unique active constraint it is 0.007.
+**Remark P3.4.1 (parametrise $C-1$ columns).** The shares satisfy $\sum_cT_c=1$, so the coefficient vectors of the $C$ column regressions sum to a known constant, and the joint covariance of all $C$ columns is singular. State $\hat\beta$, $\Sigma$ and the gradients $g_\lambda$ for the first $C-1$ columns and recover column $C$ by adding up. Then $\Sigma$ can be nonsingular. When it is positive definite, the condition in (ii) reduces to $g_\lambda\neq g_{\lambda'}$ in the reduced parametrisation.
+
+Checked: with two tied constraints and unit noise, the mean plug-in error is $-0.564\approx-1/\sqrt\pi$; with a unique active constraint it is 0.007. With two active gradients that differ only in a null direction of $\Sigma$, the mean is 0 (normal limit), as the corrected (ii) states.
 
 **Boundary cases.**
 * **Truth at a vertex.** When the true $K$ lies on the boundary of the identified set, the side of the interval that touches it carries the full error probability, so coverage is close to nominal. When the true $K$ is interior, coverage tends to 1 (JKST App. A Remark). This is the Imbens–Manski distinction between covering the parameter and covering the set.

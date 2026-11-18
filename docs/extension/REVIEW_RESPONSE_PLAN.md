@@ -70,7 +70,7 @@ These change what gets written, so they come first. The recommended choice is li
 | R-25 | 4.2 | S | P3 Lemma P3.1 | Add: this holds for a fixed constraint system and objective. It says nothing about joint variation in $(Q,\mu)$ (see R-06). | — |
 | R-26 | 4.3 | S/P | P3 Prop. P3.2 | (i) State convergence along a nested sampling sequence, or add an argument for non-nested hulls. (ii) Call Slater a strict-interiority condition and say it fails when an implied rate is 0 at a vertex. Note that P3.5's coverage does not need Slater (step 2 uses only feasibility). (iii) Split the error into estimation error ($O_p(n^{-1/2})$) and hull error (≥ 0, rate not shown). | Optional: report the minimum LP slack as a boundary flag |
 | R-27 | 4.4 | **E** (minor) | P3 Theorem P3.4(ii) | The non-Gaussian limit requires at least two active gradients with $(g_\lambda-g_{\lambda'})^\top\Sigma(g_\lambda-g_{\lambda'})>0$. Parametrise only $C-1$ outcome columns, so $\Sigma$ is nonsingular. | Check that $\hat\Sigma$ is built on $C-1$ columns (verify `rxc_core.R`) |
-| R-28 | 4.5 | **E** (assumption mismatch) | P3 P3-S1, Theorem P3.5(a); P1 A6; P2b D4 | Apply D3. **Docs:** (1) Replace P3-S1 with *S1a: given the design $\{(N_i,X_i,D_i)\}$ and the district effects, the unit residuals $e_i$ are independent.* Delete "arbitrary dependence within districts for M0, cluster-robust variances." (2) New P3 §0.4, "Where the randomness comes from": every precinct and riding is observed, so the uncertainty is neither sampling-based nor design-based in the Abadie et al. sense. It is model-based: the contextual-effects assumption is a statement about $E[\beta\mid V]$, which needs $\beta_i$ to be random given $V_i$. The targets $B$ and $\tilde B$ condition on this electorate, so riding shocks are fixed and belong in the mean (M1/M2), not in the residual. Under M0, a riding shock that is non-affine in composition is the omitted-variable failure of Prop. D4, which clustered SEs would not repair. (3) State the remaining assumption plainly: no dependence within a riding beyond its riding effect (e.g. neighbourhood spillovers). Name it as a limitation. **Response:** accept the reviewer's point that P3.5(a) needed independence, and say that the framework now assumes it explicitly, with the reasons above. Use the reviewer's common-shock example: under our target it is a riding effect, absorbed by M1 and detected by the new M0-vs-M1 test. | Deprecate `cluster` (warn and point to M1). Add a Wald test of M0 against M1 (district shifts zero), so riding shocks are detectable. |
+| R-28 | 4.5 | **E** (assumption mismatch) | P3 P3-S1, Theorem P3.5(a); P1 A6; P2b D4 | Apply D3. **Docs:** (1) Replace P3-S1 with *S1a: given the design $\{(N_i,X_i,D_i)\}$ and the district effects, the unit residuals $e_i$ are independent.* Delete "arbitrary dependence within districts for M0, cluster-robust variances." (2) New P3 §0.4, "Where the randomness comes from": every precinct and riding is observed, so the uncertainty is neither sampling-based nor design-based in the Abadie et al. sense. It is model-based: the contextual-effects assumption is a statement about $E[\beta\mid V]$, which needs $\beta_i$ to be random given $V_i$. The targets $B$ and $\tilde B$ condition on this electorate, so riding shocks are fixed and belong in the mean (M1/M2), not in the residual. Under M0, a riding shock that is non-affine in composition is the omitted-variable failure of Prop. D4, which clustered SEs would not repair. (3) State the remaining assumption plainly: no dependence within a riding beyond its riding effect (e.g. neighbourhood spillovers). Name it as a limitation. **Response:** accept the reviewer's point that P3.5(a) needed independence, and say that the framework now assumes it explicitly, with the reasons above. Use the reviewer's common-shock example: under our target it is a riding effect, absorbed by M1 and detected by the new pooling test. | **Remove `cluster` outright** (decided Nov 2026: no existing users). Add a **pooling test** under M1 of D4(b)'s condition: regress the estimated shifts $\hat Z_{D_i}$ on $X_i$ and $N_i$, and test that they are affine in $X$ and free of $N$. Testing $\zeta=0$ is not enough, because M0 can hold with $\zeta\neq0$ (e.g. $D\perp(X,N)$). |
 | R-29 | 4.6 | **E** (claim) | P3 Theorem P3.5(b) | Split it. **(b1) Theorem:** CLR with the full vertex set $\Lambda$, which is finite for a fixed design. **(b2) Algorithm:** collect candidates at simulated draws. **Proof route for a valid (b2):** by weak duality, $\theta_\lambda(\beta_0)\ge\varphi_U(\beta_0)$ for *every* dual-feasible $\lambda$. So $\min_{\lambda\in\hat V}(\hat\theta_\lambda+\hat k\hat\sigma_\lambda)$ covers $\varphi_U$ whenever $\hat k$ controls the maximum over a *fixed* set containing $\hat V$. A data-dependent subset is valid if its critical value is computed over the fixed superset (or the collected set is independent of $\hat\beta$ given the draws, to be checked). Write this as Prop. P3.5(b2) if it closes, otherwise as a Conjecture. List rarely selected vertices, degenerate faces, singular $\Sigma$ and a growing $\lvert\Lambda\rvert$ as the conditions to address. | Per D4: compute the critical value over the union of collected vertices *and* the plug-in vertex; print "algorithmic" when the theorem's conditions are not checked |
 | R-30 | 4.7 | **E** (P1) | P1 §1.6; P3 Prop. P3.6(b) | Fix P1's count to $(D^\star-1)(C-1)R(R-1)/2$, with the derivation $(C-1)R(R+1)/2-(C-1)R$. State the Wald/F test for fixed dimension. Under a growing number of restrictions it becomes a conjecture with simulation support. | Check the df in the Wald test code |
 | R-31 | 4.8–4.9 | **E** (scope) | P3 §0.1, §6, Prop. P3.7 | Apply D5. Replace "results are for R1/R3" with a table of which result covers each model and regime (D5 (i)–(iv)). Add **Theorem P3.8 (finite-sample CI)**. P3.7(a), "dropping constraints enlarges the set", stays a proposition. P3.7(b) becomes a conditional statement: *if* the procedure is valid on the kept districts, choosing them from the design alone keeps conditional coverage. "CLR restores coverage" in R2 becomes a *Simulation finding*. | `ci_method = "finite"`; note when the median group size is small, pointing to it |
@@ -79,16 +79,21 @@ These change what gets written, so they come first. The recommended choice is li
 | R-34 | 4.11 | S | P3 Prop. S1 | Label it an outer bound under bounded deviations, not the sharp set. | `sensitivity()` doc |
 | R-35 | rev. 5.2 | **E** (inconsistent) | P1 A1; P3 §7 | Change P1 A1 to say turnover is an open extension, as P3 §7 says. Note that it changes both the DD sets and the regression identity. | — |
 | R-36 | rev. 5 | S | P1 A6, A10 | Align A6 with S1a (D3) and A10 with the regime table (R-31). | — |
-| R-37 | rev. 6 | X | P3 §8 | Report Monte Carlo standard errors, and use at least 1000 replications for coverage cells. Add designs: (i) riding shocks correlated with composition, showing that M0 fails, M1 covers, and the M0-vs-M1 test detects the shocks; (ii) truth on the boundary, so Slater fails; (iii) R2 with growing $D^\star$, comparing the CLR (simulation finding) and finite-sample (theorem) intervals. | Benchmark/MC scripts |
+| R-37 | rev. 6 | X | P3 §8 | Report Monte Carlo standard errors, and use at least 1000 replications for coverage cells. Add designs: (i) riding shocks correlated with composition, showing that M0 fails, M1 covers, and the pooling test detects the shocks; (ii) truth on the boundary, so Slater fails; (iii) R2 with growing $D^\star$, comparing the CLR (simulation finding) and finite-sample (theorem) intervals. | Benchmark/MC scripts |
 
 ---
 
 ## 2. Workstreams and order
 
-### WS1: Correct outright errors (docs only; first)
+### WS1: Correct outright errors (docs only; first) — **done (Nov 2026)**
 R-04, R-06, R-07, R-23, R-27, R-30, R-35, plus the wording fix in R-33.
 * For each, write the corrected statement, a one-line counterexample to the old statement, and a verification check.
 * **Done when:** every row marked **E** above has a corrected statement, and `verify_*.py` contains a check that fails on the old statement (§3).
+* **Status:** done.
+  * Corrected: 2a §0.2 (S3), Theorem 1, Lemma 3(b)(c), new Remarks 5.1–5.2, Prop. 7 (outer-set LP; value-function regularity), §10; 2b Prop. D4(b) and new Remark D4.1; P1 Prop. 2-RC(i), (D2), (D4), A1 (turnover); P3 §0.2, Theorem P3.4(ii) and its proof, new Remark P3.4.1.
+  * Checks: `verify_phase2a.py` 27/27, `verify_phase2b.py` 19/19, `verify_phase3.py` 9/9. The new checks are the rows of §3 marked done.
+  * Finding: Remark 5.2 shows that A5 already implies $A$ is full-dimensional. So the compactness gap the reviewer found affects Lemma 3(b) used on its own, not Theorem 1.
+  * Still to do: P3-S1 and the cluster wording in P3 §1 and §9 wait for WS4 (R-28).
 
 ### WS2: Scope and assumptions (docs)
 R-01, R-02, R-05, R-10, R-11, R-12, R-15, R-19, R-22, R-25, R-33, R-36.
@@ -115,7 +120,7 @@ New layout for P3 §5–6:
 
 | Change | Files | Item |
 |---|---|---|
-| Deprecate `cluster` with a message (D3). Add the M0-vs-M1 Wald test. | `R/rxc_api.R`, `R/rxc_infer.R` | R-28 |
+| Remove `cluster` and the CR1 branch of `.rxc_vcov` (D3). Add the pooling test of D4(b). | `R/rxc_api.R`, `R/rxc_infer.R` | R-28 |
 | `ci_method = "finite"` (Hoeffding/Bernstein + union bound, Theorem P3.8) | `R/rxc_infer.R` | R-31 |
 | Critical value over the fixed superset of candidates. Add an `ndraw` note in the output. Add `ci_method = c("clr", "conservative")`. | `R/rxc_infer.R` (`.rxc_collect`, `.rxc_ci_clr`) | R-29, D4 |
 | Messages naming the failing group for rank and dimension problems (quadric-free support for M0/M2; affinely spanning support for M1; full-dimensional hull). | `R/rxc_core.R` | R-02, R-07, R-19 |
@@ -126,7 +131,7 @@ New layout for P3 §5–6:
 
 **Tests to add:**
 * the finite-sample CI contains the CLR CI in large samples, and covers in a small simulation;
-* the M0-vs-M1 test rejects with composition-correlated riding shocks;
+* the pooling test rejects with composition- or size-correlated riding shocks, and not under $D\perp(X,N)$;
 * the critical value over the superset is at least the one over the selected set;
 * a rank error for degenerate designs;
 * the Wald df.
@@ -173,15 +178,15 @@ Add these to the existing `verify_*.py` scripts and log them in each phase's ver
 
 | Check | Script | Item |
 |---|---|---|
-| Singleton $A$ with $Kx_0=0$: the LP is unbounded in $t$ | `verify_phase2a.py` | R-07 |
-| Singleton $A$ inside the hull: $M_H(x_0)\notin\mathfrak B$ is possible while S1–S2 hold | `verify_phase2a.py` | R-04 |
-| $V(Q,\mu)=\mu Q$ is not jointly concave (finite-difference Hessian) | `verify_phase2a.py` | R-06 |
+| Singleton $A$ with $Kx_0=0$: the LP is unbounded in $t$ (**done**) | `verify_phase2a.py` | R-07 |
+| Singleton $A$ inside the hull: $M_H(x_0)\notin\mathfrak B$ is possible while S1–S2 hold (**done**) | `verify_phase2a.py` | R-04 |
+| $V(Q,\mu)=\mu Q$ is not jointly concave (finite-difference Hessian) (**done**) | `verify_phase2a.py` | R-06 |
 | D4(b): $D\perp X$ but $D$ depends on $N$ ⇒ pooled $E[\beta\mid X,N]$ is not of the form $M_{H'}(X)$ | `verify_phase2b.py` | R-23 |
-| M1 df: the rank difference between the M2 and M1 designs equals $(D^\star-1)(C-1)R(R-1)/2$ | `verify_phase2b.py` | R-30 |
-| D4(b) with fixed riding shocks: M0's pooled mean is not $M_{H'}(X)$, and the M0-vs-M1 restriction fails | `verify_phase2b.py` | R-23, R-28 |
+| M1 df: the rank difference between the M2 and M1 designs equals $(D^\star-1)(C-1)R(R-1)/2$ (**done**) | `verify_phase2b.py` | R-30 |
+| D4(b): $D\perp X$ but not $N$ biases the pooled rate; $D\perp(X,N)$ does not (**done**, WS1) | `verify_phase2b.py` | R-23, R-28 |
 | Finite-sample bound: the Hoeffding radius dominates the simulated deviation of each constraint | `verify_phase3.py` | R-31 |
 | Any dual-feasible $\lambda$ gives $\theta_\lambda(\beta_0)\ge\varphi_U(\beta_0)$ (weak duality, random LPs) | `verify_phase3.py` | R-29 |
-| Equal active gradients that differ only in null directions of $\Sigma$ give a Gaussian limit | `verify_phase3.py` | R-27 |
+| Equal active gradients that differ only in null directions of $\Sigma$ give a Gaussian limit (**done**) | `verify_phase3.py` | R-27 |
 
 Each new check should **fail on the old statement and pass on the new one**, so the log shows the correction and not only the fix.
 

@@ -118,3 +118,15 @@ if claim(bounds(Q, V_all, 0, 1, 0.0)):
     print(f"     breakdown eta* for 'loyalty > 0.30': {lo_e:.4f}")
     ok("Breakdown: claim holds just below eta* and fails just above",
        claim(bounds(Q, V_all, 0, 1, lo_e * 0.99)) and not claim(bounds(Q, V_all, 0, 1, hi_e * 1.01 + 1e-6)))
+
+# ---------- Correction after review: Theorem P3.4(ii) needs distinct projected gradients ----------
+reps = 200000
+Sig = np.diag([1.0, 0.0])                                    # singular limiting covariance
+Zs = rng.multivariate_normal(np.zeros(2), Sig, reps)
+g1, g2 = np.array([1.0, 0.0]), np.array([1.0, 1.0])          # g1 != g2, but (g1-g2)' Sig (g1-g2) = 0
+m_same = np.minimum(Zs @ g1, Zs @ g2).mean()
+Zi = rng.standard_normal((reps, 2))
+m_dist = np.minimum(Zi @ g1, Zi @ g2).mean()                 # Sig = I: Var(Y - Y') = 1, E min = -1/sqrt(2 pi)
+ok(f"Thm P3.4(ii): two active gradients equal on supp(Z) give mean {m_same:.4f} (normal limit; the earlier "
+   f"'non-singleton => negative mean' fails), distinct ones give {m_dist:.4f} ~ {-1/np.sqrt(2*np.pi):.4f}",
+   abs(m_same) < 0.01 and abs(m_dist + 1 / np.sqrt(2 * np.pi)) < 0.01)

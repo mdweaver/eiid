@@ -7,3 +7,4 @@ PASS Prop S1: eta-bounds nested (wider as eta grows)
 PASS Prop S1: violated-model truth 0.8499 lies in the eta=0.02 bound [0.3617, 0.9669]
      breakdown eta* for 'loyalty > 0.30': 0.0595
 PASS Breakdown: claim holds just below eta* and fails just above
+PASS Thm P3.4(ii): two active gradients equal on supp(Z) give mean 0.0006 (normal limit; the earlier 'non-singleton => negative mean' fails), distinct ones give -0.4009 ~ -0.3989

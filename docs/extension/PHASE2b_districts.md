@@ -1,6 +1,6 @@
 # Phase 2b: units nested in groups, and the assumption ladder
 
-*Builds on `PHASE1_foundations.md` (P1) and `PHASE2a_rxc.md` (2a). Every proof step ends with a justification tag; tags are those of 2a §0.3 plus the new ones in §0.3. All closed forms, inclusions and examples are checked in `verify_phase2b.py` (output: `verify_phase2b_output.txt`, 14/14 PASS).*
+*Builds on `PHASE1_foundations.md` (P1) and `PHASE2a_rxc.md` (2a). Every proof step ends with a justification tag; tags are those of 2a §0.3 plus the new ones in §0.3. All closed forms, inclusions and examples are checked in `verify_phase2b.py` (output: `verify_phase2b_output.txt`, 19/19 PASS).*
 
 *"District" means any partition of the units into groups: ridings, counties within states, schools within boards, or, as Remark 6.2 shows, election periods. The results do not use anything specific to voter transitions.*
 
@@ -174,21 +174,25 @@ Verified against the LP in 126 random column instances.
 
 **Proposition D4 (when dummies matter).**
 (a) If $\zeta\equiv0$, then $\Theta^{M1}_O=\Theta^{M0}_O(\operatorname{conv}\bigcup_dA_d)$: dummies neither help nor hurt identification.
-(b) Under M1, write $Z_d:=[\zeta_{c,d,r}]_{rc}$. Then
-$$E[\beta\mid X]=M_H(X)+E[Z_D\mid X],$$
-and the pooled model M0 holds (for some $H'$) iff $x\mapsto E[Z_D\mid X=x]$ is affine on $\operatorname{supp}P_X$. In particular, $D\perp X$ suffices.
+(b) Under M1 with $P(X\in A_D)=1$, write $Z_d:=[\zeta_{c,d,r}]_{rc}$. Here M0 means the pooled model of 2a, a restriction on $E[\beta\mid X,N]$, which does not involve $D$. Then
+$$E[\beta\mid X,N]=M_H(X)+E[Z_D\mid X,N],$$
+and M0 holds (for some $H'$) iff there is a $G$ with $E[Z_D\mid X,N]=M_G(X)$ a.s.; that is, iff $E[Z_D\mid X,N]$ is a.s. equal to a function of $X$ alone that is affine on $\operatorname{supp}P_X$. In particular $D\perp(X,N)$ suffices, and so does $D\perp N\mid X$ together with $E[Z_D\mid X]$ affine. **$D\perp X$ alone does not suffice** (Remark D4.1). When M0 holds this way, its (S3) on $A=\operatorname{conv}\operatorname{supp}P_X$ is automatic by 2a Lemma 3(c). For any other pooled region $A$ it remains a separate condition.
 
 *Proof of (a).*
 1. $\zeta\equiv0$ gives $Q^{(d)}=Q$ for all $d$, so the pooled regression function is also $X^\top QX$. [D1(b); CE-tower]
 2. The M1 constraints then require $(Q_c+K_c)v\ge0$ for $v\in\bigcup_d\operatorname{vert}(A_d)$. By linearity that is equivalent to the constraint on $\operatorname{conv}\bigcup_dA_d$, i.e. the M0 outer set. [Thm 2(b); 2a:L3(a)] ∎(a)
 
 *Proof of (b).*
-1. $E[\beta\mid X]=E\big[E[\beta\mid V]\mid X\big]=E[M_H(X)+Z_D\mid X]=M_H(X)+E[Z_D\mid X]$. [CE-tower; S2-d with M1; 0.1, $(Z\mathbf 1^\top)x=Z$]
-2. On the simplex, an affine function of $x$ equals a homogeneous linear one: $a+b^\top x=(a\mathbf 1+b)^\top x$. [alg; $\mathbf 1^\top x=1$]
-3. "If": an affine $E[Z_D\mid X]$ equals $M_G(X)$ for some $G$, so M0 holds with $H'=H+G$. [2]
-4. "Only if": if M0 holds with $H'$, then $E[Z_D\mid X]=M_{H'-H}(X)$, which is linear. [1] ∎(b)
+1. $E[\beta\mid X,N]=E\big[E[\beta\mid X,N,D]\mid X,N\big]=E[M_H(X)+Z_D\mid X,N]=M_H(X)+E[Z_D\mid X,N]$. [CE-tower, $\sigma(X,N)\subseteq\sigma(V)$; S2-d with M1; 0.1, $(Z\mathbf 1^\top)x=Z$; CE-pull, $M_H(X)$ is $\sigma(X,N)$-measurable]
+2. On the simplex, an affine function of $x$ equals a homogeneous linear one: $a+b^\top x=(a\mathbf 1+b)^\top x$. Every linear map $\mathbb R^R\to\mathbb R^{R\times C}$ is $x\mapsto M_G(x)$ for some $G$. [alg; $\mathbf 1^\top x=1$]
+3. "If": if $E[Z_D\mid X,N]=M_G(X)$ a.s., then $E[\beta\mid X,N]=M_{H+G}(X)$, which is (S2) of 2a with $H'=H+G$. [1–2]
+4. "Only if": if M0 holds with $H'$, then $E[Z_D\mid X,N]=M_{H'}(X)-M_H(X)=M_{H'-H}(X)$ a.s., a function of $X$ only, linear in $X$. [1; 2a Def of (S2)]
+5. If $D\perp(X,N)$, then $E[Z_D\mid X,N]=E[Z_D]$, a constant, hence affine in $X$. If $D\perp N\mid X$, then $E[Z_D\mid X,N]=E[Z_D\mid X]$. [indep.]
+6. (S3) on $\operatorname{conv}\operatorname{supp}P_X$: under M0 with $H'$, (S1)–(S2) hold, so 2a Lemma 3(c) applies. [2a:L3(c)] ∎(b)
 
-*Meaning:* dummies are needed for validity exactly when district baselines vary with composition in a non-affine way, e.g. stronghold districts with different baselines. When M0 fails, the pooled quadratic fit is a projection with no bounding guarantee. In the 2×2 example (P1 §7.3) the pooled outer set is empty. In the 3×3 example it happens to cover the truth, which is not guaranteed.
+**Remark D4.1 ($D\perp X$ is not enough; corrected after review).** An earlier version conditioned on $X$ only and claimed $D\perp X$ suffices. The size-weighted estimand of 2a Lemma 2 uses $E[\beta\mid X,N]$, not $E[\beta\mid X]$. Counterexample: two districts with the same distribution of $X$, district 2 has larger precincts, and $\zeta_{\cdot,2}\neq0$. Then $E[Z_D\mid X,N]=Z_2\,P(D=2\mid N)$ varies with $N$, so (S2) of M0 fails. The $X$-only pooled model of $\Theta_X$ still holds, since $E[Z_D\mid X]=Z_2\pi_2$ is constant. But the identity $E[NX_r\beta_{rc}]=E[NX_rM_{H'}(X)_{rc}]$ behind Lemma 2 fails whenever size is correlated with the district shift, so pooled bounds on $B^*$ can be biased. The violation is generally visible in the data: $E[T\mid X,N]$ then depends on $N$ unless $x^\top Z_2=0$, which (T1) of 2a Theorem 1 rules out. It is checked numerically in `verify_phase2b.py`.
+
+*Meaning:* for the conditional-mean model, dummies are needed exactly when the expected district baseline, given composition and size, either varies non-affinely with composition (e.g. stronghold districts with different baselines) or varies with precinct size. The pooled *outer* bounds additionally need probability validity on the pooled region, which is automatic for the population hull and an assumption otherwise. When M0 fails, the pooled quadratic fit is a projection with no bounding guarantee. In the 2×2 example (P1 §7.3) the pooled outer set is empty. In the 3×3 example it happens to cover the truth, which is not guaranteed.
 
 **Proposition D5 (M2 adds district intervals).**
 $$\mathcal B^{M2}_O=\sum_d\big[\varphi^{(d)}_L,\varphi^{(d)}_U\big],$$
@@ -284,7 +288,7 @@ What the table shows:
 
 ## 7. Verification log
 
-`python3 -I verify_phase2b.py` (14 PASS, 0 FAIL) checks:
+`python3 -I verify_phase2b.py` (19 PASS, 0 FAIL) checks:
 * Lemma D1: recovery of $\zeta$, the overidentifying restrictions and the $K^{(d)}$ relation.
 * Theorem 2: ladder nesting for four targets; the truth in every valid rung.
 * Prop. D6: monotone in $\delta$; equals M2 for large $\delta$.
@@ -294,6 +298,9 @@ What the table shows:
 * Prop. D3: closed form against the LP (126 instances).
 * Prop. D0: per-cell Fréchet extremes attained (300 tables).
 * The 2×2 example reproduces P1 §7.3.
+* Corrections after review (each check fails on the earlier statement):
+  * Prop. D4(b): with $D\perp X$ but $D$ correlated with $N$, $E[\beta\mid X,N]$ depends on $N$ while $E[\beta\mid X]$ is affine, and the pooled size-weighted rate is biased. With $D\perp(X,N)$ it is exact.
+  * P1 (D2) and P3 Prop. P3.6(b): the rank gap between the M2 and M1 designs is $(D^\star-1)R(R-1)/2$ per column, and column $C$'s restrictions are implied. That gives $(D^\star-1)(C-1)R(R-1)/2$ in total (three table shapes).
 
 Not machine-checked: the measure-theoretic content of Theorem 1′, which rests on 2a Theorem 1.
 

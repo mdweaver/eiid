@@ -19,3 +19,8 @@ PASS Prop D0: per-cell Frechet extremes are attained by feasible tables (300 ran
      2x2 example (P1 section 7.3): truth 0.819  DD [0.453, 0.879]  M0 empty  M2 [0.563, 0.870]  M1 [0.618, 0.866]  L5 point 0.858
 PASS 2x2 example: M1 bound reproduces Phase 1 [0.618, 0.866]
 PASS 2x2 example: pooled M0 outer set is empty (as in Phase 1)
+PASS Prop D4(b): D indep. of X but not of N -> E[beta|X,N] depends on N, E[beta|X] affine, and the pooled size-weighted rate is biased (0.4740 vs true 0.5149); 'D indep. X suffices' fails
+PASS Prop D4(b): with D indep. of (X, N) the pooled size-weighted rate is exact
+PASS M1 restriction count 2x2, D*=3: rank gap 2 per column, column C implied -> 2 independent restrictions (earlier P1 count 4)
+PASS M1 restriction count 3x3, D*=4: rank gap 9 per column, column C implied -> 18 independent restrictions (earlier P1 count 27)
+PASS M1 restriction count 3x2, D*=5: rank gap 12 per column, column C implied -> 12 independent restrictions (earlier P1 count 24)

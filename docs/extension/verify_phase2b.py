@@ -386,3 +386,51 @@ print(f"     2x2 example (P1 section 7.3): truth {tr:.3f}  DD {fmt(dd_bound(ds, 
       f"M2 {fmt(m2)}  M1 {fmt(m1)}  L5 point {l5:.3f}")
 ok("2x2 example: M1 bound reproduces Phase 1 [0.618, 0.866]", abs(m1[0] - 0.618) < 5e-4 and abs(m1[1] - 0.866) < 5e-4)
 ok("2x2 example: pooled M0 outer set is empty (as in Phase 1)", m0 is None)
+
+# ---------------- Corrections after review (each check fails on the earlier statement) ----------------
+# Prop D4(b): D independent of X but correlated with N. Exact population with a discrete design.
+# 2x2, row 1 = group of interest; M_H(x) linear and valid; district 2 shifts column 1 by z = (0.10, 0.05).
+def M_H(x1):
+    return np.array([[0.30 + 0.20 * x1, 0.70 - 0.20 * x1],
+                     [0.60 - 0.10 * x1, 0.40 + 0.10 * x1]])
+Z2 = np.array([[0.10, -0.10], [0.05, -0.05]])                # rows sum to 0 across columns
+cells = [(x1, d, (100 if d == 1 else 1000)) for x1 in (0.2, 0.5, 0.8) for d in (1, 2)]   # equal prob each
+Eb_XN = {(x1, n): M_H(x1) + (Z2 if d == 2 else 0) for x1, d, n in cells}
+Eb_X = {x1: M_H(x1) + 0.5 * Z2 for x1 in (0.2, 0.5, 0.8)}   # D independent of X, P(D=2) = 1/2
+depends_on_N = any(not np.allclose(Eb_XN[(x1, 100)], Eb_XN[(x1, 1000)]) for x1 in (0.2, 0.5, 0.8))
+xs_ = np.array([0.2, 0.5, 0.8]); vals = np.array([Eb_X[x][0, 0] for x in xs_])
+affine_in_X = abs(vals[0] - 2 * vals[1] + vals[2]) < 1e-12      # equally spaced points: zero 2nd difference
+mu1 = sum(n * x1 for x1, d, n in cells)
+B_true = sum(n * x1 * Eb_XN[(x1, n)][0, 0] for x1, d, n in cells) / mu1
+B_pool = sum(n * x1 * Eb_X[x1][0, 0] for x1, d, n in cells) / mu1      # Lemma 2 with the X-only pooled mean
+ok(f"Prop D4(b): D indep. of X but not of N -> E[beta|X,N] depends on N, E[beta|X] affine, and the "
+   f"pooled size-weighted rate is biased ({B_pool:.4f} vs true {B_true:.4f}); 'D indep. X suffices' fails",
+   depends_on_N and affine_in_X and abs(B_pool - B_true) > 1e-3)
+cells_ind = [(x1, d, n) for x1 in (0.2, 0.5, 0.8) for d in (1, 2) for n in (100, 1000)]   # D indep. (X, N)
+B_true_i = sum(n * x1 * (M_H(x1) + (Z2 if d == 2 else 0))[0, 0] for x1, d, n in cells_ind)
+B_pool_i = sum(n * x1 * Eb_X[x1][0, 0] for x1, d, n in cells_ind)
+ok("Prop D4(b): with D indep. of (X, N) the pooled size-weighted rate is exact", abs(B_true_i - B_pool_i) < 1e-12)
+
+# P1 (D2) / P3 Prop P3.6(b): number of independent M1 overidentifying restrictions.
+def mono(X):
+    R = X.shape[1]
+    return np.column_stack([X[:, r] * X[:, s] for r in range(R) for s in range(r, R)])
+for (R, C, Dn) in [(2, 2, 3), (3, 3, 4), (3, 2, 5)]:
+    nd = 40
+    Xs = [rng.dirichlet(np.ones(R), nd) for _ in range(Dn)]
+    blocks2, blocks1 = [], []
+    for d in range(Dn):
+        Md = mono(Xs[d])
+        b2 = np.zeros((nd, Dn * Md.shape[1])); b2[:, d * Md.shape[1]:(d + 1) * Md.shape[1]] = Md
+        sh = np.zeros((nd, (Dn - 1) * R))
+        if d > 0: sh[:, (d - 1) * R:d * R] = Xs[d]
+        blocks2.append(b2); blocks1.append(np.hstack([Md, sh]))
+    Z2d, Z1d = np.vstack(blocks2), np.vstack(blocks1)
+    per_col = np.linalg.matrix_rank(Z2d) - np.linalg.matrix_rank(Z1d)
+    # column C is 1 - sum of the others; 1 lies in both column spaces, so its M1 restrictions are implied
+    one_in = [np.linalg.lstsq(Z, np.ones(len(Z)), rcond=None)[1] for Z in (Z1d, Z2d)]
+    implied = all((len(r) == 0) or (r[0] < 1e-18) for r in one_in)
+    new, old = (Dn - 1) * (C - 1) * R * (R - 1) // 2, (Dn - 1) * C * R * (R - 1) // 2
+    ok(f"M1 restriction count {R}x{C}, D*={Dn}: rank gap {per_col} per column, column C implied -> "
+       f"{new} independent restrictions (earlier P1 count {old})",
+       per_col == (Dn - 1) * R * (R - 1) // 2 and implied and per_col * (C - 1) == new and new != old)

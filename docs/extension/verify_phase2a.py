@@ -278,3 +278,40 @@ for _ in range(100):
         formula = m[r, s] * ((a[r, c] - a[r, C - 1]) / mr[r] - (a[s, c] - a[s, C - 1]) / mr[s])
         bad += abs(direct - formula) > 1e-12
 ok("Prop 7: closed-form gamma coefficients match direct computation (100 random targets)", bad == 0)
+
+# ---------- Corrections after review (each check fails on the earlier statement) ----------
+# Remark 5.1: S3 is not implied for every A inside the hull. A = {x0} with P(X = x0) = 0 imposes (S2)
+# nowhere, so any K is compatible with (S1)-(S2), and some K makes M_{Q+K}(x0) invalid.
+Qv = random_H(3, 2)                                           # valid symmetric part (H_c >= 0, sum = J)
+Qv = [(H + H.T) / 2 for H in Qv]
+x0 = np.array([0.3, 0.3, 0.4])                                # interior of any full-dimensional hull
+Kbad = K_from_vec(np.array([5.0, 0.0, 0.0]), 3, 2)
+M_x0 = np.array([(Qv[c] + Kbad[c]) @ x0 for c in range(2)]).T
+supp = rng.dirichlet(np.ones(3), 500)                         # continuous P_X: P(X = x0) = 0
+ok("Remark 5.1: A={x0} inside conv supp P_X, (S1)-(S2) vacuous, yet M_H(x0) has a negative entry "
+   "(the earlier claim 'S3 implied when A is inside the hull' fails)",
+   M_x0.min() < 0 and not np.any(np.all(np.isclose(supp, x0), axis=1)))
+
+# Remark 5.2: with A a singleton (nonempty relative interior in its own affine hull) Theta_O is unbounded.
+xs = np.ones(3) / 3
+Qh = [0.5 * np.ones((3, 3)), 0.5 * np.ones((3, 3))]
+A1, b1 = outer_constraints(Qh, [xs])
+res = linprog(np.array([-1.0, 0, 0]), A_ub=A1, b_ub=b1, bounds=[(None, None)] * 3, method="highs")
+Kc = K_from_vec(np.array([1.0, -1.0, 1.0]), 3, 2)             # k = (1, -1, 1) gives K_1 x0 = 0
+ok("Remark 5.2: A = {x0}, Q = J/2: K_1 x0 = 0 along a line, and the LP is unbounded",
+   np.allclose(Kc[0] @ xs, 0) and res.status == 3)
+Af, bf = outer_constraints(Qh, list(np.eye(3)))
+resf = [linprog(sgn * np.eye(3)[j], A_ub=Af, b_ub=bf, bounds=[(None, None)] * 3, method="highs").status
+        for j in range(3) for sgn in (1, -1)]
+ok("Remark 5.2: with A full-dimensional (the simplex), the same LP is bounded in every coordinate",
+   all(st == 0 for st in resf))
+
+# Prop 7 regularity: V(Q, mu) = max{mu k : -Q <= k <= Q} = mu Q is not jointly concave.
+def V(Qs, mu):
+    r = linprog([-mu], A_ub=[[1.0], [-1.0]], b_ub=[Qs, Qs], bounds=[(None, None)], method="highs")
+    return -r.fun
+p1, p2 = (1.0, 1.0), (3.0, 3.0)
+mid = V(2.0, 2.0); avg = (V(*p1) + V(*p2)) / 2
+ok(f"Prop 7: joint value function is not concave (V(midpoint) = {mid:.1f} < average {avg:.1f})", mid < avg - 1e-9)
+ok("Prop 7: for fixed mu the value is concave (here linear) in Q",
+   abs(V(2.0, 1.5) - (V(1.0, 1.5) + V(3.0, 1.5)) / 2) < 1e-9)

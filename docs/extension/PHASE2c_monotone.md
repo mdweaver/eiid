@@ -12,7 +12,7 @@
 
 ## 0. Setting
 
-### 0.1 Finite population (the exact rungs)
+### 0.1 Finite population (the N1 rungs)
 
 * The units $i=1,\dots,p$ are fixed (the design is conditioned on, as in P3 (P3-S2)). Unit weights are $p_i=N_i/\sum_jN_j$.
 * $X_i\in\Delta^{R-1}$, $T_i\in\Delta^{C-1}$, and the realised rates satisfy $\beta_i\in S(X_i,T_i)$ (2a §0.2).

@@ -24,9 +24,10 @@ repository. `PLAIN_LANGUAGE_GUIDE.md` there explains every rung in plain terms.
 
 For each target (by default every row-by-column cell), `eiBounds()` reports:
 
-* `estimate`: the estimated identified set for the *model-implied rate*. This
-  is not a confidence interval, and it tends to be too narrow when there are
-  many noisy constraints.
+* `estimate`: the estimated (outer) identified set for the *model-implied
+  rate*. It is sharp relative to the regression function, not to the full
+  data. It is not a confidence interval, and it tends to be too narrow when
+  there are many noisy constraints.
 * `ci_model`: a confidence interval for the model-implied rate at the observed
   compositions (the "behavioural" rate).
 * `ci_actual`: a confidence interval for the *actual* rate in these units.
@@ -35,9 +36,21 @@ For each target (by default every row-by-column cell), `eiBounds()` reports:
   default) or by the Popoviciu bound of 1/4 used by Jiang et al.
 * `duncan_davis`: the model-free bounds for the actual rate.
 
-The confidence intervals use intersection-bound inference (Chernozhukov, Lee
-and Rosen 2013). Jiang et al.'s CI_x intervals are also available
-(`jkst = TRUE`).
+The default confidence intervals use intersection-bound inference (Chernozhukov,
+Lee and Rosen 2013). The candidate endpoints are collected by simulation, so the
+interval as implemented is *algorithmic*: its coverage is supported by
+simulation but not proved. Alongside it, `proj_model` and `proj_actual` give
+projection intervals built from the same candidates. These have an asymptotic
+guarantee for a fixed-dimensional regression (M0 in any design; grouped models
+with few, large groups) and are usually only slightly wider.
+`ci = "conservative"` gives the other proved interval. Jiang et al.'s CI_x
+intervals are also available (`jkst = TRUE`).
+
+Inference is conditional on the observed compositions and on the group effects.
+Units are assumed independent given them, and no clustered variance is used.
+A shock shared by the units of a group belongs in the mean: use M1 or M2. With
+groups, `eiBounds()` also reports a pooling test of M0 against M1 (all group
+shifts zero) and the test of M1's testable part against M2.
 
 ## Two-by-two: the original method
 

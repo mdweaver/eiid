@@ -6,7 +6,7 @@
 .rxc_setup <- function(X, T, N, group = NULL, model = "M0", delta = 0, L4row = NULL,
                        range = c("hull", "trim", "extrapolate"), trim = NULL,
                        extrapolate = NULL, range_offset = 0, weights = c("none", "n"),
-                       vcov = "HC3", cluster = NULL, extra = NULL) {
+                       vcov = "HC3", extra = NULL) {
   range <- match.arg(range); weights <- match.arg(weights)
   model <- match.arg(model, setdiff(.rxc_models, "DD"))
   n <- nrow(X); R <- ncol(X); C <- ncol(T)
@@ -53,16 +53,13 @@
   sw <- if (weights == "n") sqrt(Nk) else rep(1, length(Nk))
   Zw <- Z * sw; Yw <- Tk[, seq_len(C - 1), drop = FALSE] * sw
   qrZ <- qr(Zw)
-  if (qrZ$rank < ncol(Zw)) {
-    bad <- if (type %in% c("block", "shift", "goodman_block"))
-      paste0(" (check that every group has enough units with varying composition; groups: ",
-             paste(lev, collapse = ", "), ")") else ""
-    stop("the regression design is rank deficient", bad, call. = FALSE)
-  }
+  if (qrZ$rank < ncol(Zw))
+    stop("the regression design is rank deficient", .rxc_rank_hint(Xk, gk, G, type, levels(gk_f)),
+         call. = FALSE)
   B <- qr.coef(qrZ, Yw)
   B <- matrix(B, ncol = C - 1)
   E <- Yw - Zw %*% B
-  vc <- .rxc_vcov(Zw, E, type = vcov, cluster = if (is.null(cluster)) NULL else cluster[keep])
+  vc <- .rxc_vcov(Zw, E, type = vcov)
   beta <- as.vector(B)
   # ---- composition range ----
   vert <- vector("list", G)
@@ -86,6 +83,45 @@
              keep = keep, X_all = X, T_all = T, N_all = N, extra = extra, range = range,
              resid = E)
   st
+}
+
+# Which groups break the rank condition (2a A5; 2b Lemma D1(d))? Returns a message suffix.
+# pooled / M0: A5 on all units (the quadratic design); block (M2, M1delta) and goodman_block:
+# per group; shift (M1, L4 with groups): A5 pooled and R affinely independent compositions in
+# every group (sufficient; the exact condition is the stacked rank).
+.rxc_rank_hint <- function(X, g, G, type, lev) {
+  R <- ncol(X)
+  qd <- function(Xs) { if (nrow(Xs) == 0) return(0L); qr(.rxc_design(Xs, rep(1L, nrow(Xs)), 1, "pooled")$Z)$rank }
+  m <- R * (R + 1) / 2
+  aff <- function(Xs) if (nrow(Xs) == 0) 0L else qr(Xs)$rank   # = affine rank + 1 on the simplex
+  if (type %in% c("pooled", "goodman")) {
+    return(if (type == "pooled")
+      sprintf(" (the compositions lie on a quadric: %d of the %d quadratic coefficients are identified; for R = 3 at least six compositions off a common conic are needed)", qd(X), m) else
+      " (the compositions do not span the simplex)")
+  }
+  bad <- character(0)
+  for (gg in seq_len(G)) {
+    Xg <- X[g == gg, , drop = FALSE]
+    ok <- if (type == "block") qd(Xg) == m else aff(Xg) == R
+    if (!ok) bad <- c(bad, lev[gg])
+  }
+  extra <- if (type == "shift" && qd(X) < m) "; the pooled compositions also lie on a quadric" else ""
+  need <- switch(type, block = "compositions off every quadric (2a A5 within the group)",
+                 shift = sprintf("%d affinely independent compositions (2b Lemma D1(d))", R),
+                 goodman_block = sprintf("%d affinely independent compositions", R),
+                 "enough varying compositions")
+  if (length(bad)) sprintf(" (groups without %s: %s%s)", need, paste(bad, collapse = ", "), extra) else
+    sprintf(" (every group has %s; the stacked design is still singular%s)", need, extra)
+}
+
+# Strict feasibility (Slater) at beta-hat: max over k of the smallest constraint value, in
+# probability units. Near zero means some implied rate is (close to) 0 at a hull vertex for
+# every feasible K: P3 Prop. P3.2's rate result assumes it is not; coverage does not need it.
+.rxc_slack <- function(cons, beta) {
+  if (is.null(cons$A) || ncol(cons$A) == 0) return(NA_real_)
+  s <- as.vector(cons$S %*% beta) + cons$s0
+  tt <- tryCatch(.rxc_meet(numeric(0), matrix(0, 0, ncol(cons$A)), s, cons$A), error = function(e) NA_real_)
+  tt
 }
 
 # ---------------------------------------------------------------------------
@@ -165,7 +201,12 @@
 # Emptiness rule for this version (R10 §3.1): the CI is empty iff the ends cross. If no draw
 # is feasible, candidates come from relaxed rows (see .rxc_collect); the CLR rule is kept and
 # is not mixed with the conservative rule. The caller reports a crossing as "rejected".
-.rxc_ci_clr <- function(st, cons, tg, alpha_lo, alpha_up, Zs, ndraw) {
+# 'proj_alpha': also return the projection interval (P3 Prop. P3.5(b2)(ii)) built from the same
+# candidates, as attribute "projection". Any dual-feasible candidate bounds the endpoint at the
+# truth (weak duality), and one Scheffe-type event covers every candidate and both ends, so this
+# interval has an asymptotic guarantee whatever candidates are collected; the CLR interval as
+# implemented is algorithmic (Conjecture P3.5(b3)).
+.rxc_ci_clr <- function(st, cons, tg, alpha_lo, alpha_up, Zs, ndraw, proj_alpha = NULL) {
   if (length(cons$disj)) stop("internal: CLR is not valid with disjunctive (slab) rows; use branches")
   draws <- c(list(st$beta), lapply(seq_len(ndraw), function(i)
     st$beta + as.vector(Zs$Vsq %*% stats::rnorm(ncol(Zs$Vsq)))))
@@ -173,11 +214,29 @@
   cl <- .rxc_collect(cons, tg, st$beta, Zs$Vsq, ndraw, "lower", draws = draws)
   if (is.null(cu)) cu <- .rxc_collect(cons, tg, st$beta, Zs$Vsq, ndraw, "upper", relax = TRUE, draws = draws)
   if (is.null(cl)) cl <- .rxc_collect(cons, tg, st$beta, Zs$Vsq, ndraw, "lower", relax = TRUE, draws = draws)
-  if (is.null(cu) || is.null(cl)) return(c(NA_real_, NA_real_))
+  if (is.null(cu) || is.null(cl)) {
+    out <- c(NA_real_, NA_real_)
+    if (!is.null(proj_alpha)) attr(out, "projection") <- c(NA_real_, NA_real_)
+    return(out)
+  }
   n <- nrow(st$X)
   U <- .rxc_clr_min(as.vector(cu$G %*% st$beta) + cu$ic, cu$G, Zs, alpha_up, n)
   Ln <- .rxc_clr_min(-(as.vector(cl$G %*% st$beta) + cl$ic), -cl$G, Zs, alpha_lo, n)
-  c(-Ln, U)
+  out <- c(-Ln, U)
+  if (!is.null(proj_alpha)) attr(out, "projection") <- .rxc_projection(st, cu, cl, Zs, proj_alpha)
+  out
+}
+
+# Projection interval (P3.5(b2)(ii)) from collected candidates: upper end min_j(theta_j + k se_j),
+# lower end max_j(theta_j - k se_j), k = sqrt(qchisq(1 - alpha, q)), q = rank of V.
+.rxc_projection <- function(st, cu, cl, Zs, alpha) {
+  ev <- eigen((Zs$V + t(Zs$V)) / 2, symmetric = TRUE, only.values = TRUE)$values
+  q <- max(1L, sum(ev > 1e-10 * max(ev)))
+  k <- sqrt(stats::qchisq(1 - alpha, q))
+  seU <- sqrt(pmax(rowSums((cu$G %*% Zs$V) * cu$G), 0))
+  seL <- sqrt(pmax(rowSums((cl$G %*% Zs$V) * cl$G), 0))
+  c(max(as.vector(cl$G %*% st$beta) + cl$ic - k * seL),
+    min(as.vector(cu$G %*% st$beta) + cu$ic + k * seU))
 }
 
 # conservative version (Theorem P3.5(a)): inflate every constraint simultaneously
@@ -297,7 +356,9 @@
                 ci_rejected = FALSE, n_pieces = se_$pieces,
                 estimate_gap_lower = se_$gap_lower, estimate_gap_upper = se_$gap_upper,
                 ci_model_gap_lower = NA_real_, ci_model_gap_upper = NA_real_,
-                ci_actual_gap_lower = NA_real_, ci_actual_gap_upper = NA_real_)
+                ci_actual_gap_lower = NA_real_, ci_actual_gap_upper = NA_real_,
+                proj_model_lower = NA_real_, proj_model_upper = NA_real_,
+                proj_actual_lower = NA_real_, proj_actual_upper = NA_real_)
     cm_u <- ca_u <- NULL
     if (ci != "none") {
       rng <- .rxc_interval_lin(a, matrix(0, R, C), matrix(1, R, C))
@@ -330,8 +391,9 @@
         a3 <- sweep(a, 1, 1 - share, "*")
         .rxc_interval_lin(a3, dd_trim$lower, dd_trim$upper)
       } else c(0, 0)
-      cms <- list(); cas <- list()
+      cms <- list(); cas <- list(); pms <- list(); pas <- list()
       for (sy in sys_ci) {
+        pm <- pe <- NULL
         # model-implied rate
         if (point) {
           pl <- .rxc_plugin(sy, tg, st$beta)
@@ -340,9 +402,11 @@
           pl2 <- sum(tg2$cvec * st$beta) + tg2$c0
           se2 <- sqrt(max(0, sum(tg2$cvec * (st$V %*% tg2$cvec))))
           ce <- pl2 + c(-1, 1) * stats::qnorm(1 - a_est / 2) * se2
+          pm <- cm; pe <- ce        # one linear functional: the normal interval is exact
         } else if (ci == "clr") {
-          cm <- .rxc_ci_clr(st, sy, tg, alpha / 2, alpha / 2, Zs, ndraw)
-          ce <- .rxc_ci_clr(st, sy, tg2, a_est / 2, a_est / 2, Zs, ndraw)
+          cm <- .rxc_ci_clr(st, sy, tg, alpha / 2, alpha / 2, Zs, ndraw, proj_alpha = alpha)
+          ce <- .rxc_ci_clr(st, sy, tg2, a_est / 2, a_est / 2, Zs, ndraw, proj_alpha = a_est)
+          pm <- attr(cm, "projection"); pe <- attr(ce, "projection")
         } else {
           cm <- .rxc_ci_conservative(st, sy, tg, alpha, Zs)$ci
           ce <- .rxc_ci_conservative(st, sy, tg2, a_est, Zs)$ci
@@ -353,6 +417,17 @@
         lo <- ce[1] - zE * sdE + tr[1] - eta * sum(abs(a2))
         hi <- ce[2] + zE * sdE + tr[2] + eta * sum(abs(a2))
         cas[[length(cas) + 1]] <- c(max(lo, dd[1]), min(hi, dd[2]))
+        if (!is.null(pm)) {
+          pms[[length(pms) + 1]] <- c(max(pm[1] - wid_eta, rng[1]), min(pm[2] + wid_eta, rng[2]))
+          plo <- pe[1] - zE * sdE + tr[1] - eta * sum(abs(a2))
+          phi <- pe[2] + zE * sdE + tr[2] + eta * sum(abs(a2))
+          pas[[length(pas) + 1]] <- c(max(plo, dd[1]), min(phi, dd[2]))
+        }
+      }
+      if (length(pms)) {
+        sp <- usum(.rxc_union(pms, tol = 0)); sq <- usum(.rxc_union(pas, tol = 0))
+        row$proj_model_lower <- sp$lower; row$proj_model_upper <- sp$upper
+        row$proj_actual_lower <- sq$lower; row$proj_actual_upper <- sq$upper
       }
       # a branch whose interval is empty (inflated set empty, CLR ends crossed, or wholly
       # outside the logical range / Duncan-Davis) drops out; all empty = rejected (R10(c))
@@ -372,7 +447,8 @@
     out[[nm]] <- as.data.frame(row, stringsAsFactors = FALSE)
   }
   res <- do.call(rbind, out); rownames(res) <- NULL
-  list(table = res, jkst = if (jkst) jk else NULL, cons = cons, pieces = pieces)
+  list(table = res, jkst = if (jkst) jk else NULL, cons = cons, pieces = pieces,
+       slack = if (point) NA_real_ else .rxc_slack(base, st$beta))
 }
 
 # Emptiness test (Proposition P3.6(a), conservative version): reject iff the inflated set is
@@ -396,6 +472,26 @@
   if (!detail) return(all(emp))
   list(rejected = all(emp), systems = emp, branches = vapply(sys, function(s) s$branch, ""),
        rung_alone_rejected = base_only)
+}
+
+# Pooling test (P3 Prop. P3.6(c)): conditional on the design, with every group's compositions
+# affinely spanning, M0 holds for the observed units iff all group shifts are zero. Wald test of
+# zeta = 0 in the M1 regression; (G - 1)(C - 1)R restrictions.
+.rxc_pool_test <- function(X, T, N, group, weights = "none", vcov = "HC3") {
+  st <- tryCatch(.rxc_setup(X, T, N, group, model = "M1", weights = weights, vcov = vcov),
+                 error = function(e) NULL)
+  if (is.null(st)) return(list(statistic = NA, df = NA, p.value = NA,
+                               note = "M1 regression not estimable"))
+  R <- st$R; C <- st$C; m <- st$m; p <- st$p
+  idx <- unlist(lapply(seq_len(C - 1), function(c) (c - 1) * p + m + seq_len(R * (st$G - 1))))
+  d <- st$beta[idx]; Vd <- st$V[idx, idx, drop = FALSE]
+  e <- eigen((Vd + t(Vd)) / 2, symmetric = TRUE)
+  keep <- e$values > 1e-10 * max(e$values)
+  Wd <- sum((t(e$vectors[, keep, drop = FALSE]) %*% d)^2 / e$values[keep])
+  df <- sum(keep)
+  spans <- all(vapply(seq_len(st$G), function(gg) qr(st$X[st$g == gg, , drop = FALSE])$rank == R, TRUE))
+  list(statistic = Wd, df = df, p.value = stats::pchisq(Wd, df, lower.tail = FALSE),
+       vcov_type = st$vcov_type, spanning = spans)
 }
 
 # Wald test of M1's testable part (overidentifying restrictions, 2b Lemma D1(b))

@@ -22,7 +22,6 @@ eiBounds(
   extrapolate = NULL,
   weights = c("none", "n"),
   vcov = c("HC3", "HC1", "HC0"),
-  cluster = NULL,
   restrictions = NULL,
   alpha = 0.05,
   ci = c("clr", "conservative", "none"),
@@ -72,8 +71,6 @@ Duncan-Davis) or \code{"extrapolate"} (impose the model beyond the data).}
 
 \item{vcov}{\code{"HC3"} (default; falls back to HC1, HC0, classical), \code{"HC1"} or \code{"HC0"}.}
 
-\item{cluster}{optional cluster variable (pooled models), giving CR1 variances.}
-
 \item{restrictions}{optional list with elements \code{zeros}, \code{order},
 \code{sign}, \code{slope}, \code{linear}, \code{external}, \code{assoc}
 and \code{cr}; see the vignette. \code{assoc} is a list of signs on mean
@@ -94,7 +91,8 @@ aggregates on their own (refutation is always joint with the rung).}
 
 \item{alpha}{1 - confidence level.}
 
-\item{ci}{\code{"clr"} (default), \code{"conservative"} or \code{"none"}.}
+\item{ci}{\code{"clr"} (default; reported with the projection interval
+alongside), \code{"conservative"} or \code{"none"}.}
 
 \item{fpc}{unit-level allowance for \code{ci_actual}: \code{"bhatia-davis"} (default) or \code{"popoviciu"}.}
 
@@ -110,7 +108,9 @@ aggregates on their own (refutation is always joint with the rung).}
 
 \item{seed}{optional random seed (for reproducible CIs).}
 
-\item{tests}{run the emptiness test and (for M1) the test of its testable part.}
+\item{tests}{run the emptiness test and, for grouped M1/L4, the test of M1's
+testable part (against M2) and the pooling test (M0 against M1: all group
+shifts zero).}
 
 \item{range_offset}{shrink the observed range by this amount (two-row tables
 only; Jiang et al. use 1e-5).}
@@ -151,11 +151,24 @@ shared contextual effects with group deviations up to \code{delta};
 \code{row_constant} having no contextual effect; \code{"L5"} constancy within
 groups (Goodman within each group); \code{"L6"} Goodman regression.
 
-Reported for each target: \code{estimate} (the estimated identified set for
-the model-implied rate; not a confidence interval), \code{ci_model} (CI for
-the model-implied rate at the observed compositions), \code{ci_actual} (CI
-for the actual rate in these units, including an allowance for unit-level
-deviations bounded by Bhatia-Davis or Popoviciu) and the Duncan-Davis bounds.
+Reported for each target: \code{estimate} (the estimated outer identified
+set for the model-implied rate, sharp only relative to the regression
+function; not a confidence interval), \code{ci_model} (CI for the
+finite-design conditional-mean rate, i.e. the rate the model implies at the
+observed compositions), \code{ci_actual} (CI for the realised rate in these
+units, including an allowance for unit-level deviations bounded by
+Bhatia-Davis or Popoviciu) and the Duncan-Davis bounds. With \code{ci = "clr"}
+the table also has \code{proj_model_*} and \code{proj_actual_*}: projection
+intervals built from the same candidate endpoints.
+
+Status of the intervals (PHASE3_inference.md, sections 0.5 and 5): the CLR
+interval as implemented collects candidate endpoints by simulation and is
+\emph{algorithmic} (its coverage is a conjecture supported by simulation);
+the projection interval and the conservative interval have an asymptotic
+guarantee for a fixed-dimensional regression (M0 in any design; grouped models
+with few, large groups). Inference is conditional on the design and on the
+group effects; units are assumed independent given them, and no clustered
+variance is used (group-level shocks belong in the mean: use M1 or M2).
 }
 \examples{
 library(eco); data(census)

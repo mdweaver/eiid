@@ -33,7 +33,7 @@
 
 ### 1.2 Statement
 
-**Theorem R3.** Assume 2a (A1)–(A5), standing integrability, $P(X\in A)=1$, and that $A$ has nonempty relative interior.
+**Theorem R3.** Assume 2a (A1)–(A5), standing integrability, $P(X\in A)=1$, and that $\operatorname{affdim}(A)=R-1$. *(Corrected in the review response: "nonempty relative interior" is too weak, see 2a Remark 5.2. Under A5 the condition holds automatically.)*
 
 (a) **Sharp interval.** For admissible $C$, the sharp identified set for $\varphi$ under LCE $\cap\,C$ is
 $$\varphi(\Theta_I\cap C)=\Big[\min_{\Theta_I\cap C}\varphi,\ \max_{\Theta_I\cap C}\varphi\Big],$$
@@ -225,7 +225,7 @@ P3 §0, regimes R1/R3. $\hat\beta$ is the regression coefficient vector with $\s
 
 ### 3.2 Statement
 
-**Theorem R10.** Assume P3.5's conditions *for the augmented row system* (base rows plus added rows), and that the restrictions hold at the truth, i.e. $k_0$ satisfies them. Version (a) needs no Slater-type condition. Statements of P3.2/P3.4 type do, and rows that bind at the truth (e.g. the CR edge) can break it.
+**Theorem R10.** Assume P3.5's conditions *for the augmented row system* (base rows plus added rows), and that the restrictions hold at the truth, i.e. $k_0$ satisfies them. *(Status after the review response: P3.5(b) is now split. For version (b), every statement below is a theorem only for CLR with the full dual-vertex set, P3.5(b1). With the package's simulated candidate collection it inherits the status of Conjecture P3.5(b3). The statements for version (a), and for the projection interval P3.5(b2), stand as theorems. See `MSIGN_REVIEW_LOG.md`, M-2.)* Version (a) needs no Slater-type condition. Statements of P3.2/P3.4 type do, and rows that bind at the truth (e.g. the CR edge) can break it.
 
 (a) **Added rows.** For a finite set $\mathcal R$ of linear-in-$\beta$ rows, P3.5(a), P3.5(b) and P3.6(a) hold unchanged, for both $\tilde B$ and $B$. The new rows simply join the Gaussian maximum that sets the critical value. A row whose $s_j$ does not depend on $\beta$ has $\sigma_j=0$: it is imposed exactly and left out of the maximum.
 
@@ -353,7 +353,7 @@ Numerical re-checks by the reviewer: the identities in R3 step 11 hold for every
 | "Already implied" table | `.rxc_implied_table` | Every $\delta$ (W1, W2, pairwise) under the rung alone: point interval and CI, signs flagged |
 | CR certificate, §1.6.3 | `.rxc_cr_table` | $\Theta\cap\{g_B=0,g_W=0\}\neq\emptyset$ (feasibility LP), branch intervals, number of pieces |
 | Emptiness, §1.6.4, R10(d) | `.rxc_empty_test` (conservative; reject iff every system's inflated set is empty; also reports whether the rung alone is rejected); notes in `eiBounds` | Messages name the combination "rung (M) + restriction labels"; 2-row note that $\delta_B$ / CR are never refuted on their own; "narrow interval after a near-rejection is not reassurance" |
-| CLR no longer falls back to the conservative CI | `.rxc_collect(relax = TRUE)`, `.rxc_ci_clr` | When no draw is feasible, candidates come from rows relaxed by the smallest uniform slack (any dual-feasible vertex is a valid CLR candidate). The CLR rule (ends cross ⇒ empty) is kept, so the two emptiness rules are never mixed |
+| CLR no longer falls back to the conservative CI | `.rxc_collect(relax = TRUE)`, `.rxc_ci_clr` | When no draw is feasible, candidates come from rows relaxed by the smallest uniform slack. The dual feasible set does not depend on the row constants, so these vertices are dual-feasible for the original rows and bound the endpoint by weak duality (P3.5(b2) step 1). Coverage of the CLR critical value over the collected set is Conjecture P3.5(b3). The CLR rule (ends cross ⇒ empty) is kept, so the two emptiness rules are never mixed |
 | Descriptive $\widehat{ER}$, $\widehat{NM}=\gamma\widehat{ER}$, $\gamma$, bracket, §3.5.4 | `.rxc_descriptive`, printed under "DESCRIPTIVE ONLY" | $\tau$-based; equals the EGGHM $T$-based value under `weights = "n"` (tested to 1e-10). Never imposed |
 | Integration | `ladder(sign_rungs = ...)`, `print`/`summary`, `sensitivity()`, `breakdown()` (pass `union`) | Point-identified rungs (L5, L6) ignore sign/CR rows, with a note |
 | Docs | roxygen (`eiBounds`, `eiRedundancy`, `ladder`), vignette `eiPartialID_rxc.Rmd` section "Signs on associations and contextual reinforcement", `PLAIN_LANGUAGE_GUIDE.md` §9 | Applied framing as in §3.5 |

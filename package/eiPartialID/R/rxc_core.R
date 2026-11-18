@@ -73,22 +73,18 @@
   list(Z = Z, m = m, p = ncol(Z), type = if (G == 1) "pooled" else type)
 }
 
-# Heteroskedasticity- (or cluster-) robust covariance of stacked OLS
-# coefficients for several responses sharing one design. Falls back
-# HC3 -> HC1 -> HC0 -> classical when an estimator cannot be computed.
-.rxc_vcov <- function(Z, E, type = "HC3", cluster = NULL) {
+# Heteroskedasticity-robust covariance of stacked OLS coefficients for several
+# responses sharing one design. Falls back HC3 -> HC1 -> HC0 -> classical when an
+# estimator cannot be computed. No clustered variance: inference is conditional on
+# the design and the group effects (PHASE3_inference.md section 0.4).
+.rxc_vcov <- function(Z, E, type = "HC3") {
   n <- nrow(Z); k <- ncol(Z); C1 <- ncol(E)
   ZtZi <- solve(crossprod(Z))
   h <- rowSums((Z %*% ZtZi) * Z)
   build <- function(U) {
     V <- matrix(0, C1 * k, C1 * k)
     for (a in seq_len(C1)) for (b in a:C1) {
-      if (is.null(cluster)) {
-        Sab <- crossprod(Z, Z * (U[, a] * U[, b]))
-      } else {
-        Sa <- rowsum(Z * U[, a], cluster); Sb <- rowsum(Z * U[, b], cluster)
-        Sab <- crossprod(Sa, Sb)
-      }
+      Sab <- crossprod(Z, Z * (U[, a] * U[, b]))
       blk <- ZtZi %*% Sab %*% ZtZi
       ia <- (a - 1) * k + seq_len(k); ib <- (b - 1) * k + seq_len(k)
       V[ia, ib] <- blk; V[ib, ia] <- t(blk)
@@ -100,8 +96,7 @@
     ev <- eigen((V + t(V)) / 2, symmetric = TRUE, only.values = TRUE)$values
     min(ev) > -1e-10 * max(1, max(abs(ev)))
   }
-  order <- if (!is.null(cluster)) c("CR1", "classical") else
-    unique(c(type, "HC1", "HC0", "classical"))
+  order <- unique(c(type, "HC1", "HC0", "classical"))
   for (tp in order) {
     V <- NULL
     if (tp == "HC3") {
@@ -112,10 +107,6 @@
       V <- build(E) * n / (n - k)
     } else if (tp == "HC0") {
       V <- build(E)
-    } else if (tp == "CR1") {
-      Gc <- length(unique(cluster))
-      if (Gc < 2 || n <= k) next
-      V <- build(E) * (Gc / (Gc - 1)) * ((n - 1) / (n - k))
     } else if (tp == "classical") {
       df <- max(n - k, 1)
       Sig <- crossprod(E) / df

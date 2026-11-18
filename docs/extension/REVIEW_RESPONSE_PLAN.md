@@ -150,7 +150,7 @@ New layout for P3 §5–6:
   * D5's "finite-sample CIs for R2" holds formally, not practically.
   * In the package, `ci_method = "finite"` is deferred until a sharper version exists (§10 of P3).
 
-### WS5: Package changes (`eiPartialID`; needs WS4)
+### WS5: Package changes (`eiPartialID`; needs WS4) — **done (Nov 2026)**
 
 | Change | Files | Item |
 |---|---|---|
@@ -171,6 +171,23 @@ New layout for P3 §5–6:
 * the Wald df.
 
 Then: `R CMD check`, and rerun the JKST replication test to confirm it still matches at $10^{-10}$ (the fixes must not change the 2×2 path).
+
+**WS5 status.**
+* **Branch.** Built on top of `claude/msign-build`, which was merged into this branch first (decision, 18 Nov 2026). The merge had no conflicts. Items in the merged material that still need review are in `MSIGN_REVIEW_LOG.md`.
+* **Done:**
+  * `cluster` and CR1 removed;
+  * projection intervals `proj_model_*`/`proj_actual_*` alongside CLR (D4 option 1);
+  * CLR labelled algorithmic;
+  * pooling test P3.6(c) (`fit$tests$pool`);
+  * rank errors name the offending groups;
+  * notes for near-boundary (Slater), few units per group, and unbounded estimates;
+  * roxygen, vignette, README and `PHASE4_implementation.md` updated;
+  * M-SIGN docs: R3 hypothesis, R10 status note, relaxed-candidate wording.
+* **Checks:**
+  * tests: 439 passed, 0 failed, 3 skipped (two need `ei.Datasets`; one slow MC). This includes the new `test-review-response.R`: no `cluster`; projection columns contain the estimate; projection coverage of at least 90% in a 30-replication simulation; pooling-test df, size and power; rank messages; Wald df.
+  * `R CMD check --no-manual --no-vignettes`: OK apart from the pre-existing notes (unused imports MASS/eco; `ei.Datasets` unavailable) and a container locale warning.
+  * The JKST replication test is unchanged and passes.
+* **Not done:** `ci_method = "finite"` (deferred, see WS4 status).
 
 ### WS6: Monte Carlo and benchmarks (needs WS5)
 R-37.

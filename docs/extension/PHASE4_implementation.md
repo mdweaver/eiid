@@ -38,17 +38,27 @@ Internal files:
   * `"trim"`: by quantile, minimum size or explicit `drop`. Trimmed units enter the actual rate through their Duncan–Davis bounds only, and the model-implied rate refers to the kept units.
   * `"extrapolate"`: pure units or a user matrix, with a warning.
 * **Restrictions:** `zeros`, `order` (mean-level group ordering), `sign` (direction of a contextual effect), `slope` (bounded slopes), `linear` (generic), `external` (benchmark interval on a target). Each adds rows to the LP.
-* **Variance:** HC3 by default, falling back to HC1, HC0, then classical. The estimator used is reported, with a note when a fallback occurred. `cluster` gives CR1 variances.
+* **Variance:** HC3 by default, falling back to HC1, HC0, then classical. The estimator used is reported, with a note when a fallback occurred. *(Review response, WS5: the `cluster` argument and the CR1 branch were removed. Inference is conditional on the design and the group effects, P3 §0.4.)*
 
 ## Inference defaults
 
-* **CLR-type intervals**, with candidate endpoints collected as dual vertices at $\hat\beta$ and at `ndraw = 100` Gaussian draws (P3 Thm 5(b)). Critical values come from `nz_draw = 4000` draws. If no draw yields a feasible LP (e.g. an empty plug-in), the conservative inflated set is used.
+* **CLR-type intervals (default, algorithmic).** Candidate endpoints are the dual vertices at $\hat\beta$ and at `ndraw = 100` Gaussian draws. Critical values come from `nz_draw = 4000` draws. With the simulated candidate set this is Conjecture P3.5(b3); P3.5(b1) is the theorem with the full vertex set. If no draw yields a feasible LP, candidates come from relaxed rows (M-SIGN).
+* **Projection intervals alongside (`proj_model_*`, `proj_actual_*`).** These are built from the same candidates, with critical value $\sqrt{\chi^2_{q,1-\alpha}}$, $q=\operatorname{rank}\hat\Sigma$ (P3.5(b2)(ii), proved by weak duality). They are asymptotically valid for any candidate set; on `eco::census` they are about 0.005–0.01 wider per side. Decision D4, option 1.
 * **Model-implied rate:** α/2 per side; the interval is intersected with the logical range [0, 1].
 * **Actual rate:** α split 0.04 / 0.005 / 0.005 (estimation / unit-level term / variance bound), intersected with Duncan–Davis.
   * **Bhatia–Davis allowance (default):** by concavity, $\sum_i\pi_im_i(1-m_i)\le\bar m(1-\bar m)$, where $\pi_i=w_i^2/\sum w^2$. The weighted mean $\bar m$ is itself bounded by a CLR interval. This is never larger than Popoviciu's 1/4; it is smaller only when the plausible range of $\bar m$ excludes 0.5.
   * `fpc = "popoviciu"` reproduces JKST and returns the variance-bound share of α to estimation.
 * **`jkst = TRUE`** adds CI_x with Popoviciu $S_1$ and the revert-to-DD rule.
-* **Tests:** the emptiness test (conservative inflated set at level α) and, for M1/L4 with groups, a Wald test of the overidentifying restrictions against the M2 fit.
+* **Tests:**
+  * the emptiness test (conservative inflated set at level α);
+  * for M1/L4 with groups, a Wald test of the overidentifying restrictions against the M2 fit, df $(G-1)(C-1)R(R-1)/2$;
+  * the **pooling test** (P3.6(c)): a Wald test that all group shifts in the M1 fit are zero, df $(G-1)(C-1)R$, with a flag when some group's compositions are not affinely spanning.
+* **Notes added (WS5):**
+  * near-boundary flag: strict-feasibility slack below 0.005 at $\hat\beta$ (P3.2's Slater condition);
+  * few units per group (median below 30): CLR coverage rests on simulation (P3 §0.5);
+  * unbounded estimate: a composition range is not full-dimensional (2a Lemma 3(b));
+  * CLR is algorithmic.
+* **Rank errors** name the groups that break the rank condition: A5 per group for M2; $R$ affinely independent compositions per group for M1 (2b Lemma D1(d)); for M0, a hint that for $R=3$ six compositions off a common conic are needed.
 
 ## Validation
 

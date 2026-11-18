@@ -33,7 +33,8 @@ a data frame of bounds by dial value and target (class
 Recomputes the bounds of a fitted \code{eiRxC} object along a dial.
 \code{dial = "eta"} (default) allows average rates to depart from the linear
 model by up to \code{eta} (in probability units) in directions the data
-cannot detect (Phase 3, Proposition S1). \code{dial = "slack"} relaxes the
+cannot detect (Phase 3, Proposition S1; the result is a valid outer bound,
+not the sharp set of the relaxed model). \code{dial = "slack"} relaxes the
 sign and contextual-reinforcement restrictions (\code{assoc}, \code{cr}):
 each association may have the "wrong" sign by up to \code{slack}, measured
 as an average within-unit gap (\eqn{\delta_B}) or an average slope in own

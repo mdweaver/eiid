@@ -18,7 +18,10 @@ ladder(
 
 \item{rungs}{rungs to run; rungs needing groups are skipped without groups.}
 
-\item{delta}{values of delta for M1delta.}
+\item{delta}{values of delta for M1delta. \code{delta = 0} is a sensitivity
+benchmark rather than a substantive rung: it keeps the shared contextual
+effects of M1 but drops M1's testable restrictions on the symmetric parts,
+so it can be wider than M1.}
 
 \item{row_constant}{row for L4 (skipped if \code{NULL}).}
 

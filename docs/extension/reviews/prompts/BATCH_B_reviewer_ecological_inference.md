@@ -24,7 +24,27 @@ You report only. Do not edit the documents or the code.
 
 ## What you are reviewing
 
-**Repository:** `https://github.com/mdweaver/eiid`, at **commit `8b98589`**. Check out exactly that commit (`git checkout 8b98589`). If you have no repository access, ask the person who gave you this brief for the files listed below.
+**Repository:** https://github.com/mdweaver/eiid, at **commit `8b98589`** (full hash `8b98589653db71849fc7cdca500312754c26e95d`). Everything you need is on GitHub; you do not need any other environment. If the repository is not visible to you, ask the person who gave you this brief for access or for copies of the files below.
+
+**Direct links (GitHub, pinned to the reviewed commit; open these in a browser or fetch the raw file):**
+
+| File | What to read |
+|---|---|
+| [`docs/extension/PHASE2c_monotone.md`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/PHASE2c_monotone.md) | primary: all |
+| [`docs/extension/PHASE5a_sign_module.md`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/PHASE5a_sign_module.md) | primary: §§1–3 and §5; §4 only after your verdicts |
+| [`docs/extension/PLAIN_LANGUAGE_GUIDE.md`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/PLAIN_LANGUAGE_GUIDE.md) | primary: §9; background: §§1–3 |
+| [`package/eiPartialID/vignettes/eiPartialID_rxc.Rmd`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/package/eiPartialID/vignettes/eiPartialID_rxc.Rmd) | primary: section "Signs on associations and contextual reinforcement" only |
+| [`docs/extension/PHASE1b_monotone_did.md`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/PHASE1b_monotone_did.md) | background: §0, §A1, §A2, §A3, §D only |
+| [`docs/extension/PHASE2a_rxc.md`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/PHASE2a_rxc.md) | background: §0, §2, §3, §6.2 only |
+| [`docs/extension/verify_phase2c.py`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/verify_phase2c.py) | optional check script |
+| [`docs/extension/verify_phase2c_output.txt`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/verify_phase2c_output.txt) | its output |
+| [`docs/extension/verify_phase1_mei_did.py`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/verify_phase1_mei_did.py) | optional check script |
+| [`docs/extension/verify_phase1_mei_did_output.txt`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/verify_phase1_mei_did_output.txt) | its output |
+| [`docs/extension/verify_R10.py`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/verify_R10.py) | optional check script |
+| [`docs/extension/verify_R10_output.txt`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/verify_R10_output.txt) | its output |
+
+To work locally instead: `git clone https://github.com/mdweaver/eiid.git && cd eiid && git checkout 8b98589653db71849fc7cdca500312754c26e95d`. Browse the whole commit at https://github.com/mdweaver/eiid/tree/8b98589653db71849fc7cdca500312754c26e95d (but read only the files listed here).
+
 
 **Primary documents (review these in full):**
 1. `docs/extension/PHASE2c_monotone.md`: monotone EI in R×C. Associations within and between groups (W1 one-vs-rest, W2, pairwise); exact bounds under sign beliefs (N1); sign beliefs under linear contextual effects (K-rows, Prop. M5); monotone nonparametric contextual effects (N2); the ladder (§5).
@@ -130,4 +150,4 @@ One Markdown file, `docs/extension/reviews/B_ecological_inference_report.md`, wi
 6. **Outside scope:** problems noticed in the background documents.
 7. **Comparison with the earlier internal review** (PHASE5a §4).
 
-If you can push to the repository, commit only your report (and any scripts) on a new branch named `review/B-ecological-inference`. Otherwise return the file to the person who gave you this brief.
+If you can push to the GitHub repository, commit only your report (and any scripts) on a new branch named `review/B-ecological-inference`. Otherwise return the file to the person who gave you this brief.

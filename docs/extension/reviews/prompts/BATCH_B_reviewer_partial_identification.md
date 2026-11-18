@@ -14,7 +14,32 @@ You report only. Do not edit the documents or the code.
 
 ## What you are reviewing
 
-**Repository:** `https://github.com/mdweaver/eiid`, at **commit `8b98589`**. Check out exactly that commit (`git checkout 8b98589`). If you have no repository access, ask the person who gave you this brief for the files listed below.
+**Repository:** https://github.com/mdweaver/eiid, at **commit `8b98589`** (full hash `8b98589653db71849fc7cdca500312754c26e95d`). Everything you need is on GitHub; you do not need any other environment. If the repository is not visible to you, ask the person who gave you this brief for access or for copies of the files below.
+
+**Direct links (GitHub, pinned to the reviewed commit; open these in a browser or fetch the raw file):**
+
+| File | What to read |
+|---|---|
+| [`docs/extension/PHASE2c_monotone.md`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/PHASE2c_monotone.md) | primary: all |
+| [`docs/extension/PHASE5a_sign_module.md`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/PHASE5a_sign_module.md) | primary: §§1–3; §4 only after your verdicts; §5 optional |
+| [`docs/extension/verify_phase2c.py`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/verify_phase2c.py) | check script |
+| [`docs/extension/verify_phase2c_output.txt`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/verify_phase2c_output.txt) | its output |
+| [`docs/extension/verify_R2.py`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/verify_R2.py) | check script |
+| [`docs/extension/verify_R2_output.txt`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/verify_R2_output.txt) | its output |
+| [`docs/extension/verify_R3.py`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/verify_R3.py) | check script |
+| [`docs/extension/verify_R3_output.txt`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/verify_R3_output.txt) | its output |
+| [`docs/extension/verify_R10.py`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/verify_R10.py) | check script |
+| [`docs/extension/verify_R10_output.txt`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/verify_R10_output.txt) | its output |
+| [`docs/extension/verify_package_design.py`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/verify_package_design.py) | helper imported by verify_R2/R3 (as needed) |
+| [`docs/extension/verify_phase1_mei_did.py`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/verify_phase1_mei_did.py) | the '1b V1–V8' checks |
+| [`docs/extension/verify_phase1_mei_did_output.txt`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/verify_phase1_mei_did_output.txt) | its output |
+| [`docs/extension/PHASE2a_rxc.md`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/PHASE2a_rxc.md) | background: sections named below only |
+| [`docs/extension/PHASE2b_districts.md`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/PHASE2b_districts.md) | background: §0 and Theorem 1′ only |
+| [`docs/extension/PHASE3_inference.md`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/PHASE3_inference.md) | background: §0, §2, §5 only |
+| [`docs/extension/PHASE1b_monotone_did.md`](https://github.com/mdweaver/eiid/blob/8b98589653db71849fc7cdca500312754c26e95d/docs/extension/PHASE1b_monotone_did.md) | background: §0, §A1, §A2, §D only |
+
+To work locally instead: `git clone https://github.com/mdweaver/eiid.git && cd eiid && git checkout 8b98589653db71849fc7cdca500312754c26e95d`. Browse the whole commit at https://github.com/mdweaver/eiid/tree/8b98589653db71849fc7cdca500312754c26e95d (but read only the files listed here).
+
 
 **Primary documents (review these in full):**
 1. `docs/extension/PHASE2c_monotone.md`: monotone EI in R×C. Lemma M1; Propositions M2, M3, M4, M5; Lemma N2.1; Propositions N2.2, N2.3; §5 ladder; §6.
@@ -113,4 +138,4 @@ One Markdown file, `docs/extension/reviews/B_partial_identification_report.md`, 
 6. **Outside scope:** problems noticed in the background documents.
 7. **Comparison with the earlier internal review** (PHASE5a §4).
 
-If you can push to the repository, commit only your report (and any check scripts) on a new branch named `review/B-partial-identification`. Otherwise return the file to the person who gave you this brief.
+If you can push to the GitHub repository, commit only your report (and any check scripts) on a new branch named `review/B-partial-identification`. Otherwise return the file to the person who gave you this brief.

@@ -1,159 +1,295 @@
-# Response to the referee report on Batch B (partial identification and inference)
+# Response to the referee: Batch B, partial identification and inference
 
-*Reviewed version: commit `8b98589`. The revised documents are on branch `claude/wizardly-volta-lbh4bm`. Line numbers in the comments refer to the reviewed commit. Package changes are in release 0.3.0 of `eiPartialID`.*
+**Reviewed version:** commit [`8b98589`](https://github.com/mdweaver/eiid/tree/8b98589653db71849fc7cdca500312754c26e95d).
+**Revised version:** commit [`e170be9`](https://github.com/mdweaver/eiid/tree/e170be9161b9bbc250a17a27ffd39bc523c1c88b) on branch `claude/wizardly-volta-lbh4bm`.
+**All changes since the reviewed version:** [compare `8b98589…e170be9`](https://github.com/mdweaver/eiid/compare/8b98589653db71849fc7cdca500312754c26e95d...e170be9161b9bbc250a17a27ffd39bc523c1c88b).
 
-## Cover note
+Abbreviations follow the report: **2c** is `docs/extension/PHASE2c_monotone.md`, **5a** is `PHASE5a_sign_module.md`, **2a** is `PHASE2a_rxc.md`, **P3** is `PHASE3_inference.md`, **1b** is `PHASE1b_monotone_did.md`. Line numbers in quoted comments refer to the reviewed version.
 
-We thank the referee for a careful and constructive report. We reproduced every counterexample: the referee's appendix script runs unchanged (`reviews/referee_checks_B_partial_identification.py`), and our own checks are in `reviews/checks/`. We agree with the recommendation of major revision for the theory, above all for `PHASE2c_monotone.md`. Of the 43 points we recorded (P-B1 to P-B43), 41 called for a change; all 41 were reproduced, and none is disputed. We argue the **severity** of two points below, while accepting the corrections.
+Each corrected statement in the documents carries a note "*(Corrected after review, Batch B, Nov 2026 …)*" saying what the earlier text claimed. Each correction also has a numerical check that **fails on the earlier statement and passes on the new one**.
 
-**What changed, in brief.**
-* **Scope labels.**
-  * N1 (Prop. M2) and the DiD rung Δ4 are now stated as sharp for **continuous** unit tables given the margins. A new remark proves that in 2×2 with margins only, the integer gaps form a lattice of step $1/(N\mu(1-\mu))$ inside the continuous interval. Integer tables in general are a new open item (R15).
-  * Theorems R3 and R10 are stated for the **pooled** model. Their grouped versions are a new open item (R16).
-  * The package (0.3.0) labels the sign and reinforcement restrictions **experimental**, and under grouped rungs prints that each sign is one pooled restriction across groups and that sharpness is proved for the pooled model only.
-* **Results restated or withdrawn.**
-  * M3(d) now covers $\gamma<1$, $\gamma=1$ and $ER=0$.
-  * M5 is restated rung by rung, with the exact between-district covariance term and the referee's reversal example.
-  * N2.2(a) no longer claims a sharp version: the referee's $V$-conditional statement is recorded as **Conjecture N2.2′**, which we leave open for now.
-  * N2.3 is kept only as a structural calculus identity; the local-derivative rows are **dropped** from the build plan, because the derivative is not identified on a finite support.
-  * The binning step in 2c §6 is replaced by the referee's person-weighted repair, proved as **Lemma N2.4**. The degree of the polynomial is now prespecified.
-* **5a errata.**
-  * R2: the target intercept in the face-test LP; "zero incremental gain for this target" in place of "redundant".
-  * R3(e): "rejects the conjunction; does not attribute"; the LCE-excludes-CR example (Remark R3.2).
-  * R10: the referee's version table replaces our status note.
-  * R10(e) is now a **theorem**, using the referee's analytic bound (0.933525; 0.940092 with 4,000 critical-value draws), with credit.
-* **Core repairs reported to the original referee as well.**
+---
+
+## 1. Summary
+
+Thank you for a careful, constructive and unusually concrete report.
+
+* **Reproduction.** Your appendix script runs unchanged and reproduces every result, including both coverage bounds (0.933525 and 0.940092). It is saved as `reviews/referee_checks_B_partial_identification.py`.
+* **Recommendation.** We agree with major revision, above all for 2c.
+* **Disputes.** We accepted every point. On two points we argue only about severity (§5, items 1 and 3), and we made the corrections anyway.
+
+**The main changes, in one paragraph each.**
+
+* **Scope of the "exact" bounds.**
+  * N1 (Prop. M2) is now stated as sharp for **continuous** unit tables given the margins.
+  * A new remark proves that in 2×2 with margins only, the integer gaps form a lattice inside the continuous interval.
+  * Integer tables in general are a new open item (R15).
+  * The difference-in-differences rung Δ4 inherits the same label.
+* **District rungs.**
+  * M5 is restated rung by rung. Part (c) holds for the pooled model and within each district, and the pooled district version has an exact between-district term, illustrated by your reversal example.
+  * R3 and R10 are now stated for the pooled model. Their grouped versions are a new open item (R16).
+  * The package marks the module **experimental** and says so at fit time under grouped rungs.
+* **N2.**
+  * N2 is now defined on the finite empirical support.
+  * The sharp version is withdrawn; your $V$-conditional statement is recorded as **Conjecture N2.2′**, left open for now.
+  * N2.3 is kept only as a structural identity; the local-derivative rows are **dropped** from the build plan.
+  * Your binning repair is proved as **Lemma N2.4**.
+  * The polynomial degree must be prespecified.
+* **5a.**
+  * R2's feasibility LP now includes the target intercept, and (e) speaks of zero gain for a target.
+  * R3's refutation claim names its base system.
+  * R10's status is your version table, and R10(e) is now a theorem with your analytic proof.
+* **Core documents** (reported also to the original referee of Phases 1–3):
   * the support of the restricted measure (2a);
-  * the projection interval under a singular covariance (P3.5(b2)(ii), now requiring a positive definite covariance or a reduced parameterisation; the package drops candidates that use a null direction);
-  * the residual CLT, completed by the referee's Chebyshev/Lindeberg argument.
-* **Scripts.** Every correction has a check that fails on the old statement and passes on the new one.
-  * `verify_phase2c.py`: 12 → 26 checks.
-  * `verify_R2.py`: adds T1c and T4b.
-  * `verify_R3.py`: adds S6 and S7.
-  * `verify_R10.py`: adds V9–V12, with union lengths merged before measuring.
-  * `verify_phase2a.py` and `verify_phase3.py`: one and two new counterexamples.
+  * the projection interval under a singular covariance (P3.5(b2)(ii)), with a guard in the package;
+  * the residual CLT (P3.5(a) step 5).
 
-**The two severity points.**
-1. **Integer tables (P-B1).** We accept the relabelling. In the case the package would use first (2×2, margins only), the integer and continuous answers differ by less than one lattice step, about $6\times10^-6$ at the scale of the Wisconsin application. The difference matters for small tables and for refutation exactly at the cut point, which the referee's three-unit example shows.
-2. **$\gamma=1$ in M3(d) (P-B3).** We accept the correction. $\gamma=1$ requires every unit to be pure, in which case the gap is point-identified, so the omission did not affect any reported interval.
+---
 
-**What remains open.** Conjecture N2.2′ (sharp N2 with size conditioning); R15 (integer tables beyond 2×2 margins); R16 (grouped R3′/R10′); inference on a width gain jointly over the base and augmented endpoints (P-B22).
+## 2. What changed
 
-## Revised verdict table
+### 2.1 Theory
 
-| Result | Referee's verdict | Status now | Where |
-|---|---|---|---|
-| M1 | Established | Unchanged; hypotheses split by part | 2c §1 |
-| M2 | Established for continuous rates; integer claims incorrect | **Proposition, continuous unit tables.** Remark M2.1: integer lattice in 2×2 with margins (proved); R15 open | 2c §2 |
-| M3 | Incorrect as a whole ((d) at a boundary) | **Proposition** with stated hypotheses (continuous rates, no unit restrictions, no other sign rows); (d) covers all three cases | 2c §2 |
-| M4 | Established | Unchanged | 2c §2 |
-| M5 | Incorrect across advertised rungs | (a) all rungs; (b) district-specific ordering; (c) M0 and within each district, with the exact between-district term for pooled district rungs | 2c §3 |
-| N2.1 | Established | Unchanged | 2c §4 |
-| N2.2 | Established under conditions | (a) outer only; **Conjecture N2.2′** for the sharp version; (b) on the complete finite support; (e) chart and weighted covariances | 2c §4 |
-| N2.3 | Not established as an observable restriction | Structural identity only; local rows dropped | 2c §4 |
-| (new) N2.4 | — | **Lemma**, person-weighted bins give an outer relaxation (referee's repair) | 2c §4 |
-| R3(a)–(e) | Established (with qualifications) | Pooled model; (b) finite LP for polyhedral $C$; Remarks R3.1, R3.2; (e) reworded | 5a §1 |
-| R2(a)–(e) | Established under conditions; (e) wording | Step 4 intercept; (b)–(d) qualifications; (e) target-specific | 5a §2 |
-| R10(a)–(d) | Established under stated assumptions | Version table: (a) theorem; (b1) cited under the augmented Condition P; (b2) theorem; (b3) algorithm | 5a §3 |
-| R10(e) | Established; proof completion | **Theorem** (referee's analytic proof) | 5a §3 |
+| Document | Changes |
+|---|---|
+| [2c](https://github.com/mdweaver/eiid/blob/e170be9161b9bbc250a17a27ffd39bc523c1c88b/docs/extension/PHASE2c_monotone.md) | <ul><li>**M2** relabelled as sharp for continuous unit tables. New **Remark M2.1**: your and the second referee's integer examples, plus a proved lattice statement for 2×2 with margins only. M2(d) is componentwise, with a breakdown frontier.</li><li>**M3**: hypotheses stated (continuous rates, no unit restrictions, no other sign rows); (d) covers $\gamma<1$, $\gamma=1$ and $ER=0$; the "Reading" names its base system.</li><li>**M5**: restated per rung with a stacked parameterisation; (c) for M0 and within districts; exact decomposition with the between-district term and your reversal example.</li><li>**Remark M5.1**: rate statement replaced.</li><li>**Definition 1** remarks: W2 is a pooled sum; Lemma M1 hypotheses split by part.</li><li>**N2**: support convention; N2.2(a) outer only; **Conjecture N2.2′**; N2.2(b) on the complete support only; N2.2(e) with a chart and weighted covariances.</li><li>**N2.3**: structural identity only, with your smooth example for (d) and the reverse direction.</li><li>New **Lemma N2.4** (person-weighted bins).</li><li>§5 ladder and §6 (fixed degree, separate notation for support size and degree) rewritten.</li></ul> |
+| [5a](https://github.com/mdweaver/eiid/blob/e170be9161b9bbc250a17a27ffd39bc523c1c88b/docs/extension/PHASE5a_sign_module.md) | <ul><li>**R3**: scoped to pooled M0; "finite LP when $C$ is polyhedral"; the design-weight convention; (C2) noted as stronger than (a) needs. New **Remark R3.1** (full law versus regression, $C=[.2,.4]$) and **Remark R3.2** (LCE excludes CR, $\tilde D=-261/1925$). Common-witness example in §1.4. (e) "rejects the conjunction; does not attribute".</li><li>**R2**: step 4 uses $h^\top k\ge U-\varphi_0$; (b) duplicate-row example; (c) witness objective; (d) qualifications; (e) "zero incremental gain for this target"; §2.5 items 2–4 (joint endpoint inference).</li><li>**R10**: §3.1 points to P3's regime table; §3.2 status by interval version (your table); actual-gap residual envelope; (b) one event, no Slater; (c) point coverage, no branch selection, triangular arrays; (d) pointwise; **(e) Theorem** with your analytic proof.</li><li>§3.4 table: union lengths merged, a "does not test" list and the false-CR table.</li><li>§3.5 items 2 and 4.</li><li>§4: pointer to this review.</li><li>§5: release 0.3.0 table.</li></ul> |
+| [2a](https://github.com/mdweaver/eiid/blob/e170be9161b9bbc250a17a27ffd39bc523c1c88b/docs/extension/PHASE2a_rxc.md) | New notation $\operatorname{supp}_AP_X$ (support of $P_X$ restricted to $A$), defined in §0.1 with your example; [supp] proved; Lemma 1, Remark 1.1, Lemma 3(c), Remarks 5.1–5.2, Props 7′ and 9 updated. |
+| [P3](https://github.com/mdweaver/eiid/blob/e170be9161b9bbc250a17a27ffd39bc523c1c88b/docs/extension/PHASE3_inference.md) | <ul><li>**P3.5(b2)(ii)**: requires $\Sigma$ positive definite (ii-a) or a reduced full-rank parameterisation (ii-b); new proof; your null-direction counterexample.</li><li>**P3.5(a) step 5**: Chebyshev/Lindeberg subsequence argument; [Lyap] tag corrected.</li><li>P3.6: calibration of both tests by a restricted wild bootstrap.</li><li>§10 updated.</li></ul> |
+| 1b, P1, 2b | 1b: theorem-to-table mapping and pure-unit caveat. P1 A5 and 2b Lemma D1 use the restricted support. |
+| [`PACKAGE_DESIGN.md`](https://github.com/mdweaver/eiid/blob/e170be9161b9bbc250a17a27ffd39bc523c1c88b/docs/extension/PACKAGE_DESIGN.md) | <ul><li>Proof register: R2, R3, R7, R9 and R10 updated; new **R15** (integer tables) and **R16** (grouped rungs).</li><li>P-N scoped to M0; "exact" → "sharp for continuous tables".</li><li>Build step 8 uses the global N2 only.</li></ul> |
 
-## Point-by-point
+### 2.2 Code (`eiPartialID` 0.3.0)
 
-Each row gives the comment (summarised from the report), our check, the change as planned in `reviews/B_PI_RESPONSE_PLAN.md`, its status, and the check that now fails on the old text. The full ledger, with document and package locations, is in the plan.
+* **Status.** The sign and reinforcement restrictions are **experimental**, and `print()` shows the flag.
+* **Grouped rungs.** A fit-time note says that each sign is one pooled restriction across groups and that sharpness is proved for the pooled model only. The printed sharpness claim appears only for pooled fits.
+* **Refutation messages.**
+  * They name the base model.
+  * Next to a joint rejection, they say whether the rung alone is rejected.
+  * An empty plug-in is called a sample diagnostic, not a test.
+* **`eiRedundancy()`.** "Refuted jointly" became "empty at the point estimate (see the emptiness test)", and "cuts the set, not this target" is documented as zero gain for this target.
+* **Projection rank guard (your §5 item 2).** Candidates whose gradients use a numerical null direction of $\hat V$ are dropped, which is case (ii-b). In the CLR interval, a zero-variance candidate is exact only if its gradient is zero.
+* **Variance bounds.** The Bhatia–Davis bound in each column now uses an interval of the same version: CLR, projection or conservative.
+* **Tests.** The pooling test and the M1-versus-M2 test are calibrated by a restricted wild bootstrap. Size at nominal 5%: 0.043 and 0.054; χ² gave 0.078 and 0.057.
+* **Face test (P-B18).** The code already included the target intercept; a regression test now covers it.
+* **Test file:** [`tests/testthat/test-batchB.R`](https://github.com/mdweaver/eiid/blob/e170be9161b9bbc250a17a27ffd39bc523c1c88b/package/eiPartialID/tests/testthat/test-batchB.R).
+* **Changes and known limits:** [`NEWS.md`](https://github.com/mdweaver/eiid/blob/e170be9161b9bbc250a17a27ffd39bc523c1c88b/package/eiPartialID/NEWS.md).
 
-### A. 2c: model-free sign bounds (N1), Props M2–M4 (major comment 1)
+### 2.3 Documentation
 
-| Point | Comment (summary) | Our check | Change | Status | Check that fails on the old text |
-|---|---|---|---|---|---|
-| P-B1 | M2 "sharp in the finite-population sense" is sharp only for **continuous** unit tables. Integer counts can reject CR when the LP accepts it (3 units of size 4: the continuous CR set is {0}, the integer gaps are ±1/6). | **R\*.** Reproduced, and I1 generalises it. In 2×2 with margins only, every integer sum is attained, so the integer $D$-set is the DD interval on a lattice of step $1/N_1+1/N_0$. Integer CR is empty only when the continuous CR width $(1-\gamma)\lvert ER\rvert$ is below one step (639 of 2,987 tiny populations, all of that kind). Endpoints differ by less than one step. The step is $6\times10^{-6}$ at 370 units of 500–4,000 people. Severity is high only for tiny tables or near-ties. With unit restrictions $U_i$, or joint columns in R×C, the gap is not bounded by this argument (open). | Relabel M2: sharp for continuous tables conditional on the margins. Add a remark with the lattice statement for 2×2 and the referee's example. Integer N1 is decision **U1**. | Done | **C7:** enumerate integer allocations for the referee's example. The integer CR set is empty while the M2 LP returns {0}, contradicting "attained by unit tables". |
-| P-B2 | M2(d): a scalar breakdown value needs a specified conclusion, equality treatment and a scalar path. A vector of slacks gives a breakdown frontier. | **R.** | Restate (d) as nesting componentwise in ε, with a breakdown frontier in general and a scalar value along a stated path. | Done | **C7b:** two slacks for which the set of ε pairs preserving a conclusion is not a product of intervals. |
-| P-B3 | M3(d) "exactly one of $F_\pm$ is non-empty when $D_{ER}\ne0$" fails at γ = 1 (pure units (0,0), (1,1): both branches contain the solution). | **R\*.** Reproduced. The proof notices the case (l.127) and the statement drops it. Minor, because γ = 1 means every unit is pure and $D$ is point-identified. | Restate as: exactly one branch when $ER\ne0$ and $\gamma<1$; both give the identified gap at γ = 1; gap 0 at $ER=0$. | Done | **C8:** two pure units; both LP branches are feasible, contradicting "exactly one". |
-| P-B4 | M3(c)'s witness $\beta_{i1}=\beta_{i2}=T_i$ can be removed by unit restrictions $U_i$ or by previously imposed signs. | **R.** M3 is stated with $F$ from Def. 2, which includes $U_i$, but the proof ignores $U_i$. | Add "with no unit-level restrictions and no other sign rows" to M3. | Done | **C8b:** a unit ordering $\beta_{i1}\ge\beta_{i2}+0.1$ that makes $\{\delta_B\le0\}$ empty. |
-| P-B5 | "CR is never refuted by the data" and "Between signs and CR can never be rejected from aggregates" (2c M3(d), Reading) fail for integer tables, and are read into the wrong base model elsewhere (see P-B14). | **R.** The single between sign still has an integer witness. CR does not (P-B1). | Reword everywhere: "in the continuous-rate model-free problem (Duncan–Davis tables, no linear rung), a $\delta_B$ sign and CR are always feasible; with the linear rung they can be jointly rejected; with integer counts CR can be rejected outright." In the emptiness note, say whether the rung alone is rejected (already computed, `.rxc_empty_test`). | Done | **Package test:** the emptiness note no longer contains "never be refuted" unqualified. **C7** (integer CR empty). |
-| P-B6 | M4 established. | R | No action. Cite the referee's two-column example in the C3 discussion. | No change needed (result established); example noted | — |
+* [`PLAIN_LANGUAGE_GUIDE.md`](https://github.com/mdweaver/eiid/blob/e170be9161b9bbc250a17a27ffd39bc523c1c88b/docs/extension/PLAIN_LANGUAGE_GUIDE.md) §9 and the [vignette](https://github.com/mdweaver/eiid/blob/e170be9161b9bbc250a17a27ffd39bc523c1c88b/package/eiPartialID/vignettes/eiPartialID_rxc.Rmd) section on signs and reinforcement:
+  * refutation stated with its base model;
+  * W2 described as a pooled sum;
+  * quoted simulation figures name their method;
+  * the default reinforcement interval described as algorithmic;
+  * a "reading the output" section.
+* [`PHASE4_implementation.md`](https://github.com/mdweaver/eiid/blob/e170be9161b9bbc250a17a27ffd39bc523c1c88b/docs/extension/PHASE4_implementation.md): updated for 0.3.0.
 
-### B. 2c: K-rows under districts, Prop. M5 (major comment 2)
+### 2.4 Verification scripts
 
-| Point | Comment (summary) | Our check | Change | Status | Check that fails on the old text |
-|---|---|---|---|---|---|
-| P-B7 | M5 is incorrect across the advertised rungs. (a) holds per rung only with the full district parameterisation; the single $M_{Q+K}(X_i)$ formula proves only the pooled case. (b) needs district-specific ordering on each district's support. (c) fails under M1: six units in two districts with common positive slopes give pooled $\delta^*_W=-0.0493$. | **R.** Reproduced. I2 adds three things. (i) Within each district $\delta^*_W=+0.00064$. (ii) The 2×2 local rows $xm_1'+(1-x)m_0'\ge0$ hold everywhere. So PD's P-N chain "signed slopes ⊂ weighted-local ⊂ $\delta_W\ge0$" also fails for pooled M1. (iii) The W1 identity $\delta^*_W=\operatorname{Var}_p(X)(ER^*-D^*)$ still holds with the district-fitted τ, so the CR slab rows remain valid. | Restate M5: (a) per rung with the stacked district parameterisation; (b) per district; (c) for M0, or with district-conditional weights; give the between-district covariance term $\sum_g\mu_g\operatorname{Cov}_{w^g}(X,\zeta_{g,D})$ for M1. Scope P-N and the §4.2 cells to M0. New proof item **R16**: R3′/R10′ for grouped rungs via 2b Thm 1′ (decision **U2**). | Done | **C9:** the referee's six-unit design; M5(c)'s hypothesis holds and the conclusion fails. **Package test:** with `group` given, the sign/CR print line does not claim R3(b) until R16 is proved. |
-| P-B8 | Remark M5.1: "order $p^{-1/2}$" for $\delta-\delta^*$ needs sampling and weight conditions; (S2) is a mean condition only. | **R.** | Replace with: mean zero given the design; its scale is the root sum of squared design coefficients under P3-S1a, with a weight condition for concentration. Or delete the rate. | Done | — (wording) |
+| Script | Before → after | New checks (each fails on the earlier statement) |
+|---|---|---|
+| `verify_phase2c.py` | 12 → 26 checks | <ul><li>C4 rebuilt with valid transition matrices</li><li>C5(c′), C7, C7a, C7b, C8, C8b, C9, C10, C10b, C11, C12, C12b, C13, C14: integer examples, $\gamma=1$, district reversal, grid and size examples, derivative non-identification, binning, smooth (d), W1/W2 reversal</li></ul> |
+| `verify_R2.py` | 4 → 6 checks (+ T4) | <ul><li>T1c: target with intercept</li><li>T4b: target-specific redundancy</li><li>T4 records solver status (147/494/1153 of 1794, plus 6 unclassified)</li></ul> |
+| `verify_R3.py` | 2 → 4 checks | <ul><li>S6: Remark R3.1</li><li>S7: Remark R3.2</li><li>S2 now separates empty, point and interval branches</li></ul> |
+| `verify_R10.py` | MC → MC + 3 checks + V12 | <ul><li>V9–V11: the event inclusions</li><li>union lengths merged (0.357 / 0.242 / 0.480)</li><li>V12: the false-CR table</li></ul> |
+| `verify_phase2a.py`, `verify_phase3.py` | 31 → 32, 13 → 15 | the restricted-support counterexample; the null-direction and residual-CLT examples |
 
-### C. 2c: N2 and §6 (major comments 3 and 4)
+---
 
-| Point | Comment (summary) | Our check | Change | Status | Check that fails on the old text |
-|---|---|---|---|---|---|
-| P-B9 | N2.2(a)–(b): "support points (the distinct observed compositions)" is ambiguous. On a subset of a larger support, extendibility subject to the other accounting equations can fail (support {1/4, 1/2, 3/4}, dropping the middle point). | **R.** Reproduced. | Define N2 on the finite empirical design law, where all of (a)–(d) hold. For grids, state only an outer relaxation, using the binning repair (P-B13). | Done | **C10:** the referee's three-point example. The LP on the two extreme points accepts values that no monotone extension can produce at the middle point. |
-| P-B10 | N2.2(a): the proposed sharp version $E[S(X,T)\mid X=x]$ is not sharp. The model conditions on $V=(X,N)$. The condition is $m(X)\in E[S(X,T)\mid V]$ a.s., with the shape restrictions. | **R** for the counterexample (two sizes at $X=1/2$). **N** for the replacement: it must be proved via 2a Thm 1 selection for each measurable $m$. | Replace the sentence with the referee's $V$-conditional statement, marked Conjecture until proved. Add the size example as a remark. Carry the caution into R9. | Partly: the claim is withdrawn and the $V$-conditional statement added as Conjecture N2.2′, left open | **C10b:** the size example; the X-conditional LP admits $(0.75,0.25)$, which the full model excludes. |
-| P-B11 | N2.3: the derivative is not identified on isolated support points. Adding $h=(x-\tfrac14)(x-\tfrac12)(x-\tfrac34)$ leaves the law unchanged and moves $\tau'(1/2)$ by $-1/16$. An LP using the wrong $\tau'$ need not cover the true gap. | **R.** Reproduced. | Restate N2.3 for the structural $\tau_m$. As an observable restriction, require an identified derivative: an interior point of an interval support with compatible smooth versions, or a maintained identified regression family. An estimated derivative adds sampling error. Decision **U4**. | Done | **C11:** the referee's $h$ example; two compatible models give different local thresholds. |
-| P-B12 | N2.3(d)'s last assertion is true even for smooth functions ($X\sim U[1/5,2/5]$, $m_1=x-x^2/2$, $m_0=1-x^2/2$: local zero, aggregate $-1/47250$). The reverse non-implication also holds. | **R.** Reproduced ($-2.1164\times10^{-5}$). | Replace the kinked V6 witness by the smooth example and add the reverse direction. | Done | **C13:** the smooth example (strengthens the check; nothing fails). |
-| P-B13 | 2c §6 binning: "averaging Lemma N2.1 within a bin uses [CE-cvx]" is wrong, since $S(x,\tau(x))$ varies with $x$ (example: 0.3125 against 0.25). Repair: person-weighted bin means $\bar m_{1b}=E_b[Xm_1]/\bar x_b$ etc. give an outer relaxation for global monotonicity. Local rows need a separate argument. | **R** for the counterexample (0.3125, 0.25, 0.625 reproduced). **N** for the repair proof. | Replace the binning sentence by the repair, proved as a lemma (with absent groups by zero-weight extension). | Done | **C12:** the two-point bin example. |
-| P-B14 | 2c §6: fixed-degree inference after LOO-CV selection of the degree is invalid (conditional coverage about 68%). Degree $J$ with $J$ support points is not identified; $J$ is used twice. | **R.** I3: $1-0.05/P(\lvert Z\rvert>\sqrt2)=0.682$. | Prespecify the degree, or use sample splitting or a selection-aware procedure. Rename the support size (e.g. $J_X$) apart from the degree. | Done | **C12b:** LOO selection simulation in the balanced two-level design; conditional coverage ≈ 0.68. |
+## 3. Revised verdict table
 
-### D. 5a: Theorem R3 (major comment 5)
+| Result | Your verdict | Now |
+|---|---|---|
+| M1 | Established | Unchanged; hypotheses split by part (2c §1) |
+| M2 | Established for continuous rates; integer claims incorrect | **Proposition for continuous unit tables**; Remark M2.1 (integer lattice in 2×2 with margins, proved); R15 open |
+| M3 | Incorrect as a whole | **Proposition** with stated hypotheses; (d) covers $\gamma<1$, $\gamma=1$, $ER=0$ |
+| M4 | Established | Unchanged |
+| M5 | Incorrect across the advertised rungs | (a) every rung; (b) district-specific ordering; (c) M0 and within each district, with the exact between-district term |
+| N2.1 | Established | Unchanged |
+| N2.2 | Established under conditions | (a) outer only; **Conjecture N2.2′** for the sharp version; (b) complete finite support; (e) chart and weighted covariances |
+| N2.3 | Not established as an identified restriction | Structural identity only; local rows dropped from the build |
+| (new) Lemma N2.4 | — | Proved (your repair): person-weighted bins give an outer relaxation |
+| R3(a)–(e) | Established, with qualifications | Pooled model; finite LP for polyhedral $C$; Remarks R3.1–R3.2; (e) reworded |
+| R2(a)–(e) | Established under conditions; (e) wording | Step 4 with the intercept; qualifications in (b)–(d); (e) target-specific |
+| R10(a)–(d) | Established under the stated assumptions | Status by version: (a) theorem; (b1) cited under the augmented Condition P; (b2) theorem; (b3) algorithm |
+| R10(e) | Established; proof completion | **Theorem**, using your analytic proof |
 
-| Point | Comment (summary) | Our check | Change | Status | Check that fails on the old text |
-|---|---|---|---|---|---|
-| P-B15 | R3(b): calling the computation "an LP" needs polyhedral $C$ (a ball is admissible under (C1)–(C2)). (C2) is stronger than (a) needs. The dimension condition is sufficient (A5 implies it). $P(X\in A)=1$ is needed for the witness. "Fixed design ⇒ $\tilde B=B^*$" is a convention, not an identity for a superpopulation rate. The full-law versus regression distinction is illustrated by $C=[0.2,0.4]$: full law empty, regression $[1/6,1/3]$. | **R.** Reproduced. | Say "a finite LP when $C$ is polyhedral". Add the full-law versus regression example as a remark under (b). Reword l.22 as a convention. | Done | **S6:** the referee's $C=[0.2,0.4]$ example; regression interval $[1/6,1/3]$, full-law set empty. Shows (a) and (b) differ; nothing fails. |
-| P-B16 | R3(e): "never $C$ alone" needs qualifying when a belief has a model-free implication ($m_r=1.5-2x$: ER = −2, positive within association impossible model-free). 5a l.309 "rests on an unrefutable belief (2c M3)" imports M3 into the wrong base: on $X=0,1/4,1$ LCE fits, and both LCE CR branches are empty ($\tilde D=-261/1925$, ER = 0). | **R.** Reproduced. | R3(e): "an empty LP rejects the conjunction; emptiness alone does not attribute the failure". l.309: name the base model, and say that under LCE CR is refutable even when LCE fits. Package: print "LCE alone is / is not rejected" next to the joint rejection. | Done | **S7:** the $X=0,1/4,1$ example; both LCE branches empty while LCE fits, contradicting "unrefutable" as applied in §3.5. |
-| P-B17 | R3(c), (d) established. Minor: a common witness is only sufficient. In the square with $g_B=u+0.5$, $g_W=u-0.5$, target $v$ has identical branch images although the common-witness LP is infeasible. | **R.** | Add the referee's example to §1.4. | Done | — |
+---
 
-### E. 5a: Proposition R2 (major comment 6)
+## 4. Point-by-point
 
-| Point | Comment (summary) | Our check | Change | Status | Check that fails on the old text |
-|---|---|---|---|---|---|
-| P-B18 | R2 step 4 (l.169): the face LP $h^\top k\ge U$ omits the target intercept. It should be $h^\top k\ge U-\varphi_0$. On $[0,1]^2$ with target $2+x$ the printed row is $x\ge3$. | **R** for the document. **Code is correct:** `.rxc_face_moves` subtracts $c(\hat\beta)+c_0$ (`check_B_pi_code.R`: a cut through the facet keeps $U$; a cut removing it moves $U$; the document's row is infeasible). `verify_R2.py` uses zero intercept, so it cannot see the error. | Fix step 4. | Done | **T1c:** target $2+x$ on the square; the printed face LP is infeasible (so it reports "moves") while the brute-force endpoint is unchanged. **Package test:** `.rxc_face_moves` with $c_0=2$. |
-| P-B19 | R2(b): a positive multiplier certifies tightening only with uniqueness or a positive lower bound on all optimal multipliers (duplicate-row example). R2(c): the separating witness need not be a reported cell-rate target. | **R.** | Add the duplicate-row example to (b). Add "the witness objective may not be a reported target" to (c). | Done | — |
-| P-B20 | R2(d) holds under γ < 1, a nonconstant gap target, and nonempty intersections. §2.5 item 2 ("in 2×2 the middle verdict cannot occur") needs the nonconstant-target qualification. | **R.** | Add the qualification. | Done | — |
-| P-B21 | R2(e): "redundant given the others" is incorrect if it means implied. Square, target $x$, rows $x+y\le0.8$ and $x\le0.5$: zero last-added gain for $x$, yet the row lowers the upper endpoint of $x+y$ from 1.5 to 0.8. | **R** for the document. **Code is correct:** the added-last verdict is "cuts the set, not this target" (checked on the same example, `check_B_pi_code.R`). | Reword (e): "zero incremental gain for this target"; "redundant for the feasible set" only via the implication test (c). | Done | **T4b:** the square example; the old sentence calls the row redundant while it tightens $x+y$. |
-| P-B22 | §2.5 item 4: width-gain inference needs joint treatment of the base and augmented endpoints (and any estimated threshold). An interval for one endpoint is insufficient. | **R.** | Restate item 4 and the open item. | Text corrected; the joint-endpoint width-gain inference is still to be built | — (design item) |
+Tags show where each change lives: **[Theory]**, **[Code]**, **[Docs]**, **[Check]**.
 
-### F. 5a: Theorem R10 (major comment 7)
+### Major comment 1: a continuous LP and an integer electorate can reach opposite refutation decisions
 
-| Point | Comment (summary) | Our check | Change | Status | Check that fails on the old text |
-|---|---|---|---|---|---|
-| P-B23 | R10(a) holds per version only under that version's conditions for the **augmented** system. Growing-district M1/M2 (regime R3) is conjectural (P3 §0.5) independently of candidate collection. "Finite vertex set at each $n$" does not verify CLR Condition P (fixed compact index set, gradients bounded away from zero, well-conditioned covariance, rate). A zero-variance **candidate** is different from an exactly known row. Appending row standard errors to the old CLR maximum is insufficient. | **R.** The package already collects candidates from the augmented system (`.rxc_collect(cons, …)` uses the full `cons`). Zero-s.e. candidates are zeroed in the CLR maximum (`W[, se == 0] <- 0`) and kept as exact bounds. That is right only if their gradient is exactly zero. | Replace "R1/R3" by the P3 §0.5 table. List Condition P's actual requirements in the status note. Add the zero-variance-candidate sentence. | Done | — (status) **Package test:** a candidate with nonzero gradient but numerically zero $\hat\sigma$ is not treated as exact. |
-| P-B24 | R10(a) for actual targets: carry over P3-S1a, the weight condition and the residual allowance. An actual gap needs its own residual envelope, e.g. $\tfrac12\{\sum_i(w_{i1}+w_{i0})^2\}^{1/2}$. A single-row $S_1$ need not bound the contrast. | **R.** **Code is valid:** `ci_actual` adds the per-cell envelopes $\sum_{rc}\lvert a_{rc}\rvert\,\mathrm{sd}_{rc}$ (`R/rxc_infer.R:388`). By Minkowski this dominates the referee's contrast envelope, so it is valid and more conservative. | State the allowance for linear contrasts (sum of per-cell envelopes, or the joint envelope). | Done | — |
-| P-B25 | R10(b), (c), (d) established under conditions. One simultaneous event includes the target constant (no strict feasibility needed). Branch union: point coverage only, no simultaneous coverage of both branch images, no selection on $\widehat{ER}$. Under triangular arrays, branch validity is needed along each subsequence. Emptiness bound $\alpha_U+\alpha_L$. Pointwise only. | **R.** The code's conservative slab includes the target row (`Gall <- rbind(cons$S, DS, tg$cvec)`, two-sided via `abs`). | Adopt the referee's version table (R10 against P3.5(a), (b1), (b2)(i), (b2)(ii), (b3)) as §3.2's status note. Add the triangular-array sentence to (c). | Done | — |
-| P-B26 | R10(e): an analytic counterexample replaces the Monte Carlo sketch. A repeated three-point design gives $\limsup P\le\Phi(\tfrac7{12}z_{.995})=0.9335$; with 4,000 critical-value draws, ≤ 0.9401. The supplied far-edge design also satisfies the condition (ratio 0.564, ≤ 0.927). | **R.** Reproduced. The derivation of the 0.564 ratio for the far-edge design is **N** (not rerun here). | Replace the sketch by the fixed-design proof. Keep the MC as illustration. | Done | **V9:** the three-point design; assert the analytic bound is < 0.95. (Nothing fails; it completes a proof.) |
-| P-B27 | 5a l.311: "the naive interval contains bracket ∩ JKST CI, so under-coverage transfers a fortiori" is unproved, and in general false (an empty pre-expansion intersection need not stay empty after expansion). Direct argument: the narrower procedure has limiting coverage ≤ 1/2 at the edge. Also distinguish the two sample ERs when weights differ. | **R.** | Replace the a-fortiori sentence with the direct ≤ 1/2 argument and the counterexample $[0,0.1]$, $[0.15,0.2]$, allowance 0.1. | Done | **V10:** the referee's three intervals; the claimed containment fails. |
+> *M2's step 106 gives real cell masses, not integer counts; your three-unit example shows that CR can be infeasible for every integer allocation. M3(d) omits the pure-unit boundary case. N1 should be labelled sharp for continuous tables; a scalar breakdown value needs a path.*
 
-### G. Minor comments and the EGGHM mapping (report §3)
+**Response.** Accepted in full.
+* **[Theory]**
+  * M2 is now "sharp for **continuous** unit tables given the margins" (2c §2), with a note recording the earlier claim.
+  * New **Remark M2.1** gives your three-unit example and the second referee's two-precinct example. It also proves that in 2×2 with margins only, the integer gap set is the Duncan–Davis interval intersected with a lattice of step $1/(N\mu(1-\mu))$.
+  * M2(d) now says nesting is componentwise in the slacks: a vector of slacks gives a breakdown frontier, and a scalar breakdown value needs a stated path.
+  * M3 states its hypotheses (continuous rates, no unit-level restrictions, no other sign rows). M3(d) now distinguishes $\gamma<1$ (exactly one branch when $ER\ne0$), $\gamma=1$ (both branches give the same identified gap) and $ER=0$ (gap zero; the singleton is the gap's image).
+  * The difference-in-differences rung Δ4 inherits the continuous label (`PACKAGE_DESIGN.md`).
+  * Integer tables in general are a new proof item, **R15**.
+* **[Code]** N1 is not implemented. The package's wording about feasibility now names the continuous model-free problem.
+* **[Check]** C7, C7a, C7b (integer examples; lattice), C8 and C8b ($\gamma=1$, $ER=0$).
+* **Severity (P-B1, P-B3).** We accept both corrections, and note two mitigating facts:
+  * In the case the package would use first (2×2, margins only), integer and continuous answers differ by less than one lattice step, about $6\times10^{-6}$ at the scale of our Wisconsin application.
+  * $\gamma=1$ requires every unit to be pure, in which case the gap is point-identified.
 
-| Point | Comment (summary) | Our check | Change | Status | Check that fails on the old text |
-|---|---|---|---|---|---|
-| P-B28 | W1 versus W2: invertibility of $M$ is needed for $g$ only; ER needs only positive regressor variance; choose a bounded value for the absent rest group at $X_r=1$; W2 signs concern components of a sum and need not sign every summand. | **R** (M1 boundary identities reproduced). | Edit the hypotheses of M1(b)–(c); add the W2 sentence. | Done | — |
-| P-B29 | Ladder (2c §5): "both signs" ⇒ CR only when the directions agree; N2 admits steps where a local derivative is undefined; compare realised and model-implied associations only on the same population; for $R\ge3$ specify a simplex chart. The symmetric Dirichlet example gives negative covariance under both W1 weights. | **R.** | Fix the ladder lines. Upgrade C5(c) to the weighted covariances. | Done | **C5(c′):** the weighted covariances under both W1 weights are negative (strengthens the check). |
-| P-B30 | Identification versus sample labels: R3(e) is a population statement; raw LP infeasibility at $\hat\beta$ is a sample diagnostic; level-controlled rejection uses R10's rule. R2 §2.5 l.208 and l.210 need their qualifications (P-B20, P-B22). | **R.** | Rename to "empty at the point estimate (see the emptiness test)". | Done | **Package test:** verdict strings contain no "refuted" for point-level emptiness. |
-| P-B31 | EGGHM §2, Lemma 1, Props 1, 4, 6, 9–10: correct. EGGHM assumes a mixed neighbourhood (γ < 1); ER also needs positive composition variance; the strict branch distinction at nonzero ER needs a mixed unit. | **R.** | Add the mixed-unit condition where EGGHM is cited for branch uniqueness. | Done | — |
-| P-B32 | EGGHM Props 2–3, 5, 7, 8, Cor. 3: sharpness ranges over compatible joint distributions; it does not license integer-table interpolation. sign(ER − NM) = sign(ER) uses γ < 1. | **R.** | Cite this with P-B1. | Done | — |
-| P-B33 | EGGHM §4 end, Theorems 1–3: 1b l.69 attributes all three tables to Theorem 1 (the gap is Theorem 1; the group levels are Theorems 2 and 3). W2 and joint columns need their own proofs (M1, M4). | **R.** 1b l.69 checked; EGGHM theorem numbers taken from the report. | Fix the attribution. | Done | — |
-| P-B34 | EGGHM §5, Props 11–13 and 14–16: the neighbourhood readings use Assumption 1 and meaningful derivatives. N2 imposes a common conditional mean. Neither identifies a derivative on an atom. At a pure composition EGGHM's local between association is 0; replacing it by the sign of $D(x)$ changes the belief. | **R.** | With P-B11. | Done | — |
+### Major comment 2: district rungs preserve affine rows but can reverse the sign predicted by M5(c)
 
-### H. The referee's notes on our verification scripts (report §4)
+> *M5(a) holds for every rung via the stacked parameterisation; (b) needs district-specific ordering; (c) fails under M1 because the district intercept is correlated with $X$ (six-unit example, pooled $\delta_W^*=-0.0493$). R3 and R10 extensions to districts must retain the district design.*
 
-| Point | Comment (summary) | Our check | Change | Status | Check that fails on the old text |
-|---|---|---|---|---|---|
-| P-B35 | `verify_phase2c.py` C4's ordering construction changes one column without rebalancing the others, so it does not always build a valid full transition matrix. No check covers integer feasibility, district intercepts or derivative identification. | **N** (C4 not re-read here). | Rebuild C4 with valid transition matrices. Add C7–C13 above. | Done (script) | C7–C13 |
-| P-B36 | `verify_R3.py` S2 labels a branch nonempty only if its width exceeds $10^{-9}$ and calls zero positive-width branches "both degenerate" (possibly two empty sets). Frequencies over reused designs are descriptive. | **R.** Code read: `verify_R3.py` l.102. | Separate empty, degenerate and positive-width branches. Call the frequencies descriptive. | Done (script) | — |
-| P-B37 | `verify_R2.py` T4 now gives 153/494/1,153 of 1,800, against 147/494/1,153 of 1,794 saved. Unsuccessful base solves are skipped without recording status. The face LP in the tests uses zero intercept. | **N** (not rerun; the earlier session reproduced the committed output under the old runner). | Record solver status for skipped cases; regenerate the output; add T1c (P-B18). | Done (script) | T1c |
-| P-B38 | `verify_R10.py` l.189–190 sum the two branch lengths even when they overlap, so "union length" can exceed the Lebesgue length. The runs do not test CLR, residual coverage, the crossing rule or growing dimension. | **R** (code read). The package merges overlaps (`.rxc_union`). | Merge before measuring; regenerate; correct the 5a §3.4 figure. State what the MC does not test. | Done (script) | **V11:** overlapping branch intervals; the script's length exceeds the merged length. |
+**Response.** Accepted.
+* **[Theory]**
+  * M5 is restated per rung with the stacked district parameterisation (2c §3): (a) holds for every rung; (b) requires ordering in each district; (c) is proved for M0 and within each district.
+  * For pooled district rungs there is an exact law-of-total-covariance decomposition, including the between-district term $\sum_g\mu_g\operatorname{Cov}_{w^g}(X,\zeta_{g,D})$. Your example illustrates it: −0.04927 pooled, +0.00064 within each district.
+  * R3 and R10 are now stated for the pooled model (5a §1, §3). Their district versions are a new proof item, **R16**.
+  * The nesting chain P-N in `PACKAGE_DESIGN.md` is scoped to M0.
+* **[Code]** The sign rows were already computed with each unit's own district coefficients. What changed is the labelling:
+  * a fit-time note under M1, M1(δ), M2 and L4 says the module is experimental and that each sign is one pooled restriction;
+  * `print()` claims regression sharpness only for pooled fits, and otherwise says "outer set; sharpness under grouped rungs not yet proved".
+* **[Check]** C9 (your reversal), and a package test for the grouped-rung note.
 
-### I. Outside scope: core documents (report §5)
+### Major comment 3: N2 needs a support convention, conditioning on size, and an identified derivative
 
-| Point | Comment (summary) | Our check | Change | Status | Check that fails on the old text |
-|---|---|---|---|---|---|
-| P-B39 | 2a tag [supp] (l.57), Lemma 1 (l.144–150), Lemma 3(c) (l.310–314): continuous functions equal a.e. **on** $A$ agree on the support of the measure restricted to $A$, which can be smaller than $\operatorname{supp}P_X\cap A$ ($X\sim U[0,1]$, $A=\{1/2\}$). This also explains the tension between Lemma 3(c) and Remark 5.1. | **R.** Elementary counterexample. Note that Remark 5.2's argument (A5 ⇒ full-dimensional) also uses $\operatorname{supp}P_X\cap A$. | Define $\operatorname{supp}(P_X\vert_A)$ and impose A5 on it. Rewrite [supp]. Check every use. Report it to referee A with the batch-A material (it corrects a reviewed core result). | Done (also reported to referee A) | **2a check:** $X\sim U[0,1]$, $A=\{1/2\}$; the old [supp] claims $0\equiv1$ at $1/2$. |
-| P-B40 | P3.5(b2)(ii) (l.179–189): the rank-$q$ pseudoinverse proof bounds gradients in the range of $\Sigma$ only. A singular CLT need not control smaller errors in null directions, e.g. error $(Z/\sqrt n,-1/n)$. | **R** (I4). | Document: require $\Sigma$ positive definite (as (b1) already does), or work in a full-rank reduced parameterisation, or require exact null-coordinate identities. Code: if $q<\dim\beta$, use $q=\dim\beta$ and warn, or set the projection to NA with a message. Add a test. | Done (proof and package guard; also reported to referee A) | **P3 check:** I4's toy; zero-s.e. bound misses always. **Package test:** a rank-deficient $\hat V$ triggers the guard. |
-| P-B41 | P3 [Lyap] (l.40) and the residual step (l.201–203): $\max_iw_i^2/\sum_iw_i^2\to0$ does not give a variance-standardised CLT if only one summand has positive variance. The tail bound with the envelope $S_1$ still holds: Chebyshev where $\mathrm{sd}(E)/S_1\to0$, Lindeberg where the ratio is bounded away from zero. | **R** for the gap. **N** for writing the argument. | Replace step 5 by the subsequence argument. Report to referee A with batch A. | Done (also reported to referee A) | — (proof completion) |
-| P-B42 | 1b §§A1–A2 (l.59–80, 116–121): fix the theorem-to-table mapping (P-B33). For pure units, unit-level row ordering cannot be equated with the observable implication of a local between sign (the between covariance is identically zero). | **R.** | Fix the mapping. Add the pure-unit caveat. | Done | — |
+> *(i) "Support points" must be the finite empirical design; on a grid of a larger support, extendibility can fail. (ii) The proposed sharp version conditions on $X$ only, but the model conditions on $(X,N)$. (iii) N2.3's derivative is not identified on isolated support points.*
 
-### J. The referee's comparison with the earlier internal review (report §6)
+**Response.** Accepted.
+* **[Theory]**
+  * (i) A support convention defines N2 on the finite empirical design law (2c §4). N2.2(b) holds on the complete finite support only. Your grid example is Remark N2.2.2.
+  * (ii) N2.2(a) now claims only an outer set. Your $V$-conditional statement is recorded as **Conjecture N2.2′**, with the proof route through 2a Theorem 1. The size example is Remark N2.2.1. We have deliberately left the conjecture open for now, because a separate review of the rungs bears on it.
+  * The same caution is recorded for the planned series bound M-SHARP: it is "tighter than the outer set", not sharp, when size is informative (`PACKAGE_DESIGN.md` R9).
+  * (iii) N2.3 is now a structural calculus identity for $\tau_m$, with a statement that it is **not** an observable restriction on a finite support, and your $h(x)=\prod_j(x-x_j)$ example.
+  * The local-derivative rows are **dropped** from build step 8.
+  * N2.3(d) uses your smooth example ($\delta^*_W=-1/47250$) and states the reverse non-implication.
+* **[Check]** C10, C10b (grid and size), C11 (derivative), C13 (smooth (d)).
 
-| Point | Comment (summary) | Our check | Change | Status | Check that fails on the old text |
-|---|---|---|---|---|---|
-| P-B43 | The internal review (5a §4) covered 5a §§1–3 only and missed the face-LP intercept, set-versus-target redundancy, the empty LCE–CR example and the union-length double count. Its R10(e) sketch left verification to simulation. Combining two tests by a union bound gives an upper bound; the rejection probability need not double. Inference labels should keep P3's growing-district qualification separate from the candidate-simulation conjecture. | **R.** | Reword the §3.1 parenthesis ("would double the **bound**", not the level). Add to 5a §4 a line pointing to this ledger. Process lesson for EXTERNAL_REVIEW_PLAN §3: the fresh-session pre-screen must also cover the scope document (here 2c), not only the new proofs. | Done | — |
+### Major comment 4: binning and cross-validation in 2c §6 require different arguments
 
-## Acknowledgements
+> *Ordinary bin averages do not satisfy the accounting identity; person-weighted bin rates do. A CV-selected degree invalidates fixed-degree inference; "J" is used for two things.*
 
-We adopted, with credit in the documents, the referee's analytic proof of persistent under-coverage for R10(e), the person-weighted binning repair (Lemma N2.4), the Chebyshev/Lindeberg completion of the residual step, the null-direction counterexample for the projection interval, and the $V$-conditional formulation recorded as Conjecture N2.2′.
+**Response.** Accepted. We adopted your repair.
+* **[Theory]**
+  * New **Lemma N2.4** proves that person-weighted bin rates reproduce $E_bT$, preserve the row targets and inherit monotonicity, and so give an outer relaxation of the global N2 bounds (2c §4, credited).
+  * §6 now requires a prespecified degree, or sample splitting or a selection-aware procedure.
+  * Support size is $J_X$ and degree is $q$.
+  * Build step 8 in `PACKAGE_DESIGN.md` cites the lemma.
+* **[Check]** C12, C12b.
+
+### Major comment 5: R3 is sharp for specified information; refutability changes with that information
+
+> *(a) and (b) are distinct; "LP" needs a polyhedral $C$. R3(e) should say an empty set rejects the conjunction without attributing it. 5a line 309's "unrefutable belief" imports M3 into the wrong base model: LCE alone can fit while both CR branches are empty.*
+
+**Response.** Accepted.
+* **[Theory]**
+  * R3 now says "a finite LP when $C$ is polyhedral" and records the design-weight convention. It notes that (C2) is stronger than (a) needs.
+  * New **Remark R3.1** gives your full-law-versus-regression example ($C=[.2,.4]$: full-law set empty, regression gap set $[1/6,1/3]$).
+  * New **Remark R3.2** gives your example where LCE fits but excludes CR ($\tilde D=-261/1925$).
+  * R3(e) reads "an empty population set rejects the conjunction; emptiness alone does not attribute the failure". It includes the $ER=-2$ example of a belief refutable model-free, and distinguishes population emptiness, an empty plug-in, and a test rejection.
+  * 5a §3.5 item 2 now names its base system.
+  * Your common-witness strip example is in §1.4.
+* **[Code] [Docs]**
+  * Every "never refuted on their own" string was replaced: roxygen, module metadata, the emptiness note, the guide and the vignette. The new text says that a δ_B sign and CR are always feasible only in the model-free problem with continuous tables, and that under the rung the combination can be rejected.
+  * Next to a joint rejection, the output now says whether the rung alone is rejected.
+* **[Check]** S6, S7 in `verify_R3.py`. S7 fails on the old wording.
+
+### Major comment 6: R2 certifies changes to a specified endpoint
+
+> *Step 4's feasibility LP omits the target intercept ($h^\top k\ge U$ should be $\ge U-\varphi_0$). A positive multiplier at one optimum does not certify tightening (duplicate-row example). (e)'s "redundant" should be "zero incremental gain for this target".*
+
+**Response.** Accepted.
+* **[Theory]**
+  * Step 4 now uses $h^\top k\ge U-\varphi_0$.
+  * (b) includes your duplicate-row example.
+  * (c) notes that the separating objective need not be a reported target.
+  * (d) states the qualifications (positive variance, $\gamma<1$, non-constant target).
+  * (e) reads "zero incremental gain for this target". Redundancy for the feasible set is decided only by the inclusion test of (c).
+  * §2.5 item 4: inference on a width gain needs joint treatment of the base and augmented endpoints.
+* **[Code]**
+  * The package's face test already included the target intercept; a regression test (P-B18) now covers it.
+  * The verdict "cuts the set, not this target" is documented as zero gain for this target.
+* **[Check]** T1c (intercept) and T4b (target-specific redundancy) in `verify_R2.py`.
+
+### Major comment 7: R10 inherits a coverage theorem only when the augmented procedure has one
+
+> *A version table: conservative (a) supports (a)–(d); full-candidate CLR needs the augmented Condition P; projection controls both ends at once; simulated-candidate CLR remains conjectural. The regime caveat must stay separate from the candidate conjecture. Actual gaps need their own residual envelope. Analytic counterexample for (e).*
+
+**Response.** Accepted. We adopted your table and your proof.
+* **[Theory]**
+  * 5a §3.2's status note is replaced by your version table: (a) theorem; (b1) cited, under the augmented Condition P; (b2)(i) and (b2)(ii) theorem; (b3) algorithm. Condition P's actual requirements are listed, with the zero-variance-candidate caveat.
+  * §3.1 now points to P3 §0.5's regime table instead of "R1/R3".
+  * R10(a) adds the actual-gap envelope $\tfrac12\{\sum_i(w_{i1}+w_{i0})^2\}^{1/2}$ and notes that the package's per-cell sum is also valid (Minkowski).
+  * (b): one simultaneous event, no Slater.
+  * (c): point coverage, no branch selection, and the triangular-array remark.
+  * (d): pointwise only.
+  * **R10(e) is now a theorem** with your fixed-design proof (0.933525; 0.940092 with 4,000 draws; far-edge 0.927), credited.
+  * §3.5 item 4 replaces "a fortiori" with your direct ≤ 1/2 argument and counterexample.
+* **[Code]**
+  * The default CR interval (CLR branch union) is labelled **algorithmic** on its own line, with the projection branch union printed beside it.
+  * A zero-variance CLR candidate is exact only if its gradient is zero.
+* **[Check]** V9–V11 in `verify_R10.py`.
+
+### Minor comments and the EGGHM mapping (report §3)
+
+* **W1 versus W2.** The Lemma M1 hypotheses are split by part (invertibility only for $g$; positive variance for $ER^r$). The W2 sentence says it signs a sum. **[Theory]** 2c §1. **[Check]** C14 (W1/W2 sign reversal).
+* **Residual order (2c line 160).** Replaced by a root-sum-of-squared-coefficients bound, valid under P3-S1a. **[Theory]** 2c Remark M5.1.
+* **The ladder.** "Both signs" now means both weakly positive or both weakly negative. N2-local is removed. A simplex chart is specified for $R\ge3$, and C5(c) uses the weighted covariances. **[Theory]** 2c §5, N2.2(e). **[Check]** C5(c′).
+* **Identification versus sample labels.** R3(e) is a population statement. Raw emptiness is a sample diagnostic. Width-gain inference must be joint.
+  * **[Theory]** 5a §1, §2.5.
+  * **[Code]** `eiRedundancy()` says "empty at the point estimate (see the emptiness test)".
+  * **[Docs]** guide §9.
+* **EGGHM mapping.**
+  * EGGHM's mixed-unit condition ($\gamma<1$) is cited where branch uniqueness is used (2c §0, M3).
+  * Integer interpolation is not licensed by EGGHM's sharpness proof (2c M2).
+  * Table 1 is attributed to Theorem 1, and Tables 2–3 to Theorems 2–3 (1b §A1).
+  * The local results are cited for structural, not identified, derivatives (2c N2.3).
+  * W2, pairwise and their CR are marked as extensions (2c Definition 1 remarks).
+  * **[Theory]**
+
+### Verification scripts (report §4)
+
+* **`verify_phase2c.py` C4.** Rebuilt with valid transition matrices.
+* **`verify_R3.py` S2.** It separates empty, point and interval branches; frequencies are called descriptive.
+* **`verify_R2.py` T4.** It records solver status. Our rerun gives 147/494/1153 of 1794, plus 6 unclassified (status 4); your 153 differs, presumably by solver version.
+* **`verify_R10.py`.** Union lengths are merged before measuring; 5a §3.4 now reports occupied length, hull span and the unmerged sum, and lists what the Monte Carlo does not test.
+
+**[Check]** All outputs were regenerated.
+
+### Outside scope: core documents (report §5)
+
+These are also reported to the original referee of Phases 1–3 (`REVIEW_RESPONSE.md`).
+
+1. **Restricted support (2a).** New notation $\operatorname{supp}_AP_X$, defined in 2a §0.1 with your example. [supp] is proved for it, and Lemma 1, Lemma 3(c), Remarks 5.1–5.2 and P1 A5 use it. This also resolves the tension between Lemma 3(c) and Remark 5.1. **[Theory] [Check]** `verify_phase2a.py`.
+2. **Projection under a singular covariance (P3.5(b2)(ii)).** The proposition now requires a positive definite $\Sigma$ (ii-a), or a reduced full-rank parameterisation with exactly zero null-direction error (ii-b). It has a new proof, and your counterexample.
+   * **[Code]** The package drops candidates whose gradients use a numerical null direction of $\hat V$, with a note when this happens.
+   * In the Monte Carlo of P3 §8, $\hat V$ had full rank in every replication of every design, so this is a safeguard rather than a fix for an observed failure.
+   * **[Check]** `verify_phase3.py`; package tests.
+3. **Residual CLT (P3.5(a) step 5).** Completed by your Chebyshev/Lindeberg subsequence argument, credited; the allowance is unchanged. **[Theory] [Check]**
+4. **1b attribution and pure units.** Fixed in 1b §§A1–A2. **[Theory]**
+
+### Comparison with the earlier internal review (report §6)
+
+Agreed. 5a §4 now records that the internal review missed:
+* the face-LP intercept;
+* set-level versus target-level redundancy;
+* the empty LCE–CR example;
+* the double-counted union length;
+* everything in 2c, which it had not been asked to cover.
+
+Our external review plan now gives internal pre-screens the same scope as the external reviewers. We also fixed the "would double the bound" wording in §3.1.
+
+---
+
+## 5. Remaining open items
+
+1. **Conjecture N2.2′** (sharp N2 with conditioning on size). It is stated, with a proof route, and left open by decision for now.
+2. **R15:** integer unit tables beyond 2×2 with margins only.
+3. **R16:** regression sharpness and inference for the sign restrictions under district rungs. Until then the module is labelled experimental under those rungs.
+4. **Width-gain inference.** It must be joint over the base and augmented endpoints (5a §2.5); not yet in the package.
+5. **Conjecture P3.5(b3)** (the simulated CLR candidate collection) and uniformity near point identification remain open, as in P3 §10.
+
+We are grateful for the replacement arguments, which we adopted with credit in the documents: the analytic proof for R10(e), the person-weighted binning lemma, the Chebyshev/Lindeberg completion, the null-direction counterexample, and the $V$-conditional formulation.

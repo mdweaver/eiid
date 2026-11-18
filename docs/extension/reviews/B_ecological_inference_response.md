@@ -1,69 +1,269 @@
-# Response to the referee report on Batch B (ecological inference)
+# Response to the referee: Batch B, ecological inference
 
-*Reviewed version: commit `8b98589`. The revised documents are on branch `claude/wizardly-volta-lbh4bm`; the package changes are in release 0.3.0 of `eiPartialID`.*
+**Reviewed version:** commit [`8b98589`](https://github.com/mdweaver/eiid/tree/8b98589653db71849fc7cdca500312754c26e95d).
+**Revised version:** commit [`e170be9`](https://github.com/mdweaver/eiid/tree/e170be9161b9bbc250a17a27ffd39bc523c1c88b) on branch `claude/wizardly-volta-lbh4bm`.
+**All changes since the reviewed version:** [compare `8b98589…e170be9`](https://github.com/mdweaver/eiid/compare/8b98589653db71849fc7cdca500312754c26e95d...e170be9161b9bbc250a17a27ffd39bc523c1c88b).
 
-## Cover note
+**2c** is `docs/extension/PHASE2c_monotone.md`; **5a** is `PHASE5a_sign_module.md`; **Guide** is `PLAIN_LANGUAGE_GUIDE.md`; **Vig** is `package/eiPartialID/vignettes/eiPartialID_rxc.Rmd`. Line numbers in quoted comments refer to the reviewed version.
 
-We thank the referee for an applied reading that changed what the package reports. We reproduced all 33 points we recorded (P-E1 to P-E33): the referee's appendix (`reviews/referee_checks_B_ecological_inference.py`) runs unchanged, including the W1/W2 sign reversal and the false-CR coverage table. Thirteen points overlap with the partial-identification referee's; the shared corrections are listed in both responses. We agree with the recommendation of major revision: the module stays in the package, **flagged experimental**, with revised claims, examples and default reporting.
+---
 
-**One partial dispute.** The referee notes that the slack dial on beliefs was out of scope. It is implemented (`sensitivity(dial = "slack")`); our implementation-status section was stale and said otherwise. We corrected that section (5a §5, P-E22/P-E28).
+## 1. Summary
 
-**What changed for users (release 0.3.0).**
-* **W2 is described correctly.** It is one pooled sum over the original groups, not a direction for each group, and W1 and W2 can disagree in sign (the referee's two-unit example is now check C14). A per-group restriction is planned.
-* **Refutation is stated with its base model.** A between-group sign and reinforcement are always feasible only in the model-free problem with continuous tables. Under the linear rung the combination can be rejected, and the output says whether the rung alone is rejected.
-* **The default reinforcement interval is labelled algorithmic** on its own line, and the projection interval, which has a proof, is printed beside it. Quoted simulation figures now name their method (the 0.36 width and 99% coverage are the conservative method's).
-* **Reporting.** Every union piece is printed. A rung-only (base) column sits beside every restricted result. Weight concentration (largest unit weight; effective number of units) is reported for each signed association. The redundancy verdicts say "zero gain for this target" and "empty at the point estimate", not "redundant" or "refuted".
-* **False beliefs.** The referee's misspecification experiment is reproduced as check V12. The guide and vignette now say plainly that a wrong belief can make the reinforcement interval miss the truth while never coming out empty, and they recommend showing the base column beside it.
-* **Guidance.** The vignette and the plain-language guide now include:
-  * what a sign does not mean (not per precinct, district or rival; not causal; under district rungs one pooled restriction);
-  * columns and denominators (complementary outcomes; turnout as a column);
-  * how to read sets, confidence intervals, gaps and hulls;
-  * the relation to King's EI and hierarchical R×C methods, and the need for a held-out benchmark.
+Thank you for an applied reading that changed what the package reports and how it explains itself.
 
-**Planned, not yet done.**
-* the drop-one display (each belief removed in turn);
-* the sign check for L5/L6 at the fitted point;
-* per-group W2 rows;
-* showing each reinforcement term in the CR table;
+* **Reproduction.** Your appendix reproduces exactly: the union-length table, the W1/W2 sign reversal and the false-CR table (399/336/2; 398/110/0). It is saved as `reviews/referee_checks_B_ecological_inference.py`.
+* **Recommendation.** We agree with major revision. The module stays in the package, **marked experimental**, with revised claims, examples and default reporting.
+* **Overlap.** A partial-identification referee reviewed the same material at the same time. Where your points overlap (integer tables, M3(d), refutation, binning, size conditioning, the union lengths), the corrections are shared and described here as well.
+
+**One partial dispute.** You note (5a line 385) that the slack on beliefs was outside the implementation. It is implemented (`sensitivity(dial = "slack")`, with a `slack` element in each restriction). Our implementation-status section was stale and said otherwise; it is corrected (5a §5).
+
+**What changed for users** (release 0.3.0 of `eiPartialID`):
+* **W2 is described correctly:** one pooled sum over the original groups, not a direction for each group. Your two-unit example is now a check.
+* **Refutation is stated with its base model,** and the output says whether the linear rung alone is rejected next to any joint rejection.
+* **The default reinforcement interval is labelled algorithmic** on its own line. A projection interval, which has a proof, is printed beside it. Quoted simulation figures name their method.
+* **Every union piece is printed.**
+* **A rung-only (base) column sits beside every restricted result.**
+* **Weight concentration** is reported for each signed association.
+* **The guide and the vignette now cover:**
+  * writing each belief down before looking at the result;
+  * what a sign does not mean;
+  * columns and denominators, including turnout;
+  * how to read sets, intervals, gaps and hulls;
+  * the relation to King's EI and hierarchical R×C methods;
+  * your false-belief result.
+
+---
+
+## 2. What changed
+
+### 2.1 Theory
+
+| Document | Changes relevant to your report |
+|---|---|
+| [2c](https://github.com/mdweaver/eiid/blob/e170be9161b9bbc250a17a27ffd39bc523c1c88b/docs/extension/PHASE2c_monotone.md) | <ul><li>**Definition 1 remarks** (new): whose behaviour is averaged and with which weights; W2 as a pooled sum; δ_B weights $p_ix_i(1-x_i)$; W2, pairwise and their CR marked as extensions of EGGHM; $g-B=M^{-1}\Delta$ (signing $\Delta_A$ does not sign the Goodman bias).</li><li>**M2** sharp for continuous unit tables, with **Remark M2.1** giving your two-precinct example and the partial-identification referee's.</li><li>**M3** hypotheses; (d) with $\gamma=1$ and $ER=0$ (the singleton is the gap's image).</li><li>**Reading** gives your equal-rates witness for R×C and the three distinct emptiness events.</li><li>**M5** per rung: under district regressions a sign is one pooled restriction.</li><li>**N2**: support convention, size conditioning (Conjecture N2.2′), the derivative not identified on a finite support (N2.3), person-weighted bins (Lemma N2.4).</li><li>§5 ladder: "both signs" means both weakly positive or both weakly negative.</li></ul> |
+| [5a](https://github.com/mdweaver/eiid/blob/e170be9161b9bbc250a17a27ffd39bc523c1c88b/docs/extension/PHASE5a_sign_module.md) | <ul><li>R3 scoped to the pooled model; R3(e) "rejects the conjunction; does not attribute".</li><li>R2(e) "zero incremental gain for this target"; §2.5 width gains need joint endpoint inference.</li><li>R10(d): conditioning on non-emptiness gives no protection against choosing a belief for its result.</li><li>§3.4: union column = occupied length, hull span, unmerged sum and overlap counts (your table A); new false-CR table (your table B).</li><li>§3.5: quoted numbers name their method.</li><li>§5: release 0.3.0 table, slack line corrected.</li></ul> |
+| [1b](https://github.com/mdweaver/eiid/blob/e170be9161b9bbc250a17a27ffd39bc523c1c88b/docs/extension/PHASE1b_monotone_did.md) | Your four outside-scope items (see §4). |
+
+### 2.2 Code (`eiPartialID` 0.3.0)
+
+* **Status.** `assoc` and `cr` restrictions are **experimental**, and `print()` shows the flag.
+* **Grouped rungs.** A fit-time note says each sign is one pooled restriction across groups.
+* **W2** is labelled "pooled over groups" in the metadata, notes, print and help.
+* **Refutation messages.**
+  * They name the base model.
+  * They say whether the rung alone is rejected.
+  * An empty plug-in is called a sample diagnostic, not a test.
+* **Reinforcement intervals.** The CLR branch union stays the default, labelled **algorithmic** on its line, with the projection branch union printed beside it.
+* **Union pieces.** All of them are printed, including three or more.
+* **Base columns.** New `base_*` columns hold the rung-only estimate and intervals, printed beside restricted results.
+* **Weight concentration.** `eiRedundancy()$concentration` gives, per signed association, the largest unit weight, its unit, and the effective number of units $1/\sum u_i^2$.
+* **`eiRedundancy()` verdicts.** These read:
+  * "empty at the point estimate (see the emptiness test)";
+  * "cuts the set, not this target", which means zero gain for this target;
+  * a header naming the rung and explaining the first and last orderings.
+* **Tests:** [`tests/testthat/test-batchB.R`](https://github.com/mdweaver/eiid/blob/e170be9161b9bbc250a17a27ffd39bc523c1c88b/package/eiPartialID/tests/testthat/test-batchB.R). **Changes and known limits:** [`NEWS.md`](https://github.com/mdweaver/eiid/blob/e170be9161b9bbc250a17a27ffd39bc523c1c88b/package/eiPartialID/NEWS.md).
+
+### 2.3 Documentation
+
+* **[Guide](https://github.com/mdweaver/eiid/blob/e170be9161b9bbc250a17a27ffd39bc523c1c88b/docs/extension/PLAIN_LANGUAGE_GUIDE.md)**
+  * **§2:** which requirements each rung actually uses.
+  * **§9, rewritten.**
+    * Status: experimental.
+    * The δ_B weighting; the W1 predictor (A's share in both parts); W2 pooled.
+    * Refutation with its base model.
+    * Comparison with the rung alone.
+    * Gains and the cost of a wrong belief.
+    * Separate ranges; "do not do this by hand".
+    * Redundancy verdicts.
+    * **New:** write each belief down first; what a sign does not mean; columns and denominators; reading the printout; other methods.
+* **[Vignette](https://github.com/mdweaver/eiid/blob/e170be9161b9bbc250a17a27ffd39bc523c1c88b/package/eiPartialID/vignettes/eiPartialID_rxc.Rmd)**, section "Signs on associations and contextual reinforcement".
+  * **Corrections:**
+    * the W1 predictor;
+    * the δ_B weights;
+    * the slab written as $\operatorname{hull}\{\gamma ER, ER\}$ (your line-163 point);
+    * "exact" removed;
+    * the 0.36/99% figures attributed to the conservative method;
+    * the false-CR price added.
+  * **New subsection "Reading the output":** sets versus intervals; gaps and hulls; writing beliefs down first; what a sign does not mean; columns, orientation and turnout; other methods and benchmarks.
+  * **Descriptive values:** named as the weighted aggregate regression slope and the neighbourhood-model gap.
+
+### 2.4 Verification scripts
+
+* `verify_phase2c.py`: new checks, among them:
+  * **C14**, your W1/W2 sign reversal;
+  * **C7–C7b**, the integer examples;
+  * **C10–C10b**, the grid and size examples;
+  * **C12**, binning;
+  * **C13**, the smooth example.
+* `verify_R10.py`:
+  * union lengths merged before measuring, reproducing your table A (0.357 / 0.242 / 0.480, with 134 / 591 / 0 overlapping runs);
+  * **V12** reproduces your table B exactly.
+
+---
+
+## 3. Assessment table: your rows, with what changed
+
+| Belief or feature | Your concern | What changed |
+|---|---|---|
+| Between sign, δ_B | A weighted average, not an ordering everywhere or against each rival | **[Theory]** 2c Definition 1 remarks (weights; pure units get zero weight). **[Docs]** Guide §9, Vig: weighting stated; "what a sign does not mean". **[Code]** weight concentration reported. |
+| Within sign, δ_W (W1) | Predictor is A's share in both parts; either covariance can be negative; causal reading needs a design | **[Docs]** Guide §9 and Vig corrected ("rates of A, and of everyone else, rise on average with A's share"); causal and sorting caveat added. |
+| W2 | A pooled sum, not per group; W1 and W2 can disagree | **[Theory]** 2c Definition 1. **[Code]** "pooled over groups" labels. **[Docs]** Guide §9, Vig, 1b §D.1. **[Check]** C14. A per-group version is planned. |
+| Pairwise CR | Print the two terms separately | **Planned (0.3.x):** the CR table shows branch intervals but not yet each term. **[Docs]** The guide and vignette explain the pairing. |
+| CR | Belief selection; a wrong belief gives narrow, nonempty, wrong intervals | **[Theory]** 5a §3.4 false-CR table; R10(d) belief-selection sentence. **[Docs]** Guide §9 and Vig state the cost and recommend the base column and pre-specification. **[Code]** base columns. |
+| N1 "exact" bounds | Fails with counted ballots | **[Theory]** 2c M2 continuous label, Remark M2.1 (your example). |
+| N2 | Support, size conditioning, derivatives, binning | **[Theory]** 2c §4: support convention, Conjecture N2.2′, N2.3 not an observable restriction, Lemma N2.4. Local rows dropped from the build. |
+| Redundancy diagnostic | Label base, target and ordering; zero last-added gain is not logical redundancy | **[Theory]** 5a R2(e), §2.5. **[Code]** verdict wording and header. |
+| Two-range output | Keep every component; separate set and CI | **[Code]** every piece printed. **[Docs]** "Reading the output". |
+| Descriptive values | Name them; arithmetic check only | **[Docs]** Vig and Guide name them; the `voter_vax` agreement is called an arithmetic check. Renaming the table columns in the printout is planned. |
+
+---
+
+## 4. Point-by-point
+
+Tags: **[Theory]**, **[Code]**, **[Docs]**, **[Check]**.
+
+### Major comment 1: state whose behaviour is averaged, and with which weights
+
+> *δ_B weights $p_ix_i(1-x_i)$ and ignores pure precincts; W1's predictor is A's share in both covariances; W2 signs one pooled sum (the two-unit example gives W1 −0.02633, W2 +0.00110); signing $\Delta_A$ does not sign the Goodman bias; print the two pairwise-CR terms.*
+
+**Response.** Accepted.
+* **[Theory]** New remarks under 2c Definition 1 state the weights, the W2 pooled sum and $g-B=M^{-1}\Delta$. 1b §D.1 now describes W2 as pooled.
+* **[Docs]**
+  * Guide §9 and the vignette: "rates of A, and of everyone else, rise on average with A's share"; W2 is "one pooled sum"; a direction for each named group needs separate restrictions.
+* **[Code]** W2 is labelled "pooled over groups" in metadata, notes, print and help.
+* **[Check]** C14 reproduces your example.
+* **Not yet done:**
+  * printing the two pairwise-CR terms separately (planned for 0.3.x);
+  * per-group W2 restrictions (planned);
+  * placing the two-unit example beside the selector in the vignette (it is cited from the guide and checked in C14).
+
+### Major comment 2: an argument for a between sign rarely supplies one for reinforcement
+
+> *Pre-specify each restriction (row, column, population, geography, pairing, reason); show results without the belief and under the alternative; under district regressions a sign is one pooled restriction.*
+
+**Response.** Accepted.
+* **[Docs]** Guide §9 and the vignette now open the advice with "**Write each belief down first**": row, column, population and denominator, geography, comparison, the independent reason, and how well that evidence transfers. Report the result without the belief and, if contested, with the opposite sign.
+* **[Code]**
+  * The base (rung-only) columns are printed beside every restricted result, so the price of a belief is always visible.
+  * Under grouped rungs, a fit-time note says each sign is one pooled restriction across groups.
+* **[Theory]** 2c M5 per rung.
+
+### Major comment 3: distinguish three kinds of sharpness and two targets
+
+> *EGGHM mappings are faithful for W1; W2, pairwise and their CR are extensions. JKST plus a sign is a coherent intersection; an implied sign adds nothing. R3 gives an estimated bound for the model-implied gap using the regression and design, which can be wider than the full-law sharp set. M2 fails with counted ballots.*
+
+**Response.** Accepted.
+* **[Theory]**
+  * W2, pairwise and their CR are marked as extensions of EGGHM (2c Definition 1 remarks).
+  * R3 is described as sharp for the information in the regression and the design. Remark R3.1 gives the full-law-versus-regression example, which is the one you describe.
+  * M2 is labelled continuous, and Remark M2.1 gives your two-precinct example.
+* **[Docs]** The guide says what the bound is: an estimate, from the fitted regression and the observed compositions, of the values the model allows, sharp only relative to that information. It also says what a sign does not mean, including that an implied sign adds nothing (see the "already implied" table).
+
+### Major comment 4: say exactly what a refutation establishes
+
+> *With margins and continuous rates the non-refutability is sound, but known cells, zeros or integer counts can also rule out the witness; distinguish population emptiness, an empty plug-in and a test rejection; show the base result; M3(d) needs a mixed unit.*
+
+**Response.** Accepted.
+* **[Theory]** 2c "Reading" gives your equal-rates witness for R×C and lists the three emptiness events. 5a R3(e) says that population emptiness "rejects the conjunction; does not attribute". M3(d) covers $\gamma=1$ and $ER=0$.
+* **[Code] [Docs]**
+  * The non-refutability wording now names the base model: "always feasible only in the model-free problem with continuous tables; with the rung, known cells, integer counts or other restrictions it can be refuted".
+  * The output says whether the rung alone is rejected next to a joint rejection, and calls an empty plug-in a sample diagnostic.
+* **[Check]** C8, C8b.
+
+### Major comment 5: report disconnected sets and uncertainty in a usable form
+
+> *Fix the slab ordering in Vig line 163; several CRs can give more than two pieces; print set and CI separately, keep every component; the default CLR CR interval is conjectural, so say so on the line and show the conservative result; the 0.359/0.992 figures are for the conservative method; name the descriptive values; label redundancy verdicts with base, target and ordering; report occupied length and hull span; show DD, the base LCE result and the restricted result together.*
+
+**Response.** Accepted, except two printout items that are planned.
+* **[Code]**
+  * All union pieces are printed.
+  * The CLR line says "algorithmic", with the projection union beside it.
+  * Base columns are shown.
+  * Weight concentration is reported.
+  * Redundancy verdicts carry a header with the rung and orderings.
+* **[Docs]**
+  * The vignette writes the slab as $\operatorname{hull}\{\gamma ER, ER\}$.
+  * The guide and vignette attribute 0.36/99% to the conservative method.
+  * "Reading the output" covers set versus CI, gaps, probability weights and hulls.
+  * The descriptive values are named as the weighted aggregate regression slope and the neighbourhood-model gap, and the `voter_vax` agreement is called an arithmetic check.
+* **[Theory]** 5a §3.4 reports occupied length and hull span; §3.5 numbers name their method.
+* **Planned:**
+  * renaming the descriptive table's columns in the printout;
+  * the L5/L6 sign check at the fitted point;
+  * a confidence interval for width gains (5a §2.5; this needs joint endpoint inference).
+
+### Major comment 6: correct the simulation table and show the price of the narrower result
+
+> *The union column double-counts overlapping branches (0.242, not 0.430, at the near-zero design); the design is narrow; a matched false-CR experiment shows coverage 398, 110, 0 of 400 while always nonempty; show a misspecification comparison and a drop-one display.*
+
+**Response.** Accepted.
+* **[Theory]** 5a §3.4 replaces the union column with your three statistics and adds the false-CR table, with a "does not test" list (fixed designs, continuous rates, no segregation or spatial dependence).
+* **[Check]** `verify_R10.py` merges intervals before measuring, and V12 reproduces your table B.
+* **[Docs]** The guide and vignette state the cost of a wrong belief and recommend showing the base result.
+* **Planned:** the drop-one display (each belief removed in turn).
+
+### Major comment 7: N2 requires an explicit support and conditioning argument
+
+> *Finite support versus a grid; conditioning on $(X,N)$; the derivative is not identified on isolated support; binned means need the row's own population weights.*
+
+**Response.** Accepted.
+* **[Theory]**
+  * A support convention in 2c §4.
+  * The sharp version is recorded as **Conjecture N2.2′**, with the size example as Remark N2.2.1. We leave it open for now, because a separate review of the rungs bears on it.
+  * N2.3 is not an observable restriction on a finite support, and the local rows are dropped from the build.
+  * **Lemma N2.4** proves the person-weighted bin repair.
+* **[Check]** C10, C10b, C11, C12, C12b.
+
+### Minor comments
+
+1. **Turnout example.** **[Docs]** Guide §9 and the vignette explain that with abstention as a column the eligible population is the denominator, and that loyalty among voters can coexist with a negative eligible-population gap. A fully worked numerical example is not yet included.
+2. **Weight concentration and the residual claim.**
+   * **[Code]** The largest weight and the effective number of units are reported per signed association.
+   * **[Theory]** The residual claim in 2c (Remark M5.1) now states its conditions.
+   * **Planned:** the leave-largest-unit-out display, with the drop-one display.
+3. **King's EI and hierarchical R×C; a held-out benchmark.**
+   * **[Docs]** A paragraph in the guide and vignette: a posterior mean inside a sign bound is not independent support.
+   * **Planned:** the held-out benchmark with locked sign choices, as part of the package's real-data step (`PACKAGE_DESIGN.md` S11).
+4. **2×3 versus 3×2; adding-up; complementary outcomes; "both signs".**
+   * **[Docs]** Added to the guide and vignette.
+   * **[Theory]** 2c §5 defines "both signs" as both weakly positive or both weakly negative.
+   * An automatic check for contradictory signs on complementary columns is not implemented.
+5. **One status key; the planned API versus the shipped syntax.**
+   * **[Theory]** 5a §5 has one status table for 0.3.0, and 2c's header describes the shipped `restrictions` syntax.
+   * **[Docs]** The guide says what is experimental.
+
+### Outside scope (background documents)
+
+All four are fixed in 1b. **[Theory]**
+* **1b §A2.** "CR needs two LPs" is marked superseded (one slab for W1 and 2×2). "Different moments" is no longer offered as proof of non-nesting.
+* **1b §D.1 and §A1.**
+  * W2 is described as a pooled sum.
+  * Table 1 is attributed to Theorem 1, and Tables 2–3 to Theorems 2–3.
+  * The vaccination evidence now carries the transport and selection caveats.
+* **Guide §2.** The table says which requirements each rung uses: Duncan–Davis needs only the accounting identity, and N1 needs no regression.
+* **1b §D.2.** A reversal in the aggregate yes-share is not evidence that a group's rate reverses, and a monotone aggregate does not show that each group's rate is monotone. The degree of the fitted curve must be prespecified.
+
+### Comparison with the earlier internal review
+
+Agreed. 5a §4 now records what the internal review missed (the union length, counted ballots, the W1/W2 reversal, false-CR coverage). R10(d) now says that conditioning on a non-empty interval gives no protection against choosing a belief because it gives an attractive result.
+
+---
+
+## 5. Not yet done
+
+**Planned for the package (0.3.x):**
+* the two pairwise-CR terms printed separately;
 * renaming the descriptive table's columns;
-* a held-out benchmark with known truth (PACKAGE_DESIGN step S11).
+* the drop-one and leave-largest-unit-out displays;
+* the L5/L6 sign check at the fitted point;
+* per-group W2 restrictions;
+* inference on width gains.
 
-## Point-by-point
+**Documentation:** a fully worked turnout example.
 
-Columns as in the partial-identification response.
-
-| Point | Comment (summary) | Our check | Change | Status | Check that fails on the old text |
-|---|---|---|---|---|---|
-| P-E1 | W2 is described as "the contextual effect on each group separately" (PLG §9 l.214; 1b §D.1). It signs one pooled sum $\Delta_A=\sum_s\mu_s\operatorname{Cov}_{w^s}(X_A,m_s)$; summands can have either sign. W1 and W2 can disagree: two units in which every group's rate rises 2 points give W1 −0.02633, W2 +0.00110. | **R** (I5, recomputed independently). Same as minor point P-B28 (W2 signs a sum), with a user-facing consequence. | Fix the wording. Put the two-unit example next to the W1/W2 selector in the vignette. | Done | **C14:** the two-unit table; old wording "each group" is contradicted by W2 > 0 with W1 < 0. |
-| P-E2 | W1: the predictor in **both** covariances is A's share. The vignette's "rises with the group's own share" is the wrong predictor for the complement. Either covariance can be negative when the sum is positive. | **R.** | Reword: "rates of A, and of everyone else, rise on average with A's share". | Done | — |
-| P-E3 | $\delta_B$ (one-vs-rest) is a weighted average with weights $p_ix_i(1-x_i)$: pure precincts get zero weight; it is not an ordering in every precinct or against each rival; a large mixed precinct can dominate. | **R** (Def. 1). | Add the weighting sentence wherever $\delta_B$ is explained. | Done | — |
-| P-E4 | Within covariances also reflect sorting, campaign targeting and other between-precinct differences; a causal reading needs a separate design. | **R.** | Add one sentence. | Done | — |
-| P-E5 | $g-B=M^{-1}\Delta$: signing $\Delta_A$ generally does not sign the bias of A's Goodman coefficient. | **R** (2c M1(a)). | Reword 1b l.309: $\Delta$ enters the bias through $M^{-1}$. | Done | — |
-| P-E6 | Pairwise CR (5a l.94) pairs a pair $\delta_B(A,B)$ with $\Delta_A$, which involves all rows. An A-versus-B argument supports the first, not the second. Print both terms separately with every CR result. | **R.** | Add the terms to the CR table and the print. | Planned (0.3.x): the CR table shows branch intervals, not yet each term | **Package test:** a pair-CR fit prints both terms. |
-| P-E7 | Applied credibility: an argument for a between sign rarely supplies one for CR (racial bloc voting, partisan transitions with abstention, veterans). Pre-specify each restriction (row, column, population, geography, pairing, reason); show results without the belief and under the alternative. Under district regressions the sign is **one pooled restriction**: not per district, and cross-district composition differences remain. | **R.** The pooled-restriction point = P-B7. | Add a reporting checklist to the vignette and PLG §9. | Done | — |
-| P-E8 | EGGHM mapping faithful for a bounded column indicator; W2, pair weighting and CR with those pairings are extensions; EGGHM's mechanism is a reason to believe a sign, not a causal claim; local Props 12–13 versus 14–16. | **R.** = P-B31 to P-B34. | Mark W2/pair/their CR as extensions of EGGHM in 2c and PLG. | Done | — |
-| P-E9 | JKST plus a sign is a coherent intersection; a sign already implied by the base adds nothing; inferring the realised sign from the model sign, demanding it per district, or reading it as an order at every composition adds assumptions. The base also assumes no size dependence (2a A3); weighting does not repair a violation. | **R.** | Add the list of "what a sign does not mean" to PLG §9. | Done | — |
-| P-E10 | R3 delivers an *estimated bound for the model-implied gap using the regression and design*; the full-law set can be smaller ($T\in\{0,1\}$ example); report whether the CI targets $\tilde D$ or $D$. | **R.** = P-B15 (same example). | Reword as the referee suggests. | Done | — |
-| P-E11 | N1 integer: two four-voter precincts (1 and 2 A voters, one P vote each). Continuous CR set {0}; integer gaps −2/5, 2/15, 2/3, so CR is empty, and under the positive between sign the integer lower end is 2/15, not 0. | **R** (I6). = P-B1. Adds endpoint failure, consistent with the lattice bound (step 8/15). | as P-B1 (U1). Cite both examples. | Done | **C7** with this example as a second case. |
-| P-E12 | Model-free non-refutability: the equal-rates witness ($\beta_{ir}=T_i$ for all $r$) works for **all rows and columns**, so a weak $\delta_B$ sign and CR are model-free feasible in R×C too. But known cells, zeros, integer counts or other restrictions can remove the witness, so "only with straight lines" is too narrow. An empty plug-in, an empty population set and a test rejection are different events. Show the base-only result beside the joint result. | **R.** The R×C extension is new and correct (all pairwise $\delta_B=0$ at the witness, so both weak CR branches hold). = P-B4, P-B5, P-B16, P-B30. | Extend M3(c) to R×C as a remark (with "no unit restrictions"). Use the referee's three-way distinction in the emptiness note. | Done | **C8b** (unit restriction removes the witness). |
-| P-E13 | M3(d) at γ = 1; with $ER=0$ the singleton is the gap's image, not a single latent table. | **R.** = P-B3. | as P-B3, plus the image sentence. | Done | **C8** |
-| P-E14 | Vignette l.163 writes the W1 slab as $[\gamma_rER^r, ER^r]$, reversed for negative ER (voter_vax, 5a l.373). The single-LP result does not license choosing a branch from the sign of $\widehat{ER}$. | **R** for the text. **Code correct:** `.rxc_descriptive` uses min/max, and the slab is a hull. | Write $\operatorname{hull}\{\gamma_rER^r,ER^r\}$. | Done | — |
-| P-E15 | One W2/pair CR can give two pieces, one or none; a failed certificate leaves overlap undecided; several CRs can give more than two pieces. Say what the summary columns keep when the piece list is longer. | **R**, and confirmed in code: `.rxc_union_summary` keeps the hull, the piece count and only the **widest** gap; `print.eiRxC` prints `[a, b] U [c, d]` from those, so with three or more pieces the other gaps are not shown. `fit$pieces` keeps all pieces. | Fix print; add a test with two W2 CRs producing three pieces (or a mock union). | Done (package 0.3.0) | **Package test:** a three-piece union prints all three pieces. |
-| P-E16 | Print the estimated set and the confidence set on separate lines; keep every component, including point components; state units; values in an estimated gap are excluded by the assumptions, but the CI may still cover them; branches have no probability weights; a hull includes the gaps; marginal endpoints of different cells need not be jointly attainable. | **R.** | Add the interpretive sentences to the print footer and vignette. | Done in the vignette and guide; print shows every piece; further print-footer sentences planned | — |
-| P-E17 | The default CR CI (CLR branch union) is conjectural even under a correct model; say so on the result line; show the conservative result by default or alongside. The 0.359 width and 0.992 coverage (5a l.300) are the conservative method; the default-CLR experiment (l.377) gave different numbers. Uniformity open. | **R.** PLG §9 quotes "0.36 … 99%" next to "the default interval is algorithmic", which mixes the two. | Correct the quoted numbers (method named with each). | Done | — |
-| P-E18 | Descriptive values: name them "weighted aggregate regression slope" and "neighbourhood gap", name the focal group, give γ, say fitted τ or observed $T$; equality with EGGHM holds only under size-weighted LS; voter_vax is an arithmetic check; the 8–10% miss rates are design-specific. | **R.** | Rename columns or add a header line; reword PLG's "8–10%" as design-specific, citing the analytic bound of P-B26 for persistence. | Documented in the vignette and guide; renaming the table columns is planned | — |
-| P-E19 | R2 verdicts need a nonempty convex base and a feasible added restriction; label each with its base, target and order; zero last-added gain ≠ logical redundancy; with unions compare membership, not hull width (removing the middle of [0,1] keeps the endpoints); report occupied length and hull span; label the width-only fallback (5a l.357) inconclusive about implication; near ties, mark verdicts as estimated. | **R.** = P-B21, P-B22, plus the union case. The code's union fallback compares occupied length (`.rxc_union_len`), so it sees the [0,1] example; but its `method` label does not say "inconclusive about implication". | as stated | Done (5a §3.4, and the package merges overlaps) | **Package test:** verdict print names base and order. |
-| P-E20 | Report table: DD for the realised target, unrestricted LCE, LCE plus the belief; target per column; sign direction, comparator, weighting, rejection flags; number of units, composition range, size concentration. For point-identified rungs that ignore an entered sign (5a l.363), check whether the fitted point violates the sign or mark the combination unevaluated. | **R.** Code: `print.eiRxC` shows DD, estimate and CIs, not the unrestricted LCE interval. L5/L6 ignore signs with a note (`R/rxc_api.R:254`) and do not check the fitted point. | Implement in WS-B9. | Done: base (rung-only) columns. Planned: the L5/L6 sign check at the fitted point | **Package test:** an L6 fit with a sign its point violates reports the violation. |
-| P-E21 | `verify_R10.py` sums branch lengths before merging: near-zero design 0.430 → 0.242 (591/600 runs overlap); edge 0.386 → 0.357; the slab comparison survives. | **R** (reproduced exactly). = P-B38. | as P-B38; replace the 5a table column with the referee's three statistics (occupied length, hull span, unmerged sum). | Done | **V11** |
-| P-E22 | The design is narrow (fixed composition and sizes, Beta rates, cancelling slopes). In a matched-regression experiment where only the truth of CR changes, the CR slab covers 398, 110 and 0 of 400 at 600 precincts ($s=0, .08, .25$), always nonempty, while base LCE covers 400. Show a misspecification comparison beside the success example; expose one-belief-at-a-time removal now; calibrate any slack dial in interpretable units. | **R** (reproduced exactly). **D** on one point: a slack dial already exists in probability units (`sensitivity(dial = "slack")`, `test-msign-dial.R`); 5a §5 wrongly lists it as out of scope, which misled the referee. | Fix 5a §5. Add `verify_R10.py` V12: the false-CR design. | Done: 5a §5 corrected, false-CR check V12. Planned: the drop-one display | **V12:** false CR at 600 units; coverage far below 0.95 while every interval is nonempty (documents the price; nothing in the theory fails). |
-| P-E23 | N2: support convention, size conditioning, derivative non-identification (adding $a\prod_j(x-x_j)$), binning with row-specific weights, post-selection after CV. | **R.** = P-B9 to P-B14. | as P-B9 to P-B14 | Done | C10–C12 |
-| P-E24 | A hand-worked turnout example: P ballots = turnout × support; loyalty among participants can coexist with a negative eligible-population gap; abstention column; who enters the denominator; new entrants and deaths. | **R.** | Add the example. | Done | — |
-| P-E25 | Report the largest precinct weight and the effective number $1/\sum_i(w^r_i)^2$ per row, total and largest overlap weight for between comparisons, and a leave-largest-unit-out display. The $p^{-1/2}$ residual claim needs conditions. | **R.** Residual claim = P-B8. | Implement the weight table in WS-B9. | Done: weight concentration in `eiRedundancy()`; residual statement corrected (2c Remark M5.1) | — |
-| P-E26 | Position M-SIGN beside King's EI and hierarchical R×C; a posterior mean inside a sign bound is no independent support. Benchmark on aggregated individual panels or linked surveys, with sign choices locked on other units. | **R.** | Add a paragraph; add the held-out benchmark to S11. | Paragraph added; the held-out benchmark is planned (PACKAGE_DESIGN step S11) | — |
-| P-E27 | 2×3 versus 3×2; restrictions on all columns must respect adding-up; signs on complementary binary outcomes reverse; "both signs" in the ladder means both weakly positive or both weakly negative. | **R.** Ladder = P-B29. | Add the sentences; optional input check. | Sentences added; the optional input check is not implemented | — |
-| P-E28 | One status key: N1, N2, local monotonicity and sign slack are outside the implementation (5a l.385); the planned API (2c l.7) differs from the shipped `restrictions` syntax. | **R** for the key and API; **D** for slack, which is implemented (see P-E22). | One status key in 5a §5 and PLG §9; fix the slack line; update 2c's API sentence. | Done | — |
-| P-E29 | 1b §A2 l.91–98: "CR is nonconvex and needs two LPs" is superseded by R3(d) (W1 slab); "different moments" does not prove non-nesting. | **R.** | Mark superseded. | Done | — |
-| P-E30 | 1b §D.1: W2 per-group description (see P-E1); §A1 l.66–69 attribution (= P-B33); l.84–87 vaccination evidence caveats. | **R.** | Fix. | Done | — |
-| P-E31 | PLG §2: A3 and A5 are not shared requirements; DD needs neither; N1 needs no quadratic regression. State denominators and rank requirements per rung. | **R.** | Fix. | Done | — |
-| P-E32 | 1b §D.2: a reversal in the aggregate yes-share is not evidence that a group's conditional mean reverses. | **R.** | Fix. | Done | — |
-| P-E33 | Agrees with the internal review on slab versus CLR and conditional coverage; conditioning protects nothing against choosing a belief because it gives an attractive result. Differs from "accept with fixes". | **R.** = P-B43. | Add the belief-selection sentence to R10(d). | Done | — |
+**Research:**
+* Conjecture N2.2′;
+* integer unit tables beyond 2×2 margins (R15);
+* sharpness of the sign restrictions under district rungs (R16);
+* the held-out benchmark with known truth.

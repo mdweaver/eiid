@@ -12,13 +12,11 @@
 ## Recommended order
 
 ### Now: finish the review response (no new features)
-1. **WS6, Monte Carlo rerun.** At least 1000 replications, with Monte Carlo standard errors. New designs:
-   * riding shocks, to check that M0 fails, M1 covers and the pooling test detects them;
-   * truth on the boundary, where Slater fails;
-   * many small ridings (R2): CLR versus projection versus the finite-sample interval;
-   * projection coverage everywhere.
+1. **WS6, Monte Carlo rerun — done (Nov 2026).** 1000 replications per design with MC standard errors; riding shocks, Slater failure, R2 up to 200 districts, projection everywhere; NZ benchmark rerun with M1 by electorate (P3 §8, `REVIEW_RESPONSE_PLAN.md` WS6 status). Items it raises for later:
+   * the pooling test over-rejects (9% at 5% with 38 restrictions): consider the F form or a wild bootstrap;
+   * `proj_actual` takes its Bhatia–Davis variance bound from a CLR interval: use the projection interval (or Popoviciu) there so the projection column is fully covered by P3.5(b2);
+   * on the NZ data, M0 and M1 by electorate are both rejected; a non-empty CLR interval missed the truth in 8% of cells of the pooled M1 fit.
 
-   Rerun the NZ benchmark with M1 by electorate.
 2. **WS7, response letter** (`REVIEW_RESPONSE.md`), with batch A of `EXTERNAL_REVIEW_PLAN.md`.
 3. **Release hygiene:**
    * version 0.3.0 and `NEWS.md`;

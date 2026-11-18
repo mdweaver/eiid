@@ -1,6 +1,6 @@
 # Phase 3: estimation, inference and sensitivity
 
-*Builds on P1, 2a and 2b. Proof steps carry justification tags (2a §0.3, 2b §0.3, plus §0.3 below). Theorems marked "(cited)" apply a published result whose conditions are verified here but whose proof is not repeated. Checks: `verify_phase3.py` (13/13 PASS; `verify_phase3_output.txt`). Monte Carlo: `phase3_montecarlo.py` (`phase3_montecarlo_output.txt`).*
+*Builds on P1, 2a and 2b. Proof steps carry justification tags (2a §0.3, 2b §0.3, plus §0.3 below). Theorems marked "(cited)" apply a published result whose conditions are verified here but whose proof is not repeated. Checks: `verify_phase3.py` (13/13 PASS; `verify_phase3_output.txt`). Monte Carlo: `phase3_montecarlo.py`, 1000 replications per design, with Monte Carlo standard errors (`phase3_montecarlo_output.txt`; cross-check against the package in `phase3_montecarlo_crosscheck.py`).*
 
 ---
 
@@ -69,7 +69,7 @@ Within this framework:
 | M0 | any ($\dim\beta$ fixed) | P3.2, P3.4, P3.5(a), (b1), (b2) | Theorem (asymptotic, $n\to\infty$) |
 | M1, M2 | R1 ($D^\star$ fixed) | P3.2, P3.4, P3.5(a), (b1), (b2) | Theorem (asymptotic) |
 | M1, M2 | R3 | the same, with a high-dimensional Gaussian approximation [CCK] under a rate condition on $D^\star$ versus $n_d$ | Conjecture |
-| M1 | R2 | coverage of the CLR interval | Simulation finding (§8) |
+| M1 | R2 | coverage of the CLR interval | Simulation finding (§8.2: 0.995–1 with up to 200 districts of 10 polls) |
 | any | any | the CLR interval as implemented (candidates by simulation) | Conjecture P3.5(b3) |
 
 Under M0 the number of constraints grows with the number of hull vertices, but the regression has fixed dimension $p$. Every constraint term is a linear functional of one $p$-dimensional asymptotically normal vector. The relevant events, $\{\max_j(\cdot)\le k\}$, are convex sets in $\mathbb R^p$, and the multivariate CLT holds uniformly over convex sets [BR]. So the growth in constraints does not matter. Under M1/M2 in R2 or R3, $\dim\beta$ grows with $D^\star$, and that argument no longer applies.
@@ -126,7 +126,7 @@ Checked: concavity and piecewise linearity along random directions (`verify_phas
 
 **Remarks.**
 * **Error decomposition.** $\hat\varphi_U-\varphi_U(\beta_0;A)=\underbrace{[\hat\varphi_U-\varphi_U(\beta_0;\hat A)]}_{O_p(n^{-1/2})\text{ by (a)}}+\underbrace{[\varphi_U(\beta_0;\hat A)-\varphi_U(\beta_0;A)]}_{\ge0,\ \to0\text{ by (b), rate not shown}}$. The second term is not shown to be $O_p(n^{-1/2})$, and can be larger. So Theorem P3.4's limit is stated for the **sample-hull** endpoint $\varphi_U(\beta_0;\hat A)$, conditional on the design, and not for the population-hull endpoint.
-* **Slater is a strict-interiority condition.** It requires a $k$ at which every implied rate at every hull vertex is at least $\varepsilon>0$. It fails when every feasible $k$ makes some implied rate exactly 0 at some vertex, e.g. a true structural zero, or the boundary design C of §8, which is not exotic in EI. The Lipschitz bound in (a) is proved only under Slater; boundary cases are open (§10). The coverage results of §5 do **not** use Slater: P3.5(a) step 2 uses only that the true $k_0$ is feasible.
+* **Slater is a strict-interiority condition.** It requires a $k$ at which every implied rate at every hull vertex is at least $\varepsilon>0$. It fails when every feasible $k$ makes some implied rate exactly 0 at some vertex, e.g. a true structural zero, which is not exotic in EI. Design E of §8 is an example: the identified set is a single point. (Design C has a rate close to 0 at one vertex: Slater holds, but only just.) The Lipschitz bound in (a) is proved only under Slater; boundary cases are open (§10). The coverage results of §5 do **not** use Slater: P3.5(a) step 2 uses only that the true $k_0$ is feasible.
 * The hull effect in (c) is a one-sided (conservative) bias. Its size depends on how much mass $P_X$ puts near the boundary of $A_d$; it can vanish slowly. Report the bound's sensitivity to trimming the hull (P1 A4).
 * The $O_p(n^{-1/2})$ rate is for the estimation part. The target $B$ adds $E=O_p(n^{-1/2})$ as well (§5). Bounds do not shrink to a point: their width converges to the population width, which is $O(1)$.
 
@@ -270,7 +270,7 @@ Then, **for every $n$** and in every regime:
 
   An *oracle* Gaussian union bound with the true variances still gave widths of 0.76–0.87, and 1.0 at 30 × 8. So most of the cost is the constraint-by-constraint union bound, which the conservative asymptotic interval P3.5(a) shares. Theorem P3.8 settles validity in R2, but it does not yet give useful intervals there. Informative finite-sample inference for R2 is open (§10).
 
-Checked (`verify_phase3.py`): in the 30 × 8 design, coverage of $\tilde B$ and $B$ was 100% in 300 replications each, and the interval was never empty.
+Checked (`verify_phase3.py`): in the 30 × 8 design, coverage of $\tilde B$ and $B$ was 100% in 300 replications each, and the interval was never empty. In the 1000-replication Monte Carlo (§8.2) it covered in every replication of five M1 designs (10 × 93, 93 × 30, and 30, 93 and 200 districts × 10 polls), with clipped width 1.000 in all of them.
 * **Possible refinements, not proved here.**
   * An empirical-Bernstein bound (Maurer & Pontil 2009) would replace the ranges $\rho_i$ by estimated variances.
   * A Bhatia–Davis version of $t_E$, as in §5.
@@ -292,10 +292,10 @@ Checked (`verify_phase3.py`): in the 30 × 8 design, coverage of $\tilde B$ and 
 **What happens under R2.**
 * Each district's shifts $\hat\zeta_d$ come from about $n_d$ units, and their sampling error does not shrink.
 * The number of candidates grows with $D^\star$.
-* The plug-in is badly too narrow: in the Monte Carlo (§8) it covers almost never, and is empty about 40% of the time. This is the Theorem P3.4(ii) bias, compounded across many districts.
-* In the Monte Carlo (§8), the CLR interval covered in every R2 design. This is a *simulation finding* (§0.5), not a theorem. CLR inflates each candidate in proportion to its own standard error, so noisy districts rarely bind, which is precision weighting built into the method.
-* The formal guarantee in R2 is Theorem P3.8, at the cost of width.
-* The price is width. With 10 units per district, the valid interval is about as wide as Duncan–Davis, so the identification gain from district dummies (2b) is consumed by sampling noise.
+* The plug-in is badly too narrow. In the Monte Carlo (§8.2), with 10 polls per district, it covers 31%, 4% and 0.5% at 30, 93 and 200 districts, and is empty 24%, 46% and 72% of the time. This is the Theorem P3.4(ii) bias, compounded across many districts.
+* In the Monte Carlo (§8.2), the CLR interval covered 0.995–1 in every R2 design, up to 200 districts. This is a *simulation finding* (§0.5), not a theorem. CLR inflates each candidate in proportion to its own standard error, so noisy districts rarely bind, which is precision weighting built into the method.
+* The formal guarantee in R2 is Theorem P3.8, at the cost of width: in §8.2 it is $[0,1]$ in every design. The projection interval is also $[0,1]$ there, because $q$ grows with $D^\star$.
+* With 10 units per district, CLR's interval is about as wide as Duncan–Davis at 30–93 districts, so the identification gain from district dummies (2b) is consumed by sampling noise. It narrows as districts are added, and is below DD at 200 districts (0.42 for $\tilde B$ and 0.49 for $B$, against 0.57).
 
 Practical options. Each keeps the identified set valid (P3.7(a)). Their inference is formally covered by Theorem P3.8, and asymptotically only under §0.5's conditions:
 * (i) Keep the constraints of districts with enough units or composition spread (P3.7).
@@ -331,33 +331,107 @@ Checked: a nonlinear undetectable violation with $\eta=0.02$ stays inside the bo
 
 ## 8. Monte Carlo
 
-`phase3_montecarlo.py`, 200 replications per design. Unit rates are Beta/Dirichlet draws whose conditional means are exactly linear, so the model holds. Each design reports the plug-in bound, the conservative CI (Thm P3.5(a)), the CLR CI as implemented (Conjecture P3.5(b3)) for $B$, and the CLR CI for $\tilde B$, all at nominal 95%.
+*Rerun for review item R-37 (Nov 2026). It replaces the earlier 200-replication table.*
 
-Coverage is the share of 200 replications containing the truth; width is the median. The DD width is shown for reference; every CI may be intersected with DD.
+`phase3_montecarlo.py`, **1000 replications per design** (`phase3_montecarlo_output.txt`, summary in `phase3_montecarlo_summary.json`). Unit rates are Beta/Dirichlet draws whose conditional means are exactly linear in composition given the district. So M1 always holds, and M0 holds only when the district shifts are zero. Every interval is nominal 95%:
+* **plug-in**: the estimate of the identified set (not a CI);
+* **conservative** (Thm P3.5(a));
+* **CLR** as implemented (Conjecture P3.5(b3)), for $B$ with the Bhatia–Davis allowance (the package default) and for $\tilde B$;
+* **projection** (Prop. P3.5(b2)(ii)): $k=\sqrt{\chi^2_{q,1-\alpha}}$ with $q=\operatorname{rank}\hat\Sigma$, applied to the same candidates as CLR. For $B$ it follows the package: estimation part at level 0.04, plus the Bhatia–Davis allowance;
+* **finite-sample** (Thm P3.8), in the 2×2 M1 designs.
 
-| Design | DD width | Plug-in: cover / empty / width | Conservative CI for $B$ | CLR CI for $B$ (Popoviciu) | CLR CI for $B$ (Bhatia–Davis) | CLR CI for $\tilde B$ |
-|---|---|---|---|---|---|---|
-| A: 2×2, M1, 10 districts × 93 | 0.62 | 0.970 / 0.00 / 0.282 | 1.000 / 0.681 | 1.000 / 0.522 | 1.000 / 0.531 | 1.000 / 0.424 |
-| A: 2×2, M1, 93 × 30 | 0.56 | 0.665 / 0.00 / 0.158 | 1.000 / 0.702 | 1.000 / 0.476 | 1.000 / 0.481 | 1.000 / 0.419 |
-| A: 2×2, M1, 93 × 10 | 0.56 | **0.055 / 0.44** / 0.049 | 1.000 / 1.048 | 1.000 / 0.571 | 1.000 / 0.580 | 1.000 / 0.471 |
-| C: 2×2 pooled, truth on the boundary | 0.33 | 0.660 / 0.11 / 0.031 | 1.000 / 0.140 | 1.000 / 0.135 | 1.000 / **0.077** | **0.990** / 0.042 |
-| B: 3×3 pooled, loyalty P→P | 0.84 | 1.000 / 0.00 / 0.536 | 1.000 / 0.689 | 1.000 / 0.653 | 1.000 / 0.661 | 1.000 / 0.560 |
-| B: 3×3 pooled, defection P→O | 0.64 | 1.000 / 0.00 / 0.352 | 1.000 / 0.498 | 1.000 / 0.466 | 1.000 / 0.471 | 1.000 / 0.373 |
-| B: 3×3 pooled, demobilisation | 0.53 | 1.000 / 0.00 / 0.283 | 1.000 / 0.428 | 1.000 / 0.397 | 1.000 / 0.396 | 1.000 / 0.303 |
-| B: 3×3 pooled, mobilisation N→P | 0.89 | 1.000 / 0.00 / 0.530 | 1.000 / 0.720 | 1.000 / 0.660 | 1.000 / 0.668 | 1.000 / 0.561 |
+Conventions:
+* **Coverage** is the share of 1000 replications whose interval contains the truth. The Monte Carlo standard error, $\sqrt{p(1-p)/1000}$, is in parentheses. A coverage of **1** means all 1000 replications covered; the exact one-sided 95% lower confidence bound is then $0.05^{1/1000}=0.997$.
+* An empty interval (plug-in or conservative set empty, or CLR/projection ends crossing) counts as not covering.
+* **Width** is the median after clipping to $[0,1]$. The Duncan–Davis (DD) width is shown for reference.
+* Each cell reads "coverage / width".
 
-**Reading the results.**
+**Cross-check against the package.** `phase3_montecarlo_crosscheck.py` runs one replication of designs A (10 × 93) and S2 through `eiBounds()` (`phase3_montecarlo_crosscheck_output.txt`). The two agree exactly on the plug-in, the projection interval for $\tilde B$ and the pooling-test statistic. The CLR ends differ by up to 0.01, because the script uses every constraint as a candidate (the full dual-vertex set in 2×2) while the package collects candidates by simulation. The package also intersects `ci_actual`/`proj_actual` with DD.
 
-1. **The plug-in is not a confidence interval and fails exactly where Theorem P3.4 predicts.**
-   * With many districts and few units it almost never covers: 5.5% at 93 × 10, where it is also empty 44% of the time. At 93 × 30 it covers 66.5%.
-   * It covers 66% in the boundary design.
-   * It is fine only with a few large districts, or pooled data with the truth in the interior.
-2. **Both CIs covered in every design** (a simulation finding; formal status in §0.5), including the boundary case. That case is the informative one: with the truth at an endpoint, the CLR CI for $\tilde B$ covers 99%, close to its nominal level. The 100% elsewhere reflects truths in the interior of the identified set (§4).
-3. **CLR is much narrower than the conservative version**: 0.571 vs 1.048 at 93 × 10, for example. It should be the default.
-4. **The residual term is a large part of the width.** Targeting $\tilde B$ instead of $B$ narrows the 3×3 intervals by 0.09–0.10 and the 2×2 M1 intervals by 0.06–0.10.
-5. **With 10 units per district the valid CI for $B$ is no narrower than DD** (0.571 vs 0.56), and for $\tilde B$ it is 0.471. The identification gain of M1 is mostly consumed by sampling noise in this regime (§6). With 93 units per district, the CI for $\tilde B$ is 0.424 against DD's 0.62.
-6. **Bhatia–Davis versus Popoviciu.** Bhatia–Davis narrows the actual-rate CI sharply when the plausible range of rates excludes 0.5: in the boundary design it is 0.077 against 0.135. Elsewhere that range includes 0.5, so the allowance equals Popoviciu's and the interval is about 0.01 wider, the price of the α share spent bounding the variance. It remains the package default: it is never worse by more than that small share and can be much better.
-7. **In the pooled 3×3 design the CIs are 0.30–0.56 wide, against DD's 0.53–0.89.** A real gain, but these are wide intervals. Narrowing them further is the role of the stronger rungs and the menu restrictions.
+**Which figures correspond to proved results.**
+* Conservative and projection intervals: Thm P3.5(a) and Prop. P3.5(b2)(ii) are asymptotic theorems for a fixed-dimensional regression: M0 in every design here, and M1 with few, large districts (A 10 × 93; S 20 × 50). In the R2 rows (93 × 30, and 10 polls per district) $q$ grows with $D^\star$, and their coverage there is a simulation finding (§0.5).
+* Finite-sample interval: Thm P3.8 holds in every row.
+* CLR: Conjecture P3.5(b3) everywhere. All its figures are simulation findings.
+* The projection interval for $B$ uses the Bhatia–Davis allowance, whose variance bound comes from a CLR interval (as in the package). Strictly, only the version with the Popoviciu allowance is fully covered by P3.5(b2).
+
+**Rank of $\hat\Sigma$ in the projection interval** (`phase3_montecarlo_rank.py`, `phase3_montecarlo_rank_output.txt`; same seeds, 1000 replications per design). Prop. P3.5(b2)(ii) uses $q=\operatorname{rank}\hat\Sigma$. If $\hat\Sigma$ were singular while the estimation error had a component in its null space, those directions would not be controlled. The numerical rank (eigenvalues above $10^{-10}$ times the largest) equals $\dim\beta$ in every replication of every 2×2 design, from $\dim\beta=3$ to 401.
+* Conditioning: the smallest-to-largest eigenvalue ratio is 0.005–0.04 for the pooled fits, and falls with the number of districts, to a minimum of $2.6\times10^{-8}$ at 200 × 10. That is still far above the rank threshold.
+* Design B fits all three columns ($\dim\beta=18$) and has $q=12$ in every replication. The six null directions are the adding-up constraint: summed across columns, the coefficients are the regression of 1 on the design, which has no error. So the estimation error lies in the range of $\hat\Sigma$, and nothing is left uncontrolled.
+* On the $C-1$ free columns (Remark P3.4.1, as the package fits), $\hat\Sigma$ has full rank 12 in every replication.
+* No replication had a numerical rank drop, so there is no rank-drop subsample whose coverage could be compared.
+
+### 8.1 Model holds (M1, or M0 without shifts)
+
+| Design | $q$ | DD | Plug-in: cover / empty / width | Conservative, $B$ | CLR, $B$ | Projection, $B$ | Conservative, $\tilde B$ | CLR, $\tilde B$ | Projection, $\tilde B$ |
+|---|---|---|---|---|---|---|---|---|---|
+| A: 2×2, M1, 10 districts × 93 | 21 | 0.574 | 0.982 (0.004) / 0.000 / 0.287 | 1 / 0.696 | 1 / 0.538 | 1 / 0.662 | 1 / 0.596 | 1 / 0.432 | 1 / 0.554 |
+| A: 2×2, M1, 93 × 30 | 187 | 0.567 | 0.656 (0.015) / 0.002 / 0.160 | 1 / 0.694 | 1 / 0.477 | 1 / 0.964 | 1 / 0.633 | 1 / 0.414 | 1 / 0.932 |
+| C: 2×2 pooled, truth near the boundary | 3 | 0.325 | 0.661 (0.015) / 0.076 / 0.031 | 1 / 0.087 | 0.999 (0.001) / 0.057 | 1 / 0.059 | 0.996 (0.002) / 0.041 | 0.994 (0.002) / 0.039 | 0.999 (0.001) / 0.041 |
+| **E: 2×2 pooled, Slater fails** | 3 | 0.271 | **0.267 (0.014) / 0.503** / 0.038 | 1 / 0.249 | 0.998 (0.001) / 0.207 | 1 / 0.249 | 0.990 (0.003) / 0.179 | **0.944 (0.007)** / 0.143 | 0.995 (0.002) / 0.194 |
+| B: 3×3 pooled, loyalty P→P | 12 | 0.835 | 1 / 0.000 / 0.533 | 1 / 0.675 | 1 / 0.659 | 1 / 0.679 | 1 / 0.592 | 1 / 0.557 | 1 / 0.581 |
+| B: 3×3 pooled, defection P→O | 12 | 0.635 | 1 / 0.000 / 0.348 | 1 / 0.447 | 1 / 0.431 | 1 / 0.445 | 1 / 0.399 | 1 / 0.369 | 1 / 0.395 |
+| B: 3×3 pooled, demobilisation | 12 | 0.533 | 1 / 0.000 / 0.283 | 1 / 0.381 | 1 / 0.363 | 1 / 0.377 | 1 / 0.333 | 1 / 0.304 | 1 / 0.329 |
+| B: 3×3 pooled, mobilisation N→P | 12 | 0.884 | 1 / 0.000 / 0.528 | 1 / 0.683 | 1 / 0.646 | 1 / 0.661 | 1 / 0.619 | 1 / 0.559 | 1 / 0.595 |
+
+Design E puts the truth on the boundary so that Slater fails. Compositions span $[0.02,0.98]$ with both ends observed. The mean rate of group $b$ is exactly 0 at the right vertex and that of group $w$ is exactly 0 at the left vertex. The lower and upper constraints on $k$ then meet at the truth, so the identified set of the model-implied rate is a single point, and no $k$ satisfies every constraint strictly. Design C is the earlier boundary design: the rate is close to 0 at one vertex, so Slater holds, but only just. The CLR interval for $B$ with the Popoviciu allowance covered in all 1000 replications of every row. Its widths are 0.530, 0.472, 0.086, 0.221 and 0.651/0.428/0.363/0.641 (rows in order); full output in `phase3_montecarlo_output.txt`.
+
+### 8.2 Many small districts (R2): M1, 2×2, 10 polls per district
+
+| Districts | $q$ | DD | Plug-in: cover / empty | CLR, $\tilde B$ | Projection, $\tilde B$ | Thm P3.8, $\tilde B$ | CLR, $B$ | Projection, $B$ | Thm P3.8, $B$ | Conservative, $B$ |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 30 | 61 | 0.571 | 0.305 (0.015) / 0.241 | 0.999 (0.001) / 0.557 | 1 / 0.967 | 1 / 1.000 | 1 / 0.746 | 1 / 1.000 | 1 / 1.000 | 1 / 1.000 |
+| 93 | 187 | 0.566 | 0.042 (0.006) / 0.463 | 0.995 (0.002) / 0.467 | 1 / 1.000 | 1 / 1.000 | 0.998 (0.001) / 0.575 | 1 / 1.000 | 1 / 1.000 | 1 / 0.930 |
+| 200 | 401 | 0.566 | 0.005 (0.002) / 0.717 | 0.996 (0.002) / 0.416 | 1 / 1.000 | 1 / 1.000 | 1 / 0.491 | 1 / 1.000 | 1 / 1.000 | 1 / 0.890 |
+
+Theorem P3.8 also covered in all 1000 replications of designs A 10 × 93 and 93 × 30, with median clipped width 1.000 in both, for $\tilde B$ and $B$.
+
+### 8.3 Riding shocks: M0 against M1, 2×2, 20 districts × 50 polls
+
+The district shifts are added to both groups' rates, and depend on the district's mean composition $m_d$:
+* **S0:** none;
+* **S1:** affine in $m_d$, plus noise (as in design A);
+* **S2:** a common shock $0.25\cos(2\pi m_d)$, non-affine in $m_d$: the reviewer's common-shock example.
+
+| Design | Fit | Plug-in: cover / empty | CLR, $\tilde B$: cover / empty / width | Projection, $\tilde B$ | Conservative, $\tilde B$ | CLR, $B$ | Projection, $B$ | Pooling test: rejection at 5% |
+|---|---|---|---|---|---|---|---|---|
+| S0 no shifts | M0 | 1 / 0.000 | 1 / 0.000 / 0.329 | 1 / 0.336 | 1 / 0.342 | 1 / 0.429 | 1 / 0.436 | |
+| | M1 | 0.999 (0.001) / 0.000 | 1 / 0.000 / 0.468 | 1 / 0.704 | 1 / 0.667 | 1 / 0.571 | 1 / 0.808 | **0.090 (0.009)** (size; df 38) |
+| S1 affine shifts | M0 | 1 / 0.000 | 1 / 0.000 / 0.335 | 1 / 0.344 | 1 / 0.351 | 1 / 0.435 | 1 / 0.444 | |
+| | M1 | 0.938 (0.008) / 0.000 | 1 / 0.000 / 0.437 | 1 / 0.672 | 1 / 0.638 | 1 / 0.539 | 1 / 0.773 | 1.000 (0.000) |
+| S2 common non-affine shock | M0 | **0.002 (0.001) / 0.987** | **0.009 (0.003) / 0.963** / 0.023 | **0.013 (0.004)**, empty 0.950 | **0.015 (0.004)**, empty 0.964 | **0.155 (0.011)**, empty 0.585 | **0.206 (0.013)**, empty 0.478 | |
+| | M1 | 0.997 (0.002) / 0.002 | 1 / 0.000 / 0.328 | 1 / 0.509 | 1 / 0.541 | 1 / 0.429 | 1 / 0.611 | 1.000 (0.000) |
+
+### 8.4 Reading the results
+
+1. **No proved interval under-covers.**
+   * Where its theorem applies, the projection interval covers at least 0.995 (design E, MC SE 0.002) and the conservative interval at least 0.990 (design E, SE 0.003).
+   * Theorem P3.8 covers in every replication of every design where it was computed, including R2.
+   * The only figures below 0.95 for a correctly specified model are the plug-in (not a CI) and CLR for $\tilde B$ in design E.
+2. **CLR (a simulation finding) covers at least 0.994 in every design where Slater holds**, including R2 with 200 districts (0.995–0.999 for $\tilde B$, 0.998–1 for $B$).
+   * **At the Slater failure (design E), CLR for $\tilde B$ covers 0.944 (SE 0.007).** This is within one standard error of the nominal 0.95, so it is not evidence of under-coverage.
+   * It is the informative case: the identified set is a point, so the interval has no slack, and coverage falls from near 1 to the nominal level. The 100% elsewhere reflects truths in the interior of the identified set (§4).
+   * With the residual allowance (target $B$) CLR covers 0.998 in design E.
+3. **The plug-in fails where Theorem P3.4 predicts, and badly at the Slater failure.**
+   * In R2 its coverage falls with the number of districts: 0.305, 0.042 and 0.005 at 30, 93 and 200 districts. It is empty 24%, 46% and 72% of the time.
+   * In design E it covers 0.267 and is empty half the time: with a point identified set, any sampling noise empties the plug-in.
+4. **The projection interval is useful only when $q$ is small.** Its critical value grows like $\sqrt q$: 2.8 at $q=3$, 4.6 at $q=12$, 14.8 at $q=187$ and 21.2 at $q=401$, while CLR's is about 2–3.
+   * Pooled designs ($q=3$, 12): it is only 0.01–0.03 wider than CLR.
+   * M1 with 10 districts ($q=21$): 0.554 against CLR's 0.432 for $\tilde B$.
+   * M1 with 93 districts: 0.93 at 30 polls per district, and $[0,1]$ at 10.
+   * So in grouped designs with many districts CLR is the only informative interval, and its support there is simulation only (§0.5).
+5. **Theorem P3.8 remains uninformative.** Its clipped width is 1.000 in every M1 design, including 10 districts × 93 polls, where CLR is 0.43 and DD is 0.57. This confirms §5.1 at 1000 replications.
+6. **In R2, CLR narrows as districts are added.** For $\tilde B$ its width is 0.557, 0.467 and 0.416 at 30, 93 and 200 districts; for $B$, 0.746, 0.575 and 0.491. With 200 districts of 10 polls it is narrower than DD (0.566). The earlier statement that "with 10 units per district the valid CI is no narrower than DD" holds at 93 districts but not at 200.
+7. **Riding shocks (R-37(i)).**
+   * **Common non-affine shock (S2):** every M0 interval fails, for $B$ and for $\tilde B$. CLR for $\tilde B$ covers 0.9%, and is empty (ends crossing, so M0 is rejected) 96% of the time. For $B$, CLR covers 16% and projection 21% (the residual allowance widens them), and the conservative interval 4%; again most failures are empty intervals. M1 covers in every replication, and the pooling test rejects in every replication.
+   * **Affine shifts (S1):** the pooling test rejects in every replication, because M0 is false for the observed design (P3.6(c)), but M0's intervals still cover. Shifts affine in composition change the pooled conditional mean only through terms the pooled model absorbs (2b Prop. D4(b)), approximately, so M0's bias is small here. A rejection of the pooling test therefore says that M0 is wrong, not that its intervals are.
+   * **Size of the pooling test (S0): 0.090 (SE 0.009) at nominal 0.05,** with 38 restrictions and 50 polls per district. The HC3 Wald statistic has mean 39.7 and variance 100, against 38 and 76 for $\chi^2_{38}$. The F form ($W/\text{df}$ against $F_{38,959}$) gives 0.079. This is consistent with P3.6, whose $\chi^2$ calibration is established for fixed dimension only, but the test over-rejects in a moderate-dimension R1 design. It errs towards M1, the safer rung.
+8. **The residual term is a large part of the width.** Targeting $\tilde B$ instead of $B$ narrows CLR by 0.06–0.10 in the 3×3 design and 0.06–0.11 in the 2×2 M1 designs with 30 or more polls per district; with 10 polls per district, by 0.08–0.19.
+9. **Bhatia–Davis versus Popoviciu.** In the boundary design C, Bhatia–Davis narrows CLR for $B$ from 0.086 to 0.057. In the Slater design E it narrows it from 0.221 to 0.207. Elsewhere the plausible range of rates includes 0.5, the allowance equals Popoviciu's, and the interval is up to 0.015 wider (the α share spent on the variance bound). It remains the package default.
+10. **Real data** (NZ benchmark, `benchmarks/results/ei_datasets_nz_summary.md`).
+    * Per electorate, with about 64 polling places each: M0's CLR and projection intervals covered all 4302 cells, at about DD width.
+    * Pooling each election's 62–69 electorates and fitting M1 with electorates as groups: M1 is rejected by the data. The estimate is empty in all seven elections, and the M1 test (against M2) and the pooling test both have $p\approx0$.
+    * There, CLR intervals are rejected (ends crossing) in 21% of cells and miss the truth in 8%. The projection interval never misses, but it is as wide as DD.
+    * So where the model is wrong, the tests flag it, and a non-empty CLR interval is not reassurance.
 
 ---
 
@@ -367,7 +441,7 @@ Coverage is the share of 200 replications containing the truth; width is the med
 2. Build the LP (2a Prop. 7 / 2b Thm 2) and report the plug-in bound, labelled as an estimate of the identified set, not a confidence interval.
 3. Report the CLR confidence interval for $\tilde B$ (default) and for $B$, labelled algorithmic (Conjecture P3.5(b3)). Report the projection interval (P3.5(b2)(ii)) alongside it as the interval with an asymptotic guarantee. Intersect both with Duncan–Davis, which is valid because $B\in DD$ always.
 4. Theorem P3.8 gives a finite-sample guarantee in every regime. In the designs tried, its width is that of the logical range, so it is not yet worth reporting by default. With many small districts (R2), say that the CLR interval's coverage there rests on simulation (§0.5).
-5. Report the emptiness test and, for M1, the test of its testable part (P3.6(b)) and the pooling test (P3.6(c)).
+5. Report the emptiness test and, for M1, the test of its testable part (P3.6(b)) and the pooling test (P3.6(c)). The pooling test over-rejects somewhat with many restrictions (9% at nominal 5% with 38 restrictions, §8.4), which errs towards M1. A rejection says M0 is wrong for this design, not that its intervals fail (§8.3, S1).
 6. Report the sensitivity curves in $\eta$ (and $\delta$), with the breakdown value of the headline conclusion.
 7. With few units per district, apply P3.7 selection, or prefer M1($\delta$) or coarser groups, and say so.
 
@@ -384,6 +458,8 @@ Coverage is the share of 200 replications containing the truth; width is the med
   * variance-adaptive bounds (empirical Bernstein);
   * Bhatia–Davis;
   * uneven $\alpha$ splits.
+* CLR when Slater fails: coverage fell to the nominal level (0.944, SE 0.007) in design E of §8, as expected without slack. Whether it holds uniformly near point identification is the Stoye-type question above.
+* Calibration of the pooling and M1 tests in moderate and high dimension: the HC3 Wald $\chi^2$ test over-rejects (9% at 5% with 38 restrictions, §8.4). Candidates: the F form, HC-robust wild bootstrap, or a degrees-of-freedom correction.
 * Inference under R2 with a hierarchical model for the district shifts.
 * Dependence within districts beyond the district effect (spillovers; §0.4).
 * Joint relaxation for population turnover.

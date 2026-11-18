@@ -189,12 +189,30 @@ Then: `R CMD check`, and rerun the JKST replication test to confirm it still mat
   * The JKST replication test is unchanged and passes.
 * **Not done:** `ci_method = "finite"` (deferred, see WS4 status).
 
-### WS6: Monte Carlo and benchmarks (needs WS5)
+### WS6: Monte Carlo and benchmarks (needs WS5) — **done (Nov 2026)**
 R-37.
 * Rerun `phase3_montecarlo.py` at 1000 or more replications and report Monte Carlo SEs.
 * Add the common-shock, boundary and growing-$D^\star$ designs.
 * Rerun the NZ benchmark with M1 by electorate and with the finite-sample CI.
 * Update `benchmarks/results/ei_datasets_nz_summary.md`.
+
+**WS6 status.**
+* **Done:**
+  * `phase3_montecarlo.py` rewritten: 1000 replications per design, MC standard errors (and the exact lower bound when every replication covers), widths clipped to $[0,1]$, all cores.
+  * Intervals: plug-in, conservative, CLR (Popoviciu and Bhatia–Davis), **projection** (P3.5(b2)(ii)), and Theorem P3.8 in the 2×2 M1 designs, each for $B$ and $\tilde B$.
+  * Designs A (10 × 93, 93 × 30), B (3×3), C (near boundary) kept. New: **E** (Slater fails), **R2** (30, 93, 200 districts × 10 polls), **S0–S2** (riding shocks, M0 vs M1, pooling test).
+  * Cross-check against `eiBounds()` on one replication (`phase3_montecarlo_crosscheck.py`): plug-in, projection and pooling statistic agree exactly; CLR within 0.01.
+  * P3 §8 replaced (§8.1–8.4), with the status of each figure; §0.5, §3 remark on Slater, §5.1, §6, §9 and §10 updated.
+  * NZ benchmark rerun with the current package: projection columns, and a second part with one table per election and M1 by electorate.
+* **Findings:**
+  * No proved interval under-covers: projection at least 0.995, conservative at least 0.990, Theorem P3.8 always 1.
+  * CLR covers at least 0.994 wherever Slater holds, including R2 with 200 districts (simulation finding). At the Slater failure (design E) CLR for $\tilde B$ covers 0.944 (SE 0.007), at the nominal level.
+  * Riding shocks: with a common non-affine shock, M0's intervals cover 1–21% (mostly empty), M1 covers 100%, and the pooling test rejects 100%. With affine shifts the test also rejects 100%, but M0 still covers.
+  * **Pooling test size is 0.090 (SE 0.009) at nominal 0.05** (38 restrictions, 50 polls per district; F form 0.079). This is outside P3.6's fixed-dimension guarantee; it is added to P3 §10. The package test `test-review-response.R` checks size only in a small design (10 restrictions, 40 replications, rejection rate at most 0.15).
+  * Projection is informative only for small $q$; in R2 it, and Theorem P3.8, are $[0,1]$. CLR is the only informative interval with many districts, on simulation support only.
+  * The package's `proj_actual` uses a Bhatia–Davis variance bound computed from a CLR interval (`.rxc_fpc_sd`), so strictly only the Popoviciu version is covered by P3.5(b2). Not changed (out of WS6 scope); noted in P3 §8.
+  * NZ, one table per election with electorates as groups: M1 (and M0) are rejected by the data (empty estimates; pooling and M1 tests $p\approx0$). CLR is rejected in 21% of cells and misses in 8%; projection never misses but is as wide as DD. Per electorate, M0's CLR and projection intervals cover all 4302 cells, at about DD width.
+* **Not done:** a finite-sample column in the NZ benchmark (Theorem P3.8 is not implemented in the package, `ci_method = "finite"` was deferred in WS5, and the Monte Carlo shows it is $[0,1]$ in every grouped design).
 
 ### WS7: Exposition and the response letter (last)
 * Exposition items: R-16 (Prop. 9 earlier), R-17 (Theorem 1 vs Prop. 7 information), R-21, R-24 (DiD proposition).

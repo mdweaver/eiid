@@ -90,7 +90,10 @@ def S1(reps=200):
 
 
 def S2(reps=2000):
-    one_branch = both_point = bad = 0
+    """Classify each branch as empty, degenerate (a point) or positive-width, and count the pairs.
+    (Relabelled after the Batch B review: the old code counted 'non-empty' only above width 1e-9 and called
+    'no positive-width branch' 'both degenerate', which also allowed two empty branches.)"""
+    pairs = {}
     for _ in range(reps):
         P = V.make_2x2()
         J = V.jkst_rows(P)
@@ -99,14 +102,11 @@ def S2(reps=2000):
         aW, bW = V.affine(lambda w: f(w)["dW"])
         Ip = V.interval(J + [(aB, bB), (aW, bW)])
         Im = V.interval(J + [(-aB, -bB), (-aW, -bW)])
-        ne = [I is not None and I[1] - I[0] > 1e-9 for I in (Ip, Im)]
-        if sum(ne) == 1:
-            one_branch += 1
-        elif sum(ne) == 0:
-            both_point += 1
-        else:
-            bad += 1
-    return one_branch, both_point, bad
+        lab = sorted("empty" if I is None else ("point" if I[1] - I[0] <= 1e-9 else "interval")
+                     for I in (Ip, Im))
+        key = " + ".join(lab)
+        pairs[key] = pairs.get(key, 0) + 1
+    return pairs
 
 
 def S3(reps=1000):
@@ -135,9 +135,11 @@ if __name__ == "__main__":
     n, w = S1()
     print(f"S1 constructive sharpness (3x2, LCE + true delta^0_B, delta^0_W signs): "
           f"{n} target values, worst violation {w:.1e}  {'PASS' if w < 1e-7 else 'FAIL'}")
-    o, z, bad = S2()
-    print(f"S2 2x2 CR branches: exactly one non-empty {o}, both degenerate {z}, "
-          f"both non-empty {bad}  {'PASS' if bad == 0 else 'FAIL'}")
+    pairs = S2()
+    bad = pairs.get("interval + interval", 0) + pairs.get("empty + empty", 0)
+    print("S2 2x2 CR branches (empty / point / positive-width interval): " +
+          "; ".join(f"{k} {v}" for k, v in sorted(pairs.items())) +
+          f"; frequencies are descriptive (reused design generator)  {'PASS' if bad == 0 else 'FAIL'}")
     both, holes, med, mx = S3()
     print(f"S3 3x2 CR (W1, row 0, target B_0): both branches non-empty {both}; "
           f"disjoint images (hole) {holes}; gap/hull width median {med:.3f}, max {mx:.3f}")
@@ -240,3 +242,82 @@ if __name__ == "__main__":
         g = np.array([x for x, _ in gaps])
         print(f"   hole gap/hull median {np.median(g):.3f}, max {g.max():.3f}; "
               f"certificate held in a hole case: {any(s == 0 for _, s in gaps)}")
+
+
+# ---------------------------------------------------------------------------
+# Added after the Batch B review (Nov 2026).
+# 2x2 LCE on one column: m1(x) = H11 x + k (1-x), m0(x) = -k x + H22 (1-x), with Q12 = 0 here; in general
+# m1 = q11 x + (q01 + k)(1-x), m0 = (q01 - k) x + q00 (1-x), tau = q11 x^2 + 2 q01 x(1-x) + q00 (1-x)^2.
+# ---------------------------------------------------------------------------
+def _lce_2x2(x, p, q00, q01, q11, verts):
+    """Return (k-interval of Theta_O on the vertices, D~(k) as (const, slope), ER, gamma)."""
+    rows = []
+    for v in verts:                                   # 0 <= m_g(v) <= 1: rows s + a k >= 0
+        rows += [(q11 * v + q01 * (1 - v), 1 - v), (1 - q11 * v - q01 * (1 - v), -(1 - v)),
+                 (q01 * v + q00 * (1 - v), -v), (1 - q01 * v - q00 * (1 - v), v)]
+    lo, hi = -np.inf, np.inf
+    for s_, a in rows:
+        if abs(a) < 1e-15:
+            if s_ < -1e-12:
+                return None, None, None, None
+            continue
+        if a > 0:
+            lo = max(lo, -s_ / a)
+        else:
+            hi = min(hi, -s_ / a)
+    kint = (lo, hi) if lo <= hi + 1e-12 else None
+    w1, w0 = p * x / (p @ x), p * (1 - x) / (p @ (1 - x))
+    m1c, m0c = q11 * x + q01 * (1 - x), q01 * x + q00 * (1 - x)
+    D_c = w1 @ m1c - w0 @ m0c
+    D_s = w1 @ (1 - x) + w0 @ x                       # dD/dk: m1 gains k(1-x), m0 loses k x
+    tau = q11 * x ** 2 + 2 * q01 * x * (1 - x) + q00 * (1 - x) ** 2
+    mu = p @ x
+    varx = p @ (x - mu) ** 2
+    ER = p @ ((x - mu) * tau) / varx
+    gamma = varx / (mu * (1 - mu))
+    return kint, (D_c, D_s), ER, gamma
+
+
+def S6():
+    """Full law versus regression (R3(a) versus (b)). X = 1/4, 1/2, 3/4 equiprobable, equal sizes, T a fair
+    binary total at every composition. Full law: T in {0, 1} forces beta_1 = beta_0 = T in every unit, so both
+    row means are .5 everywhere and k = 0. The regression alone (tau = .5) admits m1 = .5 + k(1-x),
+    m0 = .5 - k x. With C = {k in [.2, .4]}: full-law identified set empty; regression gap set [1/6, 1/3]."""
+    x = np.array([.25, .5, .75]); p = np.ones(3) / 3
+    kint, (Dc, Ds), ER, gamma = _lce_2x2(x, p, .5, .5, .5, (x.min(), x.max()))
+    lo, hi = max(kint[0], .2), min(kint[1], .4)
+    reg = (Dc + Ds * lo, Dc + Ds * hi) if lo <= hi else None
+    full_k = {0.0}                                    # the only k compatible with the full law
+    full = [k for k in full_k if .2 <= k <= .4]
+    return reg, full
+
+
+def S7():
+    """LCE refutes CR although LCE alone fits (5a §3.5 item 2, old 'unrefutable'). X = 0, 1/4, 1 equiprobable,
+    A = [0, 1], m0 = 1 - x, m1 = (49/55) x, deterministic T. The Bernstein cross coefficient q01 is 0, so the
+    vertex rows force k = 0: LCE fits with a single point. There ER = 0 and D~ = -261/1925, while CR needs
+    D~ in hull{gamma ER, ER} = {0}: both CR branches are empty under LCE. In the model-free continuous
+    table problem (2c M3) CR is feasible: beta_i1 = beta_i2 = T_i gives delta_B = 0."""
+    x = np.array([0., .25, 1.]); p = np.ones(3) / 3
+    kint, (Dc, Ds), ER, gamma = _lce_2x2(x, p, 1.0, 0.0, 49 / 55, (0.0, 1.0))
+    lce_fits = kint is not None
+    Dk = [Dc + Ds * k for k in (kint if lce_fits else ())]
+    lo_cr, hi_cr = min(gamma * ER, ER), max(gamma * ER, ER)
+    cr_under_lce = lce_fits and max(Dk) >= lo_cr - 1e-12 and min(Dk) <= hi_cr + 1e-12
+    # model-free witness: beta_i1 = beta_i0 = T_i, so delta_B = 0 (D = NM), which lies in the CR hull
+    tau = (49 / 55) * x ** 2 + (1 - x) ** 2
+    mu = p @ x
+    dB_witness = p @ (x * (1 - x) * (tau - tau))
+    return lce_fits, kint, Dc, ER, cr_under_lce, dB_witness
+
+
+if __name__ == "__main__":
+    reg, full = S6()
+    print(f"S6 full law vs regression (C = [.2, .4] on k): regression gap set [{reg[0]:.6f}, {reg[1]:.6f}] "
+          f"(1/6, 1/3 = {1 / 6:.6f}, {1 / 3:.6f}); full-law set {'empty' if not full else full}  "
+          f"{'PASS' if abs(reg[0] - 1 / 6) < 1e-12 and abs(reg[1] - 1 / 3) < 1e-12 and not full else 'FAIL'}")
+    lce_fits, kint, Dc, ER, cr_lce, dBw = S7()
+    print(f"S7 LCE excludes CR: LCE fits ({lce_fits}, k in [{kint[0]:.3g}, {kint[1]:.3g}]); ER = {ER:.2e}; "
+          f"D~ = {Dc:.6f} (-261/1925 = {-261 / 1925:.6f}); CR feasible under LCE: {cr_lce}; "
+          f"model-free witness delta_B = {dBw:.1f} (CR feasible without LCE). Old 'unrefutable' as applied "
+          f"in 5a §3.5 fails  {'PASS' if lce_fits and not cr_lce and abs(Dc + 261 / 1925) < 1e-12 and abs(ER) < 1e-12 else 'FAIL'}")

@@ -232,6 +232,6 @@ $$\text{N2(both rows }\uparrow)\ \Rightarrow\ \delta^*_W\ge0\qquad\text{[N2.2(d)
 * **K-rows:** the existing P3 machinery, with one extra row each.
 * **N2 and N2-local** need $\tau$ (and $\tau'$) estimated at the support points.
   * Proposal: a weighted polynomial of degree $J$, selected by cross-validation; with $J=2$, N2(c) holds exactly.
-  * The constraints are then linear in the coefficients, and P3 Thm 5 applies *conditional on $J$*: valid if $\tau$ is a polynomial of degree $J$, a heuristic otherwise.
+  * The constraints are then linear in the coefficients, and P3.5 applies *conditional on $J$* ((a) and (b2) proved; CLR as implemented algorithmic, (b3)): valid if $\tau$ is a polynomial of degree $J$, a heuristic otherwise.
   * With many support points, group compositions into bins. Binning keeps the outer property: averaging Lemma N2.1 within a bin uses [CE-cvx].
 * **Implementation sizes.** N1 has $p\,R\,C$ variables. That is about 370×6 for Wisconsin in 2×3, which `lpSolve` handles; the equalities will be eliminated to $p(R-1)(C-1)$ free variables.

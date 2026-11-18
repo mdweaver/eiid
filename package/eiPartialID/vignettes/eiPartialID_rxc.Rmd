@@ -212,7 +212,7 @@ How to read and report these:
   with a confidence interval.** Treating the estimated bracket as known
   under-covers (about 0.90 at the CR edge, and it does not improve with $n$).
   The package inflates every piece instead: the conservative CI inflates each
-  piece of the slab before taking the maximum; the CLR CI (default) takes the
+  piece of the slab before taking the maximum; the CLR CI (default; algorithmic, see "What is reported") takes the
   union of the two branch CIs, each at the full level.
 * Our $\widehat{ER}$ uses the fitted $E[T \mid X]$; it equals the EGGHM
   $T$-based $\widehat{ER}$ when `weights = "n"`.

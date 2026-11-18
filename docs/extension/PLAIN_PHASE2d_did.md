@@ -10,7 +10,7 @@ Did veterans' support for Black suffrage change more between 1857 and 1865 than 
 
 The difficulty is that we never see how veterans voted, in either year. We see only each town's veteran share and its yes votes. So both years are ecological-inference problems, and the DiD inherits the uncertainty of both.
 
-## 1. With no link between the years [D0]
+## 1. With no link between the years [Δ0]
 
 If we assume nothing connecting 1857 to 1865, the DiD range is simply the 1865 range for the veteran–non-veteran gap minus the 1857 range. The widths add up.
 
@@ -51,7 +51,7 @@ What follows from the rules:
   - *The trade-off:* the extra width buys robustness. If levels are not straight lines (e.g. town cultures vary with veteran share in a curved way), the appendix bound can miss the truth however narrow it looks; this one stays valid.
   - *In real data:* the guarantee holds when both bounds are built from the same inputs. With estimated, non-quadratic level curves, compare them on identical inputs.
 
-## 3. No straight lines at all: monotone EI on changes [D4]
+## 3. No straight lines at all: monotone EI on changes [Δ4]
 
 Apply the Monotone-EI idea to the *changes* themselves. This needs only direction assumptions:
 
@@ -64,7 +64,7 @@ Apply the Monotone-EI idea to the *changes* themselves. This needs only directio
 
 This is the "periods as groups" model. It assumes R1 and R2 *and* straight lines in each year. In exchange, it also narrows the bounds on each year's levels.
 
-## 5. When the electorate changes [D6, C1, C2]
+## 5. When the electorate changes [Δ6, C1, C2]
 
 **Population counts change.** Even R1 then gives a short **interval**, not a single number. The interval is narrow when population growth was unrelated to the veteran share.
 

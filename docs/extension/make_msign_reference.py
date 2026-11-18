@@ -20,6 +20,8 @@ import numpy as np
 from scipy.optimize import linprog
 
 sys.dont_write_bytecode = True
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))  # sibling imports also under python3 -I
 import verify_package_design as V  # noqa: E402
 import verify_R3 as R3  # noqa: E402
 

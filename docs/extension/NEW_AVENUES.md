@@ -170,7 +170,7 @@ a **lower** bound on the spread, so both sides are now bounded. With ordering it
 * a quadratic in $x$ (for $A$); and
 * $b_i/n_i$, where $b_i=\sum_rx_{ir}B_{rc}(1-B_{rc})$ is built from the true aggregate rates.
 
-**Result.** The slope is **0.69 (LAB), 0.81 (NAT), 0.69 (OTH)**, with cluster SE about 0.10.
+**Result.** The slope is **0.69 (LAB), 0.81 (NAT), 0.69 (OTH)**, with cluster SE about 0.10. *(Nov 2026: computed with clustered SEs before decision D3, P3 §0.4. Re-derive before use; see `MSIGN_REVIEW_LOG.md` M-15.)*
 
 **Reading.** The $1/n$ term is unmistakably present, and smaller than the binomial ceiling. A slope below 1 is what binomial voting with some poll heterogeneity predicts. There is **no sign of over-dispersion** from correlated voting, the main threat to A1. This is evidence of feasibility, not a test of A1 itself.
 
@@ -717,7 +717,7 @@ $\Sigma$ is identified, and the correlation that A2 merely *assumed* to be non-n
 
 **Wisconsin check** (yes rate, units ≥ 100 men, coin-flip upper bound removed):
 * **1857:** the estimated $\Sigma$ is **not positive semidefinite** (implied "correlation" 3.35; bootstrap interval [1.0, 11.9]). The quadratic-form structure fails, or noise dominates.
-* **1865:** SDs 0.22 (veterans) and 0.11 (non-veterans), correlation −0.16, 90% cluster-bootstrap interval **[−0.49, 0.70]**. The data cannot even sign the correlation.
+* **1865:** SDs 0.22 (veterans) and 0.11 (non-veterans), correlation −0.16, 90% cluster-bootstrap interval **[−0.49, 0.70]** *(cluster bootstrap predates decision D3; re-derive before use, M-15)*. The data cannot even sign the correlation.
 
 **Assessment:** a clean theoretical bridge, and the right replacement for A2's sign assumption, but data-hungry. It should not displace E4/E5.
 

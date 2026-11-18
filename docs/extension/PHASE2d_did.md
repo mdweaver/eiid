@@ -1,6 +1,8 @@
 # Phase 2d: difference-in-differences with partial identification, derivations and proofs
 
 *Builds on P1, 2a, 2b, P3, 2c and the Phase-1 proposal `PHASE1b_monotone_did.md` (1b; decisions in 1b §D). Every proof step carries a justification tag: 2a §0.3, 2b §0.3, P3 §0.3, 2c §0.3, plus §0.3 below. Checks:*
+
+*Naming (Nov 2026): the difference-in-differences rungs were called D0–D8. They are now Δ0–Δ8, so they no longer clash with Phase 2b's Propositions D0–D7 (district dummies), which the review response cites.*
 * *`verify_phase2d.py` (output `verify_phase2d_output.txt`, 15/15 PASS);*
 * *`verify_phase1_mei_did.py` V7–V8.*
 
@@ -64,9 +66,9 @@ Uses below:
 
 ## 2. No link between periods
 
-**Proposition D0.**
+**Proposition Δ0.**
 (a) **Model-free, exact.** Let $[G^-_t,G^+_t]$ be the DD range of the gap $B_{vt}-B_{nt}$. Then the set of $\text{DiD}_c$ values consistent with the margins is $[G^-_1-G^+_0,\ G^+_1-G^-_0]$.
-(b) **Per-period LCE (M2 with periods as groups).** The sharp identified set of $(K_0,K_1)$ is $\Theta_{I,0}\times\Theta_{I,1}$, where each factor is computed from its own period's law $P_t$ of $(N,X,T_t)$. The outer set is $\Theta_{O,0}\times\Theta_{O,1}$. So the DiD bound is the difference of the two periods' gap intervals, and it is **sharp** when computed with the sharp sets. *This settles the conjecture in MENU item 17 and 1b D0.*
+(b) **Per-period LCE (M2 with periods as groups).** The sharp identified set of $(K_0,K_1)$ is $\Theta_{I,0}\times\Theta_{I,1}$, where each factor is computed from its own period's law $P_t$ of $(N,X,T_t)$. The outer set is $\Theta_{O,0}\times\Theta_{O,1}$. So the DiD bound is the difference of the two periods' gap intervals, and it is **sharp** when computed with the sharp sets. *This settles the conjecture in MENU item 17 and 1b Δ0.*
 (c) In 2×2 each period's gap is increasing in $\kappa_t$. So the owner's appendix formula $ATT_{L}=(L_{v1}-U_{v0})-(U_{n1}-L_{n0})$ (and $ATT_U$) equals (b) with JKST outer sets.
 
 *Proof.*
@@ -84,7 +86,7 @@ Uses below:
 
 **Model FD.** (S1) holds in each period, and
 $$E[\Delta\beta\mid V]=M_{\Delta H}(X)\quad\text{a.s.},\qquad\textstyle\sum_c\Delta H_c=0.$$
-**Levels are unrestricted.** Each township may have any persistent political culture, $\zeta_i$ in 1b B2 D1, related to $X$ in any way.
+**Levels are unrestricted.** Each township may have any persistent political culture, $\zeta_i$ in 1b B2 Δ1, related to $X$ in any way.
 
 **Lemma FD1.** Assume A5 for the design.
 (a) $E[\Delta T_c\mid X]=X^\top\Delta Q_cX$ with $\Delta Q_c=\operatorname{sym}\Delta H_c$. So $\Delta Q$ is identified, and $\Delta K\in\mathcal K$ is left completely unidentified by this regression.
@@ -115,14 +117,14 @@ $$\Delta\kappa=\frac{a\,\Delta\kappa^{R2}+b\,\Delta\kappa^{R1}}{a+b}.$$
 4. (d): $a\Delta b_1+b\Delta w_1=\delta^{\Delta*}_W$ by 2c Prop. M5(c) applied to $\Delta m$. [2c:M5(c)] Then EGGHM's identity for the outcome $\Delta m\in[-1,1]$ gives $ER^*_\Delta-\widetilde{\text{DiD}}=\delta^{\Delta*}_W/\operatorname{Var}_p(X)=0$. [2c:L M1(c)]
 5. (e): $\Delta b_1-\Delta w_1=\Delta d_1$. [1; alg] ∎
 
-Checked: D1. With arbitrary non-linear levels, each rule recovers the DiD exactly when it holds (max error $4\times10^{-16}$), R4 always lies between R1 and R2, and Goodman on changes equals the DiD under R4.
+Checked: Δ1. With arbitrary non-linear levels, each rule recovers the DiD exactly when it holds (max error $4\times10^{-16}$), R4 always lies between R1 and R2, and Goodman on changes equals the DiD under R4.
 
 **Proposition FD3 (bounded change and breakdown).** Under FD with $\lvert\Delta w_1\rvert\le\delta$,
 $$\widetilde{\text{DiD}}\in[\widetilde{\text{DiD}}^{R1}-s\delta,\ \widetilde{\text{DiD}}^{R1}+s\delta]\cap\mathcal B^{FD}_O.$$
 The same holds with $\Delta b_1$ and R2. For the claim "DiD > 0" with $\widetilde{\text{DiD}}^{R1}>0$, the breakdown value is
 $$\delta^*=\widetilde{\text{DiD}}^{R1}/s,$$
 or $\infty$ if the lower end of $\mathcal B^{FD}_O$ is already positive. In words: **the smallest differential spillover onto non-veterans (in yes-rate points per unit of veteran share) that would erase the effect.**
-*Proof.* $\widetilde{\text{DiD}}=I+s(\Delta\kappa^{R1}-\Delta w_1)$. [FD2 step 2; L FD1(b)] Intersect with the outer set. [Def] ∎ Checked: D1 (slope $-s$).
+*Proof.* $\widetilde{\text{DiD}}=I+s(\Delta\kappa^{R1}-\Delta w_1)$. [FD2 step 2; L FD1(b)] Intersect with the outer set. [Def] ∎ Checked: Δ1 (slope $-s$).
 
 **Proposition FD4 (outer set without any restriction on $\Delta K$).** Let $\tau_t(x):=E[T_t\mid X=x]$ and let $x_j$ be the support points. Then
 $$\Theta^{FD}_O:=\{\Delta k:\ \forall j\ \exists\,m_0\in S(x_j,\tau_0(x_j))\ \text{with}\ m_0+M_{\Delta H(\Delta k)}(x_j)\in S(x_j,\tau_1(x_j))\}$$
@@ -136,8 +138,8 @@ contains the true $\Delta k$. The DiD bound is an LP in $(\Delta k,(m_0(x_j))_j)
 3. Levels linear in each period implies changes linear. [Def] If $(\kappa_0,\kappa_1)$ lie in the product of the outer sets, then $M_{H_t}(x_j)\in S(x_j,\tau_t(x_j))$. [2c:N2.2(c) step 3] So $m_0:=M_{H_0}(x_j)$ is a witness for $\Delta k=k_1-k_0$. [Def] ∎
 
 Checked:
-* D2(a): the truth is feasible under non-linear levels.
-* D2(b): the product bound lies inside the FD bound in 60 cases.
+* Δ2(a): the truth is feasible under non-linear levels.
+* Δ2(b): the product bound lies inside the FD bound in 60 cases.
 
 **Note.** $\tau_t$ (levels) is not quadratic under FD, so Phase 3 must estimate it nonparametrically, by a polynomial of chosen degree as in 2c §6.
 
@@ -145,9 +147,9 @@ Checked:
 
 ## 4. Monotone EI on changes (exact, no linearity)
 
-**Proposition D4.** In the fixed population, apply EGGHM to the individual change $\Delta Y\in\{-1,0,1\}$. The unit group means are $\Delta\beta_{iv},\Delta\beta_{in}$, and the associations of the realised changes are $\delta^\Delta_B$, $\delta^\Delta_W$. Let $ER_\Delta$ and $NM_\Delta$ be Goodman (with intercept) and the neighbourhood model computed on $\Delta T$.
+**Proposition Δ4.** In the fixed population, apply EGGHM to the individual change $\Delta Y\in\{-1,0,1\}$. The unit group means are $\Delta\beta_{iv},\Delta\beta_{in}$, and the associations of the realised changes are $\delta^\Delta_B$, $\delta^\Delta_W$. Let $ER_\Delta$ and $NM_\Delta$ be Goodman (with intercept) and the neighbourhood model computed on $\Delta T$.
 (a) $ER_\Delta-\text{DiD}=\delta^\Delta_W/\operatorname{Var}_p(X)$; $NM_\Delta-\text{DiD}=-\delta^\Delta_B/(\mu(1-\mu))$; $NM_\Delta=\gamma\,ER_\Delta$.
-(b) The exact sets intersect D0's interval $[D^-_0,D^+_0]$ with:
+(b) The exact sets intersect Δ0's interval $[D^-_0,D^+_0]$ with:
   * $\delta^\Delta_W\ge0$: $\text{DiD}\le ER_\Delta$ (empty iff $ER_\Delta<D^-_0$);
   * $\delta^\Delta_W\le0$: $\text{DiD}\ge ER_\Delta$;
   * $\delta^\Delta_B\ge0$: $\text{DiD}\ge NM_\Delta$ (never empty);
@@ -157,10 +159,10 @@ Checked:
 *Proof.*
 1. With the same men in both periods, $\Delta Y$ is defined per man, bounded, and has unit means $\Delta\beta_{ir}$. [0.1; Def]
 2. (a): [EGGHM:P4, P6, L1] for the outcome $\Delta Y$. [1; 1b V7c]
-3. (b): repeat 2c Prop. M3 with D0's product set in place of the MOB. The step "$NM\in$ range" uses $\beta_{ivt}=\beta_{int}=T_{it}$ in both periods, which gives $\Delta\beta_{iv}=\Delta\beta_{in}$, hence $\delta^\Delta_B=0$ and $\text{DiD}=NM_\Delta$. [2c:M3 steps 1–8; D0(a)]
+3. (b): repeat 2c Prop. M3 with Δ0's product set in place of the MOB. The step "$NM\in$ range" uses $\beta_{ivt}=\beta_{int}=T_{it}$ in both periods, which gives $\Delta\beta_{iv}=\Delta\beta_{in}$, hence $\delta^\Delta_B=0$ and $\text{DiD}=NM_\Delta$. [2c:M3 steps 1–8; Δ0(a)]
 4. (c): (a) with $\delta^\Delta_W=0$. ∎
 
-Checked: D3 (one branch; sign agreement in all 83 populations with realised CR).
+Checked: Δ3 (one branch; sign agreement in all 83 populations with realised CR).
 
 **Reading for the application.**
 * **Which signs are usable.**
@@ -179,7 +181,7 @@ Checked: D3 (one branch; sign agreement in all 83 populations with realised CR).
 
 ## 6. Changing population counts
 
-**Proposition D6.** Suppose the periods have different counts $N_{it}$ (and possibly $X_{it}$), with per-period moments $\mu^{(t)}$. Assume per-period LCE and R1 across periods, $w_{1}^{(1)}=w_{1}^{(0)}$. Then
+**Proposition Δ6.** Suppose the periods have different counts $N_{it}$ (and possibly $X_{it}$), with per-period moments $\mu^{(t)}$. Assume per-period LCE and R1 across periods, $w_{1}^{(1)}=w_{1}^{(0)}$. Then
 $$\widetilde{\text{DiD}}=I'+(s_1-s_0)\,\kappa_0,\qquad s_t=\mu^{(t)}_{vn}\Big(\frac1{\mu^{(t)}_v}+\frac1{\mu^{(t)}_n}\Big),$$
 with $I'$ identified and $\kappa_0\in\Theta_{O,0}\cap(\Theta_{O,1}-\Delta\kappa^{R1})$. **The DiD is therefore an interval of width $\lvert s_1-s_0\rvert\times$ (length of that set), not a point.** It is a point when $s_1=s_0$, e.g. when growth is unrelated to composition.
 
@@ -188,7 +190,7 @@ with $I'$ identified and $\kappa_0\in\Theta_{O,0}\cap(\Theta_{O,1}-\Delta\kappa^
 2. R1 gives $\kappa_1=\kappa_0+\Delta\kappa^{R1}$. [FD2 step 2, per period]
 3. Substitute; $\kappa_0$ must satisfy both periods' constraints. [1–2; 2b:Thm 2(b)] ∎
 
-Checked: D4 (formula exact; truth inside).
+Checked: Δ4 (formula exact; truth inside).
 
 FD (§3) requires the *same men*. With changing populations, only level models (§§2, 5, 6) or the composition accounting of §7 apply.
 
@@ -222,7 +224,7 @@ Cells $y_{irct}\ge0$ satisfy $\sum_cy_{irct}=\rho_{irt}$ and $\sum_ry_{irct}=$ t
 3. (b): for fixed denominators the DiD is linear in $y$. [Def] Its value function is continuous in $(V_O,N_O)$ on the feasible region. [LP-par] The image of the connected set $\mathcal T\cap\{\text{denominators}>0\}$ is an interval. [conn]
 4. (c): as in 2c M2(a). [2c:M2] ∎
 
-Checked: D6 (aged-in split interval-valued; the bound contains the stayers' DiD in 15 random populations).
+Checked: Δ6 (aged-in split interval-valued; the bound contains the stayers' DiD in 15 random populations).
 
 **Proposition C2 (what the post-war base mixes).** Put the 1857 votes over the post-war base, as in the owner's earlier analysis. Let $\omega_r=O_r/(O_r+A_r)$ (stayers' share of group $r$'s post-war men). Then
 $$\text{DiD}^{\text{orig}}=\big[\omega_v\Delta B^{O}_v+(1-\omega_v)B^{A}_{v1}\big]-\big[\omega_n\Delta B^{O}_n+(1-\omega_n)B^{A}_{n1}\big].$$
@@ -235,7 +237,7 @@ It lies between $-(1-\omega_n)B^O_{n0}$ and $(1-\omega_v)B^O_{v0}$, so it is sma
 2. $B_{r1}=\omega_rB^O_{r1}+(1-\omega_r)B^A_{r1}$. [Def]
 3. Subtract, then substitute the assumption. [alg] ∎
 
-Checked: D5.
+Checked: Δ5.
 
 **Remark C3 (exits).** The 1857 pool of group $r$ includes men who later died or did not return. Its rate is $B^{\text{pool}}_{r0}=\pi_rB^O_{r0}+(1-\pi_r)B^E_{r0}$.
 * The owner's earlier assumption is $B^E=B^O$.
@@ -256,7 +258,7 @@ Let $\theta$ be veterans' post-war counterfactual rate had they not served; $ATT
 (b) If non-empty, the ATT set is $[0,U]$ with
 $$U=\max_{b\in\mathcal F}\min\{b_{v1}-b_{v0},\ b_{v1}-b_{n1}\},$$
 an LP in epigraph form.
-(c) With two rows and the product structure of D0, $U=B^U_{v1}-\max\{B^L_{v0},B_{n1}(B^U_{v1})\}$. This is the owner's script line 336, which is therefore attained.
+(c) With two rows and the product structure of Δ0, $U=B^U_{v1}-\max\{B^L_{v0},B_{n1}(B^U_{v1})\}$. This is the owner's script line 336, which is therefore attained.
 (d) Under parallel trends, ATT = DiD. Bounded departures give ATT ∈ DiD ⊕ [−M, M] (Rambachan & Roth 2023).
 
 *Proof.*
@@ -264,10 +266,10 @@ an LP in epigraph form.
 2. (a): the inner interval is non-empty iff $b_{v1}\ge\max\{b_{v0},b_{n1}\}$. [1]
 3. (b): each feasible $b$ contributes $[0,\,b_{v1}-\max\{b_{v0},b_{n1}\}]$. All contain 0, so the union is an interval. [1; conn] Its upper end is the stated max; $\min$ of affine functions is concave, so it is an LP in epigraph form. [lin]
 4. (c): within period 1, $\mu_vB_{v1}+\mu_nB_{n1}=E_p[T_1]$ for both actual and model-implied rates. So $B_{n1}$ is decreasing in $B_{v1}$. [A1; Def]
-5. Both terms of the min increase in $b_{v1}$. $b_{v0}$ ranges over its own interval independently. [D0(b)] So the max is at $b_{v1}=B^U_{v1}$ and $b_{v0}=B^L_{v0}$. [4; alg]
+5. Both terms of the min increase in $b_{v1}$. $b_{v0}$ ranges over its own interval independently. [Δ0(b)] So the max is at $b_{v1}=B^U_{v1}$ and $b_{v0}=B^L_{v0}$. [4; alg]
 6. (d): definition of parallel trends. ∎
 
-Checked: D7 (epigraph LP = closed form, 200 cases).
+Checked: Δ7 (epigraph LP = closed form, 200 cases).
 
 **Citation note.** The appendix attributes the bounds to Athey & Imbens (2006, pp. 151–3) "with one change". The derivation above is self-contained (MTR: Manski 1997; MTS: Manski & Pepper 2000). The Athey–Imbens page reference should be checked before publication.
 
@@ -283,7 +285,7 @@ Checked: D7 (epigraph LP = closed form, 200 cases).
 2. Take a party × suffrage table with $z_{D,\text{yes}}=0$. It exists by [Gale], since $Y\le R+G$.
 3. Join them by $n_{gqs}=y_{gs}z_{qs}/Y_s$. This has both tables as two-way margins and keeps the zero. [coupling] ∎
 
-Checked: D8 (300 cases, LP over three-way tables = DD).
+Checked: Δ8 (300 cases, LP over three-way tables = DD).
 
 **Proposition P3 (selection on party only).** Assume:
 * **(SP)** in each township, within each party, future veterans and others had the same 1857 yes-rate $\pi_{iq}$;
@@ -291,7 +293,7 @@ Checked: D8 (300 cases, LP over three-way tables = DD).
 
 Then $\pi_{iR}=Y_i/R_i$, and veteran-yes $=v_{iR}Y_i/R_i$ with $v_{iR}\in[\max(0,V_i+R_i-N_i),\min(V_i,R_i)]$. The range
 $$\Big[\max(0,V_i+R_i-N_i)\tfrac{Y_i}{R_i},\ \min(V_i,R_i)\tfrac{Y_i}{R_i}\Big]$$
-is exact under SP+Z and lies inside DD; it is often strictly narrower (152 of 300 random cases in D8). The aggregate is the weighted sum of the unit ranges.
+is exact under SP+Z and lies inside DD; it is often strictly narrower (152 of 300 random cases in Δ8). The aggregate is the weighted sum of the unit ranges.
 
 *Proof.*
 1. SP+Z give unit veteran-yes $=v_{iR}\pi_{iR}$ with $\pi_{iR}=Y_i/R_i$. [Def; alg]
@@ -300,7 +302,7 @@ is exact under SP+Z and lies inside DD; it is often strictly narrower (152 of 30
 4. Lower end: $(V+R-N)Y/R-(V+Y-N)=(1-Y/R)(N-V)\ge0$. [alg]
 5. Aggregation is separable across units. [sep] ∎
 
-Checked: D8 (inside DD and containing the truth in all 300 cases; strictly narrower in 152).
+Checked: Δ8 (inside DD and containing the truth in all 300 cases; strictly narrower in 152).
 
 **Without (Z)** (e.g. some suffrage voters skipped the governor's race, or Democrats' yes-rate is $\le\varepsilon$), veteran-yes $=\sum_qv_{iq}\pi_{iq}$ is bilinear over a product of polytopes. Exact per-unit ranges then come from vertex enumeration. [bilin; conn]
 
@@ -315,18 +317,18 @@ Checked: D8 (inside DD and containing the truth in all 300 cases; strictly narro
 
 Decreasing plausibility; ⊇ means nested (the bounds shrink). Applies to the fixed population and, through §7, to stayers.
 
-$$D0\ (\text{exact})\ \supseteq\ D0\cap\text{MEI-}\Delta\ (\delta^\Delta_W\text{ sign or CR; exact})$$
+$$\Delta0\ (\text{exact})\ \supseteq\ \Delta0\cap\text{MEI-}\Delta\ (\delta^\Delta_W\text{ sign or CR; exact})$$
 $$\mathcal B^{FD}_O\ \supseteq\ \mathcal B^{FD}_O\cap\{\lvert\Delta w_1\rvert\le\delta\}\ \supseteq\ \{\text{R1 point}\}\qquad[\text{FD3}]$$
 $$\text{per-period LCE (product)}\ \subseteq\ \text{FD};\qquad \text{M1-periods}\ \subseteq\ \text{FD}+\text{R1}+\text{R2}\qquad[\text{FD4; }\S5]$$
 **Not nested:** MEI-Δ with FD (no linearity vs linearity of changes). R4 lies between R1 and R2 (FD2(c)). Party (P3) and composition (§7) modify every rung. The causal layer (§8) sits on top of any rung.
 
 ## 11. What Phase 3 must supply
 
-* **Exact rungs** (D0, MEI-Δ, the composition polytope, P3): no sampling inference. Add slack dials and breakdown values (2c M2(d)), plus the grid for C1(b).
+* **Exact rungs** (Δ0, MEI-Δ, the composition polytope, P3): no sampling inference. Add slack dials and breakdown values (2c M2(d)), plus the grid for C1(b).
 * **FD:**
-  * the regression of $\Delta T$ on the homogeneous quadratic, clustered by county;
+  * the regression of $\Delta T$ on the homogeneous quadratic, with county effects in the mean (an M1/M2-type rung on changes) where county-level shocks to changes are a concern, checked with the pooling test (P3.6(c)). No clustered variance: inference is conditional on the design and the county effects (P3 §0.4; decision D3, Nov 2026). First-differencing already removes township levels;
   * $\tau_0,\tau_1$ by polynomial series, for the outer set;
-  * CLR over the support-point constraints (P3 Thm 5);
+  * CLR over the support-point constraints (P3.5: the implemented CLR is algorithmic, Conjecture (b3); the projection interval (b2) and the conservative interval (a) are proved);
   * the breakdown value δ* (FD3) with its CI.
-* **Changing counts (D6)** and **interval bases** (§7): inference conditional on the census-based bases, with the 1860/1870 interval treated as known.
+* **Changing counts (Δ6)** and **interval bases** (§7): inference conditional on the census-based bases, with the 1860/1870 interval treated as known.
 * **The two targets** (1b §D.3): the actual DiD for the exact rungs, and the model-implied DiD for FD and LCE rungs. The actual-DiD allowance uses $(\sqrt{m_1(1-m_1)}+\sqrt{m_0(1-m_0)})^2$.

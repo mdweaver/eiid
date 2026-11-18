@@ -15,6 +15,8 @@ numpy/scipy only.  Seed 20261105.
 import numpy as np
 from scipy.optimize import linprog
 
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))  # sibling imports also under python3 -I
 import verify_package_design as V
 
 RNG = np.random.default_rng(20261105)

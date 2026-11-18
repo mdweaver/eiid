@@ -69,7 +69,7 @@ L4 is a useful intermediate step. Assuming no contextual effect for one row $r$ 
 ### F. Repeated cross-sections and difference-in-differences
 
 *Derived in `PHASE2d_did.md` (Phase 2). Corrections:*
-* *item 17's product set is sharp (2d Prop. D0(b));*
+* *item 17's product set is sharp (2d Prop. Δ0(b));*
 * *a one-column DiD needs one restriction, not $(C-1)R(R-1)/2$ (2d Lemma FD1);*
 * *"contextual effects unchanged" is R1 and R2 together, not $\Delta K=0$ (2d §5).*
 

@@ -41,7 +41,7 @@ def did_of_dkappa(Q, mom, dk):
 
 
 # ---------------------------------------------------------------------------
-# D1. First-difference LCE with arbitrary (non-linear) unit levels.
+# Δ1. First-difference LCE with arbitrary (non-linear) unit levels.
 #   For column yes: R1 (Delta w1 = 0), R2 (Delta b1 = 0), R4 (a Delta b1 + b Delta w1 = 0)
 #   each point-identify the DiD; DiD_R4 lies between DiD_R1 and DiD_R2;
 #   the sensitivity of the DiD to Delta w1 is -s, s = mu_vn (1/mu_v + 1/mu_n).
@@ -103,15 +103,15 @@ for rule in ("R1", "R2", "R4"):
         # DiD(Delta w1) = DiD(Delta kappa_R1 - Delta w1): slope -s in Delta w1
         d1 = did_of_dkappa(Q, P["mom"], dk["R1"] - 0.01) - did_of_dkappa(Q, P["mom"], dk["R1"])
         s_ok &= abs(d1 + 0.01 * s) < 1e-12
-check("D1 Prop FD2: R1, R2 and R4 each point-identify the DiD under FD-LCE with non-linear levels",
+check("Δ1 Prop FD2: R1, R2 and R4 each point-identify the DiD under FD-LCE with non-linear levels",
       worst < 1e-10, f"max err {worst:.1e}")
-check("D1 Prop FD2(c): DiD_R4 lies between DiD_R1 and DiD_R2", between_ok)
-check("D1 Prop FD2(d): under R4, Goodman on the change equals the DiD", er_ok)
-check("D1 Prop FD3: dDiD/dDelta_w1 = -s, s = mu_vn (1/mu_v + 1/mu_n)", s_ok)
+check("Δ1 Prop FD2(c): DiD_R4 lies between DiD_R1 and DiD_R2", between_ok)
+check("Δ1 Prop FD2(d): under R4, Goodman on the change equals the DiD", er_ok)
+check("Δ1 Prop FD3: dDiD/dDelta_w1 = -s, s = mu_vn (1/mu_v + 1/mu_n)", s_ok)
 
 
 # ---------------------------------------------------------------------------
-# D2. FD outer set via an LP with auxiliary level variables at the support points:
+# Δ2. FD outer set via an LP with auxiliary level variables at the support points:
 #   (a) the truth is feasible and the DiD bound contains the true DiD;
 #   (b) when levels are linear in each period (per-period LCE), the product of
 #       the per-period outer sets gives a DiD bound inside the FD outer bound.
@@ -167,7 +167,7 @@ for _ in range(40):
     b = fd_outer_bounds(P["x"], P["T0"], P["T1"], Q3, P["mom"])
     cnt += b is not None
     inside_ok &= b is not None and b[0] - 1e-9 <= P["truth"] <= b[1] + 1e-9
-check("D2(a) FD outer LP contains the true DiD (levels non-linear, exact tau)", inside_ok and cnt == 40)
+check("Δ2(a) FD outer LP contains the true DiD (levels non-linear, exact tau)", inside_ok and cnt == 40)
 
 
 def lce_period_interval(pw, x, T, mom, C=3):
@@ -217,12 +217,12 @@ for _ in range(60):
         continue
     n_nest += 1
     nest_ok &= fd[0] <= prod[0] + 1e-8 and prod[1] <= fd[1] + 1e-8
-check("D2(b) per-period LCE (product of outer sets) is inside the FD outer bound", nest_ok and n_nest > 40,
+check("Δ2(b) per-period LCE (product of outer sets) is inside the FD outer bound", nest_ok and n_nest > 40,
       f"{n_nest} cases")
 
 
 # ---------------------------------------------------------------------------
-# D3. Monotone EI on changes (fixed population, exact): CR on changes is never
+# Δ3. Monotone EI on changes (fixed population, exact): CR on changes is never
 #     empty, has one branch, and sign(DiD) = sign(ER_Delta) when realised CR holds.
 # ---------------------------------------------------------------------------
 def dd_lp_did(pw, x, T0, T1, extra_ge=()):
@@ -267,12 +267,12 @@ for _ in range(200):
     if dW * dB >= 0:
         n_cr += 1
         ok_sign &= np.sign(truth) == np.sign(ER)
-check("D3 Prop D4: CR on changes never empty, one branch", ok_one)
-check("D3 Prop D4: under realised CR on changes, sign(DiD) = sign(ER on Delta T)", ok_sign, f"{n_cr} cases")
+check("Δ3 Prop Δ4: CR on changes never empty, one branch", ok_one)
+check("Δ3 Prop Δ4: under realised CR on changes, sign(DiD) = sign(ER on Delta T)", ok_sign, f"{n_cr} cases")
 
 
 # ---------------------------------------------------------------------------
-# D4. Changing population counts (levels LCE per period, R1 across periods):
+# Δ4. Changing population counts (levels LCE per period, R1 across periods):
 #     DiD = I' + (s1 - s0) kappa_0 exactly; truth in the interval.
 # ---------------------------------------------------------------------------
 ok_formula, ok_inside = True, True
@@ -305,12 +305,12 @@ for _ in range(100):
     lo_k, hi_k = max(ka[0], kb[0] - shift), min(ka[1], kb[1] - shift)
     vals = sorted([f(lo_k), f(hi_k)])
     ok_inside &= lo_k <= hi_k + 1e-12 and vals[0] - 1e-10 <= truth <= vals[1] + 1e-10
-check("D4 Prop D6: with changing counts, DiD = I' + (s1 - s0) kappa_0 under R1", ok_formula)
-check("D4 Prop D6: truth inside the resulting interval", ok_inside)
+check("Δ4 Prop Δ6: with changing counts, DiD = I' + (s1 - s0) kappa_0 under R1", ok_formula)
+check("Δ4 Prop Δ6: truth inside the resulting interval", ok_inside)
 
 
 # ---------------------------------------------------------------------------
-# D5. Aging-in decomposition (post-war base for both periods).
+# Δ5. Aging-in decomposition (post-war base for both periods).
 # ---------------------------------------------------------------------------
 ok = True
 for _ in range(300):
@@ -334,11 +334,11 @@ for _ in range(300):
     B1_eq = BO1
     did_orig_eq = (B1_eq[0] - Borig0[0]) - (B1_eq[1] - Borig0[1])
     ok &= abs((did_orig_eq - did_O) - ((1 - om[0]) * BO0[0] - (1 - om[1]) * BO0[1])) < 1e-12
-check("D5 Prop C2: aging-in decomposition of the post-war-base DiD; bias formula when aged-in vote like stayers", ok)
+check("Δ5 Prop C2: aging-in decomposition of the post-war-base DiD; bias formula when aged-in vote like stayers", ok)
 
 
 # ---------------------------------------------------------------------------
-# D6. Composition polytope (aged-in split interval-valued, stayers' DiD):
+# Δ6. Composition polytope (aged-in split interval-valued, stayers' DiD):
 #     model-free bound by LP for fixed V_O, scanned over V_O, contains the truth.
 # ---------------------------------------------------------------------------
 def composition_bounds(O, A, V, Y0, Y1, grid):
@@ -397,11 +397,11 @@ for _ in range(15):
     grid = grid[(grid > 0) & (grid < O.sum())]
     lo, hi = composition_bounds(O, A, V, y0v + y0n, y1vO + y1nO + y1vA + y1nA, grid)
     ok &= lo - 1e-9 <= truth <= hi + 1e-9
-check("D6 Prop C1: composition polytope (interval aged-in split) bound contains the stayers' DiD", ok)
+check("Δ6 Prop C1: composition polytope (interval aged-in split) bound contains the stayers' DiD", ok)
 
 
 # ---------------------------------------------------------------------------
-# D7. Causal layer: ATT bounds under MTR, no-decline and positive selection.
+# Δ7. Causal layer: ATT bounds under MTR, no-decline and positive selection.
 #     Epigraph LP = closed form B_v1^U - max(B_v0^L, B_n1 at B_v1^U) (2 rows, product).
 # ---------------------------------------------------------------------------
 ok = True
@@ -427,11 +427,11 @@ for _ in range(200):
     bv1U = cv @ U(T1); bv0L = cv @ L(T0); bn1_at = Bn1_c - (pw * x / mn) @ U(T1)
     cf = bv1U - max(bv0L, bn1_at)
     ok &= r.status == 0 and abs(-r.fun - cf) < 1e-9
-check("D7 Prop CL: ATT upper bound (epigraph LP) = closed form in the 2-row product case", ok)
+check("Δ7 Prop CL: ATT upper bound (epigraph LP) = closed form in the 2-row product case", ok)
 
 
 # ---------------------------------------------------------------------------
-# D8. Party information.
+# Δ8. Party information.
 #   P2: veteran x party x suffrage with zero (Democrat, yes) gives the same
 #       veteran-yes range as Duncan-Davis (coupling).
 #   P3: selection on party only (pre-war) gives vet-yes = v_R * Y / R, a range
@@ -468,8 +468,8 @@ for _ in range(300):
     truth = vR * Y / R_
     ok3 &= dd[0] - 1e-9 <= lo3 <= truth + 1e-9 and truth - 1e-9 <= hi3 <= dd[1] + 1e-9
     strict3 += (hi3 - lo3) < (dd[1] - dd[0]) - 1e-9
-check("D8 Prop P2: party margin + (Democrat, yes) = 0 leaves the veteran-yes range at Duncan-Davis", ok2)
-check("D8 Prop P3: selection on party only gives a range inside Duncan-Davis containing the truth", ok3,
+check("Δ8 Prop P2: party margin + (Democrat, yes) = 0 leaves the veteran-yes range at Duncan-Davis", ok2)
+check("Δ8 Prop P3: selection on party only gives a range inside Duncan-Davis containing the truth", ok3,
       f"strictly narrower in {strict3}/300")
 
 print(f"\n{sum(results)}/{len(results)} PASS")

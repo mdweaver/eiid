@@ -96,7 +96,7 @@ where $NM^{r*}$ is the neighbourhood gap computed from $\tau$. [2c L M1(c); 2a L
   * N2 shape restrictions, which do not restrict $k$;
   * N1 signs on the realised $\delta$, which are unit-level, not mean-level;
   * any target that mixes $\tilde B$ with $B$ (marked ⚠ in the matrix).
-* **Degenerate hull.** If $A$ has empty relative interior, $\Theta_O$ can be unbounded (2a L3(b)). For polyhedral $C$, (a) and (b) then hold with a possibly infinite endpoint, and the LP reports unboundedness. For non-polyhedral closed convex $C$ the image of an unbounded closed convex set need not be closed, so an endpoint may be a supremum that is not attained. Added rows can restore a finite endpoint (V5, near-1d support).
+* **Degenerate hull.** If $\operatorname{affdim}(A)<R-1$, $\Theta_O$ can be unbounded (2a L3(b), Remark 5.2). A singleton $A$ has nonempty relative interior and is still degenerate; under A5 this case cannot arise. For polyhedral $C$, (a) and (b) then hold with a possibly infinite endpoint, and the LP reports unboundedness. For non-polyhedral closed convex $C$ the image of an unbounded closed convex set need not be closed, so an endpoint may be a supremum that is not attained. Added rows can restore a finite endpoint (V5, near-1d support).
 
 ### 1.5 Numerical check (`verify_R3.py`, output `verify_R3_output.txt`)
 
@@ -111,9 +111,9 @@ where $NM^{r*}$ is the neighbourhood gap computed from $\tau$. [2c L M1(c); 2a L
 ### 1.6 Consequences for the package
 
 1. For a linear rung plus any sign, ordering or local rows, `eiBounds()` may label the LP interval **sharp for the regression**. It is the sharp identified set when $\Theta_I=\Theta_O$, and outer otherwise.
-2. One-vs-rest CR (the default, W1) and $2\times2$ CR are implemented as two rows in $k$, so identification needs no union. Inference is not quite ordinary: the rows' constants are a min/max of estimated quantities. The conservative CI inflates each piece before the max (R10(b)); the CLR CI takes the union of the two branch CIs (R10(c)).
+2. One-vs-rest CR (the default, W1) and $2\times2$ CR are implemented as two rows in $k$, so identification needs no union. Inference is not quite ordinary: the rows' constants are a min/max of estimated quantities. The conservative CI inflates each piece before the max (R10(b)); the CLR CI takes the union of the two branch CIs (R10(c)). With the package's simulated candidates, the CLR version is algorithmic (Conjecture P3.5(b3)).
 3. For other CR pairings the package:
-   * runs the certificate LP;
+   * runs the certificate LP. The certificate is sufficient, not necessary, for the two branch images to meet. In S5, 3 cases without a certificate had no gap, and every gap had a failing certificate. R3(c) allows a gap; the certificate is not a hypothesis;
    * if the certificate fails, solves both branches and reports both intervals when they are disjoint.
 4. Emptiness messages always name the *combination* (LCE + restriction) that has been refuted.
 
@@ -123,7 +123,7 @@ where $NM^{r*}$ is the neighbourhood gap computed from $\tau$. [2c L M1(c); 2a L
 
 ### 2.1 Setting
 
-* $F=\{k:Gk\le g\}$ is the current feasible set: the rung, plus any rows already imposed. It is compact by 2a L3(b) (nonempty relative interior of $A$). Nonemptiness is *assumed*: R3 does not deliver it, and an empty $F$ is a rejection (R3(e)).
+* $F=\{k:Gk\le g\}$ is the current feasible set: the rung, plus any rows already imposed. It is compact by 2a L3(b) when $\operatorname{affdim}(A)=R-1$, which A5 implies (2a Remark 5.2). R2's proof uses this compactness (step 3). Nonemptiness is *assumed*: R3 does not deliver it, and an empty $F$ is a rejection (R3(e)).
 * $\varphi(k)=\varphi_0+h^\top k$ is a linear target, with $U=\max_F\varphi$, $L=\min_F\varphi$, and optimal faces $F^*_U=\arg\max_F\varphi$ and $F^*_L=\arg\min_F\varphi$.
 * $N$ is the added restriction: an admissible set as in §1.1, closed and convex, with $F\cap N\ne\emptyset$. $U_N$ and $L_N$ are the endpoints after adding it.
 * Three possible verdicts for $N$ relative to $F$:
@@ -225,7 +225,12 @@ P3 §0, regimes R1/R3. $\hat\beta$ is the regression coefficient vector with $\s
 
 ### 3.2 Statement
 
-**Theorem R10.** Assume P3.5's conditions *for the augmented row system* (base rows plus added rows), and that the restrictions hold at the truth, i.e. $k_0$ satisfies them. *(Status after the review response: P3.5(b) is now split. For version (b), every statement below is a theorem only for CLR with the full dual-vertex set, P3.5(b1). With the package's simulated candidate collection it inherits the status of Conjecture P3.5(b3). The statements for version (a), and for the projection interval P3.5(b2), stand as theorems. See `MSIGN_REVIEW_LOG.md`, M-2.)* Version (a) needs no Slater-type condition. Statements of P3.2/P3.4 type do, and rows that bind at the truth (e.g. the CR edge) can break it.
+**Theorem R10.** Assume P3.5's conditions *for the augmented row system* (base rows plus added rows), and that the restrictions hold at the truth, i.e. $k_0$ satisfies them. *(Status after the review response: P3.5(b) is now split. For version (b), every statement below is a theorem only for CLR with the full dual-vertex set, P3.5(b1). With the package's simulated candidate collection it inherits the status of Conjecture P3.5(b3). The statements for version (a), and for the projection interval P3.5(b2), stand as theorems. See `MSIGN_REVIEW_LOG.md`, M-2.) Step by step, as agreed with the M-SIGN session:
+* (a) step 4: CLR with added rows inherits (b1)/(b3).
+* Steps 13 and 15, and (d): for version (b), the crossing argument uses CLR's one-sided validity. It is a theorem under (b1) and a conjecture under (b3). The E-allowance part of step 15 is version-free.
+* (c), steps 9–12, the union over branches: these need only that the true branch's interval covers. The union is therefore valid for (a), (b1) and (b2), and inherits (b3) for the package default, the CLR branch union.
+* (b), the slab: version (a) only; it stands as proved.
+* In the package, the default CR interval (CLR branch union) and, with `ci = "clr"`, the "already implied" intervals and the near-tie margin (`rxc_sign.R`) are therefore algorithmic. The gated Monte Carlo coverage (0.990) is a simulation finding.* Version (a) needs no Slater-type condition. Statements of P3.2/P3.4 type do, and rows that bind at the truth (e.g. the CR edge) can break it.
 
 (a) **Added rows.** For a finite set $\mathcal R$ of linear-in-$\beta$ rows, P3.5(a), P3.5(b) and P3.6(a) hold unchanged, for both $\tilde B$ and $B$. The new rows simply join the Gaussian maximum that sets the critical value. A row whose $s_j$ does not depend on $\beta$ has $\sigma_j=0$: it is imposed exactly and left out of the maximum.
 
@@ -301,7 +306,7 @@ Entries are coverage / median length. No CI was empty in any design.
 ### 3.5 Consequences for the package
 
 1. **Every added row goes through the same CI machinery.** Sign, ordering and local rows join the critical-value maximum. Nothing new is needed beyond appending rows (R10(a)).
-2. **CR (W1 default and 2×2) uses the slab form (b) for the conservative CI** (one row per side, each piece inflated before the maximum) **and the branch union (c) for CLR**, the default CI. Here CR costs about 0.36 of width against 1.1 for JKST alone. It is a large gain, but it rests on an unrefutable belief (2c M3).
+2. **CR (W1 default and 2×2) uses the slab form (b) for the conservative CI** (one row per side, each piece inflated before the maximum) **and the branch union (c) for CLR**, the default CI. That default is algorithmic (Conjecture P3.5(b3)); the conservative version and the projection interval carry the guarantee. Here CR costs about 0.36 of width against 1.1 for JKST alone. It is a large gain, but it rests on an unrefutable belief (2c M3).
 3. **Other CR pairings use the union of the branch CIs, each at the full level (c).** The package reports the union, which can be two intervals, and offers the hull as an option.
 4. **Never impose an estimated bracket as if it were known.** The EGGHM bracket $[\gamma\,\widehat{ER},\widehat{ER}]$ intersected with a JKST CI is not a confidence interval (e). The MC naive interval (the bracket plus the target's own inflation) contains bracket ∩ JKST CI, so the under-coverage transfers to the latter a fortiori. (Our $\widehat{ER}^*$ is $\tau$-based. It equals the $T$-based EGGHM $\widehat{ER}$ under $N$-weighted OLS, because $X_r$ and $1$ lie in the span of the quadratic monomials. P3 uses unweighted OLS, so the two differ slightly in samples.)
 5. **Emptiness is reported as a test result, not as an error.** Output includes:

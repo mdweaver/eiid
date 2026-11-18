@@ -1,6 +1,8 @@
 # Phase 1 (second cycle): monotone ecological inference and difference-in-differences
 
 *A proposal for review, covering structure and assumptions only. Nothing here is a Phase-2 derivation. Status labels are used throughout:*
+
+*Naming (Nov 2026): the difference-in-differences rungs were called D0–D8. They are now Δ0–Δ8, so they no longer clash with Phase 2b's Propositions D0–D7 (district dummies), which the review response cites.*
 * ***proved*** *only for one-line facts whose proof is given here and that are also checked numerically;*
 * ***checked*** *for identities verified numerically in `verify_phase1_mei_did.py` (output: `verify_phase1_mei_did_output.txt`, 10/10 PASS), with formal proofs due in Phase 2;*
 * ***conjecture*** *or* ***heuristic*** *otherwise.*
@@ -163,7 +165,7 @@ $$\text{N1}(\delta_W\ge0)\ \supseteq\ \text{N2(each }m_r\uparrow)\ \supseteq\ \t
 
 * **N1, finite-population reading.** If the sign is an assumption about the *realised* population, the bound is a deterministic function of the observed table and needs no CI. I propose reporting it with a **slack dial** $\delta_W\ge-\varepsilon$ and the **breakdown value** $\varepsilon^*$ of a conclusion. This reuses `breakdown()`.
 * **Superpopulation reading** (EGGHM's own, via the bootstrap).
-  * In 2×2 the endpoints are a min or max of finitely many smooth functionals: MOB±, ER, NM. That is exactly P3 Thm 5(b)'s finite-candidate CLR setting, so it is valid uniformly over near-ties.
+  * In 2×2 the endpoints are a min or max of finitely many smooth functionals: MOB±, ER, NM. That is the finite-candidate case of CLR (2013) Thm 4 (smooth candidate functions, via the delta method), as in P3.5(b1). It is valid pointwise, near ties included. Uniform validity near point identification is open (P3 §10). *(Revised Nov 2026: the earlier text claimed uniformity.)*
   * EGGHM's bootstrap + Imbens–Manski selects the plug-in binding candidate, which can under-cover near ties. I will show this in a small Monte Carlo rather than assert it.
   * For the joint R×C LP, candidate collection by dual vertices is P3's device, with the same *heuristic* status as there.
 * **K-rows.** Unchanged P3 machinery.
@@ -213,19 +215,19 @@ $$\text{N1}(\delta_W\ge0)\ \supseteq\ \text{N2(each }m_r\uparrow)\ \supseteq\ \t
 
 | # | Object | Status |
 |---|---|---|
-| D0 | **No cross-period link**: the identified set is the product; the DiD bound is the difference of the periods' intervals | model-free version *checked* (V7a). LCE version: the sharp set is the product of the periods' sharp sets. *Conjecture* with a short proof route: the Aumann expectation of the product $S(X,T_0)\times S(X,T_1)$ is the product of Aumann expectations (selections of a product are pairs of selections). Phase 2 |
-| D1 | **First-difference LCE**: $\beta_{it}=\zeta_i+M_{H_t}(X_i)+e_{it}$, $\zeta_i$ arbitrary (MENU 21). Levels are *not* linear; $E[\Delta\beta\mid X]=M_{\Delta H}(X)$, $E[\Delta T\mid X]=X^\top\Delta Q X$ | **the owner's point-identification result holds here, under a weaker model than M1 across periods**: one restriction on $\Delta\kappa_c$ plus the quadratic fit of $\Delta T$ (*checked*: V7b, exact despite non-linear unit effects). Bounds on $\Delta K$: $\Delta\beta_i\in S(X_i,T_{i1})\oplus(-S(X_i,T_{i0}))$, a semi-infinite LP checked at the sample compositions. Phase 2 |
-| D2 | **Single identifying restrictions** (table B3) | each is just-identifying, hence untestable except through emptiness; pairs over-identify, e.g. $\Delta d_1=0$ |
-| D3 | **Bounded change** $\lvert\Delta\kappa_c\rvert\le\delta$, or $\lvert\Delta w_1\rvert\le\delta$ (Manski–Pepper 2018 bounded variation; Rambachan–Roth 2023) | DiD = point ± (sensitivity)·δ, intersected with D0. Calibrating δ: RR "relative magnitudes" uses *identified* pre-trends, but pre-period $\Delta\kappa$ is not identified. Scaling δ by identified pre-period changes (e.g. $\Delta d_1$ between pre-periods) is only a *heuristic* |
-| D4 | **Monotone EI on changes** (no linearity at all): apply A1 to $Y=\Delta Y\in[-1,1]$ | $ER(\Delta T\sim X)-\text{DiD}=\delta^\Delta_W/\operatorname{Var}(X_N)$ (*checked*: V7c). Under CR of changes, **DiD lies between NM and ER on $\Delta T$**. The MOB for changes must use the two periods' polytopes jointly, not $[-1,1]$. Sign of $\delta^\Delta_W$ = sign of differential spillover; $\delta^\Delta_B$ = the DiD's own sign |
-| D5 | **Intersection across periods** (M1 with periods as groups, 2b Remark 6.2) | already *proved* in 2b. Tightens the levels; refutable through $\Delta d_1\neq0$ or emptiness |
-| D6 | **Parallel trends** for the causal claim, kept separate from EI. ATT of service = DiD if future veterans' counterfactual change equals non-veterans'. Bounded version: ATT ∈ DiD ⊕ [−M, M] | interplay with spillovers: a non-zero non-veteran change caused by returning veterans contaminates the control. D2's restriction (R1) rules out only the *differential* part. Placebo with two pre-periods: the placebo DiD is itself only partially identified, so it refutes PT only if its bound excludes 0 |
-| D7 | **Composition change** (B4) | design choice needed from you |
-| D8 | **Within-person table** (veteran × pre-vote × post-vote) | for the **DiD of means**, it adds nothing beyond the two two-way tables that share the veteran margin. *Proved, sketch*: any such pair extends to a 3-way table by coupling $Y_0$ and $Y_1$ independently given $V$. It matters only for *transition* targets such as "share of veterans who switched to yes" |
+| Δ0 | **No cross-period link**: the identified set is the product; the DiD bound is the difference of the periods' intervals | model-free version *checked* (V7a). LCE version: the sharp set is the product of the periods' sharp sets. *Conjecture* with a short proof route: the Aumann expectation of the product $S(X,T_0)\times S(X,T_1)$ is the product of Aumann expectations (selections of a product are pairs of selections). Phase 2 |
+| Δ1 | **First-difference LCE**: $\beta_{it}=\zeta_i+M_{H_t}(X_i)+e_{it}$, $\zeta_i$ arbitrary (MENU 21). Levels are *not* linear; $E[\Delta\beta\mid X]=M_{\Delta H}(X)$, $E[\Delta T\mid X]=X^\top\Delta Q X$ | **the owner's point-identification result holds here, under a weaker model than M1 across periods**: one restriction on $\Delta\kappa_c$ plus the quadratic fit of $\Delta T$ (*checked*: V7b, exact despite non-linear unit effects). Bounds on $\Delta K$: $\Delta\beta_i\in S(X_i,T_{i1})\oplus(-S(X_i,T_{i0}))$, a semi-infinite LP checked at the sample compositions. Phase 2 |
+| Δ2 | **Single identifying restrictions** (table B3) | each is just-identifying, hence untestable except through emptiness; pairs over-identify, e.g. $\Delta d_1=0$ |
+| Δ3 | **Bounded change** $\lvert\Delta\kappa_c\rvert\le\delta$, or $\lvert\Delta w_1\rvert\le\delta$ (Manski–Pepper 2018 bounded variation; Rambachan–Roth 2023) | DiD = point ± (sensitivity)·δ, intersected with Δ0. Calibrating δ: RR "relative magnitudes" uses *identified* pre-trends, but pre-period $\Delta\kappa$ is not identified. Scaling δ by identified pre-period changes (e.g. $\Delta d_1$ between pre-periods) is only a *heuristic* |
+| Δ4 | **Monotone EI on changes** (no linearity at all): apply A1 to $Y=\Delta Y\in[-1,1]$ | $ER(\Delta T\sim X)-\text{DiD}=\delta^\Delta_W/\operatorname{Var}(X_N)$ (*checked*: V7c). Under CR of changes, **DiD lies between NM and ER on $\Delta T$**. The MOB for changes must use the two periods' polytopes jointly, not $[-1,1]$. Sign of $\delta^\Delta_W$ = sign of differential spillover; $\delta^\Delta_B$ = the DiD's own sign |
+| Δ5 | **Intersection across periods** (M1 with periods as groups, 2b Remark 6.2) | already *proved* in 2b. Tightens the levels; refutable through $\Delta d_1\neq0$ or emptiness |
+| Δ6 | **Parallel trends** for the causal claim, kept separate from EI. ATT of service = DiD if future veterans' counterfactual change equals non-veterans'. Bounded version: ATT ∈ DiD ⊕ [−M, M] | interplay with spillovers: a non-zero non-veteran change caused by returning veterans contaminates the control. Δ2's restriction (R1) rules out only the *differential* part. Placebo with two pre-periods: the placebo DiD is itself only partially identified, so it refutes PT only if its bound excludes 0 |
+| Δ7 | **Composition change** (B4) | design choice needed from you |
+| Δ8 | **Within-person table** (veteran × pre-vote × post-vote) | for the **DiD of means**, it adds nothing beyond the two two-way tables that share the veteran margin. *Proved, sketch*: any such pair extends to a 3-way table by coupling $Y_0$ and $Y_1$ independently given $V$. It matters only for *transition* targets such as "share of veterans who switched to yes" |
 
 **Nesting** (model classes; bounds nest by [nest]):
-$$\text{M1-periods}\subseteq\text{D1}+\{\text{R1 and R2}\},\qquad \text{per-period LCE (M2-periods)}\subseteq\text{D1},\qquad \text{D1}+\text{(any single restriction)}\subseteq\text{D1}+\text{D3}(\delta)\subseteq\text{D1}.$$
-D4 needs no linearity, is non-nested with D1, and sits inside D0's model-free bound. *All inclusions follow from the definitions; written proofs in Phase 2.*
+$$\text{M1-periods}\subseteq\text{\Delta1}+\{\text{R1 and R2}\},\qquad \text{per-period LCE (M2-periods)}\subseteq\text{\Delta1},\qquad \text{\Delta1}+\text{(any single restriction)}\subseteq\text{\Delta1}+\text{\Delta3}(\delta)\subseteq\text{\Delta1}.$$
+Δ4 needs no linearity, is non-nested with Δ1, and sits inside Δ0's model-free bound. *All inclusions follow from the definitions; written proofs in Phase 2.*
 
 ## B3. Single restrictions that identify the DiD (2 rows, one column)
 
@@ -233,30 +235,30 @@ Let $H_{rs}$ be the rate of $r$-men in a hypothetical county made up entirely of
 
 | Restriction | Meaning (veterans) | Comment |
 |---|---|---|
-| (R1) $\Delta w_1=\Delta(H_{nv}-H_{nn})=0$ | non-veterans' change does not depend on the local veteran share: **no differential spillover onto non-veterans** | most natural; a uniform spillover is still allowed and biases the *causal* reading (D6) |
+| (R1) $\Delta w_1=\Delta(H_{nv}-H_{nn})=0$ | non-veterans' change does not depend on the local veteran share: **no differential spillover onto non-veterans** | most natural; a uniform spillover is still allowed and biases the *causal* reading (Δ6) |
 | (R2) $\Delta b_1=\Delta(H_{vv}-H_{vn})=0$ | veterans' change does not depend on how many fellow veterans live nearby (no extra network or veterans-organisation effect) | plausible if veterans' attitudes formed in the army, not at home |
 | (R3) $\Delta\kappa=0$ | the change of veterans in non-veteran areas equals the change of non-veterans in veteran areas | hard to motivate on its own. *Not* M1 across periods: M1 shifts each row's baseline by $\zeta_r$, so $\Delta\kappa=(\zeta_v-\zeta_n)/2\neq0$ in general (checked: V8; corrected after review) |
-| (R4) $\Delta\delta_W=a\Delta b_1+b\Delta w_1=0$ | the composition-weighted average contextual change is zero | = Goodman's linear regression on $\Delta T$ is unbiased (D4) |
+| (R4) $\Delta\delta_W=a\Delta b_1+b\Delta w_1=0$ | the composition-weighted average contextual change is zero | = Goodman's linear regression on $\Delta T$ is unbiased (Δ4) |
 | (R1)+(R2) | both slopes unchanged; this **is** M1 across periods ("contextual effects unchanged", 2b Remark 6.2) | over-identifying, testable: $\Delta d_1=0$ (equal $X^2$ coefficients) |
 
-Signed versions turn these into one-sided cuts: $\Delta w_1\ge0$ means non-negative differential spillover. Bounded versions are D3.
+Signed versions turn these into one-sided cuts: $\Delta w_1\ge0$ means non-negative differential spillover. Bounded versions are Δ3.
 
 ## B4. Composition change (your input needed)
 
 Pre-war "veterans" are *future* veterans. Many were too young to vote before the war, war deaths removed others, and migration changes both electorates. Options, in increasing ambition:
 1. **Interval-valued pre-war composition.**
-   * In cell-count coordinates, a unit's table with interval row totals and fixed column totals is still a polytope. So model-free and N1/D4-type bounds stay LPs, with linear-fractional targets.
+   * In cell-count coordinates, a unit's table with interval row totals and fixed column totals is still a polytope. So model-free and N1/Δ4-type bounds stay LPs, with linear-fractional targets.
    * LCE with an interval regressor is *not* an LP; it would be a heuristic outer bound.
 2. **Explicit stayer / exit / entrant rows** on a common base, with shares from census age structure, mortality and migration. These shares are point or interval.
-3. **Within-stayer target** $E[\Delta Y\mid V=1,\text{stayer}]-E[\Delta Y\mid V=0,\text{stayer}]$. By D8, this needs only the two two-way tables for stayers.
+3. **Within-stayer target** $E[\Delta Y\mid V=1,\text{stayer}]-E[\Delta Y\mid V=0,\text{stayer}]$. By Δ8, this needs only the two two-way tables for stayers.
 
 ## B5. Inference
 
-* Counties appear in both periods, so the two periods' regressions are stacked and **clustered by county**.
-* Candidates from both periods enter one CLR intersection (P3 Thm 5).
-* For D1, regress $\Delta T$ directly.
+* Counties appear in both periods, so the two periods' regressions are stacked, and each county is treated as **one unit observed twice**. Its two periods may be dependent. This is within-unit dependence, which P3-S1a allows; it is not clustering of different units.
+* Candidates from both periods enter one CLR intersection (P3.5: (a) and (b2) proved; the implemented CLR is algorithmic, Conjecture P3.5(b3)).
+* For Δ1, regress $\Delta T$ directly.
 * **Two targets.** The *model-implied* DiD has no unit-level allowance. The *actual-rate* DiD's allowance uses $\operatorname{Var}(e_1-e_0)\le(\sqrt{m_1(1-m_1)}+\sqrt{m_0(1-m_0)})^2$ (Bhatia–Davis per period plus Cauchy–Schwarz). That can be up to 4× the single-period allowance. I propose the model-implied DiD as the headline (Q8).
-* **Sensitivity.** Breakdown values in δ (D3) and in M (D6).
+* **Sensitivity.** Breakdown values in δ (Δ3) and in M (Δ6).
 
 ---
 
@@ -264,7 +266,7 @@ Pre-war "veterans" are *future* veterans. Many were too young to vote before the
 
 **Proposed order.**
 1. Task 1 Phase 2 (derivations for N1, K-rows and N2), then Phases 3–4 and the NZ benchmark.
-2. Task 2 Phase 2 (D0–D8) in parallel with collecting the data.
+2. Task 2 Phase 2 (Δ0–Δ8) in parallel with collecting the data.
 3. Task 2 Phases 3–4 after your answers on composition.
 
 **Housekeeping.** The regenerated NZ benchmark results (with the `M0 trim` rung) are already in the main repository, so they are not re-run on this branch.
@@ -289,12 +291,12 @@ Pre-war "veterans" are *future* veterans. Many were too young to vote before the
 
 | # | Decision |
 |---|---|
-| 1 | **Exact (finite-population) bounds** for the sign rungs. They apply to the realised units, need no CI, and come with a slack dial and breakdown value. *Caveat:* "exact" is possible only for rungs without a fitted regression (N1, D0, D4). Rungs that use a regression (K-rows, N2, D1) still need P3 inference. |
+| 1 | **Exact (finite-population) bounds** for the sign rungs. They apply to the realised units, need no CI, and come with a slack dial and breakdown value. *Caveat:* "exact" is possible only for rungs without a fitted regression (N1, Δ0, Δ4). Rungs that use a regression (K-rows, N2, Δ1) still need P3 inference. |
 | 2 | Open: W1 vs W2; explanation in D.1. |
 | 3 | N2 accepted in principle; plain-language explanation in D.2 and in the guide. |
 | 4 | No NZ benchmark for this work. What is needed is the **option** to impose contextual reinforcement. |
 | 5 | API: `monotone=` modifier plus `model=` values (`"DD"`, `"MIV"`). |
-| 6 | Data to come: **Wisconsin 1857/1865** and **Iowa 1857/1868** suffrage referenda. One pre-period per state, so no pre-period placebo; D3's δ cannot be calibrated from pre-trends and stays a sensitivity dial with breakdown values. |
+| 6 | Data to come: **Wisconsin 1857/1865** and **Iowa 1857/1868** suffrage referenda. One pre-period per state, so no pre-period placebo; Δ3's δ cannot be calibrated from pre-trends and stays a sensitivity dial with breakdown values. |
 | 7 | Veteran share is measured once. Soldiers who died can be removed. The 1860 census gives age structure; migration is hard. → B4 option 1 (interval pre-war composition) with deaths removed exactly and age eligibility as an interval; migration as a sensitivity bound. |
 | 8 | Units are standardised to stable geographic/electoral units. **Population counts change between periods.** Headline target: **yes share of eligible men** (linear). Model-implied vs actual explained in D.3. |
 | 9 | Open: plain-language R1–R4 in D.4. |
@@ -359,7 +361,7 @@ A group's **slope** is how its yes-rate differs between towns with many and few 
 
 * Restricting the analysis to towns with near-zero 1857 YES votes changes the population of the target: the rates refer to those towns.
 * It also **selects on the outcome**. Even if contextual effects are linear in all towns, they need not be linear among towns chosen for low YES votes, so a model-based bound on the subset can be biased (*heuristic concern; to quantify in Phase 2*).
-* The new tools get the same information without selection. In those towns the unit-level Duncan–Davis range is already nearly a point. The exact rungs (N1, D0, D4) use that automatically, and the `trim` option lets such towns enter through their own unit bounds.
+* The new tools get the same information without selection. In those towns the unit-level Duncan–Davis range is already nearly a point. The exact rungs (N1, Δ0, Δ4) use that automatically, and the `trim` option lets such towns enter through their own unit bounds.
 * The earlier result will be reproduced both ways once the data arrive.
 
 ### D.7 The veterans/suffrage data (received 1 Nov 2026; not committed to the repository)
@@ -393,7 +395,7 @@ A group's **slope** is how its yes-rate differs between towns with many and few 
      * optionally, Democrats are almost never "yes" (a structural zero relaxed to $\le\varepsilon$).
    * The unit table becomes veteran × party × suffrage with three one-way margins.
    * Whether this tightens the *veteran* bounds without an extra link between veteran status and party is open (*conjecture: little gain without such a link*). Checking it numerically is the first Phase-2 task.
-6. **Groups.** County clusters (Wisconsin) and counties (Iowa) can serve as groups for the group rungs and as clusters for inference. Iowa has few sub-county units per county, so the group rungs will be weak there.
+6. **Groups.** County clusters (Wisconsin) and counties (Iowa) can serve as groups for the group rungs: county effects in the mean (M1/M2-type rungs, on levels or on changes), checked with the pooling test (P3.6(c)). They are **not** used as clusters for inference. Inference is conditional on the design and the county effects (P3 §0.4; decision D3, Nov 2026). Iowa has few sub-county units per county, so the group rungs will be weak there.
 7. **Bad records.** Negative counts: drop the affected units in the main analysis, with a sensitivity check that keeps them as intervals.
 8. **The earlier headline estimate** (`diff_suff ~ vet_pct`) is Goodman's regression on changes. By the monotone-EI identity, it equals the DiD exactly when the "within" association of changes is zero (R4), with no linearity needed. Under contextual reinforcement of changes, the DiD lies between it and the neighbourhood-model estimate on changes.
 
@@ -401,12 +403,12 @@ A group's **slope** is how its yes-rate differs between towns with many and few 
 
 | Earlier analysis | Here | Comment |
 |---|---|---|
-| §C.1: the regression of the change in yes share on enlistment rate is unbiased "if the shifts are independent of X" | D4 / R4: Goodman on changes equals the DiD **exactly iff** the within association of changes is zero, $\delta^\Delta_W=0$ (V7c) | The appendix's condition (both groups' mean shifts constant in X) is sufficient, not necessary. Only the weighted average of the two groups' contextual changes needs to vanish. No linearity is required |
+| §C.1: the regression of the change in yes share on enlistment rate is unbiased "if the shifts are independent of X" | Δ4 / R4: Goodman on changes equals the DiD **exactly iff** the within association of changes is zero, $\delta^\Delta_W=0$ (V7c) | The appendix's condition (both groups' mean shifts constant in X) is sufficient, not necessary. Only the weighted average of the two groups' contextual changes needs to vanish. No linearity is required |
 | §C.2: conditioning on county FE, 1857 Republican–suffrage gap and eligibility change | conditional version of R4 within cells of the covariates; group rungs with counties as groups | Phase 2: the FE version of the bias identity (A2(c)) |
-| §C.3: $ATT_L=(L_{e1}-U_{e0})-(U_{n1}-L_{n0})$ and $ATT_U$, from the per-period JKST bounds | D0: product of the periods' LCE sets, i.e. no cross-period link | In 2×2 the separate veteran/non-veteran endpoints are attained at the same $w_1$ within a period, so this equals the joint period bound. It needs per-period linearity in levels. It is reproducible with `eiBounds()` per period (P4) |
-| Figure C1: the size of the contextual changes needed for ATT = 0 | breakdown values for R1/R2 (D3) | the same idea, formalised as a dial on $\Delta w_1$ or $\Delta b_1$ with a breakdown value and CIs |
+| §C.3: $ATT_L=(L_{e1}-U_{e0})-(U_{n1}-L_{n0})$ and $ATT_U$, from the per-period JKST bounds | Δ0: product of the periods' LCE sets, i.e. no cross-period link | In 2×2 the separate veteran/non-veteran endpoints are attained at the same $w_1$ within a period, so this equals the joint period bound. It needs per-period linearity in levels. It is reproducible with `eiBounds()` per period (P4) |
+| Figure C1: the size of the contextual changes needed for ATT = 0 | breakdown values for R1/R2 (Δ3) | the same idea, formalised as a dial on $\Delta w_1$ or $\Delta b_1$ with a breakdown value and CIs |
 | Figure C2: bounds for towns below thresholds of 1857 yes support | subset rungs | Three cautions: (i) the plug-ins are estimates (inward-biased, P3 Thm 4), and the code uses `evaluateBounds` CIs at a small $x$, so they are not deterministic; (ii) scanning many thresholds and reporting the region that excludes 0 is a specification search; the non-monotone pattern in the threshold looks like noise; (iii) selecting on 1857 yes votes selects on the outcome (D.6). Alternative without selection: use all towns. Near-zero towns already have nearly point unit bounds, which the exact rungs use |
-| §C.4 / script lines 316–337: $ATT\in[0,\ B_{v1}-\max\{B_{v0},B_{n1}\}]$ ("Athey & Imbens 2006, 151–3" with MTR; *citation to verify*) | the causal layer D6, with three assumptions on the veterans' counterfactual $Y(0)_1$: **MTR** ($\le$ their actual post-war rate); **no decline** ($\ge$ their pre-war rate); **positive selection** ($\ge$ non-veterans' post-war rate; Manski–Pepper MTS-type) | All three are linear in the latent rates, so they are LP rows. The upper end $B_{v1}^U-\max\{B^L_{v0},B^L_{n1}\}$ in the script (line 336) is attained jointly in 2×2. A joint LP will reproduce it and extend it to R×C and to the interval bases |
+| §C.4 / script lines 316–337: $ATT\in[0,\ B_{v1}-\max\{B_{v0},B_{n1}\}]$ ("Athey & Imbens 2006, 151–3" with MTR; *citation to verify*) | the causal layer Δ6, with three assumptions on the veterans' counterfactual $Y(0)_1$: **MTR** ($\le$ their actual post-war rate); **no decline** ($\ge$ their pre-war rate); **positive selection** ($\ge$ non-veterans' post-war rate; Manski–Pepper MTS-type) | All three are linear in the latent rates, so they are LP rows. The upper end $B_{v1}^U-\max\{B^L_{v0},B^L_{n1}\}$ in the script (line 336) is attained jointly in 2×2. A joint LP will reproduce it and extend it to R×C and to the interval bases |
 
 **Partisanship (owner's note).** The governor votes allow an EI of veteran × party in 1857 and 1865, i.e. how future and actual veterans voted and how that shifted. Three uses:
 * **(P1)** a party DiD of its own;

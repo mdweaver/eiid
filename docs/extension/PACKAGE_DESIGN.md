@@ -84,7 +84,7 @@ meta = list(source, object, target, refutable, form, sharp, dial, proof_status)
 | G6 | Unidentified dimension $(C-1)\binom R2$ | **Correct** | 2a Lemma 1 |
 | G7 | R×C gives "more opportunity" | **Correct in a precise sense:** P-R and P-S. The caveats: W1 vs W2 for $R\ge3$; N2 no longer implies $\delta_W$ for $R\ge3$; a known table pins only $(R-1)(C-1)$ directions. | §5; [V5], [V7] |
 | G8 | 2×3: adding-up gives $\sum_ct_c=0$ | **Correct but not new:** it is built into $K$. The gain comes from joint restrictions across columns, which are strictly tighter than the best single-column restriction in 18% of designs [V6]. M4 reported about half, but under a different, model-free set-up. | M4; [V6] |
-| G9 | Joint sampling uncertainty | **Correct concern; already handled** if all rows are written in $k$ and enter one CLR stack (P3) | P3 Thm 5 |
+| G9 | Joint sampling uncertainty | **Correct concern; handled** if all rows are written in $k$ and enter one inference stack. Proved for the conservative interval and the projection interval in fixed-dimension regimes (P3 §0.5); the CLR interval as implemented is algorithmic (Conjecture P3.5(b3)) | P3.5(a), (b2); (b3) |
 
 ### 2.2 Proof of G2 (2×2, any mean-level model)
 1. EGGHM Prop. 4: $D_{ER}-D=\delta_W/\operatorname{Var}_p(X)$, and EGGHM Prop. 6: $D_{NM}-D=-\delta_B/(\mu(1-\mu))$. Both are accounting identities for any $m$ (PHASE2c Lemma M1), so they hold for the model-implied quantities. [M1; checked to $3\times10^{-16}$ in V1]
@@ -186,7 +186,7 @@ Plausibility tier: 0 data only · 1 direction · 2 shape · 3 parametric · 4 co
 | **M-DISP** (A, §13.5) | V | Binomial voting within cells; residual dispersion ≤ ε; covariance ceilings | unit / second moment | actual | 3 | ✓ (overdispersion slope) | SOCP/LMI or cuts | outer |
 | **M-CAR** (§14) | Q + covariates | Conditional on Z, composition is as-if random up to δ | mean, conditional on Z | model | 3 | partly (§14.3) | rows per Z cell | outer |
 | **M-MULTI** (C) | Con | Contests share contextual structure (contests as districts; single index) | link | model | 3–4 | ✓ | rows | sharp in the LP |
-| **M-PER** (DiD: FD, R1/R2/R4, D4) | Per | Changes are linear in composition; one restriction on $\Delta K$; or signs on changes | link | DiD | 1–4 | some (equal quadratics) | rows / union | D0, D4 exact; FD sharp in the LP |
+| **M-PER** (DiD: FD, R1/R2/R4, Δ4) | Per | Changes are linear in composition; one restriction on $\Delta K$; or signs on changes | link | DiD | 1–4 | some (equal quadratics) | rows / union | Δ0, Δ4 exact; FD sharp in the LP |
 | shifters (§13.6) | excluded variable | A composition shifter that does not affect rates directly | mean | model | 3 | IV-type test | rows | open |
 
 **Part B: dials, power, practicality, extension and status.**
@@ -195,18 +195,18 @@ Plausibility tier: 0 data only · 1 direction · 2 shape · 3 parametric · 4 co
 |---|---|---|---|---|---|---|---|---|
 | M-DATA | δ (table error) / yes | E4 can point-identify $K$; one table pins $(R-1)(C-1)$ directions (proved) | good | E4 with ≥2 tables of differing composition | per-period tables | published cross-tabs | E4/E5 proved in part (NA §13) | NA §5, §13 |
 | M-SHARP | — | small–medium (NA §9) | series tuning | general | per period | none | consistency open (R9) | NA §6; PHASE4 |
-| M-SIGN | slack $\eta$ on $\delta$ / yes | width ratio 0.67–0.70 on JKST [V2] | good | W1 vs W2 ambiguity for $R\ge3$ | D4 (exact) | none | proved (M2–M5) | 2c |
+| M-SIGN | slack $\eta$ on $\delta$ / yes | width ratio 0.67–0.70 on JKST [V2] | good | W1 vs W2 ambiguity for $R\ge3$ | Δ4 (exact) | none | proved (M2–M5) | 2c |
 | M-ORD | slack / yes | large with M-LOC (sandwich) [V5] | good | each pair cuts $R-1$ directions (P-R) | MTR on changes | none | proved (M5(b), M2) | 2c, PHASE4 |
 | M-LOC | slack / yes | median width ratio 0.75–0.90 alone, 0.47–0.77 with M-ORD [V5] | needs hull support in the chosen direction | same functional as M-ORD (P-S) | spillover-sign sandwich (DiD-S) | none | P-S proved; P-N proved apart from C1 | §5 |
 | M-N2 | Lipschitz slack / yes | medium | τ estimation; grid choice | W1/W2; N2 no longer implies $\delta_W$ for $R\ge3$ | N2 on changes | none | outer validity open (R7) | 2c §4 |
-| M-LCE | δ (M1δ) / yes | medium–large | good (HC3, CLR) | $\dim\mathcal K=(C-1)\binom R2$ | FD, M1-periods | none | proved (2a, 2b, P3) | PHASE1–4 |
+| M-LCE | δ (M1δ) / yes | medium–large | good (HC3; CLR with projection alongside) | $\dim\mathcal K=(C-1)\binom R2$ | FD, M1-periods | none | identification proved (2a, 2b). Inference proved for M0 in any regime and grouped models with few large groups (P3 §0.5); CLR as implemented algorithmic; many small groups: simulation only | PHASE1–4 |
 | M-BERN | degree $J$ / — | negative by design (robustness) | good | general | yes | none | designed (NA §4) | NA §4 |
 | M-CEIL | κ, $s$ / endpoint annotation | binds only at small κ in the suffrage data | good | ellipsoid in $K$ | calibrates $\delta$ in FD3 | none (κ benchmarked on covariates) | validity open (R8) | NA §12.3 |
 | M-CTX2 | $M$ / yes | large, smooth in $M$ (NA §2.4) | good | needs a rank condition (NA Prop. B1) | second-scale spillovers bound $\Delta w_1$ | a second composition $z$ | B1 in progress (R8) | NA §2 |
 | M-DISP | ε / yes | large in theory (A1), weak in practice | poor: needs thousands of small units; plug-in biased | LMI | per period | unit sizes | simulated | NA §1, §13.5 |
 | M-CAR | δ / yes | medium | needs covariates with overlap | general | conditional parallel trends | covariates | proposal | NA §14 |
 | M-MULTI | cross-contest δ / yes | medium–large (data-dependent) | data-dependent | general | — | ballots with several contests | partly | NA §3 |
-| M-PER | δ (FD3) / yes | point (R1) to wide (FD4) | good | one restriction per column for a single-column DiD | — | ≥2 periods | D0, FD2–FD4, D4 proved | 2d |
+| M-PER | δ (FD3) / yes | point (R1) to wide (FD4) | good | one restriction per column for a single-column DiD | — | ≥2 periods | Δ0, FD2–FD4, Δ4 proved | 2d |
 | shifters | — | exploratory | needs a credible shifter | — | — | shifter | open | NA §13.6 |
 
 **Set aside** (NEW_AVENUES §7, §9): G symmetry, H deconvolution, I entropy/OT, J Choquet.
@@ -259,7 +259,7 @@ Footnotes:
 2. ⇒/⇐ entries are theorems; an entry without a proof is shown as ?.
 3. A cell where a structural limit binds gets a footnote instead of ∩.
 4. Every ∩ marked with [V·] has at least one simulated design in which the combination is strictly tighter.
-5. Unions are reported as min/max over their component LPs, and inference uses the union CLR (R10).
+5. Unions are reported as min/max over their component LPs, and inference uses the union of branch CIs (R10(c)): CLR by default (algorithmic), with the projection interval alongside.
 
 ### 4.3 Data tests that narrow the assumption space
 | Test | Refutes | Form | Status |
@@ -358,7 +358,7 @@ Setting: PHASE2d. Fixed population; rows $v$ (veteran) and $n$; per-period $Q_t,
 
 | Module on changes | Restriction | Effect on DiD | Status |
 |---|---|---|---|
-| M-SIGN-Δ (= D4) | sign of $\delta^\Delta_W$ / $\delta^\Delta_B$ / CR on the realised changes | one-sided cuts at Goodman-on-changes and NM-on-changes | proved (D4), exact |
+| M-SIGN-Δ (= Δ4) | sign of $\delta^\Delta_W$ / $\delta^\Delta_B$ / CR on the realised changes | one-sided cuts at Goodman-on-changes and NM-on-changes | proved (Δ4), exact |
 | **M-ORD-Δ** (MTR) | $\Delta m_v(x)\ge\Delta m_n(x)$ on the hull: $\Delta c_1-\Delta w_1+\Delta d_1x\ge0$ | upper bound on $\Delta w_1$ | rows; proved (affine) |
 | **M-LOC-Δ** (weighted spillover sign) | $\Delta w_1+\Delta d_1x\ge0$ on the hull: replacing a non-veteran with a veteran does not lower the composition-weighted change | lower bound on $\Delta w_1$ | rows; proved (affine) |
 | **DiD-S** = ORD-Δ ∩ LOC-Δ | P-S on changes: $\lvert\Delta g(x)\rvert\le\Delta q(x)$ | closed-form interval for $\Delta w_1$, so DiD $\in$ identified $-(r+m_n)\cdot[\max_x(-\Delta d_1x),\ \min_x(\Delta c_1+\Delta d_1x)]$ | **proved** (P-S with $\Delta$); empty iff $\Delta q<0$ somewhere (test) |
@@ -380,7 +380,7 @@ Setting: PHASE2d. Fixed population; rows $v$ (veteran) and $n$; per-period $Q_t,
 
 **Still to prove (R11):**
 * sharpness of DiD-S within FD;
-* FD4 ∩ D4 (the outer set intersected with the exact sign cut, which mixes mean-level and realised quantities, ⚠);
+* FD4 ∩ Δ4 (the outer set intersected with the exact sign cut, which mixes mean-level and realised quantities, ⚠);
 * LCE-in-levels ∩ sign-on-changes;
 * inference for unions of sign patterns across periods.
 
@@ -401,8 +401,8 @@ Status: **P** proved · **C** checked numerically · **J** conjecture · **O** o
 | R7 | N2 grid LP: outer validity with estimated τ; convergence as the grid is refined | O | uniform confidence band for τ, then a monotone envelope | step 8 |
 | R8 | B1(M), κ, CAR-δ: each is a valid outer bound, monotone in its dial; B1 rank condition | partly (NA) | per module | steps 6, 7, 10 |
 | R9 | Consistency of the M-SHARP series bound; never wider than the current $\Theta_X$ | O | sieve argument | step 1b |
-| R10 | CLR validity with added rows, unions (min/max over LPs), near-emptiness, and the actual-rate allowance with new rows | **P** (5a §3: added rows; parallel disjunction = W1/2×2 CR; union of branch CIs at full level; emptiness level; plug-in bracket invalid; MC in `verify_R10.py`; independently reviewed, one error in (d) fixed, 5a §4). Still open: uniformity near point identification, and the CLR candidate collection (both inherited from P3) | — | all code |
-| R11 | DiD: DiD-S sharp within FD; FD4 ∩ D4; LCE-levels ∩ sign-Δ; union inference | DiD-S validity P; rest O | as in 2d | §7 |
+| R10 | CLR validity with added rows, unions (min/max over LPs), near-emptiness, and the actual-rate allowance with new rows | **P** (5a §3: added rows; parallel disjunction = W1/2×2 CR; union of branch CIs at full level; emptiness level; plug-in bracket invalid; MC in `verify_R10.py`; independently reviewed, one error in (d) fixed, 5a §4). Still open: uniformity near point identification, and the CLR candidate collection (Conjecture P3.5(b3)), both inherited from P3. Version (b) statements are theorems for P3.5(b1) only; see 5a §3.2 and `MSIGN_REVIEW_LOG.md` M-2 | — | all code |
+| R11 | DiD: DiD-S sharp within FD; FD4 ∩ Δ4; LCE-levels ∩ sign-Δ; union inference | DiD-S validity P; rest O | as in 2d | §7 |
 | R12 | P-S (sandwich) | P [V4] | — | — |
 | R13 | G2 table (JKST + signs) | P (§2.2) [V1, V2] | — | — |
 | R14 | Single-index dimension $C-1$ | J (NA check) | generic-rank argument | T2.4 |

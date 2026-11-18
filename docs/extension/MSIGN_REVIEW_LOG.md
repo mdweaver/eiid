@@ -76,4 +76,24 @@ Rerun without `-I` (about 12 minutes): output identical to the committed `verify
 | M-8 | `cluster` removed from `eiBounds()`, `.rxc_setup()` and `.rxc_vcov()`. No M-SIGN code (`rxc_sign.R`, `rxc_modules.R`) referred to it. The M-SIGN tests pass unchanged (`test-msign.R`, `test-msign-dial.R`). | `R/rxc_api.R`, `R/rxc_infer.R`, `R/rxc_core.R` |
 | (code) | `.rxc_ci_clr()`, which M-SIGN's `rxc_sign.R` also calls, gained an optional `proj_alpha` argument. With the default `NULL` its return value is unchanged, so M-SIGN's two calls are unaffected. | `R/rxc_infer.R` |
 
-Still open from §3: M-4, M-5 (needs your decision on county clustering), M-6, M-7. From §4: M-9 to M-17.
+
+## 7. Consultation with the M-SIGN session (18 Nov 2026) and resolutions
+
+At the user's request, the questions were put to the session that built M-SIGN (`session_01S2ZdrKuNjkb9Qi2eioNYtH`). It made no changes. Its answers were checked against the files, and the user approved the resulting list, decided M-5 as (b), and moved future M-SIGN work to this branch.
+
+| # | Answer (summary) | Resolution | Status |
+|---|---|---|---|
+| M-1 | The affdim fix also had to go in §1.4 (degenerate hull) and in Prop. R2's setting, whose step 3 uses compactness | both fixed | **done** |
+| M-2 | Agrees with the status note, and itemised the steps: (a) step 4; steps 13 and 15; (d); union steps 9–12 version-free; slab (b) proved. The CLR uses in `rxc_sign.R` ("already implied", near-tie margin) are also (b3) | itemised note added to R10 | **done** |
+| M-3 | Wording correct | — | **done** |
+| M-4 | Drop "uniformly". The sentence is about smooth nonlinear candidates without LCE, so cite the finite-candidate case of CLR Thm 4 | fixed in `PHASE1b` | **done** |
+| M-5 | `PHASE1b` l.257 = same county in two stacked periods (within-unit). l.398 and `PHASE2d` l.329 = townships within counties. No reason specific to DiD to cluster | **user decision (b)**: l.257 reworded as "one unit observed twice"; l.398 and 2d l.329 now use county effects in the mean plus the pooling test, with no clustered variance | **done** |
+| M-6, M-7 | No objection; extend the "algorithmic" label to wherever CLR is called the CR default | `PACKAGE_DESIGN` G9, M-LCE, R10 and item 5; `PHASE5a` §1.6 and §3.5; `PHASE2c` l.235; vignette; `PLAIN_LANGUAGE_GUIDE` §6 and §9 | **done** |
+| M-9 | The certificate is sufficient, not necessary; R3(c) allows gaps | sentence added to §1.6 | **done** |
+| M-11 | All branch rows are exact linear-in-β rows with design-only coefficients, so $j^*$ is fixed | no change needed | **done** |
+| M-14 | Rename the DiD family D0–D8 → Δ0–Δ8; keep 2b's names | renamed in `PHASE2d`, `PHASE1b` (except l.124, which is P1/2b's D0), `PACKAGE_DESIGN`, `PLAIN_PHASE2d`, `ASSUMPTION_MENU` l.72, `PLAIN_LANGUAGE_GUIDE` l.198–199, `verify_phase2d.py` (output regenerated: 16 PASS) | **done** |
+| M-15 | — | `NEW_AVENUES.md` cluster SE (l.173) and cluster bootstrap (l.720) marked for re-derivation | **done** (marking only) |
+| scripts | Not intended; use a path insert | path insert added to `verify_R2.py`, `verify_R3.py` and `make_msign_reference.py`. All three now run under `python3 -I`: `verify_R2.py` and `verify_R3.py` reproduce their committed outputs exactly, and `make_msign_reference.py` regenerates the three test CSVs byte for byte | **done** |
+| future work | Nothing unpushed. Planned: S11 real-data scripts; PHASE5a §5 proofs on slack monotonicity and the slack slab; slack docs. None touches `rxc_infer.R`/`rxc_core.R` | **user decision**: future M-SIGN work moves to `claude/wizardly-volta-lbh4bm` | **done** |
+
+**Still open (substantive review, not consistency):** M-9 to M-13 and M-16 to M-17 need an external reviewer. M-15 needs re-derivation. See `EXTERNAL_REVIEW_PLAN.md`.

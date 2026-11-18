@@ -1,6 +1,6 @@
 # Phase 2a: R×C bounds, derivations and proofs
 
-*Builds on `PHASE1_foundations.md` (cited as P1). Every proof step ends with a justification tag in brackets; the tag legend is in §0.3. Every closed form and every inclusion claimed here is also checked numerically or symbolically in `verify_phase2a.py` (output in `verify_phase2a_output.txt`; 31/31 PASS). §10 lists the corrections this phase makes to P1.*
+*Builds on `PHASE1_foundations.md` (cited as P1). Every proof step ends with a justification tag in brackets; the tag legend is in §0.3. Every closed form and every inclusion claimed here is also checked numerically or symbolically in `verify_phase2a.py` (output in `verify_phase2a_output.txt`; 32/32 PASS). §10 lists the corrections this phase makes to P1.*
 
 ---
 
@@ -14,6 +14,7 @@
 * $\mathcal K=\{(K_1,\dots,K_C)\in\operatorname{Skew}_R^C:\sum_cK_c=0\}$.
 * For $H=(H_1,\dots,H_C)$, $M_H(x)\in\mathbb R^{R\times C}$ has entries $M_H(x)_{rc}=e_r^\top H_cx$.
 * $A\subseteq\Delta^{R-1}$ is compact and convex. The default is $A=\operatorname{conv}(\operatorname{supp}P_X)$, the **population** hull. It is not the sample hull: P1 §1.7 separates the population hull, the hull of the empirical law, and the sample hull used as an estimate. A *polytope* $A$ has a finite vertex set $\operatorname{vert}(A)$, and that is always the case for the sample hull.
+* **Support on $A$.** $\operatorname{supp}_AP_X:=\operatorname{supp}(P_X|_A)$ is the support of the restricted measure $E\mapsto P(X\in A\cap E)$: the smallest closed set $F$ with $P(X\in A\setminus F)=0$. It is contained in $A\cap\operatorname{supp}P_X$ and can be strictly smaller: for $X\sim U[0,1]$ (as a share) and $A=\{1/2\}$, $\operatorname{supp}P_X\cap A=\{1/2\}$ but $\operatorname{supp}_AP_X=\emptyset$. When $P(X\in A)=1$ (the default $A$, and every result that uses Lemma 2), $P_X|_A=P_X$ and $\operatorname{supp}_AP_X=\operatorname{supp}P_X$. *(Corrected after review, Batch B, Nov 2026: earlier versions used $\operatorname{supp}P_X\cap A$ throughout. Continuous functions that agree $P_X$-a.e. on $A$ need not agree on that set, as the example shows; they agree on $\operatorname{supp}_AP_X$. A5, the tag [supp], Lemma 1, Lemma 3(c), Remarks 1.1, 5.1–5.2, Props 7′ and 9 now use $\operatorname{supp}_AP_X$. Nothing changes when $P(X\in A)=1$. Check: `verify_phase2a.py`, "[supp]".)*
 * **Standing integrability:** $E[N]<\infty$, and $\mu_r:=E[NX_r]>0$ for all $r$. $\mu_{rs}:=E[NX_rX_s]$.
 
 ### 0.2 Model, identified sets (these refine P1 §1.5)
@@ -22,7 +23,7 @@
 
 * (S1) $\beta\in\mathfrak B$ and $T=\beta^\top X$, $\mathbb Q$-a.s. *(A1, accounting identity)*;
 * (S2) $E_{\mathbb Q}[\beta\mid V]=M_H(X)$ $\mathbb Q$-a.s. on $\{X\in A\}$ *(A2 + A3, linear contextual effects, no dependence on $N$)*;
-* (S3) $M_H(x)\in\mathfrak B$ for every $x\in A$ *(A4: the linear model describes valid probabilities on all of $A$. Lemma 3(c) shows this follows from (S1)–(S2) when $A\subseteq\operatorname{conv}(\operatorname{supp}P_X\cap A)$, in particular for the default $A=\operatorname{conv}\operatorname{supp}P_X$. It is a genuine extra assumption whenever some part of $A$ lies outside the convex hull of the support points *at which (S2) is imposed*: when $A$ extrapolates beyond the data, as in JKST Prop. 3, and also when $A$ is a subset of the hull that the data barely touch (Remark 5.1))*.
+* (S3) $M_H(x)\in\mathfrak B$ for every $x\in A$ *(A4: the linear model describes valid probabilities on all of $A$. Lemma 3(c) shows this follows from (S1)–(S2) when $A\subseteq\operatorname{conv}(\operatorname{supp}_AP_X)$, in particular for the default $A=\operatorname{conv}\operatorname{supp}P_X$. It is a genuine extra assumption whenever some part of $A$ lies outside the convex hull of the support points *at which (S2) is imposed*: when $A$ extrapolates beyond the data, as in JKST Prop. 3, and also when $A$ is a subset of the hull that the data barely touch (Remark 5.1))*.
 
 **Identified part.** $Q(P)=(Q_1,\dots,Q_C)$ denotes the unique symmetric matrices with $E_P[T_c\mid X=x]=x^\top Q_cx$ for $P_X$-a.e. $x\in A$, when they exist (Lemma 1). If they do not exist, set $\Theta_I(P;A):=\emptyset$.
 
@@ -54,7 +55,7 @@ Theorem numbers marked † are cited from memory; §0.4 records which have been 
 | [CE-lin], [CE-mono], [CE-pull], [CE-tower] | conditional expectation: linearity, monotonicity, "taking out what is known", tower property |
 | [CE-cvx] | if $Y\in F$ a.s. with $F$ closed convex and $Y$ integrable, then $E[Y\mid\mathcal G]\in F$ a.s. (conditional Jensen / separation) |
 | [RCD] | existence of regular conditional distributions on Polish spaces, and disintegration: $E[f(V,T)\mid V]=\int f(V,t)P_{T\mid V}(dt)$ a.s. for bounded jointly measurable $f$ (Kallenberg 2002, Thms 6.3–6.4†) |
-| [supp] | if continuous $f,g$ agree $P_X$-a.e. on $A$, they agree on $\operatorname{supp}P_X\cap A$ |
+| [supp] | if continuous $f,g$ agree $P_X$-a.e. on $A$, they agree on $\operatorname{supp}_AP_X$ (§0.1). *Proof:* if $f(x_0)\ne g(x_0)$ at $x_0\in\operatorname{supp}_AP_X$, then $f\ne g$ on an open $U\ni x_0$, and $P(X\in A\cap U)>0$ by the definition of the support, a contradiction. The weaker set $\operatorname{supp}P_X\cap A$ does not work (§0.1 example). *(Corrected after review, Batch B.)* |
 | [Frob] | $\lvert\langle u,b\rangle\rvert\le\lVert u\rVert\,\lVert b\rVert$ (Cauchy–Schwarz) |
 | [Mink] | a polytope is the convex hull of its vertices (Minkowski / Krein–Milman for polytopes) |
 | [Rock] | closed convex sets are determined by their support functions (Rockafellar 1970, Cor. 13.1.1†) |
@@ -129,7 +130,7 @@ CLR's Condition P(iv) requires that the gradient of every candidate bounding fun
 
 ## 2. What the data identify
 
-**Lemma 1 (identification decomposition).** Let $\mathbb Q\in\mathcal M(H;A)$ with $\mathbb Q\circ W^{-1}=P$, and assume [A5]: for symmetric $D$, $x^\top Dx=0$ for all $x\in\operatorname{supp}P_X\cap A$ implies $D=0$. Then
+**Lemma 1 (identification decomposition).** Let $\mathbb Q\in\mathcal M(H;A)$ with $\mathbb Q\circ W^{-1}=P$, and assume [A5]: for symmetric $D$, $x^\top Dx=0$ for all $x\in\operatorname{supp}_AP_X$ implies $D=0$. Then
 (a) $E[T_c\mid X=x]=x^\top Q_cx$ with $Q_c=\tfrac12(H_c+H_c^\top)$, and $Q_c$ is unique;
 (b) $\sum_cH_c=J$, so $\sum_cQ_c=J$ and $\sum_cK_c=0$ where $K_c=\tfrac12(H_c-H_c^\top)$;
 (c) for every $K'\in\mathcal K$, $Q+K'$ gives the same regression function; $\dim\mathcal K=(C-1)R(R-1)/2$.
@@ -141,13 +142,13 @@ CLR's Condition P(iv) requires that the gradient of every candidate bounding fun
 4. Hence $E[T_c\mid X]=\sum_{r,s}X_rH_{c,rs}X_s=X^\top H_cX$ on $\{X\in A\}$. [2–3; alg]
 5. Since $X^\top K_cX$ is a scalar, $X^\top K_cX=(X^\top K_cX)^\top=X^\top K_c^\top X=-X^\top K_cX$, so $X^\top K_cX=0$. [alg; $K_c$ skew]
 6. Therefore $X^\top H_cX=X^\top Q_cX$. [4–5; $H_c=Q_c+K_c$]
-7. If symmetric $Q_c,Q'_c$ both satisfy 6 $P_X$-a.e. on $A$, then $x^\top(Q_c-Q'_c)x=0$ on $\operatorname{supp}P_X\cap A$. [supp; both sides continuous]
+7. If symmetric $Q_c,Q'_c$ both satisfy 6 $P_X$-a.e. on $A$, then $x^\top(Q_c-Q'_c)x=0$ on $\operatorname{supp}_AP_X$. [supp; both sides continuous]
 8. $Q_c-Q'_c$ is symmetric, so $Q_c=Q'_c$. [A5] ∎(a)
 
 *Proof of (b).*
 1. $\sum_c\beta_{rc}=1$ a.s. [S1; $\beta\in\mathfrak B$]
 2. $\sum_ce_r^\top H_cx=1$ for $P_X$-a.e. $x\in A$. [CE-lin on 1; S2; CE-tower]
-3. Let $d_r^\top:=e_r^\top(\sum_cH_c-J)$. Then $d_r^\top x=1-\mathbf 1^\top x=0$ on $\operatorname{supp}P_X\cap A$. [2; $\mathbf 1^\top x=1$; supp]
+3. Let $d_r^\top:=e_r^\top(\sum_cH_c-J)$. Then $d_r^\top x=1-\mathbf 1^\top x=0$ on $\operatorname{supp}_AP_X$. [2; $\mathbf 1^\top x=1$; supp]
 4. $x^\top\tfrac12(d_r\mathbf 1^\top+\mathbf 1d_r^\top)x=(d_r^\top x)(\mathbf 1^\top x)=0$ on the same set. [alg; 3]
 5. So $d_r\mathbf 1^\top+\mathbf 1d_r^\top=0$. [A5; the matrix is symmetric]
 6. Its $(s,s)$ entry is $2d_{r,s}=0$ for every $s$, so $d_r=0$. [alg]
@@ -160,7 +161,7 @@ CLR's Condition P(iv) requires that the gradient of every candidate bounding fun
 
 **Remark 1.0 (why A2 is a substantive restriction).** Lemma 1(c) shows that the data cannot see the skew part $K$. Proposition 9 below goes further: whole families of *nonlinear* departures from A2 leave the distribution of the data unchanged while moving $B^*$. So the linear contextual-effects assumption cannot be validated by goodness of fit. It is a structural assumption, and $\mathcal K$ is only the linear part of what the data cannot see.
 
-**Remark 1.1 (A5 in practice).** For $R=2$, A5 holds iff $\operatorname{supp}P_X\cap A$ contains at least three distinct points.
+**Remark 1.1 (A5 in practice).** For $R=2$, A5 holds iff $\operatorname{supp}_AP_X$ contains at least three distinct points.
 *Proof.*
 1. On $x=(t,1-t)$, $x^\top Dx$ is a polynomial of degree at most 2 in $t$. [alg]
 2. If it vanishes at three distinct $t$, it is the zero polynomial. [poly]
@@ -298,7 +299,7 @@ Theorem 1 is the identification result. Prop. 7 is the computable outer bound th
 **Lemma 3.**
 (a) If $A$ is a polytope and $\ell$ is linear, then $\ell\ge0$ on $A$ iff $\ell(v)\ge0$ for all $v\in\operatorname{vert}(A)$. Hence the constraint "$\forall x\in A$" in $\Theta_O$ can be replaced by "$\forall v\in\operatorname{vert}(A)$".
 (b) If $\operatorname{affdim}(A)=R-1$ (equivalently, $A$ has nonempty interior relative to $\Delta^{R-1}$), then $\Theta_O(P;A)$ is bounded, hence a polytope. Without this condition $\Theta_O$ is a closed convex polyhedron, possibly unbounded (Remark 5.2).
-(c) Under (S1)–(S2), if $A\subseteq\operatorname{conv}(\operatorname{supp}P_X\cap A)$, then (S3) holds automatically. In particular this is so for $A=\operatorname{conv}(\operatorname{supp}P_X)$, since then $\operatorname{supp}P_X\cap A=\operatorname{supp}P_X$.
+(c) Under (S1)–(S2), if $A\subseteq\operatorname{conv}(\operatorname{supp}_AP_X)$, then (S3) holds automatically. In particular this is so for $A=\operatorname{conv}(\operatorname{supp}P_X)$, since then $P(X\in A)=1$ and $\operatorname{supp}_AP_X=\operatorname{supp}P_X$.
 
 *Proof.*
 1. (a) "⇒" is immediate since $\operatorname{vert}(A)\subseteq A$. "⇐": write $x=\sum_k\lambda_kv_k$ with $\lambda\ge0$, $\sum\lambda_k=1$. [Mink]
@@ -308,12 +309,12 @@ Theorem 1 is the identification result. Prop. 7 is the computable outer bound th
 5. Since $\operatorname{affdim}(A)=R-1$, $A$ contains $R$ affinely independent points $x^{(1)},\dots,x^{(R)}$. These are linearly independent because $0\notin\{\mathbf 1^\top x=1\}$. [alg]
 6. $K_c=[\,e_r^\top K_cx^{(k)}\,]_{r,k}\,[x^{(1)}\cdots x^{(R)}]^{-1}$ is therefore bounded uniformly over $\Theta_O$. [4–5; lin] ∎(b)
 7. (c) $E[\beta\mid V]\in\mathfrak B$ a.s., since $\mathfrak B$ is closed and convex. [CE-cvx]
-8. (S2) holds on $\{X\in A\}$, so $M_H(x)\in\mathfrak B$ for $P_X$-a.e. $x\in A$, and by continuity at every $x\in\operatorname{supp}P_X\cap A$. [S2; supp]
-9. $M_H$ is linear in $x$ and $\mathfrak B$ is convex, so $M_H(x)\in\mathfrak B$ on $\operatorname{conv}(\operatorname{supp}P_X\cap A)$, which contains $A$ by hypothesis. [lin; L1(b); Mink] ∎(c)
+8. (S2) holds on $\{X\in A\}$, so $M_H(x)\in\mathfrak B$ for $P_X$-a.e. $x\in A$, and by continuity at every $x\in\operatorname{supp}_AP_X$. [S2; supp]
+9. $M_H$ is linear in $x$ and $\mathfrak B$ is convex, so $M_H(x)\in\mathfrak B$ on $\operatorname{conv}(\operatorname{supp}_AP_X)$, which contains $A$ by hypothesis. [lin; L1(b); Mink] ∎(c)
 
-**Remark 5.1 (S3 is not automatic for every $A$ inside the hull).** The hypothesis of (c) cannot be weakened to $A\subseteq\operatorname{conv}\operatorname{supp}P_X$. Take $A=\{x_0\}$ with $x_0$ in the interior of the hull but $P(X=x_0)=0$. Then (S2) restricts nothing, and $M_H(x_0)$ need not be a valid transition matrix. A numerical instance is in `verify_phase2a.py`. The same happens, less starkly, whenever $A$ reaches into a part of the hull where (S2) is imposed on no support points.
+**Remark 5.1 (S3 is not automatic for every $A$ inside the hull).** The hypothesis of (c) cannot be weakened to $A\subseteq\operatorname{conv}\operatorname{supp}P_X$. Take $A=\{x_0\}$ with $x_0$ in the interior of the hull but $P(X=x_0)=0$. Then (S2) restricts nothing, and $M_H(x_0)$ need not be a valid transition matrix. Here $\operatorname{supp}_AP_X=\emptyset$, so the hypothesis of (c) fails, as it should. *(Corrected after review, Batch B: with the earlier wording $\operatorname{supp}P_X\cap A$, this set was $\{x_0\}$ whenever $x_0\in\operatorname{supp}P_X$, so (c)'s hypothesis appeared to hold and (c) contradicted this remark. The restricted support removes the tension.)* A numerical instance is in `verify_phase2a.py`. The same happens, less starkly, whenever $A$ reaches into a part of the hull where (S2) is imposed on no support points.
 
-**Remark 5.2 (dimension of $A$).** "Nonempty relative interior" in the earlier draft was too weak: a singleton has nonempty relative interior in its own affine hull. For $R=3$, $C=2$, $A=\{x_0\}$ with $x_0=(\tfrac13,\tfrac13,\tfrac13)$, $Q_1=Q_2=\tfrac12J$, and $K_1=-K_2=t\begin{psmallmatrix}0&1&-1\\-1&0&1\\1&-1&0\end{psmallmatrix}$: since $K_1x_0=0$, every $t\in\mathbb R$ is in $\Theta_O$. Under (A5), however, $\operatorname{supp}P_X\cap A$ lies in no hyperplane of the simplex. (If $a^\top x=b$ there, for a proper hyperplane, so that $a-b\mathbf 1\ne0$, then $\mathbf 1^\top x=1$ gives $x^\top Dx=\big((a-b\mathbf 1)^\top x\big)(\mathbf 1^\top x)=0$ with $D=\tfrac12[(a-b\mathbf 1)\mathbf 1^\top+\mathbf 1(a-b\mathbf 1)^\top]\ne0$, contradicting (A5).) So $A\supseteq\operatorname{supp}P_X\cap A$ is full-dimensional, and the condition of (b) holds automatically.
+**Remark 5.2 (dimension of $A$).** "Nonempty relative interior" in the earlier draft was too weak: a singleton has nonempty relative interior in its own affine hull. For $R=3$, $C=2$, $A=\{x_0\}$ with $x_0=(\tfrac13,\tfrac13,\tfrac13)$, $Q_1=Q_2=\tfrac12J$, and $K_1=-K_2=t\begin{psmallmatrix}0&1&-1\\-1&0&1\\1&-1&0\end{psmallmatrix}$: since $K_1x_0=0$, every $t\in\mathbb R$ is in $\Theta_O$. Under (A5), however, $\operatorname{supp}_AP_X$ lies in no hyperplane of the simplex. (If $a^\top x=b$ there, for a proper hyperplane, so that $a-b\mathbf 1\ne0$, then $\mathbf 1^\top x=1$ gives $x^\top Dx=\big((a-b\mathbf 1)^\top x\big)(\mathbf 1^\top x)=0$ with $D=\tfrac12[(a-b\mathbf 1)\mathbf 1^\top+\mathbf 1(a-b\mathbf 1)^\top]\ne0$, contradicting (A5).) So $A\supseteq\operatorname{supp}_AP_X$ ($A$ is closed) is full-dimensional, and the condition of (b) holds automatically.
 
 **Proposition 1 (nesting).** $\Theta_I(P;A)\subseteq\Theta_X(P;A)\subseteq\Theta_O(P;A)$.
 *Proof.*
@@ -521,7 +522,7 @@ $V$ is differentiable at $(Q,\mu)$ when the optimal basis is unique and nondegen
 
 ### 6.6 Units outside $A$
 
-**Proposition 7′.** Let $A$ be a polytope with $P(X\in A)>0$, (S1) everywhere, (S2)–(S3) on $A$, and (A5) on $\operatorname{supp}P_X\cap A$, so that $Q$ is identified from $\{X\in A\}$. Put $\mu^A_{rs}:=E[NX_rX_s1\{X\in A\}]$, and keep $\mu_r=E[NX_r]$ over all units. For a linear target $\varphi=\sum_{rc}a_{rc}B^*_{rc}$, let $\varphi^A_0$ and $\gamma^A$ be the $\varphi_0$ and $\gamma$ of Prop. 7 with $\mu_{rs}$ replaced by $\mu^A_{rs}$. Let $\tilde a(x)_{rc}:=a_{rc}x_r/\mu_r$ and
+**Proposition 7′.** Let $A$ be a polytope with $P(X\in A)>0$, (S1) everywhere, (S2)–(S3) on $A$, and (A5) on $\operatorname{supp}_AP_X$, so that $Q$ is identified from $\{X\in A\}$. Put $\mu^A_{rs}:=E[NX_rX_s1\{X\in A\}]$, and keep $\mu_r=E[NX_r]$ over all units. For a linear target $\varphi=\sum_{rc}a_{rc}B^*_{rc}$, let $\varphi^A_0$ and $\gamma^A$ be the $\varphi_0$ and $\gamma$ of Prop. 7 with $\mu_{rs}$ replaced by $\mu^A_{rs}$. Let $\tilde a(x)_{rc}:=a_{rc}x_r/\mu_r$ and
 $$U_{\text{out}}=E\big[N\,h_S(\tilde a(X);X,T)\,1\{X\notin A\}\big],\qquad L_{\text{out}}=-E\big[N\,h_S(-\tilde a(X);X,T)\,1\{X\notin A\}\big].$$
 Then
 $$\varphi\in\Big[\varphi^A_0+\min_{k\in\Theta_O}\gamma^{A\top}k+L_{\text{out}},\ \ \varphi^A_0+\max_{k\in\Theta_O}\gamma^{A\top}k+U_{\text{out}}\Big].$$
@@ -555,7 +556,7 @@ In samples an empty set can also arise from sampling noise; Phase 3 turns this i
 
 **Proposition 9 (what the data can never rule out).** Let $\Delta:\Delta^{R-1}\to\mathbb R^{R\times C}$ be Borel with (i) $x^\top\Delta(x)=0$, (ii) $\Delta(x)\mathbf 1=0$, and (iii) $M_H(x)+\Delta(x)\in\mathfrak B$, all three for every $x\in\operatorname{supp}P_X$. Only the support matters: the values of $\Delta$ off $\operatorname{supp}P_X$ never enter. Then the structure $\beta=M_H(X)+\Delta(X)$ and the structure $\beta'=M_H(X)$ generate the same $P$, but
 $$B^*_{rc}(\beta)-B^*_{rc}(\beta')=\frac{E[NX_r\Delta_{rc}(X)]}{\mu_r}.$$
-Under (A5) on $\operatorname{supp}P_X\cap A$ (with $A\supseteq\operatorname{supp}P_X$), the linear $\Delta$'s satisfying (i)–(ii) on the support are exactly $M_{K'}$ with $K'\in\mathcal K$, i.e. the unidentified part. A nonlinear $\Delta$ violates A2 yet leaves no trace in the data.
+Under (A5) on $\operatorname{supp}_AP_X$ (with $A\supseteq\operatorname{supp}P_X$), the linear $\Delta$'s satisfying (i)–(ii) on the support are exactly $M_{K'}$ with $K'\in\mathcal K$, i.e. the unidentified part. A nonlinear $\Delta$ violates A2 yet leaves no trace in the data.
 
 *Proof.*
 1. $T=\beta^\top X=M_H(X)^\top X+\Delta(X)^\top X=\tau(X)+0$, and likewise $T'=\tau(X)$. With the same law of $(N,X)$, both give the same $P$. [S1; (i); L1(a)]
@@ -626,7 +627,7 @@ Not verified by computer: the measure-theoretic steps of Theorem 1, which rest o
 ## 10. Corrections to Phase 1
 
 1. **Joint vs collapsed (P1 §1.4).** For $R=2$, the joint bound is strictly tighter only if some extrapolated pure-poll rate is negative (Cor. 6.1(c)). The general claim of strict gain is withdrawn.
-2. **A4.** The model now includes (S3). It is implied when $A\subseteq\operatorname{conv}(\operatorname{supp}P_X\cap A)$, e.g. $A$ = the population hull (Lemma 3(c)). It is a real assumption otherwise: when extrapolating, as in JKST Prop. 3 and our Prop. 5, and for regions $A$ that the support does not span (Remark 5.1).
+2. **A4.** The model now includes (S3). It is implied when $A\subseteq\operatorname{conv}(\operatorname{supp}_AP_X)$, e.g. $A$ = the population hull (Lemma 3(c)). It is a real assumption otherwise: when extrapolating, as in JKST Prop. 3 and our Prop. 5, and for regions $A$ that the support does not span (Remark 5.1).
 5. **Prop. 2-RC(i).** $\Theta_O$ is a polyhedron. It is a polytope (bounded) when $\operatorname{affdim}(A)=R-1$, which A5 implies (Lemma 3(b), Remark 5.2).
 3. **Theorem 1** needs no auxiliary randomisation (Remark 4.1).
 4. **New result (Prop. 2):** $\Theta_O$ is exactly the sharp set for an analyst who uses only the regression function.

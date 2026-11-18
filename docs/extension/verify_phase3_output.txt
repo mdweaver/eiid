@@ -13,3 +13,7 @@ PASS Prop P3.5(b2)(ii): projection upper bound with a data-dependent candidate c
      Thm P3.8, M1 2x2, 30 districts x 8 polls: CI for B~ covers 1.000, for B 1.000; empty 0; median unclipped width 9.12 (valid but uninformative; see P3 section 5.1)
 PASS Thm P3.8: finite-sample CI covers B~ and B at >= 95% in an R2 design (300 reps each); emptiness rate <= 5%
 PASS Prop P3.6(c): nonzero district shifts are not of the form G X_i (residual > 0); zero shifts are
+     P3.5(b2)(ii) null direction: old rule covers coordinate 2 in 0.000 of 2000; under (ii-b) both coordinates covered in 0.968
+PASS P3.5(b2)(ii) null direction (Batch B): rank-q pseudoinverse rule misses surely (old statement fails); reduced full-rank parameterisation covers (corrected statement holds)
+     P3.5(a) residual: P(|E/sd| > 1.96) = 0.000 (normal: 0.05); P(|E| > 1.96 S_1) = 0.000; sd/S_1 = 0.050
+PASS P3.5(a) step 5 (Batch B): weight condition alone does not give a standardised CLT (old step fails); the allowance z*S_1 still holds (Chebyshev branch)

@@ -13,6 +13,17 @@ Methods compared (all target D~, alpha_E = 0):
   CR-naive   branch picked by sign(ER^), CR rows plug-in (not inflated)
 Designs put the truth on the CR boundary (delta*_W = 0) with ER* far from or
 near 0, plus one interior design.  numpy/scipy only.  Seed 20261105.
+
+Corrected after the Batch B review (Nov 2026):
+  * lengths of a union are now reported as the occupied (merged) length, with the
+    hull span and the old unmerged sum beside it (the old script summed the two branch
+    lengths even when they overlapped);
+  * V9  analytic bound for R10(e) (the referee's repeated three-point design);
+  * V10 the containment claimed in 5a §3.5 item 4 fails (the referee's three intervals);
+  * V11 an overlapping pair: unmerged sum > Lebesgue length;
+  * V12 deliberately false CR (the EI referee's matched-regression experiment).
+What these runs do NOT test: the CLR procedure, coverage of the actual-rate target
+(residual allowance), the crossing emptiness rule, or a growing-dimension regime.
 """
 import numpy as np
 
@@ -170,6 +181,17 @@ def one_rep(X, p, theta0, ab, conc, parts):
     return out
 
 
+def merge(Is):
+    """Merge a list of closed intervals; return the list of disjoint pieces."""
+    out = []
+    for lo, hi in sorted(Is):
+        if out and lo <= out[-1][1]:
+            out[-1] = (out[-1][0], max(out[-1][1], hi))
+        else:
+            out.append((lo, hi))
+    return out
+
+
 def run(kind, n=150, conc=15, reps=600):
     X, p = design(n)
     parts = linear_parts(X, p)
@@ -178,7 +200,7 @@ def run(kind, n=150, conc=15, reps=600):
     assert f0["rows"].min() >= 0, "truth violates [0,1]"
     assert f0["dW"] * f0["dB"] >= -1e-12, "truth violates CR"
     D0 = f0["D"]
-    stats = {m: [0, 0, []] for m in ("JKST", "CR-slab", "CR-union", "CR-naive")}
+    stats = {m: [0, 0, [], [], [], 0] for m in ("JKST", "CR-slab", "CR-union", "CR-naive")}
     for _ in range(reps):
         out = one_rep(X, p, theta0, ab, conc, parts)
         for mth, I in out.items():
@@ -187,14 +209,116 @@ def run(kind, n=150, conc=15, reps=600):
                 continue
             Is = I if isinstance(I, list) else [I]
             stats[mth][0] += any(lo - 1e-12 <= D0 <= hi + 1e-12 for lo, hi in Is)
-            stats[mth][2].append(sum(hi - lo for lo, hi in Is))
+            pieces = merge(Is)
+            stats[mth][2].append(sum(hi - lo for lo, hi in pieces))           # occupied (Lebesgue) length
+            stats[mth][3].append(max(hi for _, hi in Is) - min(lo for lo, _ in Is))   # hull span
+            stats[mth][4].append(sum(hi - lo for lo, hi in Is))               # old statistic: unmerged sum
+            stats[mth][5] += len(Is) == 2 and len(pieces) == 1 and \
+                min(Is[0][1], Is[1][1]) - max(Is[0][0], Is[1][0]) > 0     # runs with positive overlap
     print(f"{kind}: true D~ = {D0:.3f}, ER* = {f0['ER']:.3f}, delta*_W = {f0['dW']:.1e}, "
           f"delta*_B = {f0['dB']:.3f}; n = {n}, {reps} reps")
-    for mth, (cov, emp, w) in stats.items():
-        print(f"   {mth:9s} coverage {cov / reps:.3f}  empty {emp / reps:.3f}  "
-              f"median length {np.median(w) if w else float('nan'):.3f}")
+    for mth, (cov, emp, w, span, raw, nov) in stats.items():
+        line = (f"   {mth:9s} coverage {cov / reps:.3f}  empty {emp / reps:.3f}  "
+                f"median length {np.median(w) if w else float('nan'):.3f}")
+        if mth == "CR-union":
+            line += (f"  (hull span {np.median(span):.3f}; unmerged sum, old statistic, {np.median(raw):.3f}; "
+                     f"positive overlap in {nov}/{reps} runs)")
+        print(line)
+    return stats
 
 
 if __name__ == "__main__":
     for kind in ("boundary, ER far from 0", "boundary, ER near 0", "interior"):
         run(kind)
+
+
+# ---------------------------------------------------------------------------
+# Added after the Batch B review (Nov 2026).
+# ---------------------------------------------------------------------------
+def V9():
+    """R10(e), analytic (the partial-identification referee's argument). Repeated design X = 1/4, 1/2, 3/4,
+    equal sizes, basis ((1-x)^2, 2x(1-x), x^2). For any coefficient vector q, ER(q) = q11 - q00 and
+    c_D(q) = (7/12)(q11 - q00), so se(c_D)/se(ER^) = 7/12 exactly. With the union bound over 8 base rows and
+    2 target tails, k_crit <= z_.995, so limsup P(cover) <= Phi(7/12 z_.995). With 4000 critical-value draws,
+    add P{Bin(4000, .04) >= 200}."""
+    from scipy.stats import norm, binom
+    x = np.array([.25, .5, .75]); p = np.ones(3) / 3
+    F = np.array([(1 - x) ** 2, 2 * x * (1 - x), x * x]).T
+    cov = lambda w, a, b: (w / w.sum()) @ ((a - (w / w.sum()) @ a) * (b - (w / w.sum()) @ b))
+    er = np.array([cov(p, x, f) / cov(p, x, x) for f in F.T])
+    # c_D(q): D at k = 0 for m1 = q01 (1-x) + q11 x, m0 = q00 (1-x) + q01 x, per basis vector
+    cD = np.array([-((1 - x) ** 2).sum() / (1 - x).sum(), 0.0, (x * x).sum() / x.sum()])
+    ratio = (cD @ er) / (er @ er)
+    pop = norm.cdf(ratio * norm.ppf(.995))
+    draws = norm.cdf(ratio * norm.ppf(.996)) + binom.sf(199, 4000, .04)
+    # far-edge design of run(): X = .1 + .8 U, U ~ Beta(2,2): ratio .5 + 2 Var X in the design limit
+    varX = .64 * (1 / 20)
+    far = norm.cdf((.5 + 2 * varX) * norm.ppf(.995))
+    return er, cD, ratio, pop, draws, .5 + 2 * varX, far
+
+
+def V10():
+    """5a §3.5 item 4. Raw base interval [0, .1], bracket [.15, .2], target allowance .1. The naive rule that
+    intersects the raw base with the bracket and then expands is empty; bracket cap (base expanded) is not.
+    So 'the naive interval contains bracket cap JKST CI' fails."""
+    base, bracket, allow = (0.0, 0.1), (0.15, 0.2), 0.1
+    raw = (max(base[0], bracket[0]), min(base[1], bracket[1]))
+    naive = None if raw[0] > raw[1] else (raw[0] - allow, raw[1] + allow)
+    jk = (base[0] - allow, base[1] + allow)
+    br_jk = (max(jk[0], bracket[0]), min(jk[1], bracket[1]))
+    br_jk = None if br_jk[0] > br_jk[1] else br_jk
+    contains = br_jk is None or (naive is not None and naive[0] <= br_jk[0] and br_jk[1] <= naive[1])
+    return naive, br_jk, contains
+
+
+def V11():
+    """Two overlapping branch intervals: the old statistic (sum of lengths) exceeds the Lebesgue length."""
+    Is = [(0.0, 0.3), (0.2, 0.5)]
+    return sum(h - l for l, h in Is), sum(h - l for l, h in merge(Is))
+
+
+def V12(reps=400):
+    """The EI referee's matched-regression experiment: m0 = .40 - s x, m1 = .50 + s - s x. The aggregate
+    regression is .40 + .10 x for every s; the between sign is positive throughout; for s > 0 both contextual
+    slopes are negative, so CR is false. The design is fixed across s at each n. Same generator as the
+    referee (seed 1739), so the counts reproduce the report."""
+    global RNG
+    RNG = np.random.default_rng(1739)
+    rows = []
+    for n in (150, 600):
+        X, p = design(n)
+        parts = linear_parts(X, p)
+        for s_ in (0, .08, .25):
+            ab = (.40, -s_, .50 + s_, -s_)
+            theta = np.array([.40, .45, .50, -.05 - s_])
+            truth = parts[3](theta)["D"]
+            res = {name: [0, 0, []] for name in ("JKST", "CR-slab")}
+            for _ in range(reps):
+                out = one_rep(X, p, theta, ab, 15, parts)
+                for name in res:
+                    ci_ = out[name]
+                    if ci_ is None:
+                        res[name][1] += 1
+                    else:
+                        res[name][0] += ci_[0] <= truth <= ci_[1]
+                        res[name][2].append(ci_[1] - ci_[0])
+            rows.append((n, s_, truth, res))
+    return rows
+
+
+if __name__ == "__main__":
+    er, cD, ratio, pop, draws, far_ratio, far = V9()
+    print(f"V9 R10(e) analytic (three-point design): ER(q) = {er}, c_D(q) = {np.round(cD, 6)}; "
+          f"se ratio = {ratio:.6f} (7/12 = {7 / 12:.6f}); limsup coverage <= {pop:.6f}; with 4000 draws <= {draws:.6f}; "
+          f"far-edge design ratio {far_ratio:.3f}, bound {far:.3f}  "
+          f"{'PASS' if abs(ratio - 7 / 12) < 1e-12 and pop < .95 and draws < .95 else 'FAIL'}")
+    naive, br_jk, contains = V10()
+    print(f"V10 5a §3.5 item 4: naive (intersect, then expand) = {naive}; bracket cap JKST CI = {br_jk}; "
+          f"old containment claim holds: {contains}  {'PASS' if not contains else 'FAIL'}")
+    raw, merged = V11()
+    print(f"V11 union length: unmerged sum {raw:.2f} > merged (Lebesgue) {merged:.2f}  "
+          f"{'PASS' if raw > merged + 1e-12 else 'FAIL'}")
+    for n, s_, truth, res in V12():
+        print(f"V12 false CR, n = {n}, s = {s_:.2f}, true gap {truth:.3f}: " +
+              "; ".join(f"{name} covers {c}/400, empty {e}, median width {np.median(w):.3f}"
+                        for name, (c, e, w) in res.items()))

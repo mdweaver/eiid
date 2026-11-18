@@ -138,6 +138,7 @@ def T4(reps=300):
     classify as implied / cuts set only / tightens target."""
     import verify_R3 as R3
     counts = {"implied": 0, "cuts set, not this target": 0, "tightens target": 0}
+    skipped = {}
     for i in range(reps):
         P = V.make_3x2(support=("2d", "near-1d")[i % 2])
         A, b = V.rows_3x2(P, ["DD"])
@@ -145,20 +146,25 @@ def T4(reps=300):
         for ag, cg in ((aB[0], cB[0]), (aW[0], cW[0])):
             s = np.sign(ag @ P["k_true"] + cg)
             a, bb = -s * ag, s * cg                     # row a'k <= bb  <=>  s*g >= 0
-            hi, _ = lpmax(a, A, b)
-            if hi is None:
+            hi, res_hi = lpmax(a, A, b)
+            if hi is None:                              # record why, rather than skip silently
+                st = linprog(-a, A_ub=A, b_ub=b, bounds=FREE, method="highs").status
+                skipped[f"base solve status {st}"] = skipped.get(f"base solve status {st}", 0) + 3
                 continue
             for r in range(3):
                 if hi <= bb + 1e-9:
                     counts["implied"] += 1
                     continue
                 g, c = V.target_3x2(P, r)
-                U, _ = lpmax(g[0], A, b); L = -lpmax(-g[0], A, b)[0]
                 A2, b2 = np.vstack([A, a]), np.append(b, bb)
-                U2, _ = lpmax(g[0], A2, b2); L2 = -lpmax(-g[0], A2, b2)[0]
+                sols = [lpmax(g[0], A, b)[0], lpmax(-g[0], A, b)[0], lpmax(g[0], A2, b2)[0], lpmax(-g[0], A2, b2)[0]]
+                if any(v is None for v in sols):
+                    skipped["target solve failed"] = skipped.get("target solve failed", 0) + 1
+                    continue
+                U, L, U2, L2 = sols[0], -sols[1], sols[2], -sols[3]
                 key = "tightens target" if (U - U2) + (L2 - L) > 1e-7 else "cuts set, not this target"
                 counts[key] += 1
-    return counts
+    return counts, skipped
 
 
 def T1b(reps=150):
@@ -206,7 +212,72 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    c = T4()
+    c, sk = T4()
     tot = sum(c.values())
     print("T4 3x2 true delta^0 sign rows x targets B_0..B_2: " +
-          "; ".join(f"{k} {v}/{tot}" for k, v in c.items()))
+          "; ".join(f"{k} {v}/{tot}" for k, v in c.items()) +
+          f"; not classified {sum(sk.values())}" + (f" ({'; '.join(f'{k}: {v}' for k, v in sk.items())})" if sk else "") +
+          f"  (total {tot + sum(sk.values())} = 300 designs x 2 rows x 3 targets)")
+
+
+# ---------------------------------------------------------------------------
+# Added after the Batch B review (Nov 2026).
+# ---------------------------------------------------------------------------
+SQ = [(0, 1), (0, 1)]                                   # the unit square [0,1]^2
+
+
+def _sq_max(c, A=None, b=None):
+    kw = dict(bounds=SQ, method="highs")
+    if A is not None:
+        kw.update(A_ub=np.atleast_2d(A), b_ub=np.atleast_1d(b))
+    r = linprog(-np.asarray(c, float), **kw)
+    return None if r.status != 0 else -r.fun
+
+
+def _sq_feasible(A, b):
+    return linprog(np.zeros(2), A_ub=np.atleast_2d(A), b_ub=np.atleast_1d(b), bounds=SQ, method="highs").status == 0
+
+
+def T1c():
+    """R2 step 4 with a target intercept. F = [0,1]^2, phi = 2 + x, U = 3. The face LP must be
+    {k in F, h'k >= U - phi0}; the old text wrote h'k >= U, here x >= 3, which is infeasible and so
+    reports 'moves' for every added row. Rows: x + y <= 1.2 (keeps part of the facet x = 1) and
+    x + y <= 0.8 (removes all of it)."""
+    phi0, h = 2.0, np.array([1.0, 0.0])
+    U = phi0 + _sq_max(h)
+    rows = []
+    for rhs in (1.2, 0.8):
+        a = np.array([1.0, 1.0])
+        brute_moves = (U - (phi0 + _sq_max(h, a, rhs))) > 1e-9
+        old_moves = not _sq_feasible(np.vstack([-h, a]), [-U, rhs])            # h'k >= U
+        new_moves = not _sq_feasible(np.vstack([-h, a]), [-(U - phi0), rhs])   # h'k >= U - phi0
+        rows.append((rhs, brute_moves, old_moves, new_moves))
+    old_ok = all(bm == om for _, bm, om, _ in rows)
+    new_ok = all(bm == nm for _, bm, _, nm in rows)
+    return rows, old_ok, new_ok
+
+
+def T4b():
+    """R2(e) wording. F = [0,1]^2, target x, rows N1: x + y <= 0.8 and N2: x <= 0.5. N1 added last
+    has zero gain for x, yet it is not implied by F cap N2 (it removes (0.5, 1)) and it lowers the
+    upper endpoint of x + y from 1.5 to 0.8. The old sentence 'redundant given the others' read as
+    'implied' is false; 'zero incremental gain for this target' is true."""
+    x, xy = np.array([1.0, 0.0]), np.array([1.0, 1.0])
+    N1, N2 = (xy, 0.8), (x, 0.5)
+    gain_x = _sq_max(x, [N2[0]], [N2[1]]) - _sq_max(x, [N2[0], N1[0]], [N2[1], N1[1]])
+    gain_xy = _sq_max(xy, [N2[0]], [N2[1]]) - _sq_max(xy, [N2[0], N1[0]], [N2[1], N1[1]])
+    implied = _sq_max(N1[0], [N2[0]], [N2[1]]) <= N1[1] + 1e-12      # R2(c) implication test
+    old_claim = (abs(gain_x) < 1e-12) <= implied                    # 'zero last-added gain => redundant (implied)'
+    new_claim = abs(gain_x) < 1e-12 and not implied and gain_xy > 0.5
+    return gain_x, gain_xy, implied, old_claim, new_claim
+
+
+if __name__ == "__main__":
+    rows, old_ok, new_ok = T1c()
+    print("T1c target intercept (phi = 2 + x on [0,1]^2): " +
+          "; ".join(f"row x+y<={r}: brute {'moves' if bm else 'keeps'}, old face LP {'moves' if om else 'keeps'}, "
+                    f"corrected face LP {'moves' if nm else 'keeps'}" for r, bm, om, nm in rows) +
+          f"; old step 4 agrees with brute force: {old_ok}  {'PASS' if new_ok and not old_ok else 'FAIL'}")
+    gx, gxy, imp, oc, nc = T4b()
+    print(f"T4b target-specific redundancy: last-added gain for x {gx:.3f}, for x+y {gxy:.3f}; implied by the others: {imp}; "
+          f"old 'redundant given the others' holds: {oc}  {'PASS' if nc and not oc else 'FAIL'}")

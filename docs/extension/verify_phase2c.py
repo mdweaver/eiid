@@ -187,7 +187,7 @@ for _ in range(300):
 check("C2 Prop M3: 2x2 closed forms = LP; NM = gamma*ER; dB-sign sets never empty", worst < 1e-8,
       f"max err {worst:.1e}")
 check("C2 Prop M3(b): dW>=0 set empty exactly when ER < MOB-", n_emp_ok, f"{n_empty} empty cases")
-check("C2 Prop M3(d): CR never empty, exactly one branch (ER != 0)", cr_ok)
+check("C2 Prop M3(d): CR never empty (continuous, no U_i), exactly one branch (ER != 0, gamma < 1)", cr_ok)
 check("C2 Prop M3(d): under realised CR, sign(D) = sign(ER)", sign_ok, f"{n_cr_true} populations satisfy CR")
 
 
@@ -256,14 +256,20 @@ for _ in range(100):
         return np.array(out)
     a = 0.37
     worst = max(worst, np.max(np.abs(assoc(a * k1 + (1 - a) * k2) - a * assoc(k1) - (1 - a) * assoc(k2))))
-    # ordering: build H with row r dominating row s elementwise in column c=0
+    # ordering (rebuilt after the Batch B review): H0[:, r, s] is row r's transition vector at vertex e_s.
+    # At each vertex where row 0 has the smaller column-0 rate, swap the WHOLE transition vectors of rows 0
+    # and 1. Every row stays a probability vector at every vertex, so M_H(x) is a valid transition matrix on
+    # the simplex, and M_H(x)[0,0] >= M_H(x)[1,0] there by linearity. (The old code swapped column-0 entries
+    # only, which breaks the row sums.)
     Hord = H0.copy()
-    Hord[0, 0, :] = np.maximum(H0[0, 0, :], H0[0, 1, :])
-    Hord[0, 1, :] = np.minimum(H0[0, 0, :], H0[0, 1, :])
+    for s_ in range(R):
+        if H0[0, 0, s_] < H0[0, 1, s_]:
+            Hord[:, 0, s_], Hord[:, 1, s_] = H0[:, 1, s_].copy(), H0[:, 0, s_].copy()
     m = m_of(Hord, X)
-    order_ok &= np.sum(pw * X[:, 0] * X[:, 1] * (m[:, 0, 0] - m[:, 1, 0])) >= -1e-14
+    valid = np.all(m >= -1e-14) and np.allclose(m.sum(2), 1) and np.all(m[:, 0, 0] >= m[:, 1, 0] - 1e-14)
+    order_ok &= valid and np.sum(pw * X[:, 0] * X[:, 1] * (m[:, 0, 0] - m[:, 1, 0])) >= -1e-14
 check("C4 Prop M5: superpopulation associations affine in k (R=C=3)", worst < 1e-12, f"max err {worst:.1e}")
-check("C4 Prop M5(a): mean-level ordering => dB*(r,s) >= 0", order_ok)
+check("C4 Prop M5(b): mean-level ordering (valid transition matrices, rebuilt) => dB*(r,s) >= 0", order_ok)
 
 
 # ---------------------------------------------------------------------------
@@ -385,6 +391,11 @@ w = np.ones(400) / 400
 m3 = X3[:, 2]                                   # constant (weakly nondecreasing) in x_0
 check("C5(c) R=3: m nondecreasing in x_0 but Cov(m, X_0) < 0 (no Chebyshev nesting)",
       wcov(m3, X3[:, 0], w) < 0, f"Cov = {wcov(m3, X3[:, 0], w):.4f}")
+# C5(c') (added after review, Batch B): the W1 association uses the tilted weights w^r ~ X_0 and
+# w^{not r} ~ 1 - X_0. E[X_3 | X_0] = (1 - X_0)/2 is preserved by both tilts, so both covariances are negative.
+cw1, cw0 = wcov(m3, X3[:, 0], X3[:, 0]), wcov(m3, X3[:, 0], 1 - X3[:, 0])
+check("C5(c') R=3: the same m has negative covariance with X_0 under BOTH W1 weights", cw1 < 0 and cw0 < 0,
+      f"Cov_w1 = {cw1:.4f}, Cov_w(not1) = {cw0:.4f}")
 
 
 # ---------------------------------------------------------------------------
@@ -403,6 +414,283 @@ for _ in range(500):
     cr = D * dW >= 0
     between = (0 <= D <= tp) or (tp <= D <= 0)
     ok &= cr == between
-check("C6 Prop N2.3: local identity and local CR <=> D(x) between 0 and tau'(x)", ok)
+check("C6 Prop N2.3 (structural tau_m, differentiable m): local identity and local CR <=> D(x) between 0 and tau_m'(x)", ok)
+
+
+# ===========================================================================
+# Added after the Batch B review (Nov 2026). Each check fails on the old statement and passes on the new one
+# (or, where marked, strengthens a check without anything failing).
+# ===========================================================================
+from fractions import Fraction as Fr
+from numpy.polynomial import Polynomial as Poly
+
+
+def int_gaps(sizes, ones, yes):
+    """All realised gaps D = B_1 - B_2 over integer tables: unit i has sizes[i] people, ones[i] in group 1 and
+    yes[i] positive outcomes. Returns the set of exact Fractions."""
+    N1, N0 = sum(ones), sum(n - o for n, o in zip(sizes, ones))
+    legal = [range(max(0, y - (n - o)), min(o, y) + 1) for n, o, y in zip(sizes, ones, yes)]
+    return {Fr(sum(z), N1) - Fr(sum(yes) - sum(z), N0) for z in itertools.product(*legal)}
+
+
+def two_by_two(sizes, ones, yes):
+    N = np.array(sizes, float); X = np.array(ones) / N; T = np.array(yes) / N
+    beta = np.zeros((len(N), 2, 2))
+    beta[:, 0, 0] = beta[:, 1, 0] = T; beta[:, :, 1] = 1 - beta[:, :, 0]   # any valid table: margins only matter
+    return Pop(N, np.column_stack([X, 1 - X]), beta)
+
+
+def cr_branches(P):
+    tgt = P.B(0, 0) - P.B(1, 0)
+    dW, dB = P.dW_rest(0, 0), P.dB_rest(0, 0)
+    return tgt, P.lp_range(tgt, rows_ge=[(dW, 0), (dB, 0)]), P.lp_range(tgt, rows_le=[(dW, 0), (dB, 0)])
+
+
+# C7. M2 is sharp for CONTINUOUS tables only (P-B1, P-E11). Old claim: every value in phi(F) is attained by a
+# unit table. Both referees' examples: the continuous CR set is {0}, no integer table satisfies CR; and under
+# a positive between sign the continuous lower end is 0 but the smallest integer gap is 2/15.
+ok7 = True; det = []
+for name, sizes, ones, yes in (("PI: 3 units of 4", [4, 4, 4], [1, 2, 3], [0, 1, 0]),
+                               ("EI: 2 precincts of 4", [4, 4], [1, 2], [1, 1])):
+    P = two_by_two(sizes, ones, yes)
+    tgt, plus, minus = cr_branches(P)
+    cont = [b for b in (plus, minus) if b is not None]
+    cont_has_zero = any(lo - 1e-9 <= 0 <= hi + 1e-9 for lo, hi in cont)
+    ig = int_gaps(sizes, ones, yes)
+    t = P.T[:, 0]; x = P.X[:, 0]
+    ER = wcov(t, x, P.pw) / wcov(x, x, P.pw)
+    gam = wcov(x, x, P.pw) / (P.mu[0] * (1 - P.mu[0]))
+    lo_cr, hi_cr = sorted([gam * ER, ER])
+    int_cr = [g for g in ig if lo_cr - 1e-12 <= float(g) <= hi_cr + 1e-12]
+    ok7 &= cont_has_zero and not int_cr
+    det.append(f"{name}: integer gaps {sorted(str(g) for g in ig)}, continuous CR contains 0: {cont_has_zero}, "
+               f"integer CR {'empty' if not int_cr else int_cr}")
+    if name.startswith("EI"):
+        dB = P.dB_rest(0, 0)
+        b_ge = P.lp_range(tgt, rows_ge=[(dB, 0)])
+        NMd = np.sum(P.pw * x * t) / P.mu[0] - np.sum(P.pw * (1 - x) * t) / (1 - P.mu[0])
+        int_lo = min(g for g in ig if float(g) >= NMd - 1e-12)
+        ok7 &= abs(b_ge[0]) < 1e-9 and int_lo == Fr(2, 15)
+        det.append(f"positive between sign: continuous lower end {b_ge[0]:.3f}, integer lower end {int_lo}")
+check("C7 Remark M2.1: continuous N1 accepts CR (and lower end 0) while no integer table does "
+      "(old 'attained by unit tables' fails for integer counts)", ok7, "; ".join(det))
+
+# C7a. Remark M2.1, lattice statement (2x2, margins only, sign rows on D): the integer gap set is the
+# continuous DD interval intersected with the lattice -Y/N0 + j (1/N1 + 1/N0); endpoints differ by less than
+# one step 1/(N mu (1-mu)). Brute force on tiny populations.
+ok7a, n7a = True, 0
+for _ in range(300):
+    p_ = int(rng.integers(2, 5)); sizes = rng.integers(1, 6, p_).tolist()
+    ones = [int(rng.integers(0, n + 1)) for n in sizes]; yes = [int(rng.integers(0, n + 1)) for n in sizes]
+    N1, N0 = sum(ones), sum(sizes) - sum(ones)
+    if N1 == 0 or N0 == 0:
+        continue
+    ig = sorted(int_gaps(sizes, ones, yes))
+    step = Fr(1, N1) + Fr(1, N0)
+    Ntot = sum(sizes); mu_ = Fr(N1, Ntot)
+    P = two_by_two(sizes, ones, yes)
+    lo, hi = P.lp_range(P.B(0, 0) - P.B(1, 0))
+    full = all(b - a == step for a, b in zip(ig[:-1], ig[1:]))
+    ok7a &= full and abs(float(ig[0]) - lo) < 1e-9 and abs(float(ig[-1]) - hi) < 1e-9 \
+        and step == 1 / (Ntot * mu_ * (1 - mu_))
+    n7a += 1
+check("C7a Remark M2.1 (2x2, margins only): integer gap set = DD interval on the lattice of step "
+      "1/(N mu(1-mu)), endpoints attained", ok7a, f"{n7a} tiny populations")
+
+# C7b. M2(d): with two slack dials (within signs on two columns, 2x3) the set of (eps1, eps2) that preserves a
+# conclusion (here: the width of the B_{1,1} interval stays <= c) is a frontier, not a
+# product of intervals, so the old 'the breakdown value is well defined' needs a scalar path.
+found = False
+for _ in range(60):
+    P = random_pop(p=10, R=2, C=3)
+    tgt = P.B(0, 0)
+    W0, W1 = P.dW_rest(0, 0), P.dW_rest(0, 1)
+    if P.lp_range(tgt, rows_ge=[(W0, 0), (W1, 0)]) is None:
+        continue
+    grid = np.linspace(0, 0.05, 7)
+    U = np.array([[(lambda r: np.nan if r is None else r[1] - r[0])(P.lp_range(tgt, rows_ge=[(W0, -e1), (W1, -e2)]))
+                   for e2 in grid] for e1 in grid])
+    if np.isnan(U).any():
+        continue
+    if not (U[6, 0] > U[0, 0] + 1e-6 and U[0, 6] > U[0, 0] + 1e-6):   # both dials must matter
+        continue
+    c = U[3, 3]
+    S = U <= c + 1e-12
+    prod = np.outer(S.any(1), S.any(0))
+    if (prod & ~S).any():
+        found = True
+        break
+check("C7b M2(d): the region of (eps1, eps2) keeping 'width <= c' is not a product of intervals "
+      "(breakdown frontier)", found)
+
+# C8. M3(d) at gamma = 1 (P-B3, P-E13): two pure units (0,0), (1,1): both CR branches are non-empty,
+# contradicting 'exactly one'. Under the corrected statement (gamma < 1 required) both give {D_ER}.
+P = Pop(np.array([1.0, 1.0]), np.array([[0.0, 1.0], [1.0, 0.0]]),
+        np.array([[[0.0, 1.0], [0.0, 1.0]], [[1.0, 0.0], [1.0, 0.0]]]))
+tgt, plus, minus = cr_branches(P)
+x = P.X[:, 0]; t = P.T[:, 0]
+ER = wcov(t, x, P.pw) / wcov(x, x, P.pw); gam = wcov(x, x, P.pw) / (P.mu[0] * (1 - P.mu[0]))
+check("C8 M3(d): gamma = 1 (pure units): both CR branches non-empty and equal to {D_ER} (old 'exactly one' fails)",
+      plus is not None and minus is not None and abs(gam - 1) < 1e-12 and
+      max(abs(plus[0] - ER), abs(plus[1] - ER), abs(minus[0] - ER), abs(minus[1] - ER)) < 1e-9,
+      f"gamma = {gam:.3f}, ER = {ER:.3f}, branches {plus}, {minus}")
+
+# C8b. M3(c) needs 'no unit-level restrictions' (P-B4, P-E12): a unit ordering beta_i1 >= beta_i2 + 0.1 removes
+# the equal-rates witness and makes {delta_B <= 0} empty.
+P = random_pop(p=15)
+P.T[:, 0] = np.clip(P.T[:, 0], 0.2, 0.8); P.T[:, 1] = 1 - P.T[:, 0]
+tgt = P.B(0, 0) - P.B(1, 0)
+dB = P.dB_rest(0, 0)
+Aeq, beq = P.equalities()
+Aub = [P.dB_rest(0, 0)]; bub = [0.0]                       # delta_B <= 0
+for i in range(P.p):
+    a = np.zeros(P.nvar()); a[P.idx(i, 1, 0)] = 1; a[P.idx(i, 0, 0)] = -1
+    Aub.append(a); bub.append(-0.1)                        # beta_i2 - beta_i1 <= -0.1
+r_ord = linprog(tgt, A_ub=np.array(Aub), b_ub=np.array(bub), A_eq=Aeq, b_eq=beq, bounds=[(0, 1)] * P.nvar(), method="highs")
+r_noord = P.lp_range(tgt, rows_le=[(dB, 0)])
+Aub2 = np.array(Aub[1:]); r_ordonly = linprog(tgt, A_ub=Aub2, b_ub=np.array(bub[1:]), A_eq=Aeq, b_eq=beq,
+                                             bounds=[(0, 1)] * P.nvar(), method="highs")
+check("C8b M3(c): with a unit ordering the delta_B <= 0 set is empty although each part alone is feasible "
+      "(old 'never refuted' fails once U_i are present)", r_ord.status == 2 and r_noord is not None and r_ordonly.status == 0)
+
+# C9. M5(c) under M1 (P-B7): six equally weighted units, districts {.1,.2,.3} and {.7,.8,.9}, both rows' mean
+# .8 + .1x in district 1 and .2 + .1x in district 2 (common positive slopes, valid rates). Pooled delta*_W < 0,
+# contradicting the old 'both contextual slopes >= 0 => delta*_W >= 0' for M1. The corrected M5(c) adds the
+# between-district term: delta*_W = sum_s mu_s [ E_{w^s} Cov(X, m_s | D) + Cov_{w^s}(E[X|D], E[m_s|D]) ].
+x6 = np.array([.1, .2, .3, .7, .8, .9]); d6 = np.array([0, 0, 0, 1, 1, 1]); p6 = np.ones(6) / 6
+m6 = np.where(d6 == 0, .8, .2) + .1 * x6
+mu6 = p6 @ x6
+def dW2(x, p, m1, m0):
+    mu = p @ x
+    return mu * wcov(x, m1, p * x) + (1 - mu) * wcov(x, m0, p * (1 - x))
+pooled = dW2(x6, p6, m6, m6)
+def decomp(x, p, d, m1, m0):
+    tot = 0.0
+    for wts, m in ((p * x, m1), (p * (1 - x), m0)):
+        share = wts.sum()
+        wq = wts / share
+        within = sum(wq[d == g].sum() * wcov(x[d == g], m[d == g], wq[d == g]) for g in (0, 1))
+        ex = np.array([np.sum(wq[d == g] * x[d == g]) / wq[d == g].sum() for g in d])
+        em = np.array([np.sum(wq[d == g] * m[d == g]) / wq[d == g].sum() for g in d])
+        tot += share * (within + wcov(ex, em, wq))
+    return tot
+dec = decomp(x6, p6, d6, m6, m6)
+per_district = [dW2(x6[d6 == g], p6[d6 == g] / p6[d6 == g].sum(), m6[d6 == g], m6[d6 == g]) for g in (0, 1)]
+check("C9 M5(c): common positive slopes under M1, pooled delta*_W < 0 (old M5(c) fails); the corrected "
+      "decomposition with the between-district term is exact; within each district delta*_W > 0",
+      pooled < 0 and abs(pooled + 0.0492711) < 1e-6 and abs(dec - pooled) < 1e-12 and min(per_district) > 0,
+      f"pooled {pooled:.7f}; decomposition {dec:.7f}; per district {per_district[0]:.5f}, {per_district[1]:.5f}")
+
+# C10. N2.2(b) needs the complete finite support (P-B9). True support {1/4, 1/2, 3/4}, row means (.4,.4,.4)
+# and (8/15,.7,.8): tau = (.5,.55,.5). On a grid keeping only the extremes, (.5,.5) at both extremes passes the
+# LP, but no monotone extension reaches tau(1/2) = .55: the old 'every point extends; nothing lost' fails.
+xs3 = np.array([.25, .5, .75]); m1_3 = np.array([.4, .4, .4]); m0_3 = np.array([8 / 15, .7, .8])
+tau3 = xs3 * m1_3 + (1 - xs3) * m0_3
+grid_point_ok = all(abs(x_ * .5 + (1 - x_) * .5 - tau3[j]) < 1e-12 for j, x_ in ((0, .25), (2, .75)))
+# extension: m1(1/2), m0(1/2) with .5 <= m(1/2) <= .5 (both rows nondecreasing) and the accounting at 1/2
+ext = linprog(np.zeros(2), A_eq=[[.5, .5]], b_eq=[tau3[1]], bounds=[(.5, .5), (.5, .5)], method="highs")
+check("C10 N2.2(b): a grid point on a strict subset of the support has no monotone extension "
+      "(old 'restricting to support points loses nothing' fails on a grid)",
+      np.allclose(tau3, [.5, .55, .5]) and grid_point_ok and ext.status == 2)
+
+# C10b. N2.2(a): conditioning on X alone is not the sharp version when size is informative (P-B10). X = 1/2,
+# two equiprobable sizes; size 1: T in {0,1} equiprobably; size 2: T = 1/2. The model E[beta|X,N] = m(X) forces
+# m(1/2) = (.5,.5) (both rates equal T at size 1). E[S(X,T)|X] and S(x, tau) both admit (.75, .25).
+def in_S(b, x_, t_):
+    return 0 <= b[0] <= 1 and 0 <= b[1] <= 1 and abs(x_ * b[0] + (1 - x_) * b[1] - t_) < 1e-12
+cand = (.75, .25)
+# E[S|X=1/2] = 1/2 E[S|size 1] + 1/2 S(1/2, 1/2), with E[S|size 1] = {(.5,.5)}
+x_cond = in_S((2 * cand[0] - .5, 2 * cand[1] - .5), .5, .5)
+s_tau = in_S(cand, .5, .5)
+v_cond = cand == (.5, .5)                                    # size 1 alone forces (.5, .5)
+check("C10b N2.2(a): the X-conditional set and S(x, tau) admit (.75,.25), which the V=(X,N) model excludes",
+      x_cond and s_tau and not v_cond)
+
+# C11. N2.3 as an observable restriction (P-B11): on support {1/4,1/2,3/4} add h = (x-1/4)(x-1/2)(x-3/4) to both
+# rows of m1 = .7, m0 = .3. The law on the support is unchanged, but tau'(1/2) moves by -1/16. Model 1 has local
+# within effect 0 and gap .4, so local CR holds with D = tau'(1/2); the other compatible derivative gives the
+# threshold .3375 < .4, so an LP using it excludes the true gap.
+z = Poly([0, 1]); h = (z - .25) * (z - .5) * (z - .75)
+grid01 = np.linspace(0, 1, 1001)
+valid2 = np.all((.7 + h(grid01) >= 0) & (.7 + h(grid01) <= 1) & (.3 + h(grid01) >= 0) & (.3 + h(grid01) <= 1))
+tau1 = .3 + .4 * z; tau2 = z * (.7 + h) + (1 - z) * (.3 + h)
+same_law = np.allclose(tau1(xs3), tau2(xs3)) and np.allclose(h(xs3), 0)
+d1, d2 = tau1.deriv()(.5), tau2.deriv()(.5)
+check("C11 N2.3: two compatible models, same law on the support, local thresholds .4 and .3375; the second "
+      "excludes the first model's gap .4 (old N2.3 as an observable restriction fails)",
+      valid2 and same_law and abs(d2 - d1 + 1 / 16) < 1e-12 and d2 < .4 <= d1 + 1e-12,
+      f"tau'(1/2) = {d1:.4f} vs {d2:.4f}")
+
+# C12. Section 6 binning (P-B13): equal bin weights at x = .25, .75, m1 = x, m0 = 0. E[T|bin] = E[X^2] = .3125,
+# but the ordinary bin-average rates at E[X] = .5 give .25: averaging Lemma N2.1 with [CE-cvx] fails. The
+# person-weighted bin rate E_b[X m1]/E_b[X] = .625 reproduces .3125 (Lemma N2.4).
+xb = np.array([.25, .75]); m1b = xb; m0b = np.zeros(2)
+ET = np.mean(xb * m1b + (1 - xb) * m0b); xbar = xb.mean()
+old_bin = xbar * m1b.mean() + (1 - xbar) * m0b.mean()
+m1bar = np.mean(xb * m1b) / xbar; m0bar = np.mean((1 - xb) * m0b) / (1 - xbar)
+new_bin = xbar * m1bar + (1 - xbar) * m0bar
+# Lemma N2.4 on random monotone designs: bin rates reproduce E_b T, the row targets, and the ordering
+ok12 = True
+for _ in range(200):
+    J = 30; xs_ = np.sort(rng.uniform(0, 1, J)); pw_ = rng.uniform(1, 5, J); pw_ /= pw_.sum()
+    a1 = np.sort(rng.uniform(0, 1, J)); a0 = np.sort(rng.uniform(0, 1, J))      # nondecreasing rows
+    cuts = np.sort(rng.choice(np.arange(1, J), 4, replace=False)); bins = np.split(np.arange(J), cuts)
+    r1, r0, xbars = [], [], []
+    for b_ in bins:
+        w_ = pw_[b_] / pw_[b_].sum(); xb_ = w_ @ xs_[b_]
+        r1.append(w_ @ (xs_[b_] * a1[b_]) / xb_); r0.append(w_ @ ((1 - xs_[b_]) * a0[b_]) / (1 - xb_)); xbars.append(xb_)
+        ok12 &= abs(xb_ * r1[-1] + (1 - xb_) * r0[-1] - w_ @ (xs_[b_] * a1[b_] + (1 - xs_[b_]) * a0[b_])) < 1e-12
+    Pb = np.array([pw_[b_].sum() for b_ in bins])
+    ok12 &= abs(np.sum(Pb * np.array(xbars) * np.array(r1)) - pw_ @ (xs_ * a1)) < 1e-12
+    ok12 &= np.all(np.diff(r1) >= -1e-12) and np.all(np.diff(r0) >= -1e-12)
+check("C12 Lemma N2.4: ordinary bin averages break accounting (.25 vs .3125; old binning step fails); "
+      "person-weighted bin rates reproduce it (.625) and keep row targets and monotone order",
+      abs(ET - .3125) < 1e-12 and abs(old_bin - .25) < 1e-12 and abs(m1bar - .625) < 1e-12
+      and abs(new_bin - ET) < 1e-12 and ok12)
+
+# C12b. Section 6, degree selection (P-B14): LOO choice between intercept-only and intercept+slope in a balanced
+# two-level design (true slope 0). Given that the slope model is chosen, the nominal 95% slope interval covers
+# about 1 - .05/P(|Z| > sqrt 2) = 0.682.
+from scipy.stats import norm as _norm
+nb, reps_b = 200, 40000
+xx = np.repeat([-1.0, 1.0], nb // 2)
+E_ = rng.standard_normal((reps_b, nb))
+b1 = E_ @ xx / nb                                          # slope estimate, var 1/n (sigma known = 1)
+rss1 = np.sum((E_ - E_.mean(1, keepdims=True)) ** 2, 1)
+rss2 = np.sum((E_ - E_.mean(1, keepdims=True) - b1[:, None] * xx) ** 2, 1)
+sel = rss2 / (1 - 2 / nb) ** 2 < rss1 / (1 - 1 / nb) ** 2
+cover = np.abs(b1) * np.sqrt(nb) <= 1.959964
+cond = cover[sel].mean()
+theory = 1 - .05 / (2 * _norm.sf(np.sqrt(2)))
+check("C12b Section 6: fixed-degree inference after LOO degree selection under-covers (conditional coverage "
+      "~0.68, not 0.95)", abs(cond - theory) < 0.02 and cond < 0.8,
+      f"conditional coverage {cond:.3f} (theory {theory:.3f}); selected in {sel.mean():.3f}")
+
+# C13. N2.3(d), smooth witness (P-B12; strengthens 1b V6, nothing fails): X ~ U[1/5, 2/5], m1 = x - x^2/2,
+# m0 = 1 - x^2/2. Local within effect x m1' + (1-x) m0' = 0 everywhere; aggregate delta*_W = -1/47250
+# (finite design with equal mass at the endpoints: -1/5250).
+m1s = z - z * z / 2; m0s = 1 - z * z / 2
+loc0 = np.allclose((z * m1s.deriv() + (1 - z) * m0s.deriv()).coef, 0)
+def Eu(f):
+    F_ = f.integ(); return 5 * (F_(.4) - F_(.2))
+def wterm(wf, m):
+    return Eu(wf * z * m) - Eu(wf * z) * Eu(wf * m) / Eu(wf)
+dW_cont = wterm(z, m1s) + wterm(1 - z, m0s)
+xe = np.array([.2, .4]); pe = np.array([.5, .5])
+dW_fin = dW2(xe, pe, m1s(xe), m0s(xe))
+check("C13 N2.3(d): smooth rows with zero local within effect everywhere, aggregate delta*_W < 0",
+      loc0 and abs(dW_cont + 1 / 47250) < 1e-14 and abs(dW_fin + 1 / 5250) < 1e-14,
+      f"continuous {dW_cont:.4e} (-1/47250), finite {dW_fin:.4e} (-1/5250)")
+
+# C14. Definition 1, W2 is ONE pooled sum (P-E1): two units of equal size; every original group's rate rises by
+# 2 points from unit 1 to unit 2, yet W1 = -0.02633 and W2 = +0.00110. The old label 'each group separately'
+# would make W2 a per-group direction; it is not, and W1 and W2 can disagree in sign.
+X14 = np.array([[.2, .7, .1], [.6, .05, .35]]); m14 = np.array([[.4, .8, .1], [.42, .82, .12]]); p14 = np.array([.5, .5])
+beta14 = np.stack([m14, 1 - m14], axis=2)
+P14 = Pop(np.array([1.0, 1.0]), X14, beta14)
+W1_14 = P14.value(P14.dW_rest(0, 0))
+W2_14 = sum(P14.mu[s] * wcov(X14[:, 0], m14[:, s], p14 * X14[:, s]) for s in range(3))
+check("C14 Def. 1: every group's rate rises, W1 < 0 < W2 (W2 is one pooled sum, not a per-group direction)",
+      abs(W1_14 + 0.02633) < 5e-6 and abs(W2_14 - 0.00110) < 5e-6, f"W1 {W1_14:.5f}, W2 {W2_14:.5f}")
 
 print(f"\n{sum(results)}/{len(results)} PASS")

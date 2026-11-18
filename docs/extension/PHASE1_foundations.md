@@ -55,7 +55,7 @@ E[\beta_{irc}\mid X_i,N_i]=e_r^\top H_cX_i=\sum_{s=1}^R H_{c,rs}X_{is}\qquad\tex
 $$
 Rows of $\beta$ sum to 1, so $\sum_c e_r^\top H_c x=1=\mathbf 1^\top x$ for $P_X$-a.e. $x\in A$. Under the rank condition A5 this forces
 $$\textstyle\sum_{c=1}^C H_c=\mathbf 1\mathbf 1^\top=:J. \tag{1.5}$$
-(Proof in 2a Lemma 1(b). With $d_r^\top=e_r^\top(\sum_cH_c-J)$, the identity gives $(d_r^\top x)(\mathbf 1^\top x)=0$ on $\operatorname{supp}P_X\cap A$, which is a quadratic form in $x$, so A5 gives $d_r=0$. *Corrected after review:* an earlier version argued from "an open subset of the simplex", which was never assumed.)
+(Proof in 2a Lemma 1(b). With $d_r^\top=e_r^\top(\sum_cH_c-J)$, the identity gives $(d_r^\top x)(\mathbf 1^\top x)=0$ on $\operatorname{supp}_AP_X$, which is a quadratic form in $x$, so A5 gives $d_r=0$. *Corrected after review:* an earlier version argued from "an open subset of the simplex", which was never assumed.)
 (2×2 dictionary, with row 1 = black and $X_1=X$: $w_0=H_{22}$, $w_1=H_{21}-H_{22}$, $b_0=H_{12}$, $b_1=H_{11}-H_{12}$.)
 
 **Observable implication.** Taking $E[\cdot\mid X]$ of (1.1),
@@ -209,8 +209,8 @@ Each entry gives the statement, its mathematical role in the bounds, what it mea
 *Testable:* sensitivity to trimming $A$.
 
 **A5. Rank / richness:** for every symmetric $R\times R$ matrix $D$,
-$$x^\top Dx=0\ \ \forall x\in\operatorname{supp}P_X\cap A\ \Longrightarrow\ D=0,$$
-i.e. $\operatorname{supp}P_X\cap A$ lies in no quadric of the simplex. This is a rank condition on the quadratic regression, not just "variation in $X$". For $R=2$ it means at least 3 distinct values of $X$. For $R=3$ it needs six support points that do not lie on a common conic: three, four or five distinct compositions are never enough (2a Remark 1.1). A5 also implies that $A$ is full-dimensional (2a Remark 5.2).
+$$x^\top Dx=0\ \ \forall x\in\operatorname{supp}_AP_X\ \Longrightarrow\ D=0,$$
+i.e. $\operatorname{supp}_AP_X$ lies in no quadric of the simplex. Here $\operatorname{supp}_AP_X:=\operatorname{supp}(P_X|_A)$ is the support of the restricted measure $E\mapsto P(X\in A\cap E)$. It equals $\operatorname{supp}P_X$ when $P(X\in A)=1$, but can be smaller than $\operatorname{supp}P_X\cap A$ otherwise ($X\sim U[0,1]$, $A=\{1/2\}$ gives the empty set). *(Corrected after review, Batch B, Nov 2026: earlier stated on $\operatorname{supp}P_X\cap A$; see 2a §0.1.)* This is a rank condition on the quadratic regression, not just "variation in $X$". For $R=2$ it means at least 3 distinct values of $X$. For $R=3$ it needs six support points that do not lie on a common conic: three, four or five distinct compositions are never enough (2a Remark 1.1). A5 also implies that $A$ is full-dimensional (2a Remark 5.2).
 *Role:* point-identifies $Q$ (Lemma 1a).
 *Transitions:* fails, or nearly fails, when shares barely vary, e.g. stable turnout across precincts for $R=3$. This is JKST's "gender" problem.
 *Violation:* $Q$ is weakly identified, the bound inherits huge variance, and $\Theta_O$ is very wide or unstable.

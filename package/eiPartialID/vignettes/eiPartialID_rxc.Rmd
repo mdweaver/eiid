@@ -280,6 +280,12 @@ How to read and report these:
   between estimated pieces are excluded by the assumptions, but a confidence
   interval may still cover them. The pieces carry no probability weights, and
   the hull (`union = "hull"`) includes the gaps.
+* **Write each belief down first.** Before looking at the tightened result,
+  record for each belief the row, column, population and denominator,
+  geography, comparison (W1, pair or W2) and the independent reason for it
+  (a survey or linked records, and how well it transfers to this electorate).
+  Report the result without the belief (the `base_*` columns) and, if the
+  direction is contested, with the opposite sign.
 * **What a sign does not mean.** A sign on $\delta_W$ is a statement about a
   weighted average over units. It does not say that every precinct, every
   district, or every rival group satisfies the direction, and it is not an

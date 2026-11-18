@@ -130,3 +130,38 @@ m_dist = np.minimum(Zi @ g1, Zi @ g2).mean()                 # Sig = I: Var(Y - 
 ok(f"Thm P3.4(ii): two active gradients equal on supp(Z) give mean {m_same:.4f} (normal limit; the earlier "
    f"'non-singleton => negative mean' fails), distinct ones give {m_dist:.4f} ~ {-1/np.sqrt(2*np.pi):.4f}",
    abs(m_same) < 0.01 and abs(m_dist + 1 / np.sqrt(2 * np.pi)) < 0.01)
+
+# ---------- Workstream 3: Proposition P3.5(b2) ----------
+from scipy.stats import chi2, norm
+# A small LP family: phi_U(b) = max{gam'k : b + A k >= 0}, k in R^2, m = 8 constraints (s(b) = b).
+m_, A_ = 8, None
+ang = np.linspace(0, 2 * np.pi, m_, endpoint=False)
+A_ = -np.column_stack([np.cos(ang), np.sin(ang)])           # b_j - a_j'k >= 0: a bounded polygon
+gam_ = np.array([1.0, 0.3])
+b0 = np.full(m_, 1.0) + 0.02 * np.arange(m_)
+
+def primal(b):
+    r = linprog(-gam_, A_ub=-A_, b_ub=b, bounds=[(None, None)] * 2, method="highs")
+    return -r.fun, -r.ineqlin.marginals                      # value, optimal dual (>= 0)
+
+phiU0, _ = primal(b0)
+# (1) weak duality: every dual-feasible lambda (A'lambda = -gam, lambda >= 0) gives lambda'b0 >= phi_U(b0)
+viol = 0
+for _ in range(500):
+    r = linprog(rng.exponential(size=m_), A_eq=A_.T, b_eq=-gam_, bounds=[(0, None)] * m_, method="highs")
+    lam = r.x
+    viol += lam @ b0 < phiU0 - 1e-9
+ok("Prop P3.5(b2) step 1: every dual-feasible lambda gives an upper bound at beta_0 (500 random duals)", viol == 0)
+
+# (2) coverage of the projection version with a data-dependent candidate set (the plug-in optimal dual only)
+n_, reps_ = 400, 3000
+kq = np.sqrt(chi2.ppf(0.95, m_))
+cover_proj = cover_naive = 0
+for _ in range(reps_):
+    bh = b0 + rng.standard_normal(m_) / np.sqrt(n_)
+    val, lam = primal(bh)
+    se = np.linalg.norm(lam) / np.sqrt(n_)
+    cover_proj += phiU0 <= lam @ bh + kq * se
+    cover_naive += phiU0 <= lam @ bh + norm.ppf(0.95) * se
+ok(f"Prop P3.5(b2)(ii): projection upper bound with a data-dependent candidate covers {cover_proj / reps_:.3f} "
+   f">= 0.95 (one-candidate z-bound: {cover_naive / reps_:.3f})", cover_proj / reps_ >= 0.95)

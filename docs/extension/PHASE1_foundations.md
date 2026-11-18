@@ -27,7 +27,7 @@ There are units (precincts) $i=1,\dots,p$ nested in districts $d=1,\dots,D$. $D_
 $$
 W_i=(N_i,\;X_i,\;T_i,\;Z_i,\;D_i),\qquad X_i\in\Delta^{R-1},\quad T_i\in\Delta^{C-1},
 $$
-where $\Delta^{k-1}=\{v\in[0,1]^k:\mathbf 1^\top v=1\}$, $X_{ir}=N_{ir}/N_i$ is the row margin (e.g. vote shares in election 1, including abstention), and $T_{ic}$ is the column margin (e.g. shares in election 2: abstain, party A, party B, …). $Z_i\in\mathcal Z\subseteq\mathbb R^{k_z}$ are other covariates, such as $\log N_i$ or census variables.
+where $\Delta^{k-1}=\{v\in[0,1]^k:\mathbf 1^\top v=1\}$, $X_{ir}=N_{ir}/N_i$ is the row margin (e.g. vote shares in election 1, including abstention), and $T_{ic}$ is the column margin (e.g. shares in election 2: abstain, party A, party B, …). $Z_i\in\mathcal Z\subseteq\mathbb R^{k_z}$ are other covariates, such as $\log N_i$ or census variables. *(Scope after review: Phases 2a–3 use no covariates other than the district $D_i$. Covariate adjustment is a planned extension, Phase 2c, because it needs stronger assumptions; see §1.6.)*
 
 **Latent quantities.** These are the unit cell counts $N_{irc}$ (the unobserved $R\times C$ table) and the transition probabilities $\beta_{irc}=N_{irc}/N_{ir}$, defined when $N_{ir}>0$. Write $\beta_i=[\beta_{irc}]\in\mathfrak B:=(\Delta^{C-1})^R$ (each row is a point in the simplex).
 
@@ -53,8 +53,9 @@ Because $\mathbf 1^\top X=1$, an affine function of $X$ is a *homogeneous linear
 $$
 E[\beta_{irc}\mid X_i,N_i]=e_r^\top H_cX_i=\sum_{s=1}^R H_{c,rs}X_{is}\qquad\text{a.s. on }\{X_i\in A\}. \tag{1.4}
 $$
-Rows of $\beta$ sum to 1, so $\sum_c e_r^\top H_c x=1=\mathbf 1^\top x$ on an open subset of the simplex, which forces
+Rows of $\beta$ sum to 1, so $\sum_c e_r^\top H_c x=1=\mathbf 1^\top x$ for $P_X$-a.e. $x\in A$. Under the rank condition A5 this forces
 $$\textstyle\sum_{c=1}^C H_c=\mathbf 1\mathbf 1^\top=:J. \tag{1.5}$$
+(Proof in 2a Lemma 1(b). With $d_r^\top=e_r^\top(\sum_cH_c-J)$, the identity gives $(d_r^\top x)(\mathbf 1^\top x)=0$ on $\operatorname{supp}P_X\cap A$, which is a quadratic form in $x$, so A5 gives $d_r=0$. *Corrected after review:* an earlier version argued from "an open subset of the simplex", which was never assumed.)
 (2×2 dictionary, with row 1 = black and $X_1=X$: $w_0=H_{22}$, $w_1=H_{21}-H_{22}$, $b_0=H_{12}$, $b_1=H_{11}-H_{12}$.)
 
 **Observable implication.** Taking $E[\cdot\mid X]$ of (1.1),
@@ -75,7 +76,7 @@ Check: $2\times2\Rightarrow1$ (JKST's $w_1$, with $K_{1,12}=c_1/2-w_1$). **$2\ti
 $$
 B^*_{rc}(K)=\frac{1}{\mu_r}\Big[\sum_{s}Q_{c,rs}\mu_{rs}+\sum_{s\neq r}K_{c,rs}\mu_{rs}\Big],\qquad \mu_{rs}:=E[NX_rX_s],\ \mu_r:=E[NX_r]. \tag{1.8}
 $$
-This is *affine in $K$* with sensitivities $\partial B^*_{rc}/\partial K_{c,rs}=\mu_{rs}/\mu_r$ (for 2×2 this is JKST's $r$, eq. 18).
+This is *affine in $K$*. In the ambient entries $K_{c,rs}$ (before skew-symmetry and $\sum_cK_c=0$ are imposed), the coefficient of $K_{c,rs}$ is $\mu_{rs}/\mu_r$; for 2×2 this is JKST's $r$, eq. 18. In free coordinates see 2a Prop. 7. The formula requires $P(X\in A)=1$ (2a Lemma 2; 2a Prop. 7′ treats units outside $A$).
 
 ### 1.4 Constraint sets: the outer set (generalised JKST Prop. 2/3)
 
@@ -99,7 +100,7 @@ $$\kappa_c\in\Big[\max\{\ell_c,-\textstyle\sum_{c'\neq c}h_{c'}\},\ \min\{h_c,-\
 
 ### 1.5 The sharp identification region
 
-**Primitive objects.** Let $(\Omega,\mathcal F,\mathbb Q)$ carry $(W,\beta)$. The observable law is $P=\mathbb Q\circ W^{-1}$. The conditioning σ-algebra is $\mathcal G=\sigma(X,N,Z)$ under A3; it is $\sigma(X,Z)$ if A3 is dropped and a covariate stands in for $N$. A **structure** is a pair $s=(H,\mathbb Q_{\beta\mid W})$. The model $\mathcal M(A)$ is the set of laws $\mathbb Q$ such that
+**Primitive objects.** Let $(\Omega,\mathcal F,\mathbb Q)$ carry $(W,\beta)$. The observable law is $P=\mathbb Q\circ W^{-1}$. The conditioning σ-algebra is $\mathcal G=\sigma(X,N)$ (with $D$ added in Phase 2b). *(Corrected after review: an earlier version conditioned on $Z$ as well while the mean $M_H(X)$ did not depend on $Z$, so (S2) did not follow from A2–A3 as stated. Covariates are a planned extension, §1.6.)* A **structure** is a pair $s=(H,\mathbb Q_{\beta\mid W})$. The model $\mathcal M(A)$ is the set of laws $\mathbb Q$ such that
 
 * (S1) $\beta\in\mathfrak B$ a.s. and $T=\beta^\top X$ a.s. (A1);
 * (S2) $E_{\mathbb Q}[\beta\mid\mathcal G]=M_H(X):=[e_r^\top H_cX]_{rc}$ a.s. on $\{X\in A\}$ (A2, A3).
@@ -114,7 +115,7 @@ $\Theta_I$ is a correspondence $P\mapsto 2^{\mathcal K}$: it contains exactly th
 
 **Theorem 1 (to prove).** Assume A1–A3 and that $\mathcal F$ is rich enough to allow auxiliary randomisation. Then
 $$
-K\in\Theta_I(P;A)\iff \langle u,M_{Q+K}(x)\rangle\le E\big[h_S(u;X,T)\mid X=x,N=n,Z=z\big]\quad\forall u\in\mathbb S^{RC-1},\ P\text{-a.e. }(x,n,z),\ x\in A, \tag{1.12}
+K\in\Theta_I(P;A)\iff \langle u,M_{Q+K}(x)\rangle\le E\big[h_S(u;X,T)\mid X=x,N=n\big]\quad\forall u\in\mathbb S^{RC-1},\ P\text{-a.e. }(x,n),\ x\in A, \tag{1.12}
 $$
 equivalently $M_{Q+K}(x)\in\mathbb E[S(X,T)\mid\mathcal G]$, the conditional Aumann (selection) expectation. Tools: Hiai–Umegaki conditional selection expectation, the Kuratowski–Ryll-Nardzewski measurable selection theorem, and Beresteanu, Molchanov & Molinari (2011). For 2×2 conditioned on $X$ only, (1.12) reduces *exactly* to JKST Prop. 1, which confirms their "tightest bound" claim in that case.
 
@@ -122,9 +123,9 @@ equivalently $M_{Q+K}(x)\in\mathbb E[S(X,T)\mid\mathcal G]$, the conditional Aum
 $$
 \Theta_I(P;A)\ \subseteq\ \Theta_X(P;A)\ \subseteq\ \Theta_O(P;A). \tag{1.13}
 $$
-$\Theta_X$ is (1.12) conditioning on $X$ only, i.e. JKST Prop. 1; the gap $\Theta_I\subsetneq\Theta_X$ appears when the model conditions on $N$ (or $Z$) and $E[h_S\mid X,N]$ varies with $N$. $\Theta_O$ is (1.9). The second inclusion is the Jensen step. **Equality condition (conjecture, to prove or refute):** $\Theta_X=\Theta_O$ if, for a.e. $x$, $h_S(u;x,\cdot)$ is affine on the conditional support of $T\mid X=x$ for every $u$ that is active at the optimum. In 2×2 this means $T/(1-X)$ does not straddle 1 (and $T/X$ does not straddle 0 or 1) within an $X$-slice.
+$\Theta_X$ is (1.12) conditioning on $X$ only, i.e. JKST Prop. 1; the gap $\Theta_I\subsetneq\Theta_X$ appears when the model conditions on $N$ and $E[h_S\mid X,N]$ varies with $N$. $\Theta_O$ is (1.9). The second inclusion is the Jensen step. **Equality condition (conjecture, to prove or refute):** $\Theta_X=\Theta_O$ if, for a.e. $x$, $h_S(u;x,\cdot)$ is affine on the conditional support of $T\mid X=x$ for every $u$ that is active at the optimum. In 2×2 this means $T/(1-X)$ does not straddle 1 (and $T/X$ does not straddle 0 or 1) within an $X$-slice.
 
-**Support caveat.** (1.8) uses the linear model on all of $\operatorname{supp}(X)$, so $A\supseteq\operatorname{supp}(X)$ is required for the formula. If $A\subsetneq\operatorname{supp}(X)$, the sharp set for $B^*$ must use the model-free Aumann bound on $\operatorname{supp}(X)\setminus A$ (to formalise). The package sets $A=$ the range of the data, which is consistent with this.
+**Support caveat.** (1.8) uses the linear model on all of $\operatorname{supp}(X)$, so $A\supseteq\operatorname{supp}(X)$ is required for the formula. If $A\subsetneq\operatorname{supp}(X)$, the bound for $B^*$ adds the model-free Duncan–Davis term of the units outside $A$; this is formalised in 2a Prop. 7′. The package sets $A=$ the range of the data, which is consistent with this.
 
 ### 1.6 Covariates and district fixed effects
 
@@ -134,7 +135,7 @@ Write the district-specific coefficient matrices as $H_c^{(d)}$.
 |---|---|---|---|
 | **M0** pooled | $e_r^\top H_cX$ (no district) | $K\in\mathcal K$ | $\Theta_O(P;A)$ |
 | **M1** district intercepts, common contextual effects | $e_r^\top H_cX+\zeta_{c,d,r}$, $\ \sum_c\zeta_{c,d}=0$, $\ \zeta_{c,1}=0$ | common $K\in\mathcal K$ | $\bigcap_d\Theta_O^{(d)}$ |
-| **M1′** slopes depend on district covariates $V_d$ | $e_r^\top(H_c+\textstyle\sum_\ell V_{d\ell}G_{c\ell})X+\zeta_{c,d,r}$ | $K$ and the skew parts of $G$ | polytope; to derive |
+| **M1′** slopes depend on district covariates $V_d$ *(planned, Phase 2c; needs linearity in the covariates and a joint support condition)* | $e_r^\top(H_c+\textstyle\sum_\ell V_{d\ell}G_{c\ell})X+\zeta_{c,d,r}$ | $K$ and the skew parts of $G$ | polyhedron; to derive |
 | **M2** saturated | $e_r^\top H^{(d)}_cX$, all district-specific | $K^{(d)}$ for each $d$ | $\prod_d\Theta_O(P_d;A_d)$ |
 
 Here $\Theta_O^{(d)}=\{K:(Q^{(d)}_c+\operatorname{skew}(\zeta_{c,d}\mathbf1^\top)+K_c)v\ge0\ \forall v\in\operatorname{vert}(A_d),\ \forall c\}$, with $A_d$ the convex hull of the support of $X$ in district $d$. JKST App. C is M1 with a continuous $Z$.
@@ -148,6 +149,34 @@ Here $\Theta_O^{(d)}=\{K:(Q^{(d)}_c+\operatorname{skew}(\zeta_{c,d}\mathbf1^\top
 * **(D4) When dummies matter.** Under M1, $E[\beta\mid X,N]=M_H(X)+E[\zeta_D\mid X,N]$. So M0, which conditions on $(X,N)$, holds (with a shifted intercept) iff $E[\zeta_D\mid X,N]$ is affine in $X$ and does not depend on $N$, e.g. when $D\perp(X,N)$. **M0 is misspecified when district effects are correlated with $X$ non-affinely, or with precinct size.** *(Corrected after review: an earlier version conditioned on $X$ only and claimed $D\perp X$ suffices; see 2b Prop. D4(b).)* This is an ecological version of omitted-variable bias. If $\zeta\equiv0$, then $\Theta^{M1}=\Theta_O(P;\operatorname{conv}\bigcup_dA_d)=\Theta^{M0}$: dummies cost precision but neither help nor hurt identification. Corollary: dummies (i) protect against between-district aggregation bias, and (ii) can tighten bounds through (D3). M0 and M1 are **non-nested**; M2 is weaker than both.
 * **(D5) M2 sums intervals.** $\mathcal B^{*,M2}_I=\sum_d\omega_d[\,B^{*}_{d,L},B^{*}_{d,U}]$, a Minkowski sum. It is valid under district-specific contextual effects and can be wider or narrower than M0.
 * **By-product:** M1 and M2 give **district-level bounds** $B_{rc}(\mathcal I_d)$ as well, e.g. transition rates per constituency.
+
+### 1.7 Objects, hulls and targets (added after review)
+
+The phases use three identified sets, three composition hulls and three targets. Each must be named when a result is stated.
+
+**Three identified sets** (nested: $\Theta_I\subseteq\Theta_X\subseteq\Theta_O$, 2a Prop. 1):
+
+| Set | Information it uses | Sharp relative to | How computed |
+|---|---|---|---|
+| $\Theta_I$ | law of $(N,X,T)$; conditions on $(X,N)$ | the full observable law under the model (2a Thm 1) | conditional support-function inequalities; not a finite LP |
+| $\Theta_X$ | law of $(X,T)$; conditions on $X$ only | the law of $(X,T)$ (JKST Prop. 1) | the same, conditioning on $X$ |
+| $\Theta_O$ | the regression $E[T\mid X]$ plus probability validity | the regression function only (2a Prop. 2) | a finite LP (2a Prop. 7) |
+
+Rule: $\Theta_O$ is never called "sharp" without "for the regression function". 2a Prop. 3 gives a *sufficient* condition for $\Theta_I=\Theta_O$, not a characterisation.
+
+**Three hulls:**
+* **Population hull** $A=\operatorname{conv}\operatorname{supp}P_X$ (per district in 2b). This is the default region in all identification results, and it makes (S3) automatic (2a Lemma 3(c)).
+* **Hull of the empirical law** $\operatorname{conv}\{X_1,\dots,X_n\}$, read as the population hull of $P_n$. Identification statements with $P$ replaced by $P_n$ use it exactly. That is a finite-sample identification analysis, with no estimation step.
+* **Sample hull as an estimate of $A$.** It is the same set, but used as a plug-in for the population hull. It is not a population assumption. Since $\hat A\subseteq A$, the plug-in outer set is weakly larger, so estimating the hull only widens the bound (P3 Prop. P3.2(c)). The true parameter satisfies the constraints at the sample-hull vertices, because they lie in $A$, so coverage of the true parameter does not depend on how well $\hat A$ approximates $A$ (to be stated in P3, WS4). What the hull error affects is width, and the distribution of the endpoint estimator, which P3 states for the fixed sample hull.
+
+**Three targets:**
+* $B^*_{rc}=E[NX_r\beta_{rc}]/E[NX_r]$: the superpopulation rate of the identification results.
+* $B_{rc}$: the realised rate for this electorate (1.2), JKST's target.
+* $\tilde B_{rc}=\sum_iw_{ir}m_{rc}(V_i)$ with $w_{ir}=N_iX_{ir}/\sum_jN_jX_{jr}$: the finite-design conditional-mean rate. Under A6 it is $E[B\mid\text{design}]$.
+
+Only $\tilde B$ (and $B^*$) is affine in $K$. $B=\tilde B+E$ adds a residual term that does not depend on $K$. Inference is conditional on the design and covers $B$ or $\tilde B$. Inference for $B^*$ would also need the sampling variation of $(N_i,X_i,D_i)$, and is not pursued.
+
+**Continuous latent rates.** Every "sharp" statement is relative to the model with real-valued $\beta\in\mathfrak B$ (2a Remark 4.2), not to the finite set of integer cell counts.
 
 ---
 
@@ -167,10 +196,10 @@ Each entry gives the statement, its mathematical role in the bounds, what it mea
 *Violation:* threshold or tipping effects (party machines mobilise only above 50%), or U-shapes (competitive precincts mobilise both sides). The quadratic regression is then misspecified, $\Theta_O$ is computed for the wrong $Q$, and the bound can miss the truth by $O(1)$ that does not shrink with $p$. There are *undetectable* violations: in the R×C analogue of JKST Example 6, quadratic contextual effects cancel in $\tau$.
 *Testable:* partly. A cubic term in the $T\sim X$ regression rejects A2; emptiness of $\Theta_O$ or of $\Theta_O\cap DD$ rejects A2 (App. B generalised); exact cancellations cannot be detected.
 
-**A3. Mean independence from size:** $E[\beta\mid X,N,Z]=E[\beta\mid X,Z]$.
+**A3. Mean independence from size:** $E[\beta\mid X,N]=E[\beta\mid X]$ (with $D$ added to both sides under M1/M2). Together with A2 this gives $E[\beta\mid X,N]=M_H(X)$, which is (S2) of 2a. *(Corrected after review: covariates $Z$ are no longer in the conditioning set.)*
 *Role:* makes the finite-population term $\sum_iN_iX_{ir}e_{irc}/\sum_iN_iX_{ir}$ mean zero, so that (1.8) holds with weights $N X_r$.
 *Transitions:* large (urban) precincts do not differ in loyalty from small ones *given* their partisan mix.
-*Violation:* $B^*\neq$ the regression functional; the bias is $\operatorname{Cov}(N X_r,\beta_{rc}-M(X))/E[NX_r]$. Remedy: put $\log N$ in $Z$ (App. C).
+*Violation:* $B^*\neq$ the regression functional; the bias is $\operatorname{Cov}(N X_r,\beta_{rc}-M(X))/E[NX_r]$. Remedy: district dummies when size differs by district (2b Prop. D4); $\log N$ as a covariate is part of the planned covariate extension (App. C).
 *Testable:* partly, by adding $X\cdot\log N$ interactions to the $T$ regression.
 
 **A4. Support and extrapolation:** $\operatorname{supp}(X)\subseteq A$, compact, and A2 holds on all of $A$.
@@ -179,17 +208,19 @@ Each entry gives the statement, its mathematical role in the bounds, what it mea
 *Violation:* extrapolating beyond the data, or outlier precincts at the hull vertices, make the constraints bind spuriously, so bounds are too narrow or empty. The vertices are estimated (App. C, Remark 4\*).
 *Testable:* sensitivity to trimming $A$.
 
-**A5. Rank / richness:** $\operatorname{supp}(X)$ is not contained in any quadric of the simplex (for $R=2$: at least 3 distinct values of $X$).
+**A5. Rank / richness:** for every symmetric $R\times R$ matrix $D$,
+$$x^\top Dx=0\ \ \forall x\in\operatorname{supp}P_X\cap A\ \Longrightarrow\ D=0,$$
+i.e. $\operatorname{supp}P_X\cap A$ lies in no quadric of the simplex. This is a rank condition on the quadratic regression, not just "variation in $X$". For $R=2$ it means at least 3 distinct values of $X$. For $R=3$ it needs six support points that do not lie on a common conic: three, four or five distinct compositions are never enough (2a Remark 1.1). A5 also implies that $A$ is full-dimensional (2a Remark 5.2).
 *Role:* point-identifies $Q$ (Lemma 1a).
 *Transitions:* fails, or nearly fails, when shares barely vary, e.g. stable turnout across precincts for $R=3$. This is JKST's "gender" problem.
 *Violation:* $Q$ is weakly identified, the bound inherits huge variance, and $\Theta_O$ is very wide or unstable.
 *Testable:* yes, through the condition number of the design matrix.
 
-**A6. Sampling: independence and identical distribution.** JKST: iid across units. Here: independent across districts with arbitrary dependence within, plus iid within district under M1/M2.
-*Role:* LLN and CLT for $\hat Q$ and $\hat\mu$, and the $S_1$ term.
-*Transitions:* precincts in the same constituency share candidates, campaigns and shocks.
-*Violation:* plain HC1 errors are too small, so the CIs under-cover; the bounds' probability limits are unaffected. Remedy: cluster-robust variance by district.
-*Testable:* yes (intraclass correlation of residuals).
+**A6. Source of randomness and independence (revised after review).** Every precinct and district is observed, so the uncertainty is not from sampling precincts. It is model-based: given the design $\{(N_i,X_i,D_i)\}$ and the district effects, the precinct rates $\beta_i$ are random with conditional mean $m(V_i)$, and the residuals $e_i=\beta_i-m(V_i)$ are independent across precincts (P3-S1a). Inference is conditional on the design, and the targets ($B$ and $\tilde B$, §1.7) refer to this electorate.
+*Role:* CLT for $\hat Q$, and the unit-level allowance $S_1$ for $B-\tilde B$.
+*Transitions:* precincts in a constituency share candidates, campaigns and shocks. Shocks common to a district are fixed features of this electorate. Under M1/M2 they are the district effects, part of the mean. Under M0 they are not a variance problem but the misspecification described in 2b Prop. D4. No clustered variance is used. A superpopulation target averaging over re-drawn district shocks is not pursued.
+*Violation:* dependence *within* a district beyond its district effect, e.g. neighbourhood spillovers. The residual allowance and OLS variances are then too small. This is a stated limitation.
+*Testable:* partly: residual correlation between neighbouring precincts after M1.
 
 **A7. Regularity for inference** (JKST tie-breaking): a unique active constraint at the optimum, $\mu_{rs}>0$, and $\Theta_O$ not a singleton.
 *Role:* the LP value function is differentiable at $Q$, so the delta method and $\mathrm{CI}_x$ are valid.
@@ -202,7 +233,7 @@ Each entry gives the statement, its mathematical role in the bounds, what it mea
 *Violation:* e.g. a strong incumbent changes the contextual gradient in one district. The intersection can exclude the truth, often with *falsely narrow* bounds, because the max/min across districts picks the misspecified district.
 *Testable:* yes, by the overidentification (D2) and emptiness.
 
-**A9 (M1/M2). Within-district richness:** at least $R$ distinct $X$ values per district (M1), or a quadric-free support per district (M2).
+**A9 (M1/M2). Within-district richness.** Under M2, A5 within each district. Under M1, each district's support must be affinely spanning ($R$ affinely independent compositions), and the stacked design must have full column rank: pooled quadratic monomials plus the district × $X_r$ shifts for $d\ge2$. This is less than A5 within every district (2b Remark D1.1). *(Revised after review: "at least $R$ distinct values" is not enough; they must be affinely independent.)*
 *Role:* identifies $\zeta_{c,d}$ (M1) or $Q^{(d)}$ (M2).
 *Transitions:* districts with only a few, similar precincts identify almost nothing.
 *Violation:* weak identification per district. Combined with $\max_d$/$\min_d$ this biases the bounds *inward*.
@@ -211,6 +242,12 @@ Each entry gives the statement, its mathematical role in the bounds, what it mea
 **A10. Asymptotic regime (a choice, not a fact):** (R1) $D$ fixed, $p_d\to\infty$; (R2) $D\to\infty$, $p_d$ bounded; (R3) both grow.
 *Role:* under R2 the $\zeta_d$ are incidental parameters that cannot be estimated consistently, and $\max_d\hat\ell_{c,d}$ is biased upward. This needs intersection-bounds methods with precision correction (Chernozhukov, Lee & Rosen 2013) or a hierarchical restriction on $\zeta$.
 *Transitions:* the answer depends on your design (see the questions at the end).
+*Coverage of each regime (decided after review; P3 to be revised accordingly):*
+* M0: fixed-dimension asymptotics in every regime.
+* M1/M2 in R1: fixed-dimension asymptotics.
+* M1/M2 in R3: high-dimensional Gaussian approximation under a rate condition.
+* Every regime, including R2: a finite-sample confidence interval from Hoeffding/Bernstein bounds (P3 Theorem P3.8, planned).
+* CLR coverage in R2: a simulation finding only.
 
 **Assumptions explicitly not made:** no distributional form for $\beta$ (unlike King's truncated bivariate normal), no independence between $\beta$ and $X$ (contextual effects are the point), no stationarity over time, and no point-identifying nonlinearity.
 

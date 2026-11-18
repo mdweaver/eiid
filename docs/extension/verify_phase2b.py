@@ -434,3 +434,58 @@ for (R, C, Dn) in [(2, 2, 3), (3, 3, 4), (3, 2, 5)]:
     ok(f"M1 restriction count {R}x{C}, D*={Dn}: rank gap {per_col} per column, column C implied -> "
        f"{new} independent restrictions (earlier P1 count {old})",
        per_col == (Dn - 1) * R * (R - 1) // 2 and implied and per_col * (C - 1) == new and new != old)
+
+# ---------------- Workstreams 2-3 after review ----------------
+# Lemma D1(d): stacked M1 rank. District 1 satisfies A5 (6 generic points, R = 3); the others need only
+# R affinely independent points. Collinear (affinely dependent) points in one district break the rank.
+def m1_design(Xs):
+    Dn = len(Xs); R = Xs[0].shape[1]; rows = []
+    for d, Xd in enumerate(Xs):
+        sh = np.zeros((len(Xd), (Dn - 1) * R))
+        if d > 0: sh[:, (d - 1) * R:d * R] = Xd
+        rows.append(np.hstack([mono(Xd), sh]))
+    return np.vstack(rows)
+X1 = rng.dirichlet(np.ones(3), 6)
+good = [X1, rng.dirichlet(np.ones(3), 3), rng.dirichlet(np.ones(3), 3)]
+a_, b_ = rng.dirichlet(np.ones(3), 2)
+coll = [a_, b_, 0.5 * (a_ + b_)]                             # three distinct but collinear compositions
+bad_ = [X1, rng.dirichlet(np.ones(3), 3), np.array(coll)]
+p_ = 6 + 2 * 3
+ok("Lemma D1(d): A5 in one district + 3 affinely independent points elsewhere -> stacked M1 design full rank; "
+   "3 distinct but collinear points in a district -> rank deficient",
+   np.linalg.matrix_rank(m1_design(good)) == p_ and np.linalg.matrix_rank(m1_design(bad_)) < p_)
+
+# Prop D3, pure-composition vertices: drop t = 1 from the lower bound (row 1) and t = 0 from the upper (row 2).
+def m1_r2_closed_pure(Qd, Vd, zeta_c, c):
+    lo, hi = -np.inf, np.inf
+    for d in range(len(Qd)):
+        Q = Qd[d][c]
+        for v in Vd[d]:
+            t = v[0]; z1, z2 = zeta_c[d][c]; sh = (z1 - z2) / 2
+            if t < 1: lo = max(lo, -(Q[0, 0] * t + Q[0, 1] * (1 - t)) / (1 - t) - sh)
+            if t > 0: hi = min(hi, (Q[0, 1] * t + Q[1, 1] * (1 - t)) / t - sh)
+    return lo, hi
+bad = n = 0
+for _ in range(100):
+    C2 = int(rng.integers(2, 5)); D2 = int(rng.integers(2, 5))
+    G = rng.gamma(2.0, size=(C2, 2, 2)); H2 = [G[c] / G.sum(0) for c in range(C2)]
+    z = random_zeta(D2, 2, C2, 0.02)
+    Qd, zc, Vd = [], [], []
+    for d in range(D2):
+        Hd = [H2[c] + np.outer(z[d][c], np.ones(2)) for c in range(C2)]
+        if min(h.min() for h in Hd) < 0: break
+        Qd.append([sym(h) for h in Hd]); zc.append([z[d][c] for c in range(C2)])
+        ends = sorted(rng.uniform(0.05, 0.95, 2))
+        if d == 0: ends[1] = 1.0                             # a pure group-1 poll
+        if d == 1: ends[0] = 0.0                             # a pure group-2 poll
+        Vd.append([np.array([t, 1 - t]) for t in ends])
+    else:
+        zc = [[np.asarray(zc[d][c]) - np.asarray(zc[0][c]) for c in range(C2)] for d in range(D2)]
+        box = [m1_r2_closed_pure(Qd, Vd, zc, c) for c in range(C2)]
+        lo_v = np.array([b[0] for b in box]); hi_v = np.array([b[1] for b in box])
+        for c in range(C2 - 1):
+            pl = max(lo_v[c], -(hi_v.sum() - hi_v[c])); pu = min(hi_v[c], -(lo_v.sum() - lo_v[c]))
+            L, U = m1_r2_lp_kappa(Qd, Vd, zc, c); n += 1
+            bad += not (abs(L - pl) < 1e-7 and abs(U - pu) < 1e-7)
+ok(f"Prop D3 with pure-composition vertices (t = 0, 1): modified closed form matches the LP ({n} instances)",
+   bad == 0 and n > 20)

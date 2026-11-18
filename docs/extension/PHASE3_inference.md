@@ -1,6 +1,6 @@
 # Phase 3: estimation, inference and sensitivity
 
-*Builds on P1, 2a and 2b. Proof steps carry justification tags (2a §0.3, 2b §0.3, plus §0.3 below). Theorems marked "(cited)" apply a published result whose conditions are verified here but whose proof is not repeated. Checks: `verify_phase3.py` (9/9 PASS; `verify_phase3_output.txt`). Monte Carlo: `phase3_montecarlo.py` (`phase3_montecarlo_output.txt`).*
+*Builds on P1, 2a and 2b. Proof steps carry justification tags (2a §0.3, 2b §0.3, plus §0.3 below). Theorems marked "(cited)" apply a published result whose conditions are verified here but whose proof is not repeated. Checks: `verify_phase3.py` (11/11 PASS; `verify_phase3_output.txt`). Monte Carlo: `phase3_montecarlo.py` (`phase3_montecarlo_output.txt`).*
 
 ---
 
@@ -13,10 +13,14 @@
 * **(P3-S2)** The design is conditioned on: inference is conditional on $\{(N_i,X_i,D_i)\}$, so the vertices of the sample hulls $\hat A_d$ are fixed.
 * **Regimes** (P1 A10): (R1) $D^\star$ fixed, $n_d\to\infty$; (R2) $D^\star\to\infty$, $n_d$ bounded; (R3) both grow. Results below are for R1/R3 unless stated. R2 is treated in §6.
 
-### 0.2 Two targets
+### 0.2 Targets
 
-* **Finite-population rate** (JKST's target): $B_{rc}=\sum_iN_iX_{ir}\beta_{irc}\big/\sum_iN_iX_{ir}$.
-* **Conditional-mean rate:** $\tilde B_{rc}=\sum_iw_{ir}\,m_{rc}(V_i)$, with $w_{ir}=N_iX_{ir}/\sum_jN_jX_{jr}$ and $m=E[\beta\mid V]$. This is the rate the model implies at the observed compositions, i.e. the superpopulation rate given the design.
+There are three related objects (P1 §1.7):
+* **Superpopulation rate** $B^*_{rc}=E[NX_r\beta_{rc}]/E[NX_r]$, the object of Phases 2a–2b.
+* **Finite-population rate** (JKST's target): $B_{rc}=\sum_iN_iX_{ir}\beta_{irc}\big/\sum_iN_iX_{ir}$, the realised rate for this electorate.
+* **Finite-design conditional-mean rate:** $\tilde B_{rc}=\sum_iw_{ir}\,m_{rc}(V_i)$, with $w_{ir}=N_iX_{ir}/\sum_jN_jX_{jr}$ and $m=E[\beta\mid V]$. This is the conditional expectation of $B$ given the observed design (under P3-S1). It is a sample-weighted analogue of $B^*$, not equal to it in general. Under suitable design-sampling conditions it estimates $B^*$, but inference for $B^*$ would also need the variation of the design, which is not pursued here.
+
+All inference below is conditional on the design and covers $B$ or $\tilde B$.
 
 They differ by the residual term
 $$E_{rc}=B_{rc}-\tilde B_{rc}=\sum_iw_{ir}e_{irc},\qquad e=\beta-m.$$
@@ -31,7 +35,7 @@ $\tilde B$ is the right target when the question is about behaviour rather than 
 | [Hausdorff] | Hausdorff/Kuratowski convergence of compact convex sets implies convergence of support functions |
 | [dDM] | delta method for Hadamard directionally differentiable maps (Shapiro 1991; Fang & Santos 2019, Thm 2.1†) |
 | [minLin] | the directional derivative of $\beta\mapsto\min_{j\in J}g_j^\top\beta$ ($J$ finite) at $\beta_0$, in direction $h$, is $\min_{j\in J^*(\beta_0)}g_j^\top h$, with $J^*$ the active set |
-| [CLR] | Chernozhukov, Lee & Rosen (2013, *Econometrica* 81:667–737), analytic intersection-bound inference over a finite index set, Thm 2† |
+| [CLR] | Chernozhukov, Lee & Rosen (2013, *Econometrica* 81:667–737): parametric bounding functions (Condition P, Lemma 4, Thm 4, via Thms 1–2); finite index set as in their Example 1. *Corrected after review: earlier cited as Thm 2; see 2a §0.4.* |
 | [Pop] | Popoviciu: $\operatorname{Var}(Y)\le(b-a)^2/4$ for $Y\in[a,b]$; [BD] Bhatia–Davis: $\operatorname{Var}(Y)\le(M-\mu)(\mu-m)$ |
 | [Lyap] | Lyapunov CLT for independent bounded summands with $\max_iw_i^2/\sum_iw_i^2\to0$ |
 | [union] | $P(A\cup B)\le P(A)+P(B)$ |
@@ -63,6 +67,8 @@ a finite set. $\varphi_U$ is therefore concave and piecewise linear in $\beta$, 
 
 Checked: concavity and piecewise linearity along random directions (`verify_phase3.py`).
 
+*Scope.* The lemma is about variation in the regression coefficients $\beta$ for a **fixed** constraint matrix $A$ and objective $\gamma$. Conditioning on the design fixes both, because the target uses the sample weights. It is the first case of 2a Prop. 7's regularity paragraph. It says nothing about joint variation in the identified coefficients, the population moments and the constraint set, where the value function is in general neither concave nor piecewise linear.
+
 **Reading.** JKST's Proposition 4 is this lemma with $|\Lambda|=4$ (their $g_{lj},g_{uj}$). Its "tie-breaking" assumption says the minimising $\lambda$ is unique. In R×C, and especially with many districts, $\Lambda$ is large and near-ties are the norm. That is why the inference below treats the endpoint as an intersection bound.
 
 ---
@@ -71,7 +77,7 @@ Checked: concavity and piecewise linearity along random directions (`verify_phas
 
 **Proposition P3.2.** Assume (P3-S1–S2), [A1]–[A5] for the rung used, $\sqrt n(\hat\beta-\beta_0)=O_p(1)$, and **(Slater)**: there are $\tilde k$ and $\varepsilon>0$ with $s_j(\beta_0)+a_j^\top\tilde k\ge\varepsilon$ for all constraints defined by the population hulls. Then:
 (a) $\hat\varphi_U-\varphi_U(\beta_0;\hat A)=O_p(n^{-1/2})$, and likewise for $\varphi_L$;
-(b) $\varphi_U(\beta_0;\hat A)\to\varphi_U(\beta_0;A)$ when $\hat A\to A$ in Hausdorff distance;
+(b) $\varphi_U(\beta_0;\hat A)\to\varphi_U(\beta_0;A)$ when $\hat A\to A$ in Hausdorff distance, either along a nested sequence ($\hat A_n\subseteq\hat A_{n+1}$, as when observations are added), or for any Hausdorff-convergent sequence whose feasible sets $\Theta(\hat A_n)$ eventually lie in a common bounded set;
 (c) since $\hat A_d\subseteq A_d$, $\varphi_U(\beta_0;\hat A)\ge\varphi_U(\beta_0;A)$ and $\varphi_L(\beta_0;\hat A)\le\varphi_L(\beta_0;A)$: **estimating the hull only ever widens the bound.**
 
 *Proof.*
@@ -82,9 +88,12 @@ Checked: concavity and piecewise linearity along random directions (`verify_phas
 5. Hence $\lvert\hat\varphi_U-\varphi_U(\beta_0;\hat A)\rvert\le L\lVert\hat\beta-\beta_0\rVert=O_p(n^{-1/2})$, with $L$ uniform in the hull because the constraint set over $\hat A$ is a subset of the one over $A$. [2–4; 1]
 6. (b): the sets $\Theta(\hat A)$ are compact and convex, decrease as $\hat A$ grows, and contain $\Theta(A)$. [1; 2a:L3(b)]
 7. If $k\in\Theta(\hat A_p)$ for all $p$ and $v\in A$, take $v_p\in\hat A_p$ with $v_p\to v$. The constraints are continuous in $v$, so $k$ satisfies the constraint at $v$. Hence $\bigcap_p\Theta(\hat A_p)=\Theta(A)$. [Def; continuity]
-8. A decreasing sequence of compact convex sets converges in Hausdorff distance to its intersection, so the support functions, and hence the LP values, converge. [Hausdorff] ∎
+8. A decreasing sequence of compact convex sets converges in Hausdorff distance to its intersection, so the support functions, and hence the LP values, converge. [Hausdorff] ∎(nested)
+9. Non-nested case: $\Theta(A)\subseteq\Theta(\hat A_n)$ for every $n$ by 1. If $k_n\in\Theta(\hat A_n)$ and $k_{n_j}\to k$, then for each $v\in A$ pick $v_j\in\hat A_{n_j}$ with $v_j\to v$. Continuity of the constraints in $(k,v)$ gives the constraint at $v$, so $k\in\Theta(A)$. The upper Kuratowski limit is therefore $\Theta(A)$, which is also contained in every term. In a common bounded set this is Hausdorff convergence. [1; Def; continuity; Hausdorff] ∎(b)
 
 **Remarks.**
+* **Error decomposition.** $\hat\varphi_U-\varphi_U(\beta_0;A)=\underbrace{[\hat\varphi_U-\varphi_U(\beta_0;\hat A)]}_{O_p(n^{-1/2})\text{ by (a)}}+\underbrace{[\varphi_U(\beta_0;\hat A)-\varphi_U(\beta_0;A)]}_{\ge0,\ \to0\text{ by (b), rate not shown}}$. The second term is not shown to be $O_p(n^{-1/2})$, and can be larger. So Theorem P3.4's limit is stated for the **sample-hull** endpoint $\varphi_U(\beta_0;\hat A)$, conditional on the design, and not for the population-hull endpoint.
+* **Slater is a strict-interiority condition.** It requires a $k$ at which every implied rate at every hull vertex is at least $\varepsilon>0$. It fails when every feasible $k$ makes some implied rate exactly 0 at some vertex, e.g. a true structural zero, or the boundary design C of §8, which is not exotic in EI. The Lipschitz bound in (a) is proved only under Slater; boundary cases are open (§10). The coverage results of §5 do **not** use Slater: P3.5(a) step 2 uses only that the true $k_0$ is feasible.
 * The hull effect in (c) is a one-sided (conservative) bias. Its size depends on how much mass $P_X$ puts near the boundary of $A_d$; it can vanish slowly. Report the bound's sensitivity to trimming the hull (P1 A4).
 * The $O_p(n^{-1/2})$ rate is for the estimation part. The target $B$ adds $E=O_p(n^{-1/2})$ as well (§5). Bounds do not shrink to a point: their width converges to the population width, which is $O(1)$.
 
@@ -92,7 +101,7 @@ Checked: concavity and piecewise linearity along random directions (`verify_phas
 
 ## 4. Asymptotic distribution
 
-**Theorem P3.4 (cited structure: [dDM]).** Under Proposition P3.2's assumptions and $\sqrt n(\hat\beta-\beta_0)\Rightarrow\mathcal Z\sim N(0,\Sigma)$, with the design and hull fixed:
+**Theorem P3.4 (cited structure: [dDM]).** Under Proposition P3.2's assumptions and $\sqrt n(\hat\beta-\beta_0)\Rightarrow\mathcal Z\sim N(0,\Sigma)$, with the design and the sample hull $\hat A$ fixed, so that $\varphi_U(\beta_0)$ means $\varphi_U(\beta_0;\hat A)$ (see the error decomposition after P3.2):
 $$\sqrt n\big(\hat\varphi_U-\varphi_U(\beta_0)\big)\Rightarrow\min_{\lambda\in\Lambda^*}\big(c+S^\top\lambda\big)^\top\mathcal Z,$$
 where $\Lambda^*\subseteq\Lambda$ is the set of optimal dual vertices at $\beta_0$.
 * (i) If $\Lambda^*$ is a singleton (JKST's tie-breaking), the limit is $N(0,g^{*\top}\Sigma g^*)$ with $g^*=c+S^\top\lambda^*$.
@@ -127,12 +136,30 @@ $$\mathrm{CI}=\Big[c(\hat\beta)-\hat k\hat\sigma_c+\min_{\hat\Theta^+}\gamma^\to
 with $S_1=\tfrac12\big(\sum_iw_{ir}^2\big)^{1/2}$ and $z_{\alpha_E}=\Phi^{-1}(1-\alpha_E/2)$. Then
 $$\liminf_nP(B_{rc}\in\mathrm{CI})\ge1-\alpha_U-\alpha_L-\alpha_E.$$
 
-**(b) CLR version (cited: [CLR]).** For the upper end:
+**(b1) CLR with the full candidate set (cited: [CLR], Thm 4).** Let $\Lambda$ be the full set of dual vertices of Lemma P3.1, which is finite for a fixed design. Assume CLR's Condition P: $\Sigma$ is positive definite (use $C-1$ columns, Remark P3.4.1, and a full-rank design), and $g_\lambda\ne0$ for every $\lambda\in\Lambda$. For the upper end:
 1. Select $\hat V=\{\lambda:\hat\theta_\lambda\le\min_\mu(\hat\theta_\mu+k_p\hat\sigma_\mu)+2k_p\hat\sigma_\lambda\}$, where $k_p$ is the $\gamma_n=1-0.1/\log n$ quantile of $\max_\lambda Z_\lambda$, and $Z$ is the standardised Gaussian vector with correlation from $\hat\Sigma$.
 2. Set $\hat U=\min_{\lambda\in\hat V}(\hat\theta_\lambda+\hat k\hat\sigma_\lambda)$, with $\hat k$ the $(1-\alpha_U)$-quantile of $\max_{\lambda\in\hat V}Z_\lambda$.
 3. Do the same for the lower end, and add $z_{\alpha_E}S_1$ on each side (each side's E-allowance at level $\alpha_E/2$).
 
 The same coverage bound holds. With $\alpha_E=0$ and no $S_1$ term, either version covers $\tilde B_{rc}$ with probability at least $1-\alpha_U-\alpha_L$.
+
+**(b2) Any candidate set, with a simultaneous critical value (proved here).** Let $\hat\Lambda$ be any data-dependent set of dual-feasible points (vertices or not; for example collected by simulation), and $\hat U=\min_{\lambda\in\hat\Lambda}(\hat\theta_\lambda+\hat k\hat\sigma_\lambda)$, with $\hat U=+\infty$ if $\hat\Lambda=\emptyset$. Then $\liminf_nP(\varphi_U(\beta_0)\le\hat U)\ge1-\alpha_U$ in either of two cases:
+* (i) $\hat k$ is the $(1-\alpha_U)$-quantile of $\max_{\lambda\in\bar\Lambda}Z_\lambda$ for a fixed finite set $\bar\Lambda\supseteq\hat\Lambda$ a.s. (e.g. all of $\Lambda$), with $\sigma_\lambda>0$ on $\bar\Lambda$;
+* (ii) projection: $\hat k=\sqrt{\chi^2_{q,1-\alpha}}$ with $q=\operatorname{rank}\Sigma$. This one event covers both ends, any $\hat\Lambda$, at total level $\alpha$.
+
+*Proof.*
+1. Under the model the primal LP at $\beta_0$ is feasible ($k_0$ is feasible). For any dual-feasible $\lambda$ and any primal-feasible $k$: $\gamma^\top k=-\lambda^\top Ak\le\lambda^\top s(\beta_0)$. So $\theta_\lambda(\beta_0)\ge\varphi_U(\beta_0)$ for **every** dual-feasible $\lambda$, not only optimal ones. [weak duality; $\lambda\ge0$, $s+Ak\ge0$]
+2. On $\mathcal E=\{\theta_\lambda(\beta_0)\le\hat\theta_\lambda+\hat k\hat\sigma_\lambda\ \forall\lambda\in\bar\Lambda\}$: $\hat U\ge\min_{\lambda\in\hat\Lambda}\theta_\lambda(\beta_0)\ge\varphi_U(\beta_0)$. [1; $\hat\Lambda\subseteq\bar\Lambda$]
+3. (i): $(\theta_\lambda(\beta_0)-\hat\theta_\lambda)/\hat\sigma_\lambda$, $\lambda\in\bar\Lambda$, is a fixed finite collection of standardised linear functionals of $\hat\beta$, jointly asymptotically $N(0,\text{corr})$. So $P(\mathcal E)\to1-\alpha_U$. [OLS; $\hat\Sigma$ consistent; Def $\hat k$]
+4. (ii): by Cauchy–Schwarz in the metric of $\Sigma$, $\lvert g^\top(\hat\beta-\beta_0)\rvert\le\lVert\Sigma^{+1/2}(\hat\beta-\beta_0)\rVert\,(g^\top\Sigma g)^{1/2}$ for every $g$ in the range of $\Sigma$. The first factor, scaled by $\sqrt n$, is asymptotically $\chi_q$. So $\mathcal E$ holds for all $\lambda$ at once, and for both ends, with probability $\to1-\alpha$. [alg; OLS] ∎
+
+(ii) needs no enumeration of vertices and is valid for any collection rule. It is conservative, increasingly so as $q$ grows (many districts). (i) is sharper, but needs a fixed superset, and enumerating all dual vertices is feasible only in small problems. Checked (`verify_phase3.py`): weak duality on 500 random dual-feasible points. In a small LP, the projection bound built from the plug-in dual alone covered in 100% of 3000 replications, against 94.5% for a one-candidate $z$-bound.
+
+**Conjecture P3.5(b3) (the implemented CLR procedure).** The package collects $\hat\Lambda$ as the optimal dual vertices at $\hat\beta$ and at `ndraw` Gaussian draws, and computes both $k_p$ and $\hat k$ over $\hat\Lambda$. The conjecture is that it has asymptotic coverage $\ge1-\alpha_U$ under (b1)'s conditions as `ndraw` $\to\infty$.
+* *Proved reduction.* Suppose $k_p$ is computed over $\Lambda$, and $\hat\Lambda$ contains every vertex selected by CLR's rule over $\Lambda$ and a minimiser of $\hat\theta_\mu+k_p\hat\sigma_\mu$ over $\Lambda$. Then the threshold, the selected set, $\hat k$ and $\hat U$ all coincide with (b1), so (b1)'s coverage carries over. (The threshold is the same because its minimiser is in $\hat\Lambda$. The selected set over $\hat\Lambda$ is CLR's selected set intersected with $\hat\Lambda$, which is CLR's selected set.)
+* *Open.* (1) Recovery: vertices that are optimal only for rare Gaussian directions, degenerate optimal faces, and singular $\Sigma$. (2) Computing $k_p$ over $\hat\Lambda\subseteq\Lambda$ can only lower it, so this error goes in the anti-conservative direction. (3) $\lvert\Lambda\rvert$ grows with the number of districts, outside CLR's fixed-index setting.
+
+Until this is settled, the CLR-type interval as implemented is an *Algorithm* with simulation support (§8). The intervals of (a) and (b2) carry the formal guarantee.
 
 *Proof of (a).*
 1. Let $\mathcal E$ be the event that $s_j(\beta_0)\le s_j(\hat\beta)+\hat k\hat\sigma_{s_j}$ for all $j$ and $\lvert c(\beta_0)-c(\hat\beta)\rvert\le\hat k\hat\sigma_c$. Then $P(\mathcal E)\to\ge1-\alpha_U-\alpha_L$. [OLS; linear maps of an asymptotically normal $\hat\beta$; Def of $\hat k$; $\hat\Sigma$ consistent]
@@ -143,7 +170,7 @@ The same coverage bound holds. With $\alpha_E=0$ and no $S_1$ term, either versi
 6. If $B\notin\mathrm{CI}$, then either $\tilde B$ lies outside the interval in 3, or $\lvert E\rvert>z_{\alpha_E}S_1$. [$B=\tilde B+E$; triangle inequality]
 7. So $P(B\notin\mathrm{CI})\le P(\mathcal E^c)+P(\lvert E\rvert>z_{\alpha_E}S_1)\to\le\alpha_U+\alpha_L+\alpha_E$. [union; 1, 3, 5, 6] ∎
 
-*(b)* replaces step 1 by CLR's coverage of each intersection bound, which needs a finite index set (Lemma P3.1) and Gaussian approximation for every candidate [CLR]. Steps 4–7 are unchanged. For R×C, the candidate set $\Lambda$ is not enumerated in advance. It is collected by re-solving the LP at simulated draws $\beta^\star\sim N(\hat\beta,\hat\Sigma)$ and recording the optimal dual vertices. This is consistent for the relevant set $\Lambda^*$ when the number of draws grows. (This collection step is a practical device; its formal justification is an open item.)
+*(b1)* replaces step 1 by CLR's coverage of each intersection bound, which needs the finite index set $\Lambda$ (Lemma P3.1) and their Condition P [CLR]. Steps 4–7 are unchanged. *(b2)* is proved above. The simulation-based collection of candidates is the subject of Conjecture P3.5(b3); it is not claimed as a theorem.
 
 **Remarks.**
 * **Better variance bound for the residual term.** $\operatorname{Var}(e_{irc}\mid V)\le m(1-m)$ [BD], with $m=E[\beta_{irc}\mid V]$, which is bounded through the identified set. Taking the maximum of $m(1-m)$ over that set's range at $X_i$ gives a smaller, still valid $S_1$.
@@ -189,7 +216,7 @@ A hierarchical restriction on the district shifts (they are draws from a distrib
 
 **Proposition S1 (bounded nonlinearity).** Replace (S2) by $E[\beta\mid V]=M_H(X)+\Delta(X)$, with $\Delta$ in the undetectable class of 2a Prop. 9 ($x^\top\Delta(x)=0$, $\Delta(x)\mathbf 1=0$) and $\lVert\Delta(x)\rVert_\infty\le\eta$. Then $Q$ is still identified as before, and every value of $\tilde B_{rc}$ consistent with the data lies in
 $$\Big[\min_{\Theta_O(\eta)}\varphi-\eta,\ \max_{\Theta_O(\eta)}\varphi+\eta\Big],\qquad\Theta_O(\eta)=\{k:s+Ak\ge-\eta\mathbf 1\}.$$
-For a general $\varphi=\sum a_{rc}B_{rc}$, widen by $\eta\sum\lvert a_{rc}\rvert$ instead.
+For a general $\varphi=\sum a_{rc}B_{rc}$, widen by $\eta\sum\lvert a_{rc}\rvert$ instead. This is an **outer** bound under bounded deviations: it is valid, but it is not claimed to be the sharp set of the relaxed model.
 
 *Proof.*
 1. $E[T\mid X]=X^\top Q X+X^\top\Delta(X)=X^\top QX$, so $Q$ is unchanged. [2a:L1(a); $x^\top\Delta=0$]
@@ -250,7 +277,10 @@ Coverage is the share of 200 replications containing the truth; width is the med
 
 ## 10. Open items
 
-* A formal justification of collecting dual vertices by simulation (P3.5(b)).
+* Conjecture P3.5(b3): validity of collecting dual vertices by simulation, with $k_p$ computed over the collected set. A proved reduction to (b1) is given; recovery and the $k_p$ effect are open.
+* Boundary cases where Slater fails (implied rates exactly 0 at a vertex): rate and limit of the endpoint estimator.
+* The rate of the hull error $\varphi(\beta_0;\hat A)-\varphi(\beta_0;A)$, and inference for the population-hull endpoint.
+* Inference for the superpopulation target $B^*$, which needs design-sampling variation.
 * Uniform validity near point identification for the CLR version (Stoye-type adaptation).
 * Inference under R2 with a hierarchical model for the district shifts.
 * Joint relaxation for population turnover.

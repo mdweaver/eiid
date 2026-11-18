@@ -1,6 +1,6 @@
 # Phase 2b: units nested in groups, and the assumption ladder
 
-*Builds on `PHASE1_foundations.md` (P1) and `PHASE2a_rxc.md` (2a). Every proof step ends with a justification tag; tags are those of 2a §0.3 plus the new ones in §0.3. All closed forms, inclusions and examples are checked in `verify_phase2b.py` (output: `verify_phase2b_output.txt`, 19/19 PASS).*
+*Builds on `PHASE1_foundations.md` (P1) and `PHASE2a_rxc.md` (2a). Every proof step ends with a justification tag; tags are those of 2a §0.3 plus the new ones in §0.3. All closed forms, inclusions and examples are checked in `verify_phase2b.py` (output: `verify_phase2b_output.txt`, 21/21 PASS).*
 
 *"District" means any partition of the units into groups: ridings, counties within states, schools within boards, or, as Remark 6.2 shows, election periods. The results do not use anything specific to voter transitions.*
 
@@ -70,7 +70,9 @@ whatever the law of $D$ (or of any covariate). Any gain from district dummies th
 7. Integrating $N\times$ that selection gives the endpoints of $DD^*_{rc}$. Both are attained by valid structures (S1), with $\beta$ a function of $W$. [3, 5, 6; lin]
 8. Neither the constraint $\beta\in S(X,T)$ nor the objective involves $D$, so the set does not depend on the law of $D$. [Def] ∎
 
-The same argument shows that the joint sharp set for the whole vector $B^*$ is $\{E[NX\odot\xi]/\mu:\xi\text{ a selection of }S\}$, also free of $D$. Verified: per-cell extremes are attained in 300 random tables.
+**Cell intervals versus the joint set.** $DD^*_{rc}$ is the sharp set for one cell. The joint sharp set for the whole matrix $B^*$ is
+$$\mathcal B^*_{DD}=\Big\{\big[E[NX_r\xi_{rc}]/\mu_r\big]_{rc}:\ \xi\text{ a measurable selection of }S(X,T)\Big\},$$
+also free of $D$. It is convex and compact. It is **not** the Cartesian product $\prod_{rc}DD^*_{rc}$: the accounting identity links the cells of each unit, so in general the per-cell endpoints cannot be attained together. For a linear target $\sum a_{rc}B^*_{rc}$, the sharp interval is $\big[-E[N\,h_S(-\tilde a(X);X,T)],\ E[N\,h_S(\tilde a(X);X,T)]\big]$ with $\tilde a(x)_{rc}=a_{rc}x_r/\mu_r$ (the off-$A$ term of 2a Prop. 7′, applied to every unit), which can be strictly inside the sum of the cell intervals. Verified: per-cell extremes are attained in 300 random tables.
 
 ---
 
@@ -83,9 +85,19 @@ $$(Q^{(d)}_c-Q^{(1)}_c)_{rs}=\tfrac12(\zeta_{c,d,r}+\zeta_{c,d,s})\quad(r\ne s);
 and $K^{(d)}=K+\operatorname{skew}(\zeta_{\cdot,d}\mathbf 1^\top)$ with $K=K^{(1)}$ common. The unidentified dimension is $d_0$, the same as the pooled model.
 (c) Under L5: $\alpha_{c,d}=\operatorname{diag}Q^{(d)}_c$, $K^{(d)}=\operatorname{skew}(\alpha_{\cdot,d}\mathbf 1^\top)$ is identified, and $Q^{(d)}_c=\operatorname{sym}(\alpha_{c,d}\mathbf 1^\top)$ is testable.
 
+(d) **Under M1, less richness suffices (revised after review).** Replace (A5-d) by the stacked rank condition (A5-M1): for symmetric $D$ and vectors $z_2,\dots,z_{D^\star}$,
+$$x^\top Dx+z_d^\top x=0\ \ \forall x\in\operatorname{supp}P_{X\mid D=d}\cap A_d,\ \forall d\quad(z_1:=0)\ \Longrightarrow\ D=0,\ z_d=0.$$
+This is the population version of "the design with the pooled quadratic monomials and the district × $X_r$ shifts ($d\ge2$) has full column rank". Then $Q$, the $\zeta_{c,d}$ and the conclusions of (b) hold. A sufficient condition: A5 holds within one district, and every other district's support contains $R$ affinely independent points. Having $R$ *distinct* compositions is not enough: they must be affinely independent.
+
 *Proof of (a).*
 1. On $\{D=d\}$, (S1)–(S3-d) are the 2a model with $H=H^{(d)}$ and $A=A_d$ for the law $P(\cdot\mid D=d)$. [cond-D]
 2. Apply 2a Lemma 1 to that conditional law. [2a:L1; A5-d] ∎(a)
+
+*Proof of (d).*
+1. Under M1, $E[T_c\mid X=x,D=d]=x^\top Q_cx+x^\top(\zeta_{c,d}\mathbf 1^\top)x=x^\top Q_cx+\zeta_{c,d}^\top x$ on the district's support. [2a:L1(a) steps 1–6 within $d$; Def M1; $\mathbf 1^\top x=1$]
+2. If two parameter sets give the same regression in every district, their differences $(D,z_d)$ satisfy the premise of (A5-M1), so they coincide. [1; A5-M1]
+3. Sufficiency: if A5 holds in district $d_0$, then for $d_0=1$ the premise gives $x^\top Dx=0$ there, so $D=0$. For $d_0\ne1$, $x^\top Dx+z_{d_0}^\top x=x^\top(D+\operatorname{sym}(z_{d_0}\mathbf 1^\top))x=0$ gives $D=-\operatorname{sym}(z_{d_0}\mathbf 1^\top)$, and district 1's equation then forces $z_{d_0}^\top x=0$ on an affinely spanning set, so $z_{d_0}=0$ and $D=0$. Then $z_d^\top x=0$ on each district's affinely spanning support. Such a support spans $\mathbb R^R$ linearly, because it lies in $\{\mathbf 1^\top x=1\}$, which misses the origin. So $z_d=0$. [alg; A5]
+4. (b)'s formulas follow as before, from the identified $Q$ and $\zeta$. ∎(d)
 
 *Proof of (b).*
 1. $H^{(d)}_c=H_c+\zeta_{c,d}\mathbf 1^\top$. [Def M1]
@@ -99,7 +111,7 @@ and $K^{(d)}=K+\operatorname{skew}(\zeta_{\cdot,d}\mathbf 1^\top)$ with $K=K^{(1
 1. $H^{(d)}_c=\alpha_{c,d}\mathbf 1^\top$, so $Q^{(d)}_c=\operatorname{sym}(\alpha_{c,d}\mathbf 1^\top)$, whose diagonal is $\alpha_{c,d}$. [Def L5; (b)2]
 2. Hence $K^{(d)}_c=\operatorname{skew}(\alpha_{c,d}\mathbf 1^\top)$ is a known function of identified quantities. The off-diagonal entries of 1 are testable restrictions. [1; (a)] ∎(c)
 
-**Remark D1.1 (less richness needed under M1).** Given the common $Q$, district $d$'s regression is $E[T_c\mid X,d]=X^\top Q_cX+\zeta_{c,d}^\top X$, which is linear in $\zeta_{c,d}$. So under M1, $\zeta_{c,d}$ needs only $R$ affinely independent compositions in district $d$, rather than A5-d. For example, 2 distinct polls per district in 2×2, provided $Q$ is identified elsewhere. This matters with about 10 polls per riding.
+**Remark D1.1 (why (d) matters in practice).** Given the common $Q$, district $d$'s regression is $E[T_c\mid X,d]=X^\top Q_cX+\zeta_{c,d}^\top X$, which is linear in $\zeta_{c,d}$. So under M1 (Lemma D1(d)), $\zeta_{c,d}$ needs only $R$ affinely independent compositions in district $d$, rather than A5-d. This is identification, not precision: with about 10 polls in a riding, $\hat\zeta_d$ is identified but noisy (Phase 3, regime R2). For example, 2 distinct polls per district in 2×2, provided $Q$ is identified elsewhere. This matters with about 10 polls per riding.
 
 Verified on the 3×3 example: $\zeta$ recovered to $10^{-15}$; the overidentifying restrictions and the $K^{(d)}$ relation hold to $10^{-15}$.
 
@@ -116,9 +128,15 @@ Under M1, its sensitivity to the common $K_{c,rs}$ is $\mu_{rs}/\mu_r$, exactly 
 
 ## 3. Sharp and outer sets for each rung
 
-**Theorem 1′ (sharpness for any affine mean model).** Let $\theta$ range over a finite-dimensional space, and let $\theta\mapsto m_\theta(v)$ be affine with $m_\theta$ bounded and Borel on $\{v:x\in A_d\}$. Define the model by (S1), $E[\beta\mid V]=m_\theta(V)$ a.s., and $m_\theta(v)\in\mathfrak B$ for all admissible $v$. Then $\theta\in\Theta_I$ iff the latter holds and, for $P_V$-a.e. $v$ and all $u$,
+**Theorem 1′ (sharpness for any affine mean model).** Let $\theta$ range over a closed subset $\Theta_0$ of $\mathbb R^p$. Let $\mathcal V_A=\{v=(x,n,d):x\in A_d\}$, and assume:
+* (H1) for each $\theta$, $v\mapsto m_\theta(v)\in\mathbb R^{R\times C}$ is Borel on $\mathcal V_A$;
+* (H2) $\sup_{v\in\mathcal V_A}\lVert m_\theta(v)\rVert<\infty$ for each $\theta$;
+* (H3) $\theta\mapsto m_\theta(v)$ is affine for each $v$, and continuous uniformly in $v$ on bounded sets of $\theta$;
+* (H4) the selection set $\mathcal S$ of 2a Theorem 1 is unchanged: $S(x,t)$ is nonempty, compact and convex, with a measurable graph (2a Lemma 0), and is not affected by $\theta$.
+
+Define the model by (S1), $E[\beta\mid V]=m_\theta(V)$ a.s. on $\{V\in\mathcal V_A\}$, and $m_\theta(v)\in\mathfrak B$ for all $v\in\mathcal V_A$. Then $\theta\in\Theta_I$ iff the latter holds and, for $P_V$-a.e. $v$ and all $u$,
 $$\langle u,m_\theta(v)\rangle\le\psi(u;v).$$
-*Proof.* Replace $M_H(X)$ by $m_\theta(V)$ in the proof of 2a Theorem 1. That proof uses only boundedness and $V$-measurability of $M_H(X)$ (steps 6, 8, 15, 16 and 21 of "(ii)⇒(i)"; steps 6–7 of "(i)⇒(ii)"), and affinity in the parameter (the convexity and closedness part). Each step therefore carries over with the same tag. [2a:T1] ∎
+*Proof.* Replace $M_H(X)$ by $m_\theta(V)$ in the proof of 2a Theorem 1. (H4) leaves facts F1–F7 there unchanged. That proof uses only boundedness (H2) and $V$-measurability (H1) of $M_H(X)$ (steps 6, 8, 15, 16 and 21 of "(ii)⇒(i)"; steps 6–7 of "(i)⇒(ii)"), and affinity and continuity in the parameter (H3; the convexity and closedness part). Each step therefore carries over with the same tag. For the rungs of Theorem 2, $m_\theta(x,n,d)=M_{Q^{(d)}+K^{(d)}(\theta)}(x)$ is linear in $x$, so (H1)–(H2) hold on compact $A_d$, and (H3) holds because $K^{(d)}(\theta)$ is linear in $\theta$. [2a:T1] ∎
 
 **Theorem 2 (the rungs).** Assume (A1), (A5-d) and $P(X\in A_D)=1$.
 (a) **Sharp set.** For each rung $\rho$,
@@ -157,7 +175,7 @@ Verified on the 3×3 example (§6): the chain DD ⊇ M2 ⊇ M1(.10) ⊇ M1(.05) 
 
 ## 4. Closed forms and properties
 
-**Proposition D3 (M1 with two rows).** Let $R=2$, $\operatorname{vert}(A_d)=\{(t,1-t):t\in\{l_d,u_d\}\}$ with $0<l_d\le u_d<1$, and let $\lambda_c,\rho_c$ be defined from the reference $Q=Q^{(1)}$ as in 2a Prop. 6. Under M1:
+**Proposition D3 (M1 with two rows).** Let $R=2$, $\operatorname{vert}(A_d)=\{(t,1-t):t\in\{l_d,u_d\}\}$ with $0<l_d\le u_d<1$ (needed: the formula divides by $t$ and $1-t$; pure-composition vertices are treated below), and let $\lambda_c,\rho_c$ be defined from the reference $Q=Q^{(1)}$ as in 2a Prop. 6. Under M1:
 $$\ell_c=\max_d\max_{t\in\{l_d,u_d\}}\Big[\lambda_c(t)-\frac{\zeta_{c,d,1}}{1-t}\Big],\qquad h_c=\min_d\min_{t\in\{l_d,u_d\}}\Big[\rho_c(t)+\frac{\zeta_{c,d,2}}{t}\Big],$$
 and $\Theta^{M1}_O=\{\kappa:\ell\le\kappa\le h,\ \sum_c\kappa_c=0\}$, projected by 2a Lemma 4.
 
@@ -169,6 +187,9 @@ and $\Theta^{M1}_O=\{\kappa:\ell\le\kappa\le h,\ \sum_c\kappa_c=0\}$, projected 
 5. Adding $\sum_c\kappa_c=0$ gives a box intersected with a hyperplane. [Def $\mathcal K$; 2a:L4] ∎
 
 Verified against the LP in 126 random column instances.
+
+**Pure-composition vertices.** If $u_d=1$ (a poll with only group 1), the row-1 constraint at $t=1$ reads $Q_{c,11}+\zeta_{c,d,1}\ge0$. It does not involve $\kappa_c$: it is a testable restriction, and if it holds it adds no bound on $\kappa_c$. The term $t=1$ is therefore dropped from the maximum defining $\ell_c$. The row-2 constraint at $t=1$ is $\kappa_c\le Q_{c,12}+\zeta_{c,d,2}=\rho_c(1)+\zeta_{c,d,2}$, as the formula gives. Symmetrically, if $l_d=0$, the row-2 constraint at $t=0$ becomes the testable $Q_{c,22}+\zeta_{c,d,2}\ge0$ and is dropped from the minimum defining $h_c$, while row 1 gives $\kappa_c\ge\lambda_c(0)-\zeta_{c,d,1}=-Q_{c,12}-\zeta_{c,d,1}$. With $\zeta=0$ the same rule applies to 2a Prop. 6.
+*Derivation.* Set $t=1$ (or $t=0$) in steps 1 and 3 above before dividing; the coefficient of $\kappa_c$ vanishes in exactly one of the two rows. [alg]
 
 **Reading the formula.** A district raises the lower bound when its group-1 baseline for column $c$ is low ($\zeta_{c,d,1}<0$) and it contains polls that are mostly group 1 ($t$ near 1, where $1/(1-t)$ is large). In such polls group 1's rate is nearly observed, the shared contextual effect carries that information to every district, and so **one riding with lopsided polls and an extreme baseline can tighten the province-wide bound.** The upper bound behaves symmetrically, through group 2.
 
@@ -288,7 +309,7 @@ What the table shows:
 
 ## 7. Verification log
 
-`python3 -I verify_phase2b.py` (19 PASS, 0 FAIL) checks:
+`python3 -I verify_phase2b.py` (21 PASS, 0 FAIL) checks:
 * Lemma D1: recovery of $\zeta$, the overidentifying restrictions and the $K^{(d)}$ relation.
 * Theorem 2: ladder nesting for four targets; the truth in every valid rung.
 * Prop. D6: monotone in $\delta$; equals M2 for large $\delta$.
@@ -301,6 +322,9 @@ What the table shows:
 * Corrections after review (each check fails on the earlier statement):
   * Prop. D4(b): with $D\perp X$ but $D$ correlated with $N$, $E[\beta\mid X,N]$ depends on $N$ while $E[\beta\mid X]$ is affine, and the pooled size-weighted rate is biased. With $D\perp(X,N)$ it is exact.
   * P1 (D2) and P3 Prop. P3.6(b): the rank gap between the M2 and M1 designs is $(D^\star-1)R(R-1)/2$ per column, and column $C$'s restrictions are implied. That gives $(D^\star-1)(C-1)R(R-1)/2$ in total (three table shapes).
+* Scope additions after review:
+  * Lemma D1(d): the stacked M1 design has full rank with A5 in one district and three affinely independent points in the others, and is rank-deficient with three distinct but collinear points;
+  * Prop. D3 with pure-composition vertices: the modified closed form matches the LP (195 instances).
 
 Not machine-checked: the measure-theoretic content of Theorem 1′, which rests on 2a Theorem 1.
 

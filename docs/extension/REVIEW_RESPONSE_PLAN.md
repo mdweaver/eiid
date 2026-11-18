@@ -95,14 +95,29 @@ R-04, R-06, R-07, R-23, R-27, R-30, R-35, plus the wording fix in R-33.
   * Finding: Remark 5.2 shows that A5 already implies $A$ is full-dimensional. So the compactness gap the reviewer found affects Lemma 3(b) used on its own, not Theorem 1.
   * Still to do: P3-S1 and the cluster wording in P3 §1 and §9 wait for WS4 (R-28).
 
-### WS2: Scope and assumptions (docs)
+### WS2: Scope and assumptions (docs) — **done (Nov 2026)**
 R-01, R-02, R-05, R-10, R-11, R-12, R-15, R-19, R-22, R-25, R-33, R-36.
 * Add a new **P1 §1.7, "Objects and targets"**, cited everywhere: $\Theta_I\subseteq\Theta_X\subseteq\Theta_O$ with the information each uses; the three hulls; the three targets; continuous-rate sharpness.
 * Phases 2a, 2b and 3 then point to it, instead of repeating it.
 
-### WS3: Proof hardening (docs; may run alongside WS2)
+### WS3: Proof hardening (docs; may run alongside WS2) — **done (Nov 2026)**
 R-03, R-08, R-09, R-13, R-14, R-16, R-18, R-20, R-26, R-29 (b1 and the weak-duality route for b2), R-34.
 * R-09 produces a citation table, with an edition and page for every † tag. Remove the † marks once checked.
+
+**WS2–WS3 status.**
+* **P1:** new §1.7 (three sets, three hulls, three targets, continuous rates); (1.5) by A5; ambient-coordinate wording for (1.8); $Z$ removed from $\mathcal G$ and A3; A5 in matrix form; A6 rewritten (model-based randomness, no clustering); A9 stacked rank; A10 regime coverage; M1′ marked planned.
+* **2a:** §0.4 citation table; Remark 1.0 (Prop. 9 as motivation); Remark 1.1 ($R=3$ needs six points off a conic); Lemma 2 coefficient wording; Theorem 1 facts F1–F7 and the "all $u$ at once" paragraph; Remark 4.2 (continuous vs integer rates); §4.3 (what each set needs); Props 4–6 carry $P(X\in A)=1$; Prop. 5 nonemptiness; Cor. 6.1(c) exact sign condition; Prop. 7 is the outer LP; **new Prop. 7′** (units outside $A$); Prop. 9 domain.
+* **2b:** D0 per-cell vs joint set; **Lemma D1(d)** (stacked rank, affinely independent points); Theorem 1′ hypotheses H1–H4; Prop. D3 pure-composition vertices.
+* **P3:** three targets; [CLR] corrected to Thm 4 (Condition P); scope of Lemma P3.1; P3.2 non-nested hulls, error decomposition, Slater as interiority; P3.4 stated for the sample-hull endpoint; P3.5 split into (b1) theorem, **(b2) proved** (weak duality; fixed-superset or projection critical value), and **Conjecture (b3)** with a proved reduction; S1 labelled an outer bound; §10 updated.
+* **Checks:** 2a 31/31, 2b 21/21, P3 11/11.
+* **Citations:**
+  * checked in the source text (arXiv versions): CLR (2013) and Fang–Santos (2019).
+  * **Error found:** P3 cited CLR "Thm 2"; the finite-index parametric case is Thm 4. Corrected.
+  * Textbook theorem numbers: marked "standard", to confirm against the printed editions.
+* **Consequence for D4 (needs a decision before WS5).** A critical value over a fixed superset needs all dual vertices, which is feasible only for small problems. The always-valid alternative is projection (b2)(ii), which is wider. The package's current CLR procedure is Conjecture (b3). Options:
+  1. Keep CLR as the default, labelled "algorithmic", with (a) or (b2)(ii) reported alongside.
+  2. Make (a) the default, with CLR as an option.
+  3. Enumerate vertices when there are few, otherwise fall back to 1 or 2.
 
 ### WS4: Restructure inference in Phase 3 (needs WS1)
 R-28, R-29, R-31, R-32, the new §0.4 on where the randomness comes from, and the regime table.

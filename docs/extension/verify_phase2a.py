@@ -315,3 +315,54 @@ mid = V(2.0, 2.0); avg = (V(*p1) + V(*p2)) / 2
 ok(f"Prop 7: joint value function is not concave (V(midpoint) = {mid:.1f} < average {avg:.1f})", mid < avg - 1e-9)
 ok("Prop 7: for fixed mu the value is concave (here linear) in Q",
    abs(V(2.0, 1.5) - (V(1.0, 1.5) + V(3.0, 1.5)) / 2) < 1e-9)
+
+# ---------- Workstreams 2-3 after review ----------
+# Remark 1.1: for R = 3 five compositions never identify Q (6 coefficients); six generic ones do.
+def quad_design(P):
+    return np.column_stack([P[:, r] * P[:, s] for r in range(3) for s in range(r, 3)])
+P6 = rng.dirichlet(np.ones(3), 6)
+ok("Remark 1.1: R=3, five compositions give rank <= 5 < 6; six generic compositions give rank 6",
+   np.linalg.matrix_rank(quad_design(P6[:5])) == 5 and np.linalg.matrix_rank(quad_design(P6)) == 6)
+
+# Remark 4.2(1): vertices of the unit DD polytope in counts are integer tables (integer margins).
+bad = 0
+for _ in range(200):
+    R_, C_ = int(rng.integers(2, 5)), int(rng.integers(2, 5)); Ntot = int(rng.integers(5, 400))
+    rows = rng.multinomial(Ntot, np.ones(R_) / R_); cols = rng.multinomial(Ntot, np.ones(C_) / C_)
+    Aeq = np.vstack([np.kron(np.eye(R_), np.ones(C_)), np.kron(np.ones(R_), np.eye(C_))])
+    res = linprog(rng.normal(size=R_ * C_), A_eq=Aeq, b_eq=np.r_[rows, cols], bounds=[(0, None)] * (R_ * C_),
+                  method="highs-ds")
+    bad += res.status != 0 or np.max(np.abs(res.x - np.round(res.x))) > 1e-7
+ok("Remark 4.2(1): LP optima over integer-margin transportation polytopes are integer tables (200 cases)", bad == 0)
+
+# Prop 5: Theta_O is empty as soon as some Q_{c,rs} < 0.
+Qneg = [np.array([[0.6, -0.05], [-0.05, 0.5]]), None]; Qneg[1] = np.ones((2, 2)) - Qneg[0]
+An, bn = outer_constraints(Qneg, list(np.eye(2)))
+ok("Prop 5: a negative Q_{c,rs} makes Theta_O (A = simplex) empty",
+   linprog(np.zeros(1), A_ub=An, b_ub=bn, bounds=[(None, None)], method="highs").status == 2)
+
+# Prop 7': units outside A. 2x2 population on a grid of X; the linear model holds everywhere (noise-free T),
+# A = [0.3, 0.7] is a strict subset of the support. Single cell (1, 1).
+xs_g = np.linspace(0.05, 0.95, 19); Ns = rng.integers(200, 2000, xs_g.size).astype(float)
+def Mx(t): return np.array([[0.55 + 0.30 * t, 0.45 - 0.30 * t], [0.20 + 0.25 * t, 0.80 - 0.25 * t]])
+Bt = [Mx(t) for t in xs_g]; Tg = np.array([np.array([t, 1 - t]) @ B for t, B in zip(xs_g, Bt)])
+mu1 = np.sum(Ns * xs_g)
+truth = np.sum(Ns * xs_g * np.array([B[0, 0] for B in Bt])) / mu1
+inA = (xs_g >= 0.3 - 1e-12) & (xs_g <= 0.7 + 1e-12)
+# Q from the noise-free regression on A (exact), constraints at the vertices of A
+Xa = np.column_stack([xs_g[inA], 1 - xs_g[inA]])
+Z = np.column_stack([Xa[:, 0] ** 2, 2 * Xa[:, 0] * Xa[:, 1], Xa[:, 1] ** 2])
+coef = np.linalg.lstsq(Z, Tg[inA, 0], rcond=None)[0]
+Q1 = np.array([[coef[0], coef[1]], [coef[1], coef[2]]]); Qa = [Q1, np.ones((2, 2)) - Q1]
+Av, bv = outer_constraints(Qa, [np.array([0.3, 0.7]), np.array([0.7, 0.3])])
+mA = lambda f: np.sum((Ns * f)[inA])
+phi0 = (Q1[0, 0] * mA(xs_g ** 2) + Q1[0, 1] * mA(xs_g * (1 - xs_g))) / mu1
+gam = np.array([mA(xs_g * (1 - xs_g)) / mu1])               # coefficient of kappa = K_{1,12}
+lo_in, hi_in = lp_range(gam, Av, bv)
+out = ~inA
+U_out = np.sum((Ns * np.minimum(xs_g, Tg[:, 0]))[out]) / mu1
+L_out = np.sum((Ns * np.maximum(0, xs_g + Tg[:, 0] - 1))[out]) / mu1
+lo7, hi7 = phi0 + lo_in + L_out, phi0 + hi_in + U_out
+dd = (np.sum(Ns * np.maximum(0, xs_g + Tg[:, 0] - 1)) / mu1, np.sum(Ns * np.minimum(xs_g, Tg[:, 0])) / mu1)
+ok(f"Prop 7': truth {truth:.4f} lies in [{lo7:.4f}, {hi7:.4f}], which is inside DD [{dd[0]:.4f}, {dd[1]:.4f}]",
+   lo7 - 1e-9 <= truth <= hi7 + 1e-9 and dd[0] - 1e-9 <= lo7 and hi7 <= dd[1] + 1e-9)

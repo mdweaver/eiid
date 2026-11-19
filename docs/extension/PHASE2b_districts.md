@@ -324,7 +324,7 @@ What the table shows:
 
 ## 7. Verification log
 
-`python3 -I verify_phase2b.py` (21 PASS, 0 FAIL) checks:
+`python3 -I verify_phase2b.py` (22 PASS, 0 FAIL) checks:
 * Lemma D1: recovery of $\zeta$, the overidentifying restrictions and the $K^{(d)}$ relation.
 * Theorem 2: ladder nesting for four targets; the truth in every valid rung.
 * Prop. D6: monotone in $\delta$; equals M2 for large $\delta$.

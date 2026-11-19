@@ -602,7 +602,7 @@ All four contain the truth, and all are narrower than DD. They are still wide, b
 
 ## 9. Verification log
 
-`python3 -I verify_phase2a.py` (31 PASS, 0 FAIL; full output in `verify_phase2a_output.txt`) checks:
+`python3 -I verify_phase2a.py` (32 PASS, 0 FAIL; full output in `verify_phase2a_output.txt`) checks:
 * Lemma 1: the dimension $(C-1)R(R-1)/2$ by rank computation for 2×2, 2×3, 3×3 and 4×3; $x^\top Kx=0$ and uniqueness of $Q$ symbolically for $R=3$.
 * Prop. 4: the JKST Prop. 3 constraints symbolically; Prop. 2 numerically (P1 script).
 * Prop. 5 against an LP solver (200 tables).

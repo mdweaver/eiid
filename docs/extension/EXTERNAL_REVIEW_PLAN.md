@@ -21,7 +21,7 @@ Each batch is sent as a frozen commit (a git tag, e.g. `review-B-2026-12`). It i
 
 ### Batch A: new results introduced by the review response (return to the original reviewer)
 
-**Status (Nov 2026): ready to send.** The response letter is `REVIEW_RESPONSE.md`. It includes the three core corrections found in Batch B.
+**Status (Nov 2026): ready to send.** The response letter is `REVIEW_RESPONSE.md`. It includes the three core corrections found in Batch B. **Round 2 (Nov 2026):** the referee's second report (`reviews/A_phases1to3_report_round2.md`, favourable, targeted revisions) is answered in `REVIEW_RESPONSE_ROUND2.md` (P3.4 fixed-constraint + P3.4′; P3.5(c); D8 split; independence as an assumption).
 
 *Send with the response letter (WS7). The reviewer knows the context, so this is the cheapest batch and closes the current review.*
 
@@ -41,7 +41,7 @@ Each batch is sent as a frozen commit (a git tag, e.g. `review-B-2026-12`). It i
 
 ### Batch B: M-SIGN theory (highest priority among the unreviewed)
 
-**Status (Nov 2026): reviewed.** Two external reports (partial identification; ecological inference), both major revision. Corrections were applied in theory and code (0.3.0); see `reviews/B_PI_RESPONSE_PLAN.md`. Responses to the referees are being written (WS-B8). **Lesson for later batches:** the internal fresh-session review of PHASE5a §4 had accepted it with fixes, and missed the integer-table, district-slope, derivative-identification and binning problems, all in 2c, which it had not been asked to cover. Every batch should give the pre-screen the full scope that the external reviewers get.
+**Status (Nov 2026): reviewed.** Two external reports (partial identification; ecological inference), both major revision. Corrections were applied in theory and code (0.3.0); see `reviews/B_PI_RESPONSE_PLAN.md`. Responses sent (WS-B8). **Round 2 (Nov 2026):** both referees recommend minor revision; reports `reviews/B_*_report_round2.md`, answered in `reviews/B_*_response_round2.md` (package 0.3.1; theory plan `reviews/ROUND2_THEORY_PLAN.md`, package plan `reviews/ROUND2_PACKAGE_PLAN.md`). **Lesson for later batches:** the internal fresh-session review of PHASE5a §4 had accepted it with fixes, and missed the integer-table, district-slope, derivative-identification and binning problems, all in 2c, which it had not been asked to cover. Every batch should give the pre-screen the full scope that the external reviewers get.
 
 *Already shipped and exported, so it is the largest exposure.*
 

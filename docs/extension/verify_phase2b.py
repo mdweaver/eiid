@@ -386,3 +386,125 @@ print(f"     2x2 example (P1 section 7.3): truth {tr:.3f}  DD {fmt(dd_bound(ds, 
       f"M2 {fmt(m2)}  M1 {fmt(m1)}  L5 point {l5:.3f}")
 ok("2x2 example: M1 bound reproduces Phase 1 [0.618, 0.866]", abs(m1[0] - 0.618) < 5e-4 and abs(m1[1] - 0.866) < 5e-4)
 ok("2x2 example: pooled M0 outer set is empty (as in Phase 1)", m0 is None)
+
+# ---------------- Corrections after review (each check fails on the earlier statement) ----------------
+# Prop D4(b): D independent of X but correlated with N. Exact population with a discrete design.
+# 2x2, row 1 = group of interest; M_H(x) linear and valid; district 2 shifts column 1 by z = (0.10, 0.05).
+def M_H(x1):
+    return np.array([[0.30 + 0.20 * x1, 0.70 - 0.20 * x1],
+                     [0.60 - 0.10 * x1, 0.40 + 0.10 * x1]])
+Z2 = np.array([[0.10, -0.10], [0.05, -0.05]])                # rows sum to 0 across columns
+cells = [(x1, d, (100 if d == 1 else 1000)) for x1 in (0.2, 0.5, 0.8) for d in (1, 2)]   # equal prob each
+Eb_XN = {(x1, n): M_H(x1) + (Z2 if d == 2 else 0) for x1, d, n in cells}
+Eb_X = {x1: M_H(x1) + 0.5 * Z2 for x1 in (0.2, 0.5, 0.8)}   # D independent of X, P(D=2) = 1/2
+depends_on_N = any(not np.allclose(Eb_XN[(x1, 100)], Eb_XN[(x1, 1000)]) for x1 in (0.2, 0.5, 0.8))
+xs_ = np.array([0.2, 0.5, 0.8]); vals = np.array([Eb_X[x][0, 0] for x in xs_])
+affine_in_X = abs(vals[0] - 2 * vals[1] + vals[2]) < 1e-12      # equally spaced points: zero 2nd difference
+mu1 = sum(n * x1 for x1, d, n in cells)
+B_true = sum(n * x1 * Eb_XN[(x1, n)][0, 0] for x1, d, n in cells) / mu1
+B_pool = sum(n * x1 * Eb_X[x1][0, 0] for x1, d, n in cells) / mu1      # Lemma 2 with the X-only pooled mean
+ok(f"Prop D4(b): D indep. of X but not of N -> E[beta|X,N] depends on N, E[beta|X] affine, and the "
+   f"pooled size-weighted rate is biased ({B_pool:.4f} vs true {B_true:.4f}); 'D indep. X suffices' fails",
+   depends_on_N and affine_in_X and abs(B_pool - B_true) > 1e-3)
+cells_ind = [(x1, d, n) for x1 in (0.2, 0.5, 0.8) for d in (1, 2) for n in (100, 1000)]   # D indep. (X, N)
+B_true_i = sum(n * x1 * (M_H(x1) + (Z2 if d == 2 else 0))[0, 0] for x1, d, n in cells_ind)
+B_pool_i = sum(n * x1 * Eb_X[x1][0, 0] for x1, d, n in cells_ind)
+ok("Prop D4(b): with D indep. of (X, N) the pooled size-weighted rate is exact", abs(B_true_i - B_pool_i) < 1e-12)
+
+# P1 (D2) / P3 Prop P3.6(b): number of independent M1 overidentifying restrictions.
+def mono(X):
+    R = X.shape[1]
+    return np.column_stack([X[:, r] * X[:, s] for r in range(R) for s in range(r, R)])
+for (R, C, Dn) in [(2, 2, 3), (3, 3, 4), (3, 2, 5)]:
+    nd = 40
+    Xs = [rng.dirichlet(np.ones(R), nd) for _ in range(Dn)]
+    blocks2, blocks1 = [], []
+    for d in range(Dn):
+        Md = mono(Xs[d])
+        b2 = np.zeros((nd, Dn * Md.shape[1])); b2[:, d * Md.shape[1]:(d + 1) * Md.shape[1]] = Md
+        sh = np.zeros((nd, (Dn - 1) * R))
+        if d > 0: sh[:, (d - 1) * R:d * R] = Xs[d]
+        blocks2.append(b2); blocks1.append(np.hstack([Md, sh]))
+    Z2d, Z1d = np.vstack(blocks2), np.vstack(blocks1)
+    per_col = np.linalg.matrix_rank(Z2d) - np.linalg.matrix_rank(Z1d)
+    # column C is 1 - sum of the others; 1 lies in both column spaces, so its M1 restrictions are implied
+    one_in = [np.linalg.lstsq(Z, np.ones(len(Z)), rcond=None)[1] for Z in (Z1d, Z2d)]
+    implied = all((len(r) == 0) or (r[0] < 1e-18) for r in one_in)
+    new, old = (Dn - 1) * (C - 1) * R * (R - 1) // 2, (Dn - 1) * C * R * (R - 1) // 2
+    ok(f"M1 restriction count {R}x{C}, D*={Dn}: rank gap {per_col} per column, column C implied -> "
+       f"{new} independent restrictions (earlier P1 count {old})",
+       per_col == (Dn - 1) * R * (R - 1) // 2 and implied and per_col * (C - 1) == new and new != old)
+
+# ---------------- Workstreams 2-3 after review ----------------
+# Lemma D1(d): stacked M1 rank. District 1 satisfies A5 (6 generic points, R = 3); the others need only
+# R affinely independent points. Collinear (affinely dependent) points in one district break the rank.
+def m1_design(Xs):
+    Dn = len(Xs); R = Xs[0].shape[1]; rows = []
+    for d, Xd in enumerate(Xs):
+        sh = np.zeros((len(Xd), (Dn - 1) * R))
+        if d > 0: sh[:, (d - 1) * R:d * R] = Xd
+        rows.append(np.hstack([mono(Xd), sh]))
+    return np.vstack(rows)
+X1 = rng.dirichlet(np.ones(3), 6)
+good = [X1, rng.dirichlet(np.ones(3), 3), rng.dirichlet(np.ones(3), 3)]
+a_, b_ = rng.dirichlet(np.ones(3), 2)
+coll = [a_, b_, 0.5 * (a_ + b_)]                             # three distinct but collinear compositions
+bad_ = [X1, rng.dirichlet(np.ones(3), 3), np.array(coll)]
+p_ = 6 + 2 * 3
+ok("Lemma D1(d): A5 in one district + 3 affinely independent points elsewhere -> stacked M1 design full rank; "
+   "3 distinct but collinear points in a district -> rank deficient",
+   np.linalg.matrix_rank(m1_design(good)) == p_ and np.linalg.matrix_rank(m1_design(bad_)) < p_)
+
+# Prop D3, pure-composition vertices: drop t = 1 from the lower bound (row 1) and t = 0 from the upper (row 2).
+def m1_r2_closed_pure(Qd, Vd, zeta_c, c):
+    lo, hi = -np.inf, np.inf
+    for d in range(len(Qd)):
+        Q = Qd[d][c]
+        for v in Vd[d]:
+            t = v[0]; z1, z2 = zeta_c[d][c]; sh = (z1 - z2) / 2
+            if t < 1: lo = max(lo, -(Q[0, 0] * t + Q[0, 1] * (1 - t)) / (1 - t) - sh)
+            if t > 0: hi = min(hi, (Q[0, 1] * t + Q[1, 1] * (1 - t)) / t - sh)
+    return lo, hi
+bad = n = 0
+for _ in range(100):
+    C2 = int(rng.integers(2, 5)); D2 = int(rng.integers(2, 5))
+    G = rng.gamma(2.0, size=(C2, 2, 2)); H2 = [G[c] / G.sum(0) for c in range(C2)]
+    z = random_zeta(D2, 2, C2, 0.02)
+    Qd, zc, Vd = [], [], []
+    for d in range(D2):
+        Hd = [H2[c] + np.outer(z[d][c], np.ones(2)) for c in range(C2)]
+        if min(h.min() for h in Hd) < 0: break
+        Qd.append([sym(h) for h in Hd]); zc.append([z[d][c] for c in range(C2)])
+        ends = sorted(rng.uniform(0.05, 0.95, 2))
+        if d == 0: ends[1] = 1.0                             # a pure group-1 poll
+        if d == 1: ends[0] = 0.0                             # a pure group-2 poll
+        Vd.append([np.array([t, 1 - t]) for t in ends])
+    else:
+        zc = [[np.asarray(zc[d][c]) - np.asarray(zc[0][c]) for c in range(C2)] for d in range(D2)]
+        box = [m1_r2_closed_pure(Qd, Vd, zc, c) for c in range(C2)]
+        lo_v = np.array([b[0] for b in box]); hi_v = np.array([b[1] for b in box])
+        for c in range(C2 - 1):
+            pl = max(lo_v[c], -(hi_v.sum() - hi_v[c])); pu = min(hi_v[c], -(lo_v.sum() - lo_v[c]))
+            L, U = m1_r2_lp_kappa(Qd, Vd, zc, c); n += 1
+            bad += not (abs(L - pl) < 1e-7 and abs(U - pu) < 1e-7)
+ok(f"Prop D3 with pure-composition vertices (t = 0, 1): modified closed form matches the LP ({n} instances)",
+   bad == 0 and n > 20)
+
+# Prop D8b [F] (added after review, round 2, Nov 2026). Delta q = 0 is sufficient for point identification of the
+# change, not necessary. 2x2, A = simplex (vertices e1, e2), column 1: m1(e2) = Q12 + k >= 0, m0(e1) = Q12 - k >= 0
+# (and the complements <= 1). With Q12 = 0 the outer set is {k = 0}: the change is point-identified although the
+# composition moments differ across periods (Delta q != 0). With Q12 = .2 it is not (positive width).
+rng_d8 = np.random.default_rng(88)
+def q12(x, N):                      # mu_12 / mu_1 = E[N X1 X2] / E[N X1]
+    return np.sum(N * x * (1 - x)) / np.sum(N * x)
+x_pre, x_post = rng_d8.uniform(.1, .5, 40), rng_d8.uniform(.4, .9, 40)
+N_pre, N_post = rng_d8.integers(200, 2000, 40).astype(float), rng_d8.integers(200, 2000, 40).astype(float)
+dq = q12(x_post, N_post) - q12(x_pre, N_pre)
+def k_range(Q12):
+    lo, hi = max(-Q12, Q12 - 1), min(Q12, 1 - Q12)     # Q12 + k in [0,1] and Q12 - k in [0,1]
+    return lo, hi
+w0 = (k_range(0.0)[1] - k_range(0.0)[0]) * abs(dq)    # width of the change's identified set = width of L(Theta)
+w2 = (k_range(0.2)[1] - k_range(0.2)[0]) * abs(dq)
+ok(f"Prop D8b [F] (round 2): Delta q = {dq:.3f} != 0, yet with Q12 = 0 the change is point-identified (width {w0:.3f}); "
+   f"with Q12 = .2 it is not (width {w2:.3f}). The old 'iff Delta q = 0' fails; the max-min criterion holds",
+   abs(dq) > 0.01 and w0 == 0 and w2 > 0.01)

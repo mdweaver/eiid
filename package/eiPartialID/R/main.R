@@ -255,9 +255,8 @@ calcSummaryOutputValues <- function(x, t, n, trueBetaB=NULL, useXRangeOffset=TRU
 #'  Optional: bd True district Beta
 #'
 #' @examples
-#' library("MASS")
-#' library("eco")
-#' data("census")
+#' if (requireNamespace("eco", quietly = TRUE)) {
+#' data("census", package = "eco")
 #' inputDataSet <- census
 #' x <- inputDataSet$X
 #' t <- inputDataSet$Y
@@ -265,6 +264,7 @@ calcSummaryOutputValues <- function(x, t, n, trueBetaB=NULL, useXRangeOffset=TRU
 #' trueBetaB <- inputDataSet$W1
 #' outputList <- generateBounds(x, t, n, trueBetaB=trueBetaB, useXRangeOffset=TRUE,
 #'     returnAdditionalStats=FALSE, printSummary=TRUE)
+#' }
 #'
 #' # True B: 0.674809
 #' # Duncan-Davis bounds: [0.535618, 0.974010]
@@ -326,9 +326,8 @@ generateBounds <- function(x, t, n, trueBetaB=NULL, useXRangeOffset=TRUE, return
 #' @importFrom stats pnorm
 #'
 #' @examples
-#' library("MASS")
-#' library("eco")
-#' data("census")
+#' if (requireNamespace("eco", quietly = TRUE)) {
+#' data("census", package = "eco")
 #' inputDataSet <- census
 #' x <- inputDataSet$X
 #' t <- inputDataSet$Y
@@ -337,6 +336,7 @@ generateBounds <- function(x, t, n, trueBetaB=NULL, useXRangeOffset=TRUE, return
 #' outputList <- generateBounds(x, t, n, trueBetaB=trueBetaB, useXRangeOffset=TRUE,
 #'     returnAdditionalStats=FALSE, printSummary=TRUE)
 #' summaryOutputList <- evaluateBounds(outputList)
+#' }
 #'
 #' # $x$ & Nominal coverage (\Phi(x)) & True B in CI_x & Width-ratio: |Proposed width|/|DD| &
 #' #     Reverted to DD & Proposed Lower & Proposed Upper \\
@@ -490,9 +490,8 @@ evaluateBounds <- function(outputListFromGenerateBounds) {
 #'   true value was captured in the proposed CI_0.5.
 #'
 #' @examples
-#' library("MASS")
-#' library("eco")
-#' data("census")
+#' if (requireNamespace("eco", quietly = TRUE)) {
+#' data("census", package = "eco")
 #' inputDataSet <- census
 #' x <- inputDataSet$X
 #' t <- inputDataSet$Y
@@ -500,6 +499,7 @@ evaluateBounds <- function(outputListFromGenerateBounds) {
 #' trueBetaB <- inputDataSet$W1
 #' outputList <- bounds(x, t, n, trueBetaB=trueBetaB)
 #' print(outputList)
+#' }
 #'
 #' # > print(outputList)
 #' # $CI_0.5_lower

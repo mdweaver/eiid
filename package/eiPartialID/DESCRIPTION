@@ -1,7 +1,7 @@
 Package: eiPartialID
 Type: Package
 Title: Ecological Regression with Partial Identification
-Version: 0.2.0
+Version: 0.3.1
 Author: Wenxin Jiang, Gary King, Allen Schmaltz, Martin A. Tanner
 Maintainer: Allen Schmaltz <schmaltz@fas.harvard.edu>
 Contact: <wjiang@northwestern.edu,king@harvard.edu,schmaltz@fas.harvard.edu,mat132@northwestern.edu>
@@ -14,21 +14,21 @@ Description: Estimate district-level bounds for 2x2 ecological inference based o
     to units nested in groups (group baselines and bounded group heterogeneity), and to a
     ladder of assumptions from Duncan-Davis bounds to Goodman constancy, with confidence
     intervals for intersection bounds, optional additional restrictions and sensitivity
-    analysis.
+    analysis. Version 0.3.0 adds signs on mean associations and contextual reinforcement
+    (experimental), projection intervals with a rank guard, and a bootstrap pooling test.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports:
   sandwich,
   stats,
-  MASS,
-  eco,
   lpSolve,
   graphics,
   grDevices
 RoxygenNote: 7.3.1
 Suggests: knitr,
     rmarkdown,
+    eco,
     testthat (>= 3.0.0),
     eiPack,
     ei.Datasets,

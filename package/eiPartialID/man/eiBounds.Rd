@@ -22,7 +22,6 @@ eiBounds(
   extrapolate = NULL,
   weights = c("none", "n"),
   vcov = c("HC3", "HC1", "HC0"),
-  cluster = NULL,
   restrictions = NULL,
   alpha = 0.05,
   ci = c("clr", "conservative", "none"),
@@ -35,7 +34,10 @@ eiBounds(
   seed = NULL,
   tests = TRUE,
   range_offset = 0,
-  mismatch = c("error", "rescale")
+  mismatch = c("error", "rescale"),
+  union = c("pieces", "hull"),
+  diagnostics = NULL,
+  base = NULL
 )
 }
 \arguments{
@@ -70,16 +72,41 @@ Duncan-Davis) or \code{"extrapolate"} (impose the model beyond the data).}
 
 \item{vcov}{\code{"HC3"} (default; falls back to HC1, HC0, classical), \code{"HC1"} or \code{"HC0"}.}
 
-\item{cluster}{optional cluster variable (pooled models), giving CR1 variances.}
-
 \item{restrictions}{optional list with elements \code{zeros}, \code{order},
-\code{sign}, \code{slope}, \code{linear}, \code{external}; see the vignette.}
+\code{sign}, \code{slope}, \code{linear}, \code{external}, \code{assoc}
+and \code{cr}; see the vignette. \code{assoc} is a list of signs on mean
+associations, each \code{list(type = "dB" or "dW", row, col, sign = +1 or -1,
+version, other)}: \code{"dB"} is the between-group association
+\eqn{\delta_B} (version \code{"W1"}, row vs the rest, default; or
+\code{"pair"}, row vs \code{other}), \code{"dW"} the within-group
+(contextual) association \eqn{\delta_W} (version \code{"W1"}, one-vs-rest,
+default; or \code{"W2"}, \eqn{\Delta_r}, the within-group associations
+of every original group with the row's share, \emph{pooled} into one sum:
+its sign does not sign each group's association). \code{cr} is a list of
+contextual-reinforcement restrictions (\eqn{\delta_B} and \eqn{\delta_W}
+have the same sign, which is not assumed known), each \code{list(row, col,
+version = "W1", "W2" or "pair", other)}. W1 (and every 2 x 2 CR) is one LP
+(a slab); W2 and pair are a union of two branches and may give two disjoint
+intervals. All associations are model-implied (LCE) means with design
+weights \eqn{N_i}. Signs on \eqn{\delta_W} can be refuted by the data.
+A sign on \eqn{\delta_B} and CR are always feasible only in the
+model-free problem with continuous unit tables (Duncan-Davis margins, no
+linear rung, no other restrictions); with the linear rung they can be
+rejected jointly with it, and with integer counts or other restrictions
+CR can be refuted outright. An empty set rejects the combination; it does
+not say which part fails (the fit's notes say whether the rung alone is
+rejected).}
 
 \item{alpha}{1 - confidence level.}
 
-\item{ci}{\code{"clr"} (default), \code{"conservative"} or \code{"none"}.}
+\item{ci}{\code{"clr"} (default; reported with the projection interval
+alongside), \code{"conservative"} or \code{"none"}.}
 
-\item{fpc}{unit-level allowance for \code{ci_actual}: \code{"bhatia-davis"} (default) or \code{"popoviciu"}.}
+\item{fpc}{unit-level allowance for \code{ci_actual} and \code{proj_actual}:
+\code{"bhatia-davis"} (default; the variance bound comes from a CLR
+interval for \code{ci_actual}, from a projection interval for the rung
+alone for \code{proj_actual}, and from a conservative interval with
+\code{ci = "conservative"}) or \code{"popoviciu"} (the bound 1/4).}
 
 \item{jkst}{also report Jiang et al. CI_x intervals.}
 
@@ -93,12 +120,28 @@ Duncan-Davis) or \code{"extrapolate"} (impose the model beyond the data).}
 
 \item{seed}{optional random seed (for reproducible CIs).}
 
-\item{tests}{run the emptiness test and (for M1) the test of its testable part.}
+\item{tests}{run the emptiness test and, for grouped M1/L4, the test of M1's
+testable part (against M2) and the pooling test (M0 against M1: all group
+shifts zero).}
 
 \item{range_offset}{shrink the observed range by this amount (two-row tables
 only; Jiang et al. use 1e-5).}
 
 \item{mismatch}{\code{"error"} or \code{"rescale"} when row and column totals differ.}
+
+\item{union}{with CR restrictions the estimate and CIs can be a union of
+disjoint intervals: \code{"pieces"} (default) reports the hull in
+\code{*_lower}/\code{*_upper}, the number of pieces in \code{n_pieces} and
+the \emph{widest} excluded gap in \code{*_gap_lower}/\code{*_gap_upper};
+\code{print()} shows every piece, and \code{fit$pieces} holds them all;
+\code{"hull"} reports the hull only (valid, wider or equal).}
+
+\item{diagnostics}{compute \code{eiRedundancy()} diagnostics and store them in
+\code{$sign} (default: when \code{assoc} or \code{cr} restrictions are given).}
+
+\item{base}{also fit the rung alone (without the optional restrictions) and
+report its estimate and CIs in the \code{base_*} columns, printed beside
+the restricted result (default: when restrictions are given).}
 }
 \value{
 an object of class \code{"eiRxC"}.
@@ -126,16 +169,54 @@ shared contextual effects with group deviations up to \code{delta};
 \code{row_constant} having no contextual effect; \code{"L5"} constancy within
 groups (Goodman within each group); \code{"L6"} Goodman regression.
 
-Reported for each target: \code{estimate} (the estimated identified set for
-the model-implied rate; not a confidence interval), \code{ci_model} (CI for
-the model-implied rate at the observed compositions), \code{ci_actual} (CI
-for the actual rate in these units, including an allowance for unit-level
-deviations bounded by Bhatia-Davis or Popoviciu) and the Duncan-Davis bounds.
+Reported for each target: \code{estimate} (the estimated outer identified
+set for the model-implied rate, sharp only relative to the regression
+function; not a confidence interval), \code{ci_model} (CI for the
+finite-design conditional-mean rate, i.e. the rate the model implies at the
+observed compositions), \code{ci_actual} (CI for the realised rate in these
+units, including an allowance for unit-level deviations bounded by
+Bhatia-Davis or Popoviciu) and the Duncan-Davis bounds. With \code{ci = "clr"}
+the table also has \code{proj_model_*} and \code{proj_actual_*}: projection
+intervals built from the same candidate endpoints.
+
+Status of the intervals (PHASE3_inference.md, sections 0.5 and 5): the CLR
+interval as implemented collects candidate endpoints by simulation and is
+\emph{algorithmic} (its coverage is a conjecture supported by simulation);
+the projection interval (P3.5(b2)(ii), critical value
+\eqn{\sqrt{\chi^2_{p,1-\alpha}}} with \eqn{p = \dim\beta}) and the
+conservative interval (P3.5(a)) have an asymptotic guarantee for the pooled
+model M0 in a full-rank design, and for grouped models only with few, large
+groups (regime R1; with many small groups their coverage is a simulation
+finding). With sign or CR restrictions the guarantee (PHASE5a R10) is for
+pooled M0 only; under grouped rungs no interval with these restrictions is
+covered by a theorem (R16 open). \code{print()} states the status for each
+fit, with the numerical rank of \eqn{\hat V} as a diagnostic. As a
+safeguard (rank guard), candidate endpoints whose gradients use a numerically
+null direction of \eqn{\hat V} are dropped from the projection and CLR
+intervals (a valid, wider interval) and a note says so. The
+\code{proj_actual} allowance for unit-level deviations uses a Bhatia-Davis
+variance bound taken from a projection interval for the rung alone, so the
+projection columns rest only on P3.5(b2)(ii) and a union bound;
+\code{ci_actual} with CLR takes that bound from a CLR interval. The
+Bhatia-Davis allowance needs the weighted mean rate bounded away from 0 and 1
+(P3.5(c1)); a note suggests \code{fpc = "popoviciu"} when its interval lies
+within [0, .05] or [.95, 1]. Inference is conditional on the design and on the
+group effects; units are assumed independent given them, and no clustered
+variance is used (group-level shocks belong in the mean: use M1 or M2).
+
+Sign and contextual-reinforcement restrictions (\code{assoc}, \code{cr};
+the M-SIGN module) are \strong{experimental} in this release: both referee
+reports of review batch B are being answered. Under grouped rungs (M1,
+M1delta, M2, L4 with groups) each sign is one pooled restriction across
+groups, and sharpness (PHASE5a R3(b)) and inference (R10) are proved only
+for the pooled model M0.
 }
 \examples{
-library(eco); data(census)
-fit <- eiBounds(x = census$X, t = census$Y, n = census$N, model = "M0", seed = 1)
-fit
+if (requireNamespace("eco", quietly = TRUE)) {
+  data("census", package = "eco")
+  fit <- eiBounds(x = census$X, t = census$Y, n = census$N, model = "M0", seed = 1)
+  fit
+}
 }
 \references{
 Jiang, W., King, G., Schmaltz, A. and Tanner, M. A. (2019).

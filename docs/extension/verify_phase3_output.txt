@@ -7,3 +7,17 @@ PASS Prop S1: eta-bounds nested (wider as eta grows)
 PASS Prop S1: violated-model truth 0.8499 lies in the eta=0.02 bound [0.3617, 0.9669]
      breakdown eta* for 'loyalty > 0.30': 0.0595
 PASS Breakdown: claim holds just below eta* and fails just above
+PASS Thm P3.4(ii): two active gradients equal on supp(Z) give mean 0.0006 (normal limit; the earlier 'non-singleton => negative mean' fails), distinct ones give -0.4009 ~ -0.3989
+PASS Prop P3.5(b2) step 1: every dual-feasible lambda gives an upper bound at beta_0 (500 random duals)
+PASS Prop P3.5(b2)(ii): projection upper bound with a data-dependent candidate covers 1.000 >= 0.95 (one-candidate z-bound: 0.945)
+     Thm P3.8, M1 2x2, 30 districts x 8 polls: CI for B~ covers 1.000, for B 1.000; empty 0; median unclipped width 9.12 (valid but uninformative; see P3 section 5.1)
+PASS Thm P3.8: finite-sample CI covers B~ and B at >= 95% in an R2 design (300 reps each); emptiness rate <= 5%
+PASS Prop P3.6(c): nonzero district shifts are not of the form G X_i (residual > 0); zero shifts are
+     P3.5(b2)(ii) null direction: old rule covers coordinate 2 in 0.000 of 2000; under (ii-b) both coordinates covered in 0.968
+PASS P3.5(b2)(ii) null direction [F] (Batch B): rank-q pseudoinverse rule misses surely (old statement fails); reduced full-rank parameterisation covers (corrected statement holds)
+     P3.5(a) residual: P(|E/sd| > 1.96) = 0.000 (normal: 0.05); P(|E| > 1.96 S_1) = 0.000; sd/S_1 = 0.050
+PASS P3.5(a) step 5 [F] (Batch B): weight condition alone does not give a standardised CLT (old step fails); the allowance z*S_1 still holds (Chebyshev branch)
+     P3.4': mean of sqrt(n)(f_n(theta_hat) - f_n(theta_0)) = -0.395 (normal: 0; min(Z, 1-Z): -0.395); KS distance to N(0,1) = 0.309
+PASS P3.4' [F] (round 2): a uniquely active candidate with an O(n^-1/2) gap gives the non-normal limit min{Z, 1-Z} (old fixed-hull reading fails); P3.4' with c = (0, 1) matches
+     P3.5(c): BD bound from a wrong interval 0.090 < true 0.250; with a covering interval P(|E| <= 1.96 S_BD) = 0.958
+PASS P3.5(c) [V] (round 2): BD from a failed interval is not conservative; BD from a covering interval keeps the allowance (>= 0.95)

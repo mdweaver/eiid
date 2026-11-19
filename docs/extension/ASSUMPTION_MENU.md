@@ -68,6 +68,11 @@ L4 is a useful intermediate step. Assuming no contextual effect for one row $r$ 
 
 ### F. Repeated cross-sections and difference-in-differences
 
+*Derived in `PHASE2d_did.md` (Phase 2). Corrections:*
+* *item 17's product set is sharp (2d Prop. Δ0(b));*
+* *a one-column DiD needs one restriction, not $(C-1)R(R-1)/2$ (2d Lemma FD1);*
+* *"contextual effects unchanged" is R1 and R2 together, not $\Delta K=0$ (2d §5).*
+
 Setting: the same units observed in a pre- and a post-period, e.g. counties voting on Black suffrage before and after the Civil War, with rows veteran / non-veteran. Each period $t$ has its own identified $Q_t$ and unidentified $K_t$. A typical target is
 $$\text{DiD}=(B_{v,\text{post}}-B_{v,\text{pre}})-(B_{n,\text{post}}-B_{n,\text{pre}}),$$
 which is affine in $(K_\text{pre},K_\text{post})$ (Lemma 2), so every item below keeps the LP structure.
@@ -96,6 +101,8 @@ which is affine in $(K_\text{pre},K_\text{post})$ (Lemma 2), so every item below
     * The two cross-sections then cover different people, and the DiD of group rates differs from the average within-person change.
     * Options: (a) interval-valued $X_\text{pre}$ from age and mortality data, making EI with interval regressors (more partial identification); (b) explicit entry/exit rows; (c) a within-person target, which is a 3-way (veteran × pre-vote × post-vote) table with one-way margins, a multi-way Fréchet / transition problem.
     * Also: $T$ must use the same base as $X$ (yes votes / eligible men, with an abstain column), so the 2×2 becomes 2×3. R×C is needed here, not optional.
+
+*Consolidated module catalogue, layering matrix, build order and proof register: `PACKAGE_DESIGN.md` (Nov 2026).*
 
 ## Notes for implementation (Phase 4)
 

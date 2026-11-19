@@ -1,0 +1,31 @@
+PASS  C1 Lemma M1 (a)-(c): Goodman/NM bias formulas, 1'Delta=0, one-vs-rest collapse (R=C=3)  [max err 6.2e-15]
+PASS  C2 Prop M3: 2x2 closed forms = LP; NM = gamma*ER; dB-sign sets never empty  [max err 5.6e-15]
+PASS  C2 Prop M3(b): dW>=0 set empty exactly when ER < MOB-  [2 empty cases]
+PASS  C2 Prop M3(d): CR never empty (continuous, no U_i), exactly one branch (ER != 0, gamma < 1)
+PASS  C2 Prop M3(d): under realised CR, sign(D) = sign(ER)  [152 populations satisfy CR]
+PASS  C3 Prop M4: joint <= single (nested), and strictly narrower in some cases  [75/139 strict; max width gain 0.273]
+PASS  C4 Prop M5: superpopulation associations affine in k (R=C=3)  [max err 5.6e-17]
+PASS  C4 [V] Prop M5(b): mean-level ordering (valid transition matrices, rebuilt) => dB*(r,s) >= 0
+PASS  C5(a) N2 outer bound contains the truth under a monotone nonlinear DGP
+PASS  C5(b) M0 + signed slopes (outer) is inside N2 (outer) when tau is quadratic  [47 cases]
+PASS  C5(c) R=3: m nondecreasing in x_0 but Cov(m, X_0) < 0 (no Chebyshev nesting)  [Cov = -0.0194]
+PASS  C5(c') [V] R=3: the same m has negative covariance with X_0 under BOTH W1 weights  [Cov_w1 = -0.0180, Cov_w(not1) = -0.0154]
+PASS  C6 Prop N2.3 (structural tau_m, differentiable m): local identity and local CR <=> D(x) between 0 and tau_m'(x)
+PASS  C7 [F] Remark M2.1: continuous N1 accepts CR (and lower end 0) while no integer table does (old 'attained by unit tables' fails for integer counts)  [PI: 3 units of 4: integer gaps ['-1/6', '1/6'], continuous CR contains 0: True, integer CR empty; EI: 2 precincts of 4: integer gaps ['-2/5', '2/15', '2/3'], continuous CR contains 0: True, integer CR empty; positive between sign: continuous lower end 0.000, integer lower end 2/15]
+PASS  C7a [V] Remark M2.1 (2x2, margins only): integer gap set = DD interval on the lattice of step 1/(N mu(1-mu)), endpoints attained  [265 tiny populations]
+PASS  C7b [V] M2(d): the set of (eps1, eps2) keeping 'width <= c' is not a product of intervals (its boundary is the breakdown frontier)
+PASS  C8 [F] M3(d): gamma = 1 (pure units): both CR branches non-empty and equal to {D_ER} (old 'exactly one' fails)  [gamma = 1.000, ER = 1.000, branches (1.0, 1.0), (1.0, 1.0)]
+PASS  C8b [F] M3(c): with a unit ordering the delta_B <= 0 set is empty although each part alone is feasible (old 'never refuted' fails once U_i are present)
+PASS  C9 [F] M5(c): common positive slopes under M1, pooled delta*_W < 0 (old M5(c) fails); the corrected decomposition with the between-district term is exact; within each district delta*_W > 0  [pooled -0.0492711; decomposition -0.0492711; per district 0.00064, 0.00064]
+PASS  C10 [F] N2.2(b): a grid point on a strict subset of the support has no monotone extension (old 'restricting to support points loses nothing' fails on a grid)
+PASS  C10b [F] N2.2(a): the X-conditional set and S(x, tau) admit (.75,.25), which the V=(X,N) model excludes
+PASS  C11 [F] N2.3: two compatible models, same law on the support, local thresholds .4 and .3375; the second excludes the first model's gap .4 (old N2.3 as an observable restriction fails)  [tau'(1/2) = 0.4000 vs 0.3375]
+PASS  C12 [F] Lemma N2.4: ordinary bin averages break accounting (.25 vs .3125; old binning step fails); person-weighted bin rates reproduce it (.625) and keep row targets and monotone order
+PASS  C12b [F] Section 6: fixed-degree inference after LOO degree selection under-covers (conditional coverage ~0.68, not 0.95)  [conditional coverage 0.692 (theory 0.682); selected in 0.160]
+PASS  C13 [I] N2.3(d): smooth rows with zero local within effect everywhere, aggregate delta*_W < 0  [continuous -2.1164e-05 (-1/47250), finite -1.9048e-04 (-1/5250)]
+PASS  C14 [F] Def. 1: every group's rate rises, W1 < 0 < W2 (W2 is one pooled sum, not a per-group direction)  [W1 -0.02633, W2 0.00110]
+PASS  C15 [F] equal-rates witness: delta_B = 0 and the CR union holds, but delta_W = .0456 > 0, so only the positive branch contains it (old 'both weak CR branches hold' fails)  [ER 1.000, gamma 0.240, delta_W 0.0456]
+PASS  C16 [F] N2.3(d): rows monotone (constant) on the finite support, local within effect -1/16 at x = 1/2  [local within effect -0.0625]
+PASS  C3b [F] M4 example: same within sign on complementary columns forces D = ER; opposite signs = one restriction  [single [-0.5 -0. ], same sign [-0. -0.], opposite [-0.5 -0. ]]
+
+29/29 PASS

@@ -1,0 +1,58 @@
+\documentclass[11pt]{article}
+\input{preamble}
+
+\title{Partial Identification for R$\times$C Ecological Inference:\\
+Theory, Inference, Referee Revisions and the \texttt{eiPartialID} Package\\[4pt]
+\large Technical report}
+\author{Compiled from the \texttt{mdweaver/eiid} repository\\
+\small branch \texttt{claude/wizardly-volta-lbh4bm}, commit \texttt{ec3644f}}
+\date{November 2026}
+
+% For a process-free version set \revisionsfalse here (see preamble.tex).
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent This report collects, in one document, the partial-identification
+programme for ecological inference developed in the \texttt{eiid} repository and
+implemented in the R package \texttt{eiPartialID} (version 0.3.1). It extends
+Jiang, King, Schmaltz and Tanner's $2\times2$ bounds under linear contextual
+effects to general R$\times$C tables (the sets $\Theta_I\subseteq\Theta_X\subseteq\Theta_O$),
+to units nested in districts (the rung ladder DD, M2, M1($\delta$), M1, L4, L5,
+L6 beside the pooled M0), to sign, reinforcement and monotonicity beliefs from
+Monotone Ecological Inference (N1, N2 and the M-SIGN module), and to confidence
+intervals that are valid when many candidate constraints are nearly tied. Each
+result is stated with its source label in the repository, explained in plain
+terms, sketched, and proved in full in the appendices, which reproduce the
+repository's theory documents. Every change made in response to three external
+referees over two rounds is attached to the result it changed and collected in a
+revision table. A status table separates proved results, results proved under
+stated conditions, cited theorems, conjectures, algorithms and open problems.
+\end{abstract}
+
+\tableofcontents
+\clearpage
+
+\input{sections/01_purpose}
+\input{sections/02_setting}
+\input{sections/03_twobytwo}
+\input{sections/04_rxc}
+\input{sections/05_districts}
+\input{sections/06_monotone}
+\input{sections/07_msign}
+\input{sections/08_inference}
+\input{sections/09_did}
+\input{sections/10_evidence}
+\input{sections/11_package}
+\input{sections/12_status}
+\input{sections/13_open}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\clearpage
+\appendix
+\ifrevisions\input{sections/A_revisions}\fi
+\input{sections/B_reproduced}
+
+\end{document}

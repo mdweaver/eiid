@@ -76,33 +76,6 @@
   })
 }
 
-.rxc_restrictions <- function(res, rl, cl, groups) {
-  if (is.null(res)) return(NULL)
-  ri <- function(v) .rxc_index(v, rl); ci <- function(v) .rxc_index(v, cl)
-  gi <- function(v) if (is.null(v)) NULL else .rxc_index(as.character(v), groups)
-  out <- list()
-  if (!is.null(res$zeros)) out$zeros <- lapply(res$zeros, function(z)
-    list(row = ri(z[["row"]]), col = ci(z[["col"]]),
-         group = if ("group" %in% names(z)) gi(z[["group"]]) else NULL))
-  if (!is.null(res$order)) out$order <- lapply(res$order, function(o)
-    list(high = ri(o[["high"]]), low = ri(o[["low"]]), col = ci(o[["col"]])))
-  if (!is.null(res$sign)) out$sign <- lapply(res$sign, function(s)
-    list(row = ri(s[["row"]]), col = ci(s[["col"]]), from = ri(s[["from"]]), to = ri(s[["to"]]),
-         sign = sign(as.numeric(s[["sign"]]))))
-  if (!is.null(res$slope)) out$slope <- as.numeric(res$slope)
-  if (!is.null(res$linear)) out$linear <- lapply(res$linear, function(l) {
-    tm <- l$terms
-    m <- cbind(row = ri(tm$row), col = ci(tm$col), context = ri(tm$context), value = as.numeric(tm$value))
-    list(terms = m, rhs = as.numeric(l$rhs), group = gi(l$group))
-  })
-  if (!is.null(res$external)) out$external <- lapply(res$external, function(e) {
-    a <- if (is.matrix(e$target)) e$target else {
-      a <- matrix(0, length(rl), length(cl)); a[ri(e$target[1]), ci(e$target[2])] <- 1; a }
-    list(weights = a, lower = e$lower, upper = e$upper)
-  })
-  out
-}
-
 #' Bounds for R x C ecological inference
 #'
 #' \code{eiBounds()} computes partial-identification bounds and confidence
@@ -126,11 +99,47 @@
 #' \code{row_constant} having no contextual effect; \code{"L5"} constancy within
 #' groups (Goodman within each group); \code{"L6"} Goodman regression.
 #'
-#' Reported for each target: \code{estimate} (the estimated identified set for
-#' the model-implied rate; not a confidence interval), \code{ci_model} (CI for
-#' the model-implied rate at the observed compositions), \code{ci_actual} (CI
-#' for the actual rate in these units, including an allowance for unit-level
-#' deviations bounded by Bhatia-Davis or Popoviciu) and the Duncan-Davis bounds.
+#' Reported for each target: \code{estimate} (the estimated outer identified
+#' set for the model-implied rate, sharp only relative to the regression
+#' function; not a confidence interval), \code{ci_model} (CI for the
+#' finite-design conditional-mean rate, i.e. the rate the model implies at the
+#' observed compositions), \code{ci_actual} (CI for the realised rate in these
+#' units, including an allowance for unit-level deviations bounded by
+#' Bhatia-Davis or Popoviciu) and the Duncan-Davis bounds. With \code{ci = "clr"}
+#' the table also has \code{proj_model_*} and \code{proj_actual_*}: projection
+#' intervals built from the same candidate endpoints.
+#'
+#' Status of the intervals (PHASE3_inference.md, sections 0.5 and 5): the CLR
+#' interval as implemented collects candidate endpoints by simulation and is
+#' \emph{algorithmic} (its coverage is a conjecture supported by simulation);
+#' the projection interval (P3.5(b2)(ii), critical value
+#' \eqn{\sqrt{\chi^2_{p,1-\alpha}}} with \eqn{p = \dim\beta}) and the
+#' conservative interval (P3.5(a)) have an asymptotic guarantee for the pooled
+#' model M0 in a full-rank design, and for grouped models only with few, large
+#' groups (regime R1; with many small groups their coverage is a simulation
+#' finding). With sign or CR restrictions the guarantee (PHASE5a R10) is for
+#' pooled M0 only; under grouped rungs no interval with these restrictions is
+#' covered by a theorem (R16 open). \code{print()} states the status for each
+#' fit, with the numerical rank of \eqn{\hat V} as a diagnostic. As a
+#' safeguard (rank guard), candidate endpoints whose gradients use a numerically
+#' null direction of \eqn{\hat V} are dropped from the projection and CLR
+#' intervals (a valid, wider interval) and a note says so. The
+#' \code{proj_actual} allowance for unit-level deviations uses a Bhatia-Davis
+#' variance bound taken from a projection interval for the rung alone, so the
+#' projection columns rest only on P3.5(b2)(ii) and a union bound;
+#' \code{ci_actual} with CLR takes that bound from a CLR interval. The
+#' Bhatia-Davis allowance needs the weighted mean rate bounded away from 0 and 1
+#' (P3.5(c1)); a note suggests \code{fpc = "popoviciu"} when its interval lies
+#' within [0, .05] or [.95, 1]. Inference is conditional on the design and on the
+#' group effects; units are assumed independent given them, and no clustered
+#' variance is used (group-level shocks belong in the mean: use M1 or M2).
+#'
+#' Sign and contextual-reinforcement restrictions (\code{assoc}, \code{cr};
+#' the M-SIGN module) are \strong{experimental} in this release: both referee
+#' reports of review batch B are being answered. Under grouped rungs (M1,
+#' M1delta, M2, L4 with groups) each sign is one pooled restriction across
+#' groups, and sharpness (PHASE5a R3(b)) and inference (R10) are proved only
+#' for the pooled model M0.
 #'
 #' @param formula optional formula \code{cbind(column counts) ~ cbind(row counts)}.
 #' @param data data frame with counts (and the grouping variable).
@@ -149,49 +158,90 @@
 #' @param extrapolate \code{"simplex"} (pure units) or a matrix of compositions.
 #' @param weights regression weights: \code{"none"} (as Jiang et al.) or \code{"n"}.
 #' @param vcov \code{"HC3"} (default; falls back to HC1, HC0, classical), \code{"HC1"} or \code{"HC0"}.
-#' @param cluster optional cluster variable (pooled models), giving CR1 variances.
 #' @param restrictions optional list with elements \code{zeros}, \code{order},
-#'   \code{sign}, \code{slope}, \code{linear}, \code{external}; see the vignette.
+#'   \code{sign}, \code{slope}, \code{linear}, \code{external}, \code{assoc}
+#'   and \code{cr}; see the vignette. \code{assoc} is a list of signs on mean
+#'   associations, each \code{list(type = "dB" or "dW", row, col, sign = +1 or -1,
+#'   version, other)}: \code{"dB"} is the between-group association
+#'   \eqn{\delta_B} (version \code{"W1"}, row vs the rest, default; or
+#'   \code{"pair"}, row vs \code{other}), \code{"dW"} the within-group
+#'   (contextual) association \eqn{\delta_W} (version \code{"W1"}, one-vs-rest,
+#'   default; or \code{"W2"}, \eqn{\Delta_r}, the within-group associations
+#'   of every original group with the row's share, \emph{pooled} into one sum:
+#'   its sign does not sign each group's association). \code{cr} is a list of
+#'   contextual-reinforcement restrictions (\eqn{\delta_B} and \eqn{\delta_W}
+#'   have the same sign, which is not assumed known), each \code{list(row, col,
+#'   version = "W1", "W2" or "pair", other)}. W1 (and every 2 x 2 CR) is one LP
+#'   (a slab); W2 and pair are a union of two branches and may give two disjoint
+#'   intervals. All associations are model-implied (LCE) means with design
+#'   weights \eqn{N_i}. Signs on \eqn{\delta_W} can be refuted by the data.
+#'   A sign on \eqn{\delta_B} and CR are always feasible only in the
+#'   model-free problem with continuous unit tables (Duncan-Davis margins, no
+#'   linear rung, no other restrictions); with the linear rung they can be
+#'   rejected jointly with it, and with integer counts or other restrictions
+#'   CR can be refuted outright. An empty set rejects the combination; it does
+#'   not say which part fails (the fit's notes say whether the rung alone is
+#'   rejected).
 #' @param alpha 1 - confidence level.
-#' @param ci \code{"clr"} (default), \code{"conservative"} or \code{"none"}.
-#' @param fpc unit-level allowance for \code{ci_actual}: \code{"bhatia-davis"} (default) or \code{"popoviciu"}.
+#' @param ci \code{"clr"} (default; reported with the projection interval
+#'   alongside), \code{"conservative"} or \code{"none"}.
+#' @param fpc unit-level allowance for \code{ci_actual} and \code{proj_actual}:
+#'   \code{"bhatia-davis"} (default; the variance bound comes from a CLR
+#'   interval for \code{ci_actual}, from a projection interval for the rung
+#'   alone for \code{proj_actual}, and from a conservative interval with
+#'   \code{ci = "conservative"}) or \code{"popoviciu"} (the bound 1/4).
 #' @param jkst also report Jiang et al. CI_x intervals.
 #' @param jkst_x values of x for CI_x.
 #' @param eta sensitivity: allowed undetectable nonlinearity (probability units).
 #' @param ndraw draws used to collect candidate endpoints.
 #' @param nz_draw Gaussian draws for critical values.
 #' @param seed optional random seed (for reproducible CIs).
-#' @param tests run the emptiness test and (for M1) the test of its testable part.
+#' @param tests run the emptiness test and, for grouped M1/L4, the test of M1's
+#'   testable part (against M2) and the pooling test (M0 against M1: all group
+#'   shifts zero).
 #' @param range_offset shrink the observed range by this amount (two-row tables
 #'   only; Jiang et al. use 1e-5).
 #' @param mismatch \code{"error"} or \code{"rescale"} when row and column totals differ.
+#' @param union with CR restrictions the estimate and CIs can be a union of
+#'   disjoint intervals: \code{"pieces"} (default) reports the hull in
+#'   \code{*_lower}/\code{*_upper}, the number of pieces in \code{n_pieces} and
+#'   the \emph{widest} excluded gap in \code{*_gap_lower}/\code{*_gap_upper};
+#'   \code{print()} shows every piece, and \code{fit$pieces} holds them all;
+#'   \code{"hull"} reports the hull only (valid, wider or equal).
+#' @param diagnostics compute \code{eiRedundancy()} diagnostics and store them in
+#'   \code{$sign} (default: when \code{assoc} or \code{cr} restrictions are given).
+#' @param base also fit the rung alone (without the optional restrictions) and
+#'   report its estimate and CIs in the \code{base_*} columns, printed beside
+#'   the restricted result (default: when restrictions are given).
 #' @return an object of class \code{"eiRxC"}.
 #' @references Jiang, W., King, G., Schmaltz, A. and Tanner, M. A. (2019).
 #'   Ecological Regression with Partial Identification. Political Analysis.
 #' @examples
-#' library(eco); data(census)
-#' fit <- eiBounds(x = census$X, t = census$Y, n = census$N, model = "M0", seed = 1)
-#' fit
+#' if (requireNamespace("eco", quietly = TRUE)) {
+#'   data("census", package = "eco")
+#'   fit <- eiBounds(x = census$X, t = census$Y, n = census$N, model = "M0", seed = 1)
+#'   fit
+#' }
 #' @export
 eiBounds <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL,
                      x = NULL, t = NULL, n = NULL, group = NULL,
                      model = c("M0", "M1", "M1delta", "M2", "L4", "L5", "L6"),
                      delta = 0, row_constant = NULL, targets = NULL,
                      range = c("hull", "trim", "extrapolate"), trim = NULL, extrapolate = NULL,
-                     weights = c("none", "n"), vcov = c("HC3", "HC1", "HC0"), cluster = NULL,
+                     weights = c("none", "n"), vcov = c("HC3", "HC1", "HC0"),
                      restrictions = NULL, alpha = 0.05, ci = c("clr", "conservative", "none"),
                      fpc = c("bhatia-davis", "popoviciu"), jkst = FALSE,
                      jkst_x = seq(0, 2, by = 0.25), eta = 0, ndraw = 100, nz_draw = 4000,
                      seed = NULL, tests = TRUE, range_offset = 0,
-                     mismatch = c("error", "rescale")) {
+                     mismatch = c("error", "rescale"), union = c("pieces", "hull"),
+                     diagnostics = NULL, base = NULL) {
   cl <- match.call()
+  union <- match.arg(union)
   model <- match.arg(model); range <- match.arg(range); weights <- match.arg(weights)
   vcov <- match.arg(vcov); ci <- match.arg(ci); fpc <- match.arg(fpc); mismatch <- match.arg(mismatch)
   if (!is.null(seed)) set.seed(seed)
   dat <- .rxc_parse(formula, data, rows, cols, x, t, n, group, mismatch)
   rl <- colnames(dat$X); cll <- colnames(dat$T)
-  if (!is.null(cluster) && is.character(cluster) && length(cluster) == 1 && !is.null(data))
-    cluster <- data[[cluster]]
   grp_levels <- if (is.null(dat$group)) "all" else levels(as.factor(dat$group))
   L4row <- NULL
   if (model == "L4") {
@@ -202,35 +252,116 @@ eiBounds <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL,
   st <- .rxc_setup(dat$X, dat$T, dat$N, dat$group, model = model, delta = delta, L4row = L4row,
                    range = range, trim = trim, extrapolate = extrapolate,
                    range_offset = range_offset, weights = weights, vcov = vcov,
-                   cluster = cluster, extra = extra)
+                   extra = extra)
   tl <- .rxc_targets(targets, rl, cll)
   est <- .rxc_estimate(st, tl, alpha = alpha, ci = ci, fpc = fpc, jkst = jkst, jkst_x = jkst_x,
-                       eta = eta, ndraw = ndraw, nz_draw = nz_draw)
+                       eta = eta, ndraw = ndraw, nz_draw = nz_draw, union = union)
   tst <- NULL
   if (tests) {
-    tst <- list(empty_rejected = .rxc_empty_test(st, alpha = alpha, nz_draw = nz_draw))
+    ed <- .rxc_empty_test(st, alpha = alpha, nz_draw = nz_draw, detail = TRUE)
+    tst <- list(empty_rejected = if (is.list(ed)) ed$rejected else ed,
+                empty_detail = if (is.list(ed)) ed else NULL)
     if (model %in% c("M1", "L4") && st$G > 1)
+    {
       tst$m1 <- .rxc_m1_test(dat$X[st$keep, , drop = FALSE], dat$T[st$keep, , drop = FALSE],
                              dat$N[st$keep], dat$group[st$keep], weights = weights, vcov = vcov)
+      tst$pool <- .rxc_pool_test(dat$X[st$keep, , drop = FALSE], dat$T[st$keep, , drop = FALSE],
+                                 dat$N[st$keep], dat$group[st$keep], weights = weights, vcov = vcov)
+    }
   }
   if (range == "extrapolate")
     warning("range = \"extrapolate\": the linear model is assumed where no units are observed; this cannot be checked")
   notes <- character(0)
-  if (any(est$table$empty)) notes <- c(notes, "empty bound: the assumptions are contradicted by the data (or by sampling noise; see the emptiness test)")
+  mlabels <- .rxc_module_labels(extra, rl, cll)
+  combo <- if (length(mlabels)) paste0("the rung (", model, ") + ", paste(mlabels, collapse = " + ")) else
+    paste0("the rung (", model, ")")
+  if (any(est$table$empty))
+    notes <- c(notes, paste0("empty estimate: at the point estimate ", combo, " has no solution. ",
+                             "This is a sample diagnostic, not a test (see the emptiness test). An empty ",
+                             "set rejects the combination; it does not say which part fails"))
+  if (isTRUE(tst$empty_rejected)) {
+    ra <- tst$empty_detail$rung_alone_rejected
+    notes <- c(notes, paste0("emptiness test rejects ", combo,
+                             if (isTRUE(ra)) "; the rung alone is also rejected" else
+                               if (identical(ra, FALSE)) "; the rung alone is not rejected" else ""))
+  }
+  sign_like <- c(vapply(extra$assoc, function(a) a$type == "dB", TRUE), rep(TRUE, length(extra$cr)))
+  if (length(sign_like) && all(sign_like) &&
+      (any(est$table$empty) || isTRUE(tst$empty_rejected)))
+    notes <- c(notes, paste0("a sign on delta_B and CR are always feasible only in the model-free problem with ",
+                             "continuous tables (no linear rung, no other restrictions). With the rung (", model,
+                             ") they can be rejected jointly with it, and with integer counts CR can be ",
+                             "refuted outright. The rejection is of the combination; it is not evidence that the belief holds"))
+  if (length(extra$assoc) || length(extra$cr)) {
+    if (st$G > 1 && model %in% c("M1", "M2", "M1delta", "L4"))
+      notes <- c(notes, paste0("sign/CR restrictions under a grouped rung (", model, ") are experimental: ",
+                               "each sign is one pooled restriction across groups, not one per group, and ",
+                               "sharpness (PHASE5a R3(b)) is proved only for the pooled model M0; nor are its ",
+                               "confidence intervals, the projection and conservative ones included (R10 covers ",
+                               "pooled M0; R16 open)"))
+    if (any(vapply(c(extra$assoc, extra$cr), function(a) identical(a$version, "W2"), TRUE)))
+      notes <- c(notes, paste0("W2 signs one pooled sum over the original groups; it does not sign each ",
+                               "group's association (a per-group version is planned)"))
+    if (any(est$table$ci_rejected) || any(est$table$empty) || isTRUE(tst$empty_rejected))
+      notes <- c(notes, "a narrow interval after a (near-)rejection is not reassurance: coverage holds only if the restrictions are true")
+    if (st$nz == 0) notes <- c(notes, "sign/CR restrictions are not imposed on point-identified rungs (L5, L6)")
+    if (jkst && length(extra$cr)) notes <- c(notes, "JKST CI_x intervals are not reported with CR restrictions")
+  }
+  if (isTRUE(est$slack < 0.005) && !any(est$table$empty))
+    notes <- c(notes, sprintf("near the boundary: for every K in the estimated set some implied rate is within %.3f of 0 at a range vertex. The CIs remain valid, but the rate result for the plug-in (P3 Prop. P3.2) assumes strict interiority", max(est$slack, 0)))
+  if (st$G > 1 && model %in% c("M1", "M2", "M1delta", "L4")) {
+    nmed <- stats::median(tabulate(st$g, st$G))
+    if (nmed < 30) notes <- c(notes, sprintf("few units per group (median %g): asymptotic coverage is established only for few, large groups; here the CLR interval's coverage rests on simulation (P3 section 0.5)", nmed))
+  }
+  if (any(is.na(est$table$estimate_lower) & !est$table$empty))
+    notes <- c(notes, "unbounded estimate: some composition range is not full-dimensional in the simplex (2a Lemma 3(b)); add units with more varied compositions or restrict the targets")
+  if (ci == "clr")
+    notes <- c(notes, "CLR intervals are algorithmic (candidate endpoints collected by simulation; coverage supported by simulation, not proved). proj_* columns: projection intervals from the same candidates (P3 Prop. P3.5(b2)(ii)); the status line above says which result covers this fit")
+  if (isTRUE(est$proj_dropped > 0))
+    notes <- c(notes, sprintf("rank guard: the estimated covariance matrix of the regression is numerically singular in directions that %d candidate endpoint(s) use; they were dropped from the CLR and projection intervals (a safeguard: valid, wider)", est$proj_dropped))
+  if (isTRUE(est$bd_boundary) && fpc == "bhatia-davis")
+    notes <- c(notes, paste0("the Bhatia-Davis unit-level allowance relies on the weighted mean rate being bounded away ",
+                             "from 0 and 1 (P3.5(c1)); here its interval lies within [0, .05] or [.95, 1], so ",
+                             "fpc = \"popoviciu\" is the safe choice"))
   if (st$vcov_type != vcov) notes <- c(notes, paste0("variance estimator fell back from ", vcov, " to ", st$vcov_type))
   if (any(!st$keep)) notes <- c(notes, sprintf("%d units trimmed; their contribution to the actual rate is bounded by Duncan-Davis, and the model-implied rate refers to the kept units", sum(!st$keep)))
   if (any(est$table$ci_rejected))
-    notes <- c(notes, "a confidence interval lies wholly outside the logically possible range: the rung is contradicted by the data (reported as --)")
+    notes <- c(notes, paste0("a confidence interval is empty or lies wholly outside the logically possible range: ",
+                             combo, " is contradicted by the data (reported as --)"))
   if (model %in% c("L5", "L6") && any(est$table$estimate_lower < 0 | est$table$estimate_upper > 1, na.rm = TRUE))
     notes <- c(notes, "point estimate outside [0, 1]: constancy is contradicted by the data")
-  structure(list(call = cl, model = model, delta = delta, rows = rl, cols = cll,
+  out <- structure(list(call = cl, model = model, delta = delta, rows = rl, cols = cll,
                  n = nrow(dat$X), n_kept = sum(st$keep), groups = st$groups, G = st$G,
                  vcov_type = st$vcov_type, alpha = alpha, ci = ci, fpc = fpc,
                  table = est$table, jkst = est$jkst, tests = tst, notes = notes,
-                 n_vertices = sum(sapply(st$vertices, nrow)), eta = eta,
-                 setup = st, targets = tl,
-                 settings = list(ndraw = ndraw, nz_draw = nz_draw, range = range)),
+                 n_vertices = sum(sapply(st$vertices, nrow)), eta = eta, slack = est$slack,
+                 inference = list(v_rank = est$v_rank, p = est$p, proj_dropped = est$proj_dropped,
+                                  bd_boundary = est$bd_boundary),
+                 setup = st, targets = tl, pieces = est$pieces,
+                 modules = .rxc_module_table(extra, rl, cll),
+                 settings = list(ndraw = ndraw, nz_draw = nz_draw, range = range,
+                                 union = union, weights = weights)),
             class = "eiRxC")
+  if (is.null(diagnostics)) diagnostics <- length(extra$assoc) + length(extra$cr) > 0
+  if (diagnostics) out$sign <- tryCatch(eiRedundancy(out, ci = ci != "none"),
+                                        error = function(e) { warning("diagnostics failed: ", conditionMessage(e)); NULL })
+  # the rung alone, beside the restricted result (computed last: it does not change the draws
+  # used above)
+  if (is.null(base)) base <- !is.null(extra) && length(extra) > 0
+  if (base && !is.null(extra)) {
+    st0 <- st; st0$extra <- NULL
+    if (!is.null(seed)) set.seed(seed)      # the same draws as a separate fit of the rung alone
+    b <- .rxc_estimate(st0, tl, alpha = alpha, ci = ci, fpc = fpc, eta = eta, ndraw = ndraw,
+                       nz_draw = nz_draw, union = union)$table
+    for (v in c("estimate_lower", "estimate_upper", "ci_model_lower", "ci_model_upper",
+                "ci_actual_lower", "ci_actual_upper"))
+      out$table[[paste0("base_", v)]] <- b[[v]]
+    out$table$base_empty <- b$empty
+    if (any(est$table$empty))
+      out$notes <- c(out$notes, if (any(b$empty)) "the rung alone also has an empty estimate" else
+        paste0("the rung alone (", model, ") has a non-empty estimate (base_* columns)"))
+  }
+  out
 }
 
 .rxc_model_label <- function(model, delta = 0, row = NULL) {
@@ -245,6 +376,25 @@ eiBounds <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL,
          L6 = "L6: Goodman constancy")
 }
 
+# One line on which result covers this fit's intervals (round-2 review; R10 is pooled M0 only)
+.rxc_ci_status <- function(x) {
+  inf <- x$inference
+  ex <- x$setup$extra
+  msign <- length(ex$assoc) > 0 || length(ex$cr) > 0
+  pooled <- identical(x$setup$type, "pooled")
+  if (x$setup$nz == 0 || identical(x$ci, "none")) return(NULL)
+  rk <- if (!is.null(inf$v_rank)) sprintf("; V-hat rank %d of %d (diagnostic)", inf$v_rank, inf$p) else ""
+  gd <- if (isTRUE(inf$proj_dropped > 0)) sprintf("; rank guard dropped %d candidates", inf$proj_dropped) else ""
+  what <- if (identical(x$ci, "clr")) "proj_*" else "ci_* (conservative)"
+  if (!pooled && msign)
+    return(paste0("proj_* and ci_*: no coverage theorem for sign/CR restrictions under grouped rungs (R16 open)", gd))
+  if (pooled)
+    return(paste0(what, ": asymptotic guarantee (", if (identical(x$ci, "clr")) "P3.5(b2)(ii)" else "P3.5(a)",
+                  if (msign) "; with sign/CR rows PHASE5a R10, pooled M0" else "", "), pooled model", rk, gd))
+  paste0(what, ": asymptotic guarantee only with few, large groups (P3 regime R1); with many small ",
+         "groups a simulation finding", rk, gd)
+}
+
 #' @export
 print.eiRxC <- function(x, digits = 3, ...) {
   cat("R x C ecological inference bounds\n")
@@ -254,25 +404,111 @@ print.eiRxC <- function(x, digits = 3, ...) {
               x$vcov_type, 100 * (1 - x$alpha), x$ci))
   if (x$eta > 0) cat(sprintf("Sensitivity: eta = %g (undetectable nonlinearity allowed)\n", x$eta))
   tb <- x$table
-  f <- function(l, u) ifelse(is.na(l), "      --      ", sprintf(paste0("[%.", digits, "f, %.", digits, "f]"), l, u))
+  f <- .rxc_fmt_iv(digits)
+  hull <- identical(x$settings$union, "hull")
+  # every piece of a union (P-E15): from fit$pieces when available, else hull + widest gap
+  g <- function(p) {
+    out <- if (paste0(p, "_gap_lower") %in% names(tb))
+      f(tb[[paste0(p, "_lower")]], tb[[paste0(p, "_upper")]], tb[[paste0(p, "_gap_lower")]], tb[[paste0(p, "_gap_upper")]]) else
+      f(tb[[paste0(p, "_lower")]], tb[[paste0(p, "_upper")]])
+    if (!hull && !is.null(x$pieces)) for (i in seq_len(nrow(tb))) {
+      u <- x$pieces[[tb$target[i]]][[p]]
+      if (!is.null(u) && nrow(u) > 2 && !is.na(tb[[paste0(p, "_lower")]][i]))
+        out[i] <- paste(f(u[, 1], u[, 2]), collapse = " U ")
+    }
+    out
+  }
   out <- data.frame(target = tb$target,
-                    estimate = ifelse(tb$empty, "empty", f(tb$estimate_lower, tb$estimate_upper)),
-                    ci_model = f(tb$ci_model_lower, tb$ci_model_upper),
-                    ci_actual = f(tb$ci_actual_lower, tb$ci_actual_upper),
+                    estimate = ifelse(tb$empty, "empty", g("estimate")),
+                    ci_model = g("ci_model"), ci_actual = g("ci_actual"),
                     duncan_davis = f(tb$dd_lower, tb$dd_upper), stringsAsFactors = FALSE)
+  has_proj <- "proj_model_lower" %in% names(tb) && any(!is.na(tb$proj_model_lower)) && identical(x$ci, "clr")
+  if (has_proj) {
+    out$proj_model <- f(tb$proj_model_lower, tb$proj_model_upper)
+    out$proj_actual <- f(tb$proj_actual_lower, tb$proj_actual_upper)
+    out <- out[, c("target", "estimate", "ci_model", "proj_model", "ci_actual", "proj_actual", "duncan_davis")]
+  }
   print(out, row.names = FALSE, right = FALSE)
-  cat("\n  estimate:  estimated identified set for the model-implied rate (not a confidence interval)\n")
-  cat("  ci_model:  CI for the rate implied by the model at the observed compositions\n")
-  cat(sprintf("  ci_actual: CI for the actual rate in these units (unit-level allowance: %s)\n", x$fpc))
+  has_base <- "base_estimate_lower" %in% names(tb)
+  if (has_base) {
+    nmod <- if (is.null(x$modules)) 0L else nrow(x$modules)
+    if (nmod > 1)
+      cat("\nThe rung alone (", x$model, ", all ", nmod, " optional restrictions removed: their joint effect;\n",
+          "for one restriction's own increment see the added-last gains in eiRedundancy()), for comparison:\n", sep = "")
+    else cat("\nThe rung alone (", x$model, ", without the optional restriction), for comparison:\n", sep = "")
+    print(data.frame(target = tb$target,
+                     estimate = ifelse(tb$base_empty, "empty", f(tb$base_estimate_lower, tb$base_estimate_upper)),
+                     ci_model = f(tb$base_ci_model_lower, tb$base_ci_model_upper),
+                     ci_actual = f(tb$base_ci_actual_lower, tb$base_ci_actual_upper), stringsAsFactors = FALSE),
+          row.names = FALSE, right = FALSE)
+  }
+  ex <- x$setup$extra
+  has_cr <- length(ex$cr) > 0
+  if (length(ex$assoc) || has_cr) {
+    cat("\nSign / CR restrictions (model-implied mean associations, design-weighted):\n")
+    for (lb in .rxc_module_labels(list(assoc = ex$assoc, cr = ex$cr), x$rows, x$cols)) cat("  ", lb, "\n")
+    if (any(tb$n_pieces > 1, na.rm = TRUE) || any(!is.na(tb$ci_model_gap_lower)))
+      cat("  'U' marks a union of disjoint intervals (CR branches; every piece is shown; use union = \"hull\" for the hull)\n")
+    if (identical(x$setup$type, "pooled"))
+      cat("  estimate is sharp for the regression (PHASE5a R3(b), pooled model)\n") else
+      cat("  estimate is an outer set for the regression; sharpness under grouped rungs is not yet proved\n")
+    if (any(vapply(c(ex$assoc, ex$cr), function(a) identical(a$version, "W2"), TRUE)))
+      cat("  W2 is one pooled sum over the original groups, not a sign for each group\n")
+  }
+  if (!is.null(x$modules)) {
+    exp <- x$modules[!grepl("^proved", x$modules$proof_status), , drop = FALSE]
+    for (k in seq_len(nrow(exp))) cat(sprintf("  EXPERIMENTAL module %s: %s\n", exp$restriction[k], exp$proof_status[k]))
+  }
+  clr <- identical(x$ci, "clr")
+  cat("\n  estimate:  estimated outer identified set for the model-implied rate (not a confidence interval)\n")
+  cat("  ci_model:  CI for the rate implied by the model at the observed compositions",
+      if (clr) "\n             (CLR: algorithmic, coverage supported by simulation, not proved)" else "", "\n", sep = "")
+  cat(sprintf("  ci_actual: CI for the actual rate in these units (unit-level allowance: %s)%s\n", x$fpc,
+              if (clr && identical(x$fpc, "bhatia-davis"))
+                "\n             (CLR (algorithmic); its Bhatia-Davis bound also uses a CLR interval)" else
+                if (clr) "; CLR, algorithmic" else ""))
+  if (has_cr && clr) cat("  with CR, ci_* are the union of the CLR branch intervals (algorithmic); proj_* are the\n",
+                         "  union of the projection branch intervals\n", sep = "")
+  if (has_proj) {
+    cat("  proj_model: projection interval for the model-implied rate (same candidates as CLR)\n")
+    cat("  proj_actual: projection interval + unit-level allowance",
+        if (identical(x$fpc, "bhatia-davis"))
+          " (Bhatia-Davis, variance bound from a\n             projection interval for the rung alone; P3.5(b2)(ii) and a union bound;\n             fpc = \"popoviciu\" uses the bound 1/4)\n"
+        else " (Popoviciu bound 1/4)\n", sep = "")
+  }
+  st_line <- .rxc_ci_status(x)
+  if (!is.null(st_line)) cat("  status:    ", st_line, "\n", sep = "")
   cat("  duncan_davis: model-free bounds for the actual rate\n")
   if (!is.null(x$tests)) {
     if (isTRUE(x$tests$empty_rejected)) cat("\n  Emptiness test: the model is REJECTED at level", x$alpha, "\n")
     if (!is.null(x$tests$m1) && !is.na(x$tests$m1$p.value))
-      cat(sprintf("  Test of M1's testable part: Wald = %.2f, df = %d, p = %.3f\n",
-                  x$tests$m1$statistic, x$tests$m1$df, x$tests$m1$p.value))
+      cat(sprintf("  Test of M1's testable part (vs M2): Wald = %.2f, df = %d, p = %.3f (%s)\n",
+                  x$tests$m1$statistic, x$tests$m1$df, x$tests$m1$p.value,
+                  if (identical(x$tests$m1$method, "wild")) sprintf("wild bootstrap, B = %d", x$tests$m1$B) else
+                    if (is.null(x$tests$m1$method)) "chi-squared" else x$tests$m1$method))
+    if (!is.null(x$tests$pool) && !is.na(x$tests$pool$p.value)) {
+      pm <- x$tests$pool$method
+      cat(sprintf("  Pooling test (M0 vs M1, group shifts = 0): Wald = %.4g, df = %d, p = %.3f (%s)%s\n",
+                  x$tests$pool$statistic, x$tests$pool$df, x$tests$pool$p.value,
+                  if (identical(pm, "wild")) sprintf("wild bootstrap, B = %d", x$tests$pool$B) else
+                    if (is.null(pm)) "chi-squared" else pm,
+                  if (isTRUE(x$tests$pool$spanning)) "" else " (some group's compositions are not affinely spanning)"))
+    }
   }
   for (nt in x$notes) cat("  Note:", nt, "\n")
   invisible(x)
+}
+
+.rxc_fmt_iv <- function(digits) {
+  fmt <- paste0("[%.", digits, "f, %.", digits, "f]")
+  function(l, u, gl = NULL, gu = NULL) {
+    out <- ifelse(is.na(l), "      --      ", sprintf(fmt, l, u))
+    if (!is.null(gl)) {
+      j <- !is.na(l) & !is.na(gl)
+      out[j] <- paste(sprintf(fmt, l[j], gl[j]), "U", sprintf(fmt, gu[j], u[j]))
+    }
+    out
+  }
 }
 
 #' @export
@@ -282,6 +518,7 @@ summary.eiRxC <- function(object, ...) {
   cat(sprintf("\nComposition range: %s; %d constraint points in total\n",
               object$settings$range, object$n_vertices))
   cat(sprintf("Unknown parameters (contextual-effect splits): %d\n", st$nz))
+  if (!is.null(object$sign)) { cat("\n"); print(object$sign) }
   if (!is.null(object$jkst)) {
     cat("\nJiang et al. (2019) CI_x intervals (valid with one active constraint per side):\n")
     for (nm in names(object$jkst)) {
@@ -321,25 +558,35 @@ plot.eiRxC <- function(x, ...) {
 #'
 #' @param ... data arguments passed to \code{eiBounds()} (formula/data, rows/cols, or x/t/n, and group).
 #' @param rungs rungs to run; rungs needing groups are skipped without groups.
-#' @param delta values of delta for M1delta.
+#' @param delta values of delta for M1delta. \code{delta = 0} is a sensitivity
+#'   benchmark rather than a substantive rung: it keeps the shared contextual
+#'   effects of M1 but drops M1's testable restrictions on the symmetric parts,
+#'   so it can be wider than M1.
 #' @param row_constant row for L4 (skipped if \code{NULL}).
 #' @param seed random seed.
+#' @param sign_rungs optional named list of extra rungs with sign or CR
+#'   restrictions, run after the standard rungs; each element is
+#'   \code{list(model = "M0", restrictions = list(cr = ..., assoc = ...))}
+#'   (model defaults to \code{"M0"}). Example:
+#'   \code{list("M0 + CR" = list(restrictions = list(cr = list(list(row = 1, col = 1)))))}.
 #' @return a data frame with one row per rung and target.
 #' @export
 ladder <- function(..., rungs = c("DD", "M0", "M2", "M1delta", "M1", "L4", "L5", "L6"),
-                   delta = c(0.10, 0.05, 0.02), row_constant = NULL, seed = 1) {
+                   delta = c(0.10, 0.05, 0.02), row_constant = NULL, seed = 1,
+                   sign_rungs = NULL) {
   args <- list(...)
   has_group <- !is.null(args$group)
   out <- list()
-  run <- function(model, d = 0) {
+  run <- function(model, d = 0, restr = NULL, label = NULL) {
     a <- args; a$model <- model; a$delta <- d; a$seed <- seed; a$row_constant <- row_constant
-    a$tests <- FALSE
+    a$tests <- FALSE; a$diagnostics <- FALSE; a$base <- FALSE
+    if (!is.null(restr)) a$restrictions <- c(a$restrictions, restr)
     fit <- tryCatch(do.call(eiBounds, a), error = function(e) e)
     if (inherits(fit, "error")) {
-      warning("rung ", model, " skipped: ", conditionMessage(fit)); return(NULL)
+      warning("rung ", if (is.null(label)) model else label, " skipped: ", conditionMessage(fit)); return(NULL)
     }
     tb <- fit$table
-    tb$rung <- if (model == "M1delta") sprintf("M1(delta=%g)", d) else model
+    tb$rung <- if (!is.null(label)) label else if (model == "M1delta") sprintf("M1(delta=%g)", d) else model
     tb
   }
   base <- NULL
@@ -351,12 +598,18 @@ ladder <- function(..., rungs = c("DD", "M0", "M2", "M1delta", "M1", "L4", "L5",
       fit <- do.call(eiBounds, a)
       tb <- fit$table
       tb[, c("estimate_lower", "estimate_upper", "ci_model_lower", "ci_model_upper")] <- NA
+      tb[, grep("_gap_", names(tb))] <- NA; tb$n_pieces <- 1L
       tb$ci_actual_lower <- tb$dd_lower; tb$ci_actual_upper <- tb$dd_upper
       tb$rung <- "DD"; tb$empty <- FALSE
       out[[length(out) + 1]] <- tb
     } else if (rg == "M1delta") {
       for (d in sort(delta, decreasing = TRUE)) out[[length(out) + 1]] <- run(rg, d)
     } else out[[length(out) + 1]] <- run(rg)
+  }
+  for (nm in names(sign_rungs)) {
+    sr <- sign_rungs[[nm]]
+    m <- if (is.null(sr$model)) "M0" else sr$model
+    out[[length(out) + 1]] <- run(m, if (is.null(sr$delta)) 0 else sr$delta, sr$restrictions, nm)
   }
   res <- do.call(rbind, out)
   res <- res[, c("rung", setdiff(names(res), "rung"))]
@@ -367,52 +620,91 @@ ladder <- function(..., rungs = c("DD", "M0", "M2", "M1delta", "M1", "L4", "L5",
 
 #' @export
 print.eiLadder <- function(x, digits = 3, ...) {
-  f <- function(l, u) ifelse(is.na(l), "--", sprintf(paste0("[%.", digits, "f, %.", digits, "f]"), l, u))
+  f <- .rxc_fmt_iv(digits)
   for (tg in unique(x$target)) {
     s <- x[x$target == tg, ]
     cat("Target:", tg, "\n")
-    print(data.frame(rung = s$rung, estimate = ifelse(s$empty, "empty", f(s$estimate_lower, s$estimate_upper)),
-                     ci_model = f(s$ci_model_lower, s$ci_model_upper),
-                     ci_actual = f(s$ci_actual_lower, s$ci_actual_upper)), row.names = FALSE, right = FALSE)
+    print(data.frame(rung = s$rung, estimate = ifelse(s$empty, "empty", f(s$estimate_lower, s$estimate_upper, s$estimate_gap_lower, s$estimate_gap_upper)),
+                     ci_model = f(s$ci_model_lower, s$ci_model_upper, s$ci_model_gap_lower, s$ci_model_gap_upper),
+                     ci_actual = f(s$ci_actual_lower, s$ci_actual_upper, s$ci_actual_gap_lower, s$ci_actual_gap_upper)),
+          row.names = FALSE, right = FALSE)
     cat("\n")
   }
   cat("Rungs run from the most plausible (top) to the most restrictive (bottom).\n")
   invisible(x)
 }
 
-#' Sensitivity to undetectable nonlinearity
+#' Sensitivity to undetectable nonlinearity, or to the slack on sign beliefs
 #'
-#' Recomputes the bounds of a fitted \code{eiRxC} object allowing average
-#' rates to depart from the linear model by up to \code{eta} (in probability
-#' units) in directions the data cannot detect (Phase 3, Proposition S1).
+#' Recomputes the bounds of a fitted \code{eiRxC} object along a dial.
+#' \code{dial = "eta"} (default) allows average rates to depart from the linear
+#' model by up to \code{eta} (in probability units) in directions the data
+#' cannot detect (Phase 3, Proposition S1; the result is a valid outer bound,
+#' not the sharp set of the relaxed model). \code{dial = "slack"} relaxes the
+#' sign and contextual-reinforcement restrictions (\code{assoc}, \code{cr}):
+#' each association may have the "wrong" sign by up to \code{slack}, measured
+#' as an average within-unit gap (\eqn{\delta_B}) or an average slope in own
+#' share (\eqn{\delta_W}), in probability units. Bounds widen monotonically in
+#' either dial.
 #'
 #' @param object an \code{eiRxC} object.
-#' @param eta grid of values.
+#' @param eta grid of values of the dial.
 #' @param seed random seed.
-#' @return a data frame of bounds by \code{eta} and target (class \code{"eiSensitivity"}).
+#' @param dial \code{"eta"} or \code{"slack"}.
+#' @param modules for \code{dial = "slack"}: module names (e.g. \code{"cr[1]"},
+#'   \code{"assoc[2]"}; see \code{fit$modules}) whose slack is set; default all
+#'   \code{assoc} and \code{cr} modules.
+#' @return a data frame of bounds by dial value and target (class
+#'   \code{"eiSensitivity"}); the dial value is in column \code{eta} or \code{slack}.
 #' @export
-sensitivity <- function(object, eta = seq(0, 0.1, by = 0.01), seed = 1) {
-  st <- object$setup
+sensitivity <- function(object, eta = seq(0, 0.1, by = 0.01), seed = 1, dial = c("eta", "slack"),
+                        modules = NULL) {
+  dial <- match.arg(dial)
   res <- lapply(eta, function(e) {
     set.seed(seed)
-    tb <- .rxc_estimate(st, object$targets, alpha = object$alpha, ci = object$ci, fpc = object$fpc,
-                        eta = e, ndraw = object$settings$ndraw, nz_draw = object$settings$nz_draw)$table
-    tb$eta <- e
+    tb <- .rxc_dial_estimate(object, object$targets, dial, e, modules, ci = object$ci)$table
+    tb[[dial]] <- e
     tb
   })
   res <- do.call(rbind, res)
   class(res) <- c("eiSensitivity", "data.frame")
+  attr(res, "dial") <- dial
   res
+}
+
+.rxc_union_setting <- function(object) if (is.null(object$settings$union)) "pieces" else object$settings$union
+
+# set the slack of the sign / CR modules (all, or those named) to a common value
+.rxc_set_slack <- function(ex, value, modules = NULL) {
+  for (ty in c("assoc", "cr")) for (i in seq_along(ex[[ty]])) {
+    if (is.null(modules) || paste0(ty, "[", i, "]") %in% modules) ex[[ty]][[i]]$slack <- value
+  }
+  ex
+}
+
+# re-estimate a fit at one value of a dial
+.rxc_dial_estimate <- function(object, targets, dial, value, modules = NULL, ci = object$ci) {
+  st <- object$setup
+  eta <- object$eta
+  if (dial == "eta") eta <- value else {
+    if (!length(st$extra$assoc) && !length(st$extra$cr)) stop("dial = \"slack\" needs assoc or cr restrictions")
+    st$extra <- .rxc_set_slack(st$extra, value, modules)
+  }
+  .rxc_estimate(st, targets, alpha = object$alpha, ci = ci, fpc = object$fpc, eta = eta,
+                ndraw = object$settings$ndraw, nz_draw = object$settings$nz_draw,
+                union = .rxc_union_setting(object))
 }
 
 #' @export
 plot.eiSensitivity <- function(x, target = unique(x$target)[1], ...) {
   s <- x[x$target == target, ]
-  graphics::plot(s$eta, s$ci_actual_upper, type = "n", ylim = c(0, 1), xlab = "eta", ylab = "rate",
+  dial <- if (is.null(attr(x, "dial"))) "eta" else attr(x, "dial")
+  dv <- s[[dial]]
+  graphics::plot(dv, s$ci_actual_upper, type = "n", ylim = c(0, 1), xlab = dial, ylab = "rate",
                  main = target, ...)
-  graphics::polygon(c(s$eta, rev(s$eta)), c(s$dd_lower, rev(s$dd_upper)), col = "grey90", border = NA)
-  graphics::lines(s$eta, s$ci_actual_lower, lty = 2); graphics::lines(s$eta, s$ci_actual_upper, lty = 2)
-  graphics::lines(s$eta, s$estimate_lower, lwd = 2); graphics::lines(s$eta, s$estimate_upper, lwd = 2)
+  graphics::polygon(c(dv, rev(dv)), c(s$dd_lower, rev(s$dd_upper)), col = "grey90", border = NA)
+  graphics::lines(dv, s$ci_actual_lower, lty = 2); graphics::lines(dv, s$ci_actual_upper, lty = 2)
+  graphics::lines(dv, s$estimate_lower, lwd = 2); graphics::lines(dv, s$estimate_upper, lwd = 2)
   graphics::legend("topright", c("estimate", "CI actual", "Duncan-Davis"), lwd = c(2, 1, 8),
                    lty = c(1, 2, 1), col = c("black", "black", "grey90"), bty = "n", cex = 0.8)
   invisible(x)
@@ -420,9 +712,12 @@ plot.eiSensitivity <- function(x, target = unique(x$target)[1], ...) {
 
 #' Breakdown value of a conclusion
 #'
-#' The largest \code{eta} (undetectable departure from linear contextual
-#' effects) for which a conclusion of the form "target > threshold" (or
-#' "target < threshold") still holds for every value in the chosen interval.
+#' The largest value of a dial for which a conclusion of the form "target >
+#' threshold" (or "target < threshold") still holds for every value in the
+#' chosen interval. With \code{dial = "eta"} the dial is the undetectable
+#' departure from linear contextual effects; with \code{dial = "slack"} it is
+#' the slack on the sign / contextual-reinforcement beliefs (see
+#' \code{sensitivity()}), the natural dial for beliefs the data cannot refute.
 #'
 #' @param object an \code{eiRxC} object.
 #' @param target name of a target in \code{object$table}.
@@ -432,25 +727,27 @@ plot.eiSensitivity <- function(x, target = unique(x$target)[1], ...) {
 #' @param max_eta upper end of the search.
 #' @param tol tolerance of the bisection.
 #' @param seed random seed.
-#' @return the breakdown value (0 if the conclusion fails already at eta = 0).
+#' @param dial \code{"eta"} or \code{"slack"}.
+#' @param modules for \code{dial = "slack"}: modules whose slack is varied (default all sign / CR modules).
+#' @return the breakdown value (0 if the conclusion fails already at 0).
 #' @export
 breakdown <- function(object, target, threshold, direction = c("above", "below"),
                       which = c("ci_actual", "ci_model", "estimate"), max_eta = 0.5,
-                      tol = 1e-3, seed = 1) {
-  direction <- match.arg(direction); which <- match.arg(which)
-  st <- object$setup
+                      tol = 1e-3, seed = 1, dial = c("eta", "slack"), modules = NULL) {
+  direction <- match.arg(direction); which <- match.arg(which); dial <- match.arg(dial)
   tl <- object$targets[target]
   holds <- function(e) {
     set.seed(seed)
-    tb <- .rxc_estimate(st, tl, alpha = object$alpha, ci = if (which == "estimate") "none" else object$ci,
-                        fpc = object$fpc, eta = e, ndraw = object$settings$ndraw,
-                        nz_draw = object$settings$nz_draw)$table
+    tb <- .rxc_dial_estimate(object, tl, dial, e, modules,
+                             ci = if (which == "estimate") "none" else object$ci)$table
     lo <- tb[[paste0(which, "_lower")]]; hi <- tb[[paste0(which, "_upper")]]
     if (is.na(lo) || isTRUE(tb$empty)) return(FALSE)
+    # with a CR union the hull is used: a conclusion holds only if every piece satisfies it
     if (direction == "above") lo > threshold else hi < threshold
   }
-  if (!holds(0)) return(0)
-  lo <- 0; hi <- max_eta
+  base <- 0
+  if (!holds(base)) return(0)
+  lo <- base; hi <- max_eta
   if (holds(hi)) return(hi)
   while (hi - lo > tol) {
     mid <- (lo + hi) / 2
@@ -498,6 +795,7 @@ eiBenchmark <- function(datasets, rungs = c("M0", "M2", "M1", "L5", "L6"), cores
       args <- utils::modifyList(common, rungs[[rg]])
       if (is.function(args$restrictions)) args$restrictions <- args$restrictions(d)
       if (args$model %in% c("M2", "M1delta", "M1", "L5") && is.null(d$group)) next
+      if (is.null(args$base)) args$base <- FALSE
       args <- c(list(data = d$data, rows = d$rows, cols = d$cols, group = d$group, tests = FALSE), args)
       fit <- tryCatch(do.call(eiBounds, args), error = function(e) e)
       if (inherits(fit, "error")) { warning(nm, "/", rg, ": ", conditionMessage(fit)); next }

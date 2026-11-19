@@ -1,0 +1,91 @@
+% Appendices B-H: the repository's theory documents, reproduced verbatim.
+% The files in generated/ are produced by tools/make_appendices.py (pandoc);
+% do not edit them by hand.
+\clearpage
+\section*{About the reproduced appendices}
+\addcontentsline{toc}{section}{About the reproduced appendices}
+Appendices~\ref{app:phase1}--\ref{app:pkgdesign} reproduce the repository's theory
+documents at commit \texttt{ec3644f}. They were converted mechanically from
+Markdown to \LaTeX\ with pandoc (\path{tools/make_appendices.py}); the text,
+proofs, justification tags and correction notes are those of the source. The only
+additions are typesetting aids: an anchor at each labelled result (the main
+text's ``go to the result'' links land there), a proof index at the head of each
+appendix, line breaks in file names, and scaling of a few displays wider than the
+page. PHASE1b and PHASE2d are not reproduced (proposals, not reviewed; see
+Section~\ref{sec:did}).
+
+\paragraph{Reading the cross-references.} The reproduced documents cite each other
+by prefix and keep their own section numbers, so ``\S4'' inside an appendix means
+that document's \S4, not this report's Section~4. The prefixes map to appendices
+as follows:
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule Prefix in the sources & Document & Appendix \\ \midrule
+P1 & \path{PHASE1_foundations.md} & \ref{app:phase1} \\
+2a & \path{PHASE2a_rxc.md} & \ref{app:phase2a} \\
+2b & \path{PHASE2b_districts.md} & \ref{app:phase2b} \\
+2c & \path{PHASE2c_monotone.md} & \ref{app:phase2c} \\
+P3 & \path{PHASE3_inference.md} & \ref{app:phase3} \\
+5a & \path{PHASE5a_sign_module.md} & \ref{app:phase5a} \\
+PD & \path{PACKAGE_DESIGN.md} (\S\S2, 5, 7, 8) & \ref{app:pkgdesign} \\
+1b, 2d & \path{PHASE1b_monotone_did.md}, \path{PHASE2d_did.md} & not reproduced \\
+\bottomrule
+\end{tabular}
+\end{center}
+A tag such as ``[2a:L1]'' or ``[2c:M3]'' means ``result L1 of 2a'' and so on.
+
+\paragraph{Planning and process material.} PHASE1 is the original planning
+document. Its ``(to prove)'' labels mark statements that are proved later, in
+Appendices~\ref{app:phase2a} and \ref{app:phase2b} (the status table,
+Section~\ref{sec:status}, gives the result that proves each one). First-person text
+in it, and elsewhere, addresses the project owner. The correction notes in
+parentheses, the verification logs and PHASE5a's internal review log are part of
+the audit trail and are reproduced as written.
+
+\begingroup
+\small
+\AtBeginEnvironment{longtable}{\footnotesize\setlength{\tabcolsep}{3pt}\hyphenpenalty=0}
+\setcounter{secnumdepth}{1}
+
+\clearpage
+\section{PHASE1: structural foundations and assumptions}\label{app:phase1}
+\textit{Source: \path{docs/extension/PHASE1_foundations.md}.}\par
+\paragraph{Proof index.}\input{generated/idx_app_phase1}
+\input{generated/app_phase1}
+
+\clearpage
+\section{PHASE2a: R$\times$C bounds, derivations and proofs}\label{app:phase2a}
+\textit{Source: \path{docs/extension/PHASE2a_rxc.md}.}\par
+\paragraph{Proof index.}\input{generated/idx_app_phase2a}
+\input{generated/app_phase2a}
+
+\clearpage
+\section{PHASE2b: units nested in groups, and the assumption ladder}\label{app:phase2b}
+\textit{Source: \path{docs/extension/PHASE2b_districts.md}.}\par
+\paragraph{Proof index.}\input{generated/idx_app_phase2b}
+\input{generated/app_phase2b}
+
+\clearpage
+\section{PHASE2c: monotone ecological inference in R$\times$C}\label{app:phase2c}
+\textit{Source: \path{docs/extension/PHASE2c_monotone.md}.}\par
+\paragraph{Proof index.}\input{generated/idx_app_phase2c}
+\input{generated/app_phase2c}
+
+\clearpage
+\section{PHASE3: estimation, inference and sensitivity}\label{app:phase3}
+\textit{Source: \path{docs/extension/PHASE3_inference.md}.}\par
+\paragraph{Proof index.}\input{generated/idx_app_phase3}
+\input{generated/app_phase3}
+
+\clearpage
+\section{PHASE5a: the sign module (M-SIGN)}\label{app:phase5a}
+\textit{Source: \path{docs/extension/PHASE5a_sign_module.md}.}\par
+\paragraph{Proof index.}\input{generated/idx_app_phase5a}
+\input{generated/app_phase5a}
+
+\clearpage
+\section{PACKAGE\_DESIGN: audit, new results, DiD extension and proof register (excerpts)}\label{app:pkgdesign}
+\textit{Source: \path{docs/extension/PACKAGE_DESIGN.md}, \S\S2, 5, 7 and 8 (the other sections are design notes).}\par
+\paragraph{Proof index.}\input{generated/idx_app_pkgdesign}
+\input{generated/app_pkgdesign}
+\endgroup

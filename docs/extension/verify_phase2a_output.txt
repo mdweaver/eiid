@@ -25,3 +25,13 @@ PASS 3x3 example: truth inside outer bound for demobilisation P->abstain
        mobilisation N->P           truth 0.169   outer [0.048, 0.569]   DD [0.000, 0.890]
 PASS 3x3 example: truth inside outer bound for mobilisation N->P
 PASS Prop 7: closed-form gamma coefficients match direct computation (100 random targets)
+PASS Remark 5.1: A={x0} inside conv supp P_X, (S1)-(S2) vacuous, yet M_H(x0) has a negative entry (the earlier claim 'S3 implied when A is inside the hull' fails)
+PASS Remark 5.2: A = {x0}, Q = J/2: K_1 x0 = 0 along a line, and the LP is unbounded
+PASS Remark 5.2: with A full-dimensional (the simplex), the same LP is bounded in every coordinate
+PASS Prop 7: joint value function is not concave (V(midpoint) = 4.0 < average 5.0)
+PASS Prop 7: for fixed mu the value is concave (here linear) in Q
+PASS Remark 1.1: R=3, five compositions give rank <= 5 < 6; six generic compositions give rank 6
+PASS Remark 4.2(1): LP optima over integer-margin transportation polytopes are integer tables (200 cases)
+PASS Prop 5: a negative Q_{c,rs} makes Theta_O (A = simplex) empty
+PASS Prop 7': truth 0.7489 lies in [0.4665, 0.9194], which is inside DD [0.4188, 0.9307]
+PASS [supp] [F] (Batch B): X~U[0,1], A={1/2}: old tag claims 0 = 1 at 1/2 (fails); restricted support is empty and the corrected tag holds

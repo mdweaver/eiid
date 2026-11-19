@@ -1,0 +1,17 @@
+Rank of V-hat, 1000 replications per design (seeds as in phase3_montecarlo.py).
+design / fit: dim(beta); q (rank used): distribution; reps with q < dim; eigenvalues <= 1e-10*max; min/max eigenvalue ratio (median, minimum)
+  A_10x93       M1               dim  21; q: 21 x1000; q < dim in 0; near-zero eigenvalues 0-0; ratio median 5.9e-05, min 1.3e-05
+  A_93x30       M1               dim 187; q: 187 x1000; q < dim in 0; near-zero eigenvalues 0-0; ratio median 3.9e-06, min 8.7e-07
+  R2_30x10      M1               dim  61; q: 61 x1000; q < dim in 0; near-zero eigenvalues 0-0; ratio median 7.9e-06, min 5.9e-07
+  R2_93x10      M1               dim 187; q: 187 x1000; q < dim in 0; near-zero eigenvalues 0-0; ratio median 1.9e-06, min 5.0e-08
+  R2_200x10     M1               dim 401; q: 401 x1000; q < dim in 0; near-zero eigenvalues 0-0; ratio median 5.4e-07, min 2.6e-08
+  C_boundary    M0               dim   3; q: 3 x1000; q < dim in 0; near-zero eigenvalues 0-0; ratio median 7.3e-03, min 4.9e-03
+  E_slater      M0               dim   3; q: 3 x1000; q < dim in 0; near-zero eigenvalues 0-0; ratio median 2.7e-02, min 1.9e-02
+  S0_noshift    M0               dim   3; q: 3 x1000; q < dim in 0; near-zero eigenvalues 0-0; ratio median 2.7e-02, min 9.5e-03
+  S0_noshift    M1               dim  41; q: 41 x1000; q < dim in 0; near-zero eigenvalues 0-0; ratio median 3.1e-05, min 9.2e-06
+  S1_affine     M0               dim   3; q: 3 x1000; q < dim in 0; near-zero eigenvalues 0-0; ratio median 3.0e-02, min 1.1e-02
+  S1_affine     M1               dim  41; q: 41 x1000; q < dim in 0; near-zero eigenvalues 0-0; ratio median 3.2e-05, min 7.8e-06
+  S2_nonaffine  M0               dim   3; q: 3 x1000; q < dim in 0; near-zero eigenvalues 0-0; ratio median 3.9e-02, min 1.2e-02
+  S2_nonaffine  M1               dim  41; q: 41 x1000; q < dim in 0; near-zero eigenvalues 0-0; ratio median 3.0e-05, min 8.3e-06
+  B_3x3         M0 (3 columns)   dim  18; q: 12 x1000; q < dim in 1000; near-zero eigenvalues 6-6; ratio median 0.0e+00, min 0.0e+00
+  B_3x3         M0 (C-1 columns) dim  12; q: 12 x1000; q < dim in 0; near-zero eigenvalues 0-0; ratio median 1.5e-03, min 6.5e-04

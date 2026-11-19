@@ -9,7 +9,8 @@ ladder(
   rungs = c("DD", "M0", "M2", "M1delta", "M1", "L4", "L5", "L6"),
   delta = c(0.1, 0.05, 0.02),
   row_constant = NULL,
-  seed = 1
+  seed = 1,
+  sign_rungs = NULL
 )
 }
 \arguments{
@@ -17,11 +18,20 @@ ladder(
 
 \item{rungs}{rungs to run; rungs needing groups are skipped without groups.}
 
-\item{delta}{values of delta for M1delta.}
+\item{delta}{values of delta for M1delta. \code{delta = 0} is a sensitivity
+benchmark rather than a substantive rung: it keeps the shared contextual
+effects of M1 but drops M1's testable restrictions on the symmetric parts,
+so it can be wider than M1.}
 
 \item{row_constant}{row for L4 (skipped if \code{NULL}).}
 
 \item{seed}{random seed.}
+
+\item{sign_rungs}{optional named list of extra rungs with sign or CR
+restrictions, run after the standard rungs; each element is
+\code{list(model = "M0", restrictions = list(cr = ..., assoc = ...))}
+(model defaults to \code{"M0"}). Example:
+\code{list("M0 + CR" = list(restrictions = list(cr = list(list(row = 1, col = 1)))))}.}
 }
 \value{
 a data frame with one row per rung and target.

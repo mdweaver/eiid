@@ -1,6 +1,6 @@
 # Phase 2a: R×C bounds, derivations and proofs
 
-*Builds on `PHASE1_foundations.md` (cited as P1). Every proof step ends with a justification tag in brackets; the tag legend is in §0.3. Every closed form and every inclusion claimed here is also checked numerically or symbolically in `verify_phase2a.py` (output in `verify_phase2a_output.txt`; 22/22 PASS). §10 lists the corrections this phase makes to P1.*
+*Builds on `PHASE1_foundations.md` (cited as P1). Every proof step ends with a justification tag in brackets; the tag legend is in §0.3. Every closed form and every inclusion claimed here is also checked numerically or symbolically in `verify_phase2a.py` (output in `verify_phase2a_output.txt`; 32/32 PASS). §10 lists the corrections this phase makes to P1.*
 
 ---
 
@@ -8,12 +8,13 @@
 
 ### 0.1 Objects
 
-* $\mathcal W=\mathbb N\times\Delta^{R-1}\times\Delta^{C-1}$ is the space of one unit's observables $W=(N,X,T)$; it is Polish. $V:=(X,N)$ and $\mathcal G:=\sigma(V)$. Covariates and districts come in Phase 2b.
+* $\mathcal W=\mathbb N\times\Delta^{R-1}\times\Delta^{C-1}$ is the space of one unit's observables $W=(N,X,T)$; it is Polish. $V:=(X,N)$ and $\mathcal G:=\sigma(V)$. Districts come in Phase 2b. Other covariates are a planned extension (P1 §1.6); here the mean model depends on $X$ only.
 * $\mathfrak B=(\Delta^{C-1})^R\subset\mathbb R^{R\times C}$, with $\langle u,b\rangle=\sum_{rc}u_{rc}b_{rc}$ and the Frobenius norm. Every $b\in\mathfrak B$ satisfies $\|b\|\le\sqrt R$.
 * $J=\mathbf 1\mathbf 1^\top$. $\operatorname{Skew}_R=\{K\in\mathbb R^{R\times R}:K^\top=-K\}$.
 * $\mathcal K=\{(K_1,\dots,K_C)\in\operatorname{Skew}_R^C:\sum_cK_c=0\}$.
 * For $H=(H_1,\dots,H_C)$, $M_H(x)\in\mathbb R^{R\times C}$ has entries $M_H(x)_{rc}=e_r^\top H_cx$.
-* $A\subseteq\Delta^{R-1}$ is compact and convex. The default is $A=\operatorname{conv}(\operatorname{supp}P_X)$. A *polytope* $A$ has a finite vertex set $\operatorname{vert}(A)$, and that is always the case for the sample hull.
+* $A\subseteq\Delta^{R-1}$ is compact and convex. The default is $A=\operatorname{conv}(\operatorname{supp}P_X)$, the **population** hull. It is not the sample hull: P1 §1.7 separates the population hull, the hull of the empirical law, and the sample hull used as an estimate. A *polytope* $A$ has a finite vertex set $\operatorname{vert}(A)$, and that is always the case for the sample hull.
+* **Support on $A$.** $\operatorname{supp}_AP_X:=\operatorname{supp}(P_X|_A)$ is the support of the restricted measure $E\mapsto P(X\in A\cap E)$: the smallest closed set $F$ with $P(X\in A\setminus F)=0$. It is contained in $A\cap\operatorname{supp}P_X$ and can be strictly smaller: for $X\sim U[0,1]$ (as a share) and $A=\{1/2\}$, $\operatorname{supp}P_X\cap A=\{1/2\}$ but $\operatorname{supp}_AP_X=\emptyset$. When $P(X\in A)=1$ (the default $A$, and every result that uses Lemma 2), $P_X|_A=P_X$ and $\operatorname{supp}_AP_X=\operatorname{supp}P_X$. *(Corrected after review, Batch B, Nov 2026: earlier versions used $\operatorname{supp}P_X\cap A$ throughout. Continuous functions that agree $P_X$-a.e. on $A$ need not agree on that set, as the example shows; they agree on $\operatorname{supp}_AP_X$. A5, the tag [supp], Lemma 1, Lemma 3(c), Remarks 1.1, 5.1–5.2, Props 7′ and 9 now use $\operatorname{supp}_AP_X$. Nothing changes when $P(X\in A)=1$. Check: `verify_phase2a.py`, "[supp]".)*
 * **Standing integrability:** $E[N]<\infty$, and $\mu_r:=E[NX_r]>0$ for all $r$. $\mu_{rs}:=E[NX_rX_s]$.
 
 ### 0.2 Model, identified sets (these refine P1 §1.5)
@@ -22,7 +23,7 @@
 
 * (S1) $\beta\in\mathfrak B$ and $T=\beta^\top X$, $\mathbb Q$-a.s. *(A1, accounting identity)*;
 * (S2) $E_{\mathbb Q}[\beta\mid V]=M_H(X)$ $\mathbb Q$-a.s. on $\{X\in A\}$ *(A2 + A3, linear contextual effects, no dependence on $N$)*;
-* (S3) $M_H(x)\in\mathfrak B$ for every $x\in A$ *(A4: the linear model describes valid probabilities on all of $A$. Lemma 3(c) shows this is implied when $A\subseteq\operatorname{conv}\operatorname{supp}P_X$. It is a genuine extra assumption only when $A$ extrapolates beyond the data, as in JKST Prop. 3)*.
+* (S3) $M_H(x)\in\mathfrak B$ for every $x\in A$ *(A4: the linear model describes valid probabilities on all of $A$. Lemma 3(c) shows this follows from (S1)–(S2) when $A\subseteq\operatorname{conv}(\operatorname{supp}_AP_X)$, in particular for the default $A=\operatorname{conv}\operatorname{supp}P_X$. It is a genuine extra assumption whenever some part of $A$ lies outside the convex hull of the support points *at which (S2) is imposed*: when $A$ extrapolates beyond the data, as in JKST Prop. 3, and also when $A$ is a subset of the hull that the data barely touch (Remark 5.1))*.
 
 **Identified part.** $Q(P)=(Q_1,\dots,Q_C)$ denotes the unique symmetric matrices with $E_P[T_c\mid X=x]=x^\top Q_cx$ for $P_X$-a.e. $x\in A$, when they exist (Lemma 1). If they do not exist, set $\Theta_I(P;A):=\emptyset$.
 
@@ -43,7 +44,7 @@ $$\psi(u;v):=\int h_S(u;x,t)\,P_{T\mid V=v}(dt).$$
 
 ### 0.3 Tag legend
 
-Theorem numbers marked † are cited from memory and must be checked against the stated edition before publication. The mathematical content of each is standard.
+Theorem numbers marked † are cited from memory; §0.4 records which have been checked, and against what. The mathematical content of each is standard.
 
 | Tag | Meaning / source |
 |---|---|
@@ -54,7 +55,7 @@ Theorem numbers marked † are cited from memory and must be checked against the
 | [CE-lin], [CE-mono], [CE-pull], [CE-tower] | conditional expectation: linearity, monotonicity, "taking out what is known", tower property |
 | [CE-cvx] | if $Y\in F$ a.s. with $F$ closed convex and $Y$ integrable, then $E[Y\mid\mathcal G]\in F$ a.s. (conditional Jensen / separation) |
 | [RCD] | existence of regular conditional distributions on Polish spaces, and disintegration: $E[f(V,T)\mid V]=\int f(V,t)P_{T\mid V}(dt)$ a.s. for bounded jointly measurable $f$ (Kallenberg 2002, Thms 6.3–6.4†) |
-| [supp] | if continuous $f,g$ agree $P_X$-a.e. on $A$, they agree on $\operatorname{supp}P_X\cap A$ |
+| [supp] | if continuous $f,g$ agree $P_X$-a.e. on $A$, they agree on $\operatorname{supp}_AP_X$ (§0.1). *Proof:* if $f(x_0)\ne g(x_0)$ at $x_0\in\operatorname{supp}_AP_X$, then $f\ne g$ on an open $U\ni x_0$, and $P(X\in A\cap U)>0$ by the definition of the support, a contradiction. The weaker set $\operatorname{supp}P_X\cap A$ does not work (§0.1 example). *(Corrected after review, Batch B.)* |
 | [Frob] | $\lvert\langle u,b\rangle\rvert\le\lVert u\rVert\,\lVert b\rVert$ (Cauchy–Schwarz) |
 | [Mink] | a polytope is the convex hull of its vertices (Minkowski / Krein–Milman for polytopes) |
 | [Rock] | closed convex sets are determined by their support functions (Rockafellar 1970, Cor. 13.1.1†) |
@@ -70,6 +71,34 @@ Theorem numbers marked † are cited from memory and must be checked against the
 | [IVT] | intermediate value theorem / the image of a convex set under a linear map is convex |
 | [exch] | exchange argument for linear objectives |
 | [L0]–[L4], [T1], [P1]–[P9] | results of this document |
+
+### 0.4 Citation check (after review)
+
+Status:
+* **checked (text)**: the theorem number was read in the source text, in the version given.
+* **standard**: a textbook result whose number was checked from memory only; confirm against the printed edition before submission.
+* **to replace**: the number cited earlier was wrong.
+
+| Tag | Statement used | Reference and location | Status |
+|---|---|---|---|
+| [RCD] | regular conditional distributions on Polish spaces; disintegration | Kallenberg (2002), *Foundations of Modern Probability*, 2nd ed., Thms 6.3 and 6.4 | standard |
+| [Rock] | closed convex sets are ordered by their support functions | Rockafellar (1970), *Convex Analysis*, Cor. 13.1.1 | standard |
+| [Berge] | Berge maximum theorem | Aliprantis & Border (2006), *Infinite Dimensional Analysis*, 3rd ed., Thm 17.31 | standard |
+| [MMT] | measurable maximum theorem (Carathéodory objective, weakly measurable compact-valued correspondence) | Aliprantis & Border (2006), 3rd ed., Thm 18.19 | standard |
+| [DP] | Dunford–Pettis: uniformly integrable ⇒ relatively weakly compact in $L^1$ | Dunford & Schwartz (1958), *Linear Operators I*, Cor. IV.8.11; or Bogachev (2007), *Measure Theory*, Thm 4.7.18 | standard |
+| [Mazur] | convex norm-closed sets are weakly closed | Brezis (2011), *Functional Analysis, Sobolev Spaces and PDEs*, Thm 3.7 | standard |
+| [HB] | strict separation of a point from a closed convex set; $(L^1)^*=L^\infty$ on a probability space | Rudin (1991), *Functional Analysis*, 2nd ed., Thm 3.4(b); Folland (1999), *Real Analysis*, 2nd ed., Thm 6.15 | standard |
+| [wk-cont] | norm-continuous linear maps are weak-to-weak continuous | Brezis (2011), Thm 3.10 | standard |
+| [Riesz] | $L^p$ convergence implies a.s. convergence along a subsequence | Brezis (2011), Thm 4.9 | standard |
+| [Gale] (2b) | supply–demand feasibility of transportation problems | Gale (1957), *Pacific J. Math.* 7:1073–1082, Thm 1 | standard |
+| [dDM] (P3) | delta method for Hadamard directionally differentiable maps | Fang & Santos (2019), *Rev. Econ. Stud.* 86:377–412, Thm 2.1; Shapiro (1991), *Ann. Oper. Res.* 30:169–186 | checked (text): arXiv:1404.3763v2 (2016), Thm 2.1 |
+| Fang–Santos bootstrap (P3) | standard bootstrap consistent iff the map is fully differentiable tangentially to the support of the Gaussian limit; non-Gaussian limit ⇒ inconsistent | Fang & Santos (2019), Thm 3.1 and Cor. 3.1 | checked (text): arXiv v2, Thm 3.1, Cor. 3.1; confirm in the published version |
+| [CLR] (P3) | analytic/simulation intersection-bound inference with a parametrically estimated bounding function over a compact (here finite) index set | Chernozhukov, Lee & Rosen (2013), *Econometrica* 81:667–737: Condition P, Lemma 4, **Thm 4** (via Thms 1–2); finite index set: Example 1 | **to replace**: P3 cited "Thm 2"; the finite-index parametric case is Thm 4. Checked (text): arXiv:0907.3503v5 (2013) |
+| [Lyap] (P3) | Lyapunov CLT for independent, non-identically distributed summands | Billingsley (1995), *Probability and Measure*, 3rd ed., Thm 27.3 | standard |
+| [BD] (P3) | Bhatia–Davis variance bound | Bhatia & Davis (2000), *Amer. Math. Monthly* 107:353–357 | standard |
+| Stoye (P3) | uniform coverage of the parameter near point identification | Stoye (2009), *Econometrica* 77:1299–1315 | standard |
+
+CLR's Condition P(iv) requires that the gradient of every candidate bounding function be bounded away from zero, and that the limiting covariance be positive definite. In our setting that means using $C-1$ columns (P3 Remark P3.4.1), a full-rank design, and $g_\lambda\ne0$ for every candidate.
 
 ---
 
@@ -101,7 +130,7 @@ Theorem numbers marked † are cited from memory and must be checked against the
 
 ## 2. What the data identify
 
-**Lemma 1 (identification decomposition).** Let $\mathbb Q\in\mathcal M(H;A)$ with $\mathbb Q\circ W^{-1}=P$, and assume [A5]: for symmetric $D$, $x^\top Dx=0$ for all $x\in\operatorname{supp}P_X\cap A$ implies $D=0$. Then
+**Lemma 1 (identification decomposition).** Let $\mathbb Q\in\mathcal M(H;A)$ with $\mathbb Q\circ W^{-1}=P$, and assume [A5]: for symmetric $D$, $x^\top Dx=0$ for all $x\in\operatorname{supp}_AP_X$ implies $D=0$. Then
 (a) $E[T_c\mid X=x]=x^\top Q_cx$ with $Q_c=\tfrac12(H_c+H_c^\top)$, and $Q_c$ is unique;
 (b) $\sum_cH_c=J$, so $\sum_cQ_c=J$ and $\sum_cK_c=0$ where $K_c=\tfrac12(H_c-H_c^\top)$;
 (c) for every $K'\in\mathcal K$, $Q+K'$ gives the same regression function; $\dim\mathcal K=(C-1)R(R-1)/2$.
@@ -113,13 +142,13 @@ Theorem numbers marked † are cited from memory and must be checked against the
 4. Hence $E[T_c\mid X]=\sum_{r,s}X_rH_{c,rs}X_s=X^\top H_cX$ on $\{X\in A\}$. [2–3; alg]
 5. Since $X^\top K_cX$ is a scalar, $X^\top K_cX=(X^\top K_cX)^\top=X^\top K_c^\top X=-X^\top K_cX$, so $X^\top K_cX=0$. [alg; $K_c$ skew]
 6. Therefore $X^\top H_cX=X^\top Q_cX$. [4–5; $H_c=Q_c+K_c$]
-7. If symmetric $Q_c,Q'_c$ both satisfy 6 $P_X$-a.e. on $A$, then $x^\top(Q_c-Q'_c)x=0$ on $\operatorname{supp}P_X\cap A$. [supp; both sides continuous]
+7. If symmetric $Q_c,Q'_c$ both satisfy 6 $P_X$-a.e. on $A$, then $x^\top(Q_c-Q'_c)x=0$ on $\operatorname{supp}_AP_X$. [supp; both sides continuous]
 8. $Q_c-Q'_c$ is symmetric, so $Q_c=Q'_c$. [A5] ∎(a)
 
 *Proof of (b).*
 1. $\sum_c\beta_{rc}=1$ a.s. [S1; $\beta\in\mathfrak B$]
 2. $\sum_ce_r^\top H_cx=1$ for $P_X$-a.e. $x\in A$. [CE-lin on 1; S2; CE-tower]
-3. Let $d_r^\top:=e_r^\top(\sum_cH_c-J)$. Then $d_r^\top x=1-\mathbf 1^\top x=0$ on $\operatorname{supp}P_X\cap A$. [2; $\mathbf 1^\top x=1$; supp]
+3. Let $d_r^\top:=e_r^\top(\sum_cH_c-J)$. Then $d_r^\top x=1-\mathbf 1^\top x=0$ on $\operatorname{supp}_AP_X$. [2; $\mathbf 1^\top x=1$; supp]
 4. $x^\top\tfrac12(d_r\mathbf 1^\top+\mathbf 1d_r^\top)x=(d_r^\top x)(\mathbf 1^\top x)=0$ on the same set. [alg; 3]
 5. So $d_r\mathbf 1^\top+\mathbf 1d_r^\top=0$. [A5; the matrix is symmetric]
 6. Its $(s,s)$ entry is $2d_{r,s}=0$ for every $s$, so $d_r=0$. [alg]
@@ -130,14 +159,16 @@ Theorem numbers marked † are cited from memory and must be checked against the
 2. $(K_1,\dots,K_{C-1})\mapsto(K_1,\dots,K_{C-1},-\sum_{c<C}K_c)$ is a linear bijection from $\operatorname{Skew}_R^{C-1}$ onto $\mathcal K$. [Def; lin]
 3. $\dim\operatorname{Skew}_R=R(R-1)/2$, so $\dim\mathcal K=(C-1)R(R-1)/2$. [2] ∎
 
-**Remark 1.1 (A5 in practice).** For $R=2$, A5 holds iff $\operatorname{supp}P_X\cap A$ contains at least three distinct points.
+**Remark 1.0 (why A2 is a substantive restriction).** Lemma 1(c) shows that the data cannot see the skew part $K$. Proposition 9 below goes further: whole families of *nonlinear* departures from A2 leave the distribution of the data unchanged while moving $B^*$. So the linear contextual-effects assumption cannot be validated by goodness of fit. It is a structural assumption, and $\mathcal K$ is only the linear part of what the data cannot see.
+
+**Remark 1.1 (A5 in practice).** For $R=2$, A5 holds iff $\operatorname{supp}_AP_X$ contains at least three distinct points.
 *Proof.*
 1. On $x=(t,1-t)$, $x^\top Dx$ is a polynomial of degree at most 2 in $t$. [alg]
 2. If it vanishes at three distinct $t$, it is the zero polynomial. [poly]
 3. If $D_{11}t^2+2D_{12}t(1-t)+D_{22}(1-t)^2\equiv0$, then $t=0$ gives $D_{22}=0$, $t=1$ gives $D_{11}=0$, and then $D_{12}=0$. [alg]
 4. With only two support points $t_1,t_2$, the nonzero form $D$ given by $(t-t_1)(t-t_2)$ in homogenised form vanishes on both. [alg] ∎
 
-For general $R$, A5 says that the design of the quadratic regression on the polls has full rank. It is checkable from the condition number of the regressor matrix (Phase 4).
+For general $R$, A5 says that the design of the quadratic regression on the polls has full rank: all $R(R+1)/2$ coefficients of a symmetric $D$ must be pinned down. For $R=3$ that needs at least six support points that do not lie on a common conic. Any five points lie on some conic, so three, four or five distinct compositions are never enough. It is checkable from the condition number of the regressor matrix (Phase 4).
 
 **Remark 1.2 (sum-to-one in estimation).** Fit each column by OLS on the $R(R+1)/2$ quadratic monomials of $X$ (equivalently the homogeneous form). Then $\sum_c\hat Q_c=J$ exactly.
 *Proof.*
@@ -152,7 +183,8 @@ So the estimated columns are automatically coherent; no constrained regression i
 ## 3. The estimand in terms of $K$
 
 **Lemma 2.** Under (S1)–(S2) with $P(X\in A)=1$:
-$$B^*_{rc}=\frac1{\mu_r}\Big[\sum_sQ_{c,rs}\mu_{rs}+\sum_{s\neq r}K_{c,rs}\mu_{rs}\Big],\qquad\frac{\partial B^*_{rc}}{\partial K_{c,rs}}=\frac{\mu_{rs}}{\mu_r}\ge0.$$
+$$B^*_{rc}=\frac1{\mu_r}\Big[\sum_sQ_{c,rs}\mu_{rs}+\sum_{s\neq r}K_{c,rs}\mu_{rs}\Big].$$
+In the ambient coordinates (the entries $K_{c,rs}$, before skew-symmetry and $\sum_cK_c=0$ are imposed), the coefficient of $K_{c,rs}$ is $\mu_{rs}/\mu_r\ge0$. The entries are not free: in the free coordinates $k_{c,rs}$ ($c<C$, $r<s$) of Prop. 7, one coordinate enters four cells, with the coefficients given there.
 
 *Proof.*
 1. $0\le NX_r\beta_{rc}\le N$, so $E[NX_r\beta_{rc}]$ is finite. [S1; standing integrability]
@@ -161,13 +193,13 @@ $$B^*_{rc}=\frac1{\mu_r}\Big[\sum_sQ_{c,rs}\mu_{rs}+\sum_{s\neq r}K_{c,rs}\mu_{r
 4. $=\sum_sH_{c,rs}E[NX_rX_s]=\sum_sH_{c,rs}\mu_{rs}$. [lin]
 5. $H_{c,rs}=Q_{c,rs}+K_{c,rs}$ and $K_{c,rr}=0$. [Def; skew]
 6. Divide by $\mu_r>0$. [standing integrability]
-7. The derivative is read off from the affine form. $\mu_{rs}\ge0$ because $N,X_r,X_s\ge0$. [alg] ∎
+7. The coefficients are read off from the affine form. $\mu_{rs}\ge0$ because $N,X_r,X_s\ge0$. [alg] ∎
 
 **2×2 check.** $B^*=[Q_{11}\mu_{11}+(Q_{12}+K)\mu_{12}]/\mu_1$. With the dictionary of Prop. 4 below and $\mu_{11}+\mu_{12}=\mu_1$, this is JKST eq. (16) in the population: $w_0+c_1+d_1\mu_{11}/\mu_1-w_1\mu_{12}/\mu_1$.
 
 **Remark 2.1 ($A\subsetneq\operatorname{supp}$).** If $P(X\notin A)>0$, then
 $$B^*_{rc}=\mu_r^{-1}\Big\{E\big[NX_rM_{H,rc}(X)1\{X\in A\}\big]+E\big[NX_r\beta_{rc}1\{X\notin A\}\big]\Big\},$$
-and the second term is bounded only by the Duncan–Davis terms of the polls outside $A$. This is formalised in Phase 2b, where $A$ varies by district. Until then $P(X\in A)=1$ is assumed, which is the package's choice.
+and the second term is bounded only by the Duncan–Davis terms of the polls outside $A$. Prop. 7′ (§6.6) turns this into bounds, and Phase 2b lets $A$ vary by district. Every result below that uses Lemma 2 assumes $P(X\in A)=1$ unless it says otherwise. The default $A=\operatorname{conv}\operatorname{supp}P_X$ satisfies it automatically.
 
 ---
 
@@ -177,9 +209,11 @@ and the second term is bounded only by the Duncan–Davis terms of the polls out
 (i) $K\in\Theta_I(P;A)$;
 (ii) (S3) holds, and there is a $P_V$-null set $\mathcal N$ such that for all $v=(x,n)\notin\mathcal N$ with $x\in A$,
 $$\langle u,M_H(x)\rangle\le\psi(u;v)\quad\text{for all }u\in\mathbb R^{R\times C}.\tag{T1}$$
-Moreover, $\Theta_I(P;A)$ is convex and closed, and it is compact when $A$ has nonempty relative interior.
+Moreover, $\Theta_I(P;A)$ is convex and closed. It is compact when $\operatorname{affdim}(A)=R-1$, i.e. $A$ has nonempty interior relative to $\Delta^{R-1}$. Under (A5) this always holds (Remark 5.2), so under the theorem's own assumptions $\Theta_I(P;A)$ is compact.
 
 *Interpretation:* the implied mean transition matrix at composition $x$ must be an average of selections from the polls' Duncan–Davis polytopes among polls with that composition and size, i.e. $M_H(x)\in\mathbb E[S(X,T)\mid V=v]$. Directions $u$ and $-u$ along the equality constraints force $x^\top M_H(x)=E[T\mid V=v]$, so (T1) also requires $E[T\mid V]=E[T\mid X]$, an observable implication of A3.
+
+**Why (T1) must hold for all $u$ at once.** The inequality for one direction $u$ is a single half-space restriction on $M_H(x)$. The conclusion $M_H(x)\in\mathbb E[S(X,T)\mid V=v]$ needs every half-space at the same $v$, because a closed convex set is the intersection of all its supporting half-spaces [Rock]. Each fixed $u$ gives its own exceptional null set $\mathcal N_u$, and there are uncountably many $u$, so the union of the $\mathcal N_u$ need not be null. Steps 9–11 below avoid this: they take the union over a countable dense set and extend by continuity in $u$. Sufficiency step 15 then uses (T1) at the random direction $u=g(V(w))$, which is legitimate only because one null set serves all $u$.
 
 *Proof of (i)⇒(ii).*
 1. Take $\mathbb Q\in\mathcal M(H;A)$ with $\mathbb Q\circ W^{-1}=P$. (S3) holds by membership. [Def $\Theta_I$; S3]
@@ -193,6 +227,15 @@ Moreover, $\Theta_I(P;A)$ is convex and closed, and it is compact when $A$ has n
 9. Let $U_0$ be a countable dense subset of $\mathbb R^{R\times C}$ and $\mathcal N=\bigcup_{u\in U_0}\mathcal N_u$. Then $\mathcal N$ is null. [countable union of null sets]
 10. For $v\notin\mathcal N$, the left side of (T1) is linear in $u$, and $\lvert\psi(u;v)-\psi(u';v)\rvert\le\sqrt R\lVert u-u'\rVert$. [lin; L0(d) integrated]
 11. So (T1) extends from $U_0$ to all $u$. [9–10; density and continuity] ∎
+
+**Functional-analytic facts used in (ii)⇒(i).** Write $L^1:=L^1(\mathcal W,\mathcal B(\mathcal W),P;\mathbb R^{R\times C})$ with the Frobenius norm. Since $\mathbb R^{R\times C}$ is finite-dimensional, every statement below can be read coordinate by coordinate for scalar $L^1$.
+* **F1.** $\mathcal S\subset L^1$. Each $\xi\in\mathcal S$ is Borel with $\lVert\xi\rVert\le\sqrt R$ a.s., hence integrable.
+* **F2.** A family bounded in $L^\infty$ on a probability space is uniformly integrable: $\sup_\xi E[\lVert\xi\rVert1\{\lVert\xi\rVert>m\}]=0$ for $m>\sqrt R$.
+* **F3.** A convex, norm-closed subset of a normed space is weakly closed [Mazur].
+* **F4.** A uniformly integrable subset of $L^1$ is relatively weakly compact [DP]. With F3, $\mathcal S$ is weakly compact.
+* **F5.** $\Pi=E[\cdot\mid V]$ is linear with $\lVert\Pi\xi\rVert_1\le\lVert\xi\rVert_1$. A norm-continuous linear map between normed spaces is weak-to-weak continuous [wk-cont], so $\Pi(\mathcal S)$ is weakly compact.
+* **F6.** For a bounded $\mathcal G$-measurable direction $g$, $\sup_{\xi\in\mathcal S}E\langle g,\xi\rangle$ is attained by a Borel selector of $w\mapsto\arg\max_{b\in S(x,t)}\langle g(v),b\rangle$. This needs: $S$ nonempty and compact-valued with a measurable graph (L0); the objective is Carathéodory (Borel in $w$, continuous in $b$); and [MMT].
+* **F7.** Separation in $L^1(\mathcal G)$ uses its dual $L^\infty(\mathcal G)$ [HB]. A point outside a weakly closed convex set is strictly separated from it by a bounded $\mathcal G$-measurable $g$.
 
 *Proof of (ii)⇒(i).* Work on the canonical space $(\mathcal W,\mathcal B(\mathcal W),P)$. Let $\mathcal S=\{\xi:\mathcal W\to\mathbb R^{R\times C}\text{ Borel}:\ \xi(w)\in S(x,t)\ P\text{-a.s.}\}$, viewed in $L^1$.
 
@@ -223,9 +266,13 @@ Moreover, $\Theta_I(P;A)$ is convex and closed, and it is compact when $A$ has n
 1. $K\mapsto M_{Q+K}(x)$ is affine, so the left side of (T1) is affine in $K$, and (S3) is a family of affine inequalities. [lin]
 2. If $K,K'$ satisfy (ii) outside null sets $\mathcal N,\mathcal N'$, then every convex combination satisfies (ii) outside $\mathcal N\cup\mathcal N'$. [1]
 3. If $K_n\to K$ with $K_n$ satisfying (ii) outside $\mathcal N_n$, then $K$ satisfies (ii) outside $\bigcup_n\mathcal N_n$, which is null. [continuity in $K$; countable union]
-4. $\Theta_I\subseteq\Theta_O$, and $\Theta_O$ is bounded when $A$ has nonempty relative interior. [P1 below; L3(b)] ∎
+4. $\Theta_I\subseteq\Theta_O$, and $\Theta_O$ is bounded when $\operatorname{affdim}(A)=R-1$, which (A5) implies. [P1 below; L3(b); Remark 5.2] ∎
 
 **Remark 4.1 (no auxiliary randomisation).** P1 §1.5 said the construction needs extra randomisation. It does not: $S(x,t)$ is convex, so the selection can be chosen as a function of $W$ (step 18).
+
+**Remark 4.2 (sharpness is relative to continuous latent rates).** The model takes $\beta\in\mathfrak B$ with real entries. With integer cell counts, $\beta_{irc}=N_{irc}/N_{ir}$ lies on a grid, so the exact finite-population feasible set is a subset of $S(X,T)$. Theorem 1 asserts sharpness for the continuous model of (S1)–(S3), not for that integer set. Two observations suggest the distinction rarely matters, but they are not used anywhere below:
+1. In count coordinates $n_{rc}=Nx_rb_{rc}$, $S(x,t)$ is a transportation polytope with integer margins $Nx_r$ and $Nt_c$. Such polytopes have integer vertices (total unimodularity), so every vertex of $S(x,t)$ is an integer table, and the Duncan–Davis bounds are attained by integer tables.
+2. *(Sketch, not verified.)* If the construction may randomise, choosing an integer vertex of $S(X,T)$ with probabilities equal to measurable barycentric weights of $\xi^\star(W)$, the resulting integer-valued $\beta$ has $E[\beta\mid W]=\xi^\star(W)$. Then $E[\beta\mid V]=\eta$, so the sharp set would be unchanged. This needs a measurable choice of the weights and gives up Remark 4.1's selection without randomisation.
 
 **Corollary 1 (sharp bounds for any linear target).** Assume Theorem 1 holds, $P(X\in A)=1$ and $\Theta_I(P;A)\neq\emptyset$. Then the sharp identified set for $\varphi=\sum a_{rc}B^*_{rc}$ is the interval
 $$\Big[\min_{K\in\Theta_I}\varphi(K),\ \max_{K\in\Theta_I}\varphi(K)\Big],$$
@@ -235,25 +282,39 @@ where $\varphi(K)$ is given by Lemma 2.
 2. So the identified set is the image $\varphi(\Theta_I)$, and every point of it is attained by some consistent $\mathbb Q$. [1; T1, (ii)⇒(i)]
 3. $\varphi$ is affine and $\Theta_I$ is convex and compact, so the image is a compact interval with the stated endpoints. [lin; T1; IVT] ∎
 
+### 4.3 What each set needs from the data
+
+| Set | Information used | Computation |
+|---|---|---|
+| $\Theta_I$ (Theorem 1) | the conditional law of $T$ given $(X,N)$, through $\psi(u;v)=E[h_S(u;X,T)\mid V=v]$ | infinitely many conditional constraints; not a finite LP in general |
+| $\Theta_X$ (JKST Prop. 1) | the conditional law of $T$ given $X$ | the same, conditioning on $X$ only |
+| $\Theta_O$ (§5, Prop. 7) | the regression $E[T\mid X]$, i.e. $Q$, plus probability validity | a finite LP |
+
+Theorem 1 is the identification result. Prop. 7 is the computable outer bound that extends the JKST implementation. In data, $(X_i,N_i)$ is typically unique for every precinct, so $P_{T\mid V}$ cannot be estimated without smoothing or pooling over nearby compositions and sizes. Estimating $\Theta_I$ or $\Theta_X$ therefore needs extra structure: the series-based $\Theta_X$ is planned for the package's second release (Phase 4). Results stated for $\Theta_O$ are called sharp only relative to the regression function (Prop. 2).
+
 ---
 
 ## 5. The outer set: reduction, nesting, and when it is sharp
 
 **Lemma 3.**
 (a) If $A$ is a polytope and $\ell$ is linear, then $\ell\ge0$ on $A$ iff $\ell(v)\ge0$ for all $v\in\operatorname{vert}(A)$. Hence the constraint "$\forall x\in A$" in $\Theta_O$ can be replaced by "$\forall v\in\operatorname{vert}(A)$".
-(b) If $A$ has nonempty relative interior, $\Theta_O(P;A)$ is bounded.
-(c) Under (S1)–(S2), if $A=\operatorname{conv}(\operatorname{supp}P_X)$ then (S3) holds automatically.
+(b) If $\operatorname{affdim}(A)=R-1$ (equivalently, $A$ has nonempty interior relative to $\Delta^{R-1}$), then $\Theta_O(P;A)$ is bounded, hence a polytope. Without this condition $\Theta_O$ is a closed convex polyhedron, possibly unbounded (Remark 5.2).
+(c) Under (S1)–(S2), if $A\subseteq\operatorname{conv}(\operatorname{supp}_AP_X)$, then (S3) holds automatically. In particular this is so for $A=\operatorname{conv}(\operatorname{supp}P_X)$, since then $P(X\in A)=1$ and $\operatorname{supp}_AP_X=\operatorname{supp}P_X$.
 
 *Proof.*
 1. (a) "⇒" is immediate since $\operatorname{vert}(A)\subseteq A$. "⇐": write $x=\sum_k\lambda_kv_k$ with $\lambda\ge0$, $\sum\lambda_k=1$. [Mink]
 2. Then $\ell(x)=\sum_k\lambda_k\ell(v_k)\ge0$. [lin] ∎(a)
 3. (b) For $K\in\Theta_O$ and $x\in A$, every row of $M_{Q+K}(x)$ is nonnegative and sums to $e_r^\top Jx=1$, so it lies in $\Delta^{C-1}$. [Def $\Theta_O$; L1(b)]
 4. Hence $\lvert e_r^\top K_cx\rvert\le1+\lvert e_r^\top Q_cx\rvert$ for all $x\in A$. [3; alg]
-5. A relatively open subset of $\Delta^{R-1}$ contains $R$ affinely independent points $x^{(1)},\dots,x^{(R)}$. These are linearly independent because $0\notin\{\mathbf 1^\top x=1\}$. [alg]
+5. Since $\operatorname{affdim}(A)=R-1$, $A$ contains $R$ affinely independent points $x^{(1)},\dots,x^{(R)}$. These are linearly independent because $0\notin\{\mathbf 1^\top x=1\}$. [alg]
 6. $K_c=[\,e_r^\top K_cx^{(k)}\,]_{r,k}\,[x^{(1)}\cdots x^{(R)}]^{-1}$ is therefore bounded uniformly over $\Theta_O$. [4–5; lin] ∎(b)
 7. (c) $E[\beta\mid V]\in\mathfrak B$ a.s., since $\mathfrak B$ is closed and convex. [CE-cvx]
-8. So $M_H(x)\in\mathfrak B$ for $P_X$-a.e. $x$, and by continuity on $\operatorname{supp}P_X$. [S2; supp]
-9. The rows of $M_H(x)$ are linear in $x$ with constant row sums, so $M_H(x)\in\mathfrak B$ on the convex hull $A$. [L1(b); lin; Mink] ∎(c)
+8. (S2) holds on $\{X\in A\}$, so $M_H(x)\in\mathfrak B$ for $P_X$-a.e. $x\in A$, and by continuity at every $x\in\operatorname{supp}_AP_X$. [S2; supp]
+9. $M_H$ is linear in $x$ and $\mathfrak B$ is convex, so $M_H(x)\in\mathfrak B$ on $\operatorname{conv}(\operatorname{supp}_AP_X)$, which contains $A$ by hypothesis. [lin; L1(b); Mink] ∎(c)
+
+**Remark 5.1 (S3 is not automatic for every $A$ inside the hull).** The hypothesis of (c) cannot be weakened to $A\subseteq\operatorname{conv}\operatorname{supp}P_X$. Take $A=\{x_0\}$ with $x_0$ in the interior of the hull but $P(X=x_0)=0$. Then (S2) restricts nothing, and $M_H(x_0)$ need not be a valid transition matrix. Here $\operatorname{supp}_AP_X=\emptyset$, so the hypothesis of (c) fails, as it should. *(Corrected after review, Batch B: with the earlier wording $\operatorname{supp}P_X\cap A$, this set was $\{x_0\}$ whenever $x_0\in\operatorname{supp}P_X$, so (c)'s hypothesis appeared to hold and (c) contradicted this remark. The restricted support removes the tension.)* A numerical instance is in `verify_phase2a.py`. The same happens, less starkly, whenever $A$ reaches into a part of the hull where (S2) is imposed on no support points.
+
+**Remark 5.2 (dimension of $A$).** "Nonempty relative interior" in the earlier draft was too weak: a singleton has nonempty relative interior in its own affine hull. For $R=3$, $C=2$, $A=\{x_0\}$ with $x_0=(\tfrac13,\tfrac13,\tfrac13)$, $Q_1=Q_2=\tfrac12J$, and $K_1=-K_2=t\begin{psmallmatrix}0&1&-1\\-1&0&1\\1&-1&0\end{psmallmatrix}$: since $K_1x_0=0$, every $t\in\mathbb R$ is in $\Theta_O$. Under (A5), however, $\operatorname{supp}_AP_X$ lies in no hyperplane of the simplex. (If $a^\top x=b$ there, for a proper hyperplane, so that $a-b\mathbf 1\ne0$, then $\mathbf 1^\top x=1$ gives $x^\top Dx=\big((a-b\mathbf 1)^\top x\big)(\mathbf 1^\top x)=0$ with $D=\tfrac12[(a-b\mathbf 1)\mathbf 1^\top+\mathbf 1(a-b\mathbf 1)^\top]\ne0$, contradicting (A5).) So $A\supseteq\operatorname{supp}_AP_X$ ($A$ is closed) is full-dimensional, and the condition of (b) holds automatically.
 
 **Proposition 1 (nesting).** $\Theta_I(P;A)\subseteq\Theta_X(P;A)\subseteq\Theta_O(P;A)$.
 *Proof.*
@@ -310,11 +371,13 @@ In words: $\Theta_O$ loses nothing unless polls with similar composition are so 
 
 ### 6.1 Equivalence with JKST (2×2)
 
-**Proposition 4.** Let $R=C=2$, with row 1 = black, $X=X_1$, and $A=\{(t,1-t):t\in[l,u]\}$, $0<l<u<1$. Write $E[T\mid X]=w_0+c_1X+d_1X^2$ and $K:=K_{1,12}$. Then
+**Proposition 4.** Let $R=C=2$, with row 1 = black, $X=X_1$, and $A=\{(t,1-t):t\in[l,u]\}$, $0<l<u<1$. Write $E[T\mid X]=w_0+c_1X+d_1X^2$ and $K:=K_{1,12}$. Parts (a)–(c) concern $\Theta_O$ only. Part (d), and any use of it for $B^*$, also needs $P(l\le X\le u)=1$ (Lemma 2). Then
 (a) $Q_{1,22}=w_0$, $Q_{1,12}=w_0+c_1/2$, $Q_{1,11}=w_0+c_1+d_1$, and $K=c_1/2-w_1$;
 (b) $\Theta_O$, written in terms of $w_1$, is exactly JKST Prop. 2;
 (c) with $A=\Delta^1$ it is exactly JKST Prop. 3;
 (d) $B^*(K)$ equals JKST (16).
+
+The resulting bounds are bounds over the **outer** set, as are JKST's. They are sharp relative to the regression function (Prop. 2), not relative to the full law of the data (Theorem 1).
 
 *Derivation (a).*
 1. $X^\top Q_1X=Q_{11}t^2+2Q_{12}t(1-t)+Q_{22}(1-t)^2$ with $t=X$. [Def]
@@ -356,7 +419,7 @@ which also requires $Q_{c,rr}\ge0$ (a testable condition not involving $K$). The
 $$K_{c,rs}\in[-m_{c,rs},\,m_{c,rs}],\qquad m_{c,rs}:=\min\{Q_{c,rs},\,1-Q_{c,rs}\}.$$
 Hence
 $$B^*_{rc}\in\frac1{\mu_r}\Big[\sum_sQ_{c,rs}\mu_{rs}\ \mp\ \sum_{s\neq r}m_{c,rs}\mu_{rs}\Big],$$
-with the minus sign giving the lower bound.
+with the minus sign giving the lower bound. These formulas presuppose $\Theta_O\neq\emptyset$. By steps 1–3 below, $\Theta_O\neq\emptyset$ iff $Q_{c,rs}\ge0$ for all $c,r,s$. Then $\sum_cQ_{c,rs}=1$ gives $Q_{c,rs}\le1$ and $0\le m_{c,rs}\le\tfrac12$. If some $Q_{c,rs}<0$, the set is empty and the model with $A=\Delta^{R-1}$ is refuted. $P(X\in A)=1$ holds automatically here.
 
 *Derivation.*
 1. $\operatorname{vert}(\Delta^{R-1})=\{e_1,\dots,e_R\}$, so $\Theta_O=\{K:(Q_c+K_c)e_s\ge0\ \forall c,s\}=\{K:Q_{c,rs}+K_{c,rs}\ge0\ \forall c,r,s\}$. [L3(a); alg]
@@ -390,7 +453,7 @@ with the minus sign giving the lower bound.
 **Proposition 6.** Let $R=2$ and $\operatorname{vert}(A)=\{(t_k,1-t_k)\}_{k=1,2}$ with $0<t_1=l<t_2=u<1$. Write $\kappa_c:=K_{c,12}$, so that $K_c=\kappa_c\begin{psmallmatrix}0&1\\-1&0\end{psmallmatrix}$. Define
 $$\lambda_c(t)=-Q_{c,12}-Q_{c,11}\tfrac{t}{1-t},\qquad\rho_c(t)=Q_{c,12}+Q_{c,22}\tfrac{1-t}{t},$$
 $$\ell_c=\max_k\lambda_c(t_k),\qquad h_c=\min_k\rho_c(t_k).$$
-Then $\Theta_O=\{\kappa:\ell\le\kappa\le h,\ \sum_c\kappa_c=0\}$. The projected interval for each $\kappa_c$ is given by Lemma 4(b). The bounds are
+Then $\Theta_O=\{\kappa:\ell\le\kappa\le h,\ \sum_c\kappa_c=0\}$. The projected interval for each $\kappa_c$ is given by Lemma 4(b). If $P(X\in A)=1$, the bounds are
 * $B^*_{1c}=[Q_{c,11}\mu_{11}+(Q_{c,12}+\kappa_c)\mu_{12}]/\mu_1$, attained at the endpoints of $\kappa_c$'s projected interval (increasing in $\kappa_c$);
 * $B^*_{2c}=[(Q_{c,12}-\kappa_c)\mu_{12}+Q_{c,22}\mu_{22}]/\mu_2$ (decreasing in $\kappa_c$);
 * any $\varphi=\varphi_0+\sum_cg_c\kappa_c$, with $g_c=\mu_{12}(a_{1c}/\mu_1-a_{2c}/\mu_2)$, by the greedy rule of Lemma 4(c).
@@ -408,7 +471,7 @@ Verified against an LP solver in 300 random cases, for both the projection and t
 **Corollary 6.1 (joint vs collapsed; corrects P1 §1.4).** The collapsed analysis of column $c$ treats the table as two columns $(c,\neg c)$ with $Q_{\neg c}=J-Q_c$. For $R=2$:
 (a) the joint interval for $\kappa_c$ is contained in the collapsed one;
 (b) the two are equal whenever, for each $r\in\{1,2\}$, the numbers $Q_{c',rr}$ ($c'\ne c$) are all of one sign. That holds in particular when the extrapolated pure-poll rates $H_{c',rr}=Q_{c',rr}$ are nonnegative;
-(c) strict tightening therefore needs strong contextual effects, under which some pure-poll extrapolation is negative.
+(c) strict tightening therefore requires that the common-sign condition of (b) fail: for some row $r$, the numbers $Q_{c',rr}$ ($c'\ne c$) take both signs. In particular at least one extrapolated pure-poll rate $H_{c',rr}=Q_{c',rr}$ is negative, so the linear model is not valid on the whole simplex.
 
 For $R\ge3$, rows are coupled through the shared $K_{c,rs}$, and the joint bound can be strictly tighter even when every extrapolation is valid. A characterisation for $R\ge3$ is left open.
 
@@ -419,7 +482,7 @@ For $R\ge3$, rows are coupled through the shared $K_{c,rs}$, and the joint bound
 4. So the collapsed upper end is at least $\min\{h_c,-\sum_{c'\ne c}\ell_{c'}\}$, the joint upper end. The lower ends compare the same way, using $\rho$. That proves (a). [2–3; L4(b)]
 5. $t\mapsto t/(1-t)$ is increasing, so $\lambda_{c'}$ is monotone with direction set by the sign of $Q_{c',11}$. Likewise $(1-t)/t$ is decreasing and $\rho_{c'}$ is monotone with direction set by the sign of $Q_{c',22}$. [alg]
 6. If the signs agree across $c'\ne c$, all $\lambda_{c'}$ are maximised at the same vertex, so equality holds in 3. The same argument applies to $\rho$. That proves (b). [5]
-7. (c) is the contrapositive of (b), with $H_{c',rr}=Q_{c',rr}$. [skew] ∎
+7. (c) is the contrapositive of (b). A set of numbers that is not of one sign contains a negative one, and $H_{c',rr}=Q_{c',rr}$. [skew] ∎
 
 Numerical evidence (`verify_phase2a.py`):
 * 2×3 with nonnegative pure-poll rates: never strict, as (b) predicts.
@@ -431,10 +494,12 @@ Joint fitting remains necessary anyway for targets that combine columns (e.g. lo
 
 ### 6.5 General R×C: the linear program
 
-**Proposition 7.** Parametrise $\mathcal K$ by $k=(k_{c,rs})_{c<C,\ r<s}\in\mathbb R^d$, $d=(C-1)R(R-1)/2$, with $K_c=\sum_{r<s}k_{c,rs}(e_re_s^\top-e_se_r^\top)$ for $c<C$ and $K_C=-\sum_{c<C}K_c$. For a polytope $A$:
+**Proposition 7.** Assume $P(X\in A)=1$ (needed for the target; Prop. 7′ drops it). Parametrise $\mathcal K$ by $k=(k_{c,rs})_{c<C,\ r<s}\in\mathbb R^d$, $d=(C-1)R(R-1)/2$, with $K_c=\sum_{r<s}k_{c,rs}(e_re_s^\top-e_se_r^\top)$ for $c<C$ and $K_C=-\sum_{c<C}K_c$. For a polytope $A$:
 $$\Theta_O=\{k:Gk\le g\},$$
 with one row for each $(v,r,c)\in\operatorname{vert}(A)\times[R]\times[C]$:
 $$-\big(e_r^\top K_c(k)v\big)\le(Q_cv)_r,\qquad e_r^\top K_c(k)v=\sum_{s>r}k_{c,rs}v_s-\sum_{s<r}k_{c,sr}v_s\ \ (c<C),\quad e_r^\top K_C(k)v=-\sum_{c<C}e_r^\top K_c(k)v.$$
+$\Theta_O$ is a polyhedron. It is bounded (a polytope) when $\operatorname{affdim}(A)=R-1$ (Lemma 3(b)). This is a finite LP for the **outer** set. It is not an LP representation of the sharp set $\Theta_I$ of Theorem 1, which in general needs infinitely many conditional constraints (§4.3).
+
 For a linear target, $\varphi(k)=\varphi_0+\gamma^\top k$ with
 $$\varphi_0=\sum_{rc}\frac{a_{rc}}{\mu_r}\sum_sQ_{c,rs}\mu_{rs},$$
 and, for $c<C$ and $r<s$,
@@ -448,7 +513,30 @@ This follows from Lemma 2: $k_{c,rs}$ enters $B^*_{rc}$ with $+\mu_{rs}/\mu_r$ a
 4. $\varphi$ is affine in $K$ by Lemma 2, hence affine in $k$ by 1. [L2; lin]
 5. The vertices of $\operatorname{conv}\{X_i\}$ are among the $X_i$, and every $X_i\in A$. So constraints at all $X_i$ imply constraints at the vertices, and conversely by Lemma 3(a). [Mink; L3(a)] ∎
 
-The value function $Q\mapsto\max\{\gamma^\top k:Gk\le g(Q)\}$ is concave and piecewise linear in $(Q,\mu)$, and smooth wherever the optimal basis is unique. That generalises JKST's "tie-breaking" condition and is the starting point of Phase 3.
+**Regularity of the value function.** Write $V(Q,\mu)=\max\{\gamma(\mu)^\top k:Gk\le g(Q)\}$. Only $g$ depends on $Q$, and only $\gamma$ depends on $\mu$ (through ratios such as $\mu_{rs}/\mu_r$). Three statements must be kept apart:
+* For fixed $\mu$, $V(\cdot,\mu)$ is concave and piecewise linear in $Q$, on the set where the LP is feasible and bounded (right-hand-side parametric LP).
+* For fixed $Q$, $V(Q,\cdot)$ is convex and piecewise linear in $\gamma$: it is the support function of the polyhedron $\{Gk\le g(Q)\}$. As a function of $\mu$ it is a composition with the nonlinear map $\mu\mapsto\gamma(\mu)$.
+* Jointly in $(Q,\mu)$, $V$ is in general neither concave nor piecewise linear. Example: $\max\{\mu k:-Q\le k\le Q\}=\mu Q$ for $\mu,Q>0$, which is bilinear (checked in `verify_phase2a.py`).
+
+$V$ is differentiable at $(Q,\mu)$ when the optimal basis is unique and nondegenerate, because there $V$ coincides locally with a smooth function of both arguments. This generalises JKST's "tie-breaking" condition. Phase 3 conditions on the design, so $\gamma$ and $G$ are fixed. Its Lemma P3.1 is the first bullet, applied to the estimated coefficients.
+
+### 6.6 Units outside $A$
+
+**Proposition 7′.** Let $A$ be a polytope with $P(X\in A)>0$, (S1) everywhere, (S2)–(S3) on $A$, and (A5) on $\operatorname{supp}_AP_X$, so that $Q$ is identified from $\{X\in A\}$. Put $\mu^A_{rs}:=E[NX_rX_s1\{X\in A\}]$, and keep $\mu_r=E[NX_r]$ over all units. For a linear target $\varphi=\sum_{rc}a_{rc}B^*_{rc}$, let $\varphi^A_0$ and $\gamma^A$ be the $\varphi_0$ and $\gamma$ of Prop. 7 with $\mu_{rs}$ replaced by $\mu^A_{rs}$. Let $\tilde a(x)_{rc}:=a_{rc}x_r/\mu_r$ and
+$$U_{\text{out}}=E\big[N\,h_S(\tilde a(X);X,T)\,1\{X\notin A\}\big],\qquad L_{\text{out}}=-E\big[N\,h_S(-\tilde a(X);X,T)\,1\{X\notin A\}\big].$$
+Then
+$$\varphi\in\Big[\varphi^A_0+\min_{k\in\Theta_O}\gamma^{A\top}k+L_{\text{out}},\ \ \varphi^A_0+\max_{k\in\Theta_O}\gamma^{A\top}k+U_{\text{out}}\Big].$$
+Each endpoint is attained by a law that has the same regression function on $A$ and the same law of $W$ off $A$. For a single cell, $U_{\text{out}}=E[N\min\{X_r,T_c\}1\{X\notin A\}]/\mu_r$ and $L_{\text{out}}=E[N\max\{0,X_r+T_c-1\}1\{X\notin A\}]/\mu_r$, the Duncan–Davis terms of the units outside $A$. The package option `range = "trim"` computes this bound for single cells.
+
+*Proof.*
+1. $\varphi=\sum_{rc}\frac{a_{rc}}{\mu_r}\big\{E[NX_r\beta_{rc}1\{X\in A\}]+E[NX_r\beta_{rc}1\{X\notin A\}]\big\}$. [Def; lin]
+2. In the first term, $NX_r1\{X\in A\}$ is $V$-measurable, so $E[NX_r\beta_{rc}1\{X\in A\}]=E[NX_r(M_H(X))_{rc}1\{X\in A\}]=\sum_sH_{c,rs}\mu^A_{rs}$. Summed with the weights $a_{rc}/\mu_r$, this is $\varphi^A_0+\gamma^{A\top}k$ in the coordinates of Prop. 7. [CE-tower; CE-pull; S2 on $A$; L2 steps 3–5; P7]
+3. The second part is $E[N\langle\tilde a(X),\beta\rangle1\{X\notin A\}]$. Since $\beta\in S(X,T)$, $-h_S(-\tilde a;X,T)\le\langle\tilde a,\beta\rangle\le h_S(\tilde a;X,T)$, so it lies in $[L_{\text{out}},U_{\text{out}}]$. [S1; Def $h_S$; CE-mono]
+4. Validity: $K\in\Theta_O$ by Prop. 1 applied to the law on $\{X\in A\}$. Adding 2 and 3 gives the interval. [P1; 2–3]
+5. Attainment: no restriction links $\beta$ off $A$ to $K$, so the two terms can be chosen separately. On $A$, Prop. 2's construction attains any $K\in\Theta_O$ with the same regression function. Off $A$, a Borel argmax selector of $b\mapsto\pm\langle\tilde a(x),b\rangle$ over $S(x,t)$ attains $U_{\text{out}}$ or $L_{\text{out}}$. [P2; MMT; L0]
+6. For a single cell, $\max_{b\in S(x,t)}x_rb_{rc}=\min\{x_r,t_c\}$ and the minimum is $\max\{0,x_r+t_c-1\}$. [FH] ∎
+
+For a target that combines several cells, $U_{\text{out}}$ can be smaller than the sum of the single-cell Duncan–Davis terms, since $h_S$ of a sum is at most the sum of the $h_S$. Summing per-cell terms is valid but can be wider.
 
 ---
 
@@ -466,15 +554,15 @@ Hence an empty $\Theta_O$, or an empty intersection with $DD^*$, refutes (A1)–
 
 In samples an empty set can also arise from sampling noise; Phase 3 turns this into a test.
 
-**Proposition 9 (what the data can never rule out).** Let $\Delta:\Delta^{R-1}\to\mathbb R^{R\times C}$ be Borel with (i) $x^\top\Delta(x)=0$, (ii) $\Delta(x)\mathbf 1=0$, and (iii) $M_H(x)+\Delta(x)\in\mathfrak B$ on $\operatorname{supp}P_X$. Then the structure $\beta=M_H(X)+\Delta(X)$ and the structure $\beta'=M_H(X)$ generate the same $P$, but
+**Proposition 9 (what the data can never rule out).** Let $\Delta:\Delta^{R-1}\to\mathbb R^{R\times C}$ be Borel with (i) $x^\top\Delta(x)=0$, (ii) $\Delta(x)\mathbf 1=0$, and (iii) $M_H(x)+\Delta(x)\in\mathfrak B$, all three for every $x\in\operatorname{supp}P_X$. Only the support matters: the values of $\Delta$ off $\operatorname{supp}P_X$ never enter. Then the structure $\beta=M_H(X)+\Delta(X)$ and the structure $\beta'=M_H(X)$ generate the same $P$, but
 $$B^*_{rc}(\beta)-B^*_{rc}(\beta')=\frac{E[NX_r\Delta_{rc}(X)]}{\mu_r}.$$
-The linear $\Delta$'s are exactly $M_{K'}$ with $K'\in\mathcal K$, i.e. the unidentified part. A nonlinear $\Delta$ violates A2 yet leaves no trace in the data.
+Under (A5) on $\operatorname{supp}_AP_X$ (with $A\supseteq\operatorname{supp}P_X$), the linear $\Delta$'s satisfying (i)–(ii) on the support are exactly $M_{K'}$ with $K'\in\mathcal K$, i.e. the unidentified part. A nonlinear $\Delta$ violates A2 yet leaves no trace in the data.
 
 *Proof.*
 1. $T=\beta^\top X=M_H(X)^\top X+\Delta(X)^\top X=\tau(X)+0$, and likewise $T'=\tau(X)$. With the same law of $(N,X)$, both give the same $P$. [S1; (i); L1(a)]
 2. Both are valid structures. [(ii)–(iii); $M_H$ has unit row sums by L1(b)]
 3. The difference in $B^*$ follows by the computation of Lemma 2. [L2 steps 1–4]
-4. If $\Delta=M_D$ is linear, then (i) gives $x^\top D_cx=0$, so $\operatorname{sym}D_c=0$ by A5, and (ii) gives $\sum_cD_c=0$, so $D\in\mathcal K$. Conversely every $M_{K'}$ with $K'\in\mathcal K$ satisfies (i)–(ii). [L1(a) step 5; A5; L1(b)] ∎
+4. If $\Delta=M_D$ is linear, then (i) gives $x^\top D_cx=0$ on the support, so $\operatorname{sym}D_c=0$ by A5. (ii) gives $(\sum_cD_c)x=0$ on the support, which by A5 lies in no hyperplane (Remark 5.2) and so spans $\mathbb R^R$; hence $\sum_cD_c=0$ and $D\in\mathcal K$. Conversely every $M_{K'}$ with $K'\in\mathcal K$ satisfies (i)–(ii). [L1(a) step 5; A5; L1(b)] ∎
 
 *Example ($R=2$).* Take $\Delta_{1c}=\delta_c(x)x_2$ and $\Delta_{2c}=-\delta_c(x)x_1$ with $\sum_c\delta_c=0$. A constant $\delta_c$ is a shift of $\kappa_c$, invisible but inside the model. $\delta_c(x)=b_cx_1$ instead gives a *quadratic* contextual effect for row 1 that is exactly cancelled in row 2. It shifts $B^*_{1c}$ by $b_cE[NX_1^2X_2]/\mu_1$ and can push the truth outside $\Theta_O$; JKST Example 6 is the case $C=2$. This is the precise sense in which A2 is an untestable leap. Phase 3 bounds its consequences through a sensitivity parameter $\sup_x\lVert\Delta(x)\rVert$.
 
@@ -514,7 +602,7 @@ All four contain the truth, and all are narrower than DD. They are still wide, b
 
 ## 9. Verification log
 
-`python3 -I verify_phase2a.py` (22 PASS, 0 FAIL; full output in `verify_phase2a_output.txt`) checks:
+`python3 -I verify_phase2a.py` (32 PASS, 0 FAIL; full output in `verify_phase2a_output.txt`) checks:
 * Lemma 1: the dimension $(C-1)R(R-1)/2$ by rank computation for 2×2, 2×3, 3×3 and 4×3; $x^\top Kx=0$ and uniqueness of $Q$ symbolically for $R=3$.
 * Prop. 4: the JKST Prop. 3 constraints symbolically; Prop. 2 numerically (P1 script).
 * Prop. 5 against an LP solver (200 tables).
@@ -524,13 +612,23 @@ All four contain the truth, and all are narrower than DD. They are still wide, b
 * Theorem 1 "⇒": a known feasible structure lies in $\Theta_X$ (227/227).
 * Prop. 7: the closed-form $\gamma$ against direct computation (100 targets).
 * The 3×3 example: the truth lies inside the bounds.
+* Corrections after review (each check would fail on the earlier statement):
+  * Remark 5.1: with $A$ a singleton inside the hull, (S1)–(S2) hold but $M_H(x_0)\notin\mathfrak B$;
+  * Remark 5.2: with $A$ a singleton, $\Theta_O$ is unbounded, and the LP is unbounded;
+  * Prop. 7: $V(Q,\mu)=\mu Q$ violates joint concavity (midpoint test).
+* Scope and proof additions after review:
+  * Remark 1.1: five compositions never identify $Q$ for $R=3$; six generic ones do;
+  * Remark 4.2(1): LP optima over integer-margin transportation polytopes are integer tables (200 cases);
+  * Prop. 5: a negative $Q_{c,rs}$ empties $\Theta_O$;
+  * Prop. 7′: with $A$ a strict subset of the support, the truth lies in the bound, which lies inside DD.
 
-Not verified by computer: the measure-theoretic steps of Theorem 1, which rest on the cited theorems, and the theorem numbers marked †.
+Not verified by computer: the measure-theoretic steps of Theorem 1, which rest on the cited theorems (status in §0.4), and Remark 4.2(2), which is a sketch.
 
 ## 10. Corrections to Phase 1
 
-1. **Joint vs collapsed (P1 §1.4).** For $R=2$, the joint bound is strictly tighter only under strong contextual effects (Cor. 6.1). The general claim of strict gain is withdrawn.
-2. **A4.** The model now includes (S3). It is implied when $A$ is the hull of the data (Lemma 3(c)), and it is a real assumption only when extrapolating, as in JKST Prop. 3 and our Prop. 5.
+1. **Joint vs collapsed (P1 §1.4).** For $R=2$, the joint bound is strictly tighter only if some extrapolated pure-poll rate is negative (Cor. 6.1(c)). The general claim of strict gain is withdrawn.
+2. **A4.** The model now includes (S3). It is implied when $A\subseteq\operatorname{conv}(\operatorname{supp}_AP_X)$, e.g. $A$ = the population hull (Lemma 3(c)). It is a real assumption otherwise: when extrapolating, as in JKST Prop. 3 and our Prop. 5, and for regions $A$ that the support does not span (Remark 5.1).
+5. **Prop. 2-RC(i).** $\Theta_O$ is a polyhedron. It is a polytope (bounded) when $\operatorname{affdim}(A)=R-1$, which A5 implies (Lemma 3(b), Remark 5.2).
 3. **Theorem 1** needs no auxiliary randomisation (Remark 4.1).
 4. **New result (Prop. 2):** $\Theta_O$ is exactly the sharp set for an analyst who uses only the regression function.
 

@@ -278,3 +278,104 @@ for _ in range(100):
         formula = m[r, s] * ((a[r, c] - a[r, C - 1]) / mr[r] - (a[s, c] - a[s, C - 1]) / mr[s])
         bad += abs(direct - formula) > 1e-12
 ok("Prop 7: closed-form gamma coefficients match direct computation (100 random targets)", bad == 0)
+
+# ---------- Corrections after review (each check fails on the earlier statement) ----------
+# Remark 5.1: S3 is not implied for every A inside the hull. A = {x0} with P(X = x0) = 0 imposes (S2)
+# nowhere, so any K is compatible with (S1)-(S2), and some K makes M_{Q+K}(x0) invalid.
+Qv = random_H(3, 2)                                           # valid symmetric part (H_c >= 0, sum = J)
+Qv = [(H + H.T) / 2 for H in Qv]
+x0 = np.array([0.3, 0.3, 0.4])                                # interior of any full-dimensional hull
+Kbad = K_from_vec(np.array([5.0, 0.0, 0.0]), 3, 2)
+M_x0 = np.array([(Qv[c] + Kbad[c]) @ x0 for c in range(2)]).T
+supp = rng.dirichlet(np.ones(3), 500)                         # continuous P_X: P(X = x0) = 0
+ok("Remark 5.1: A={x0} inside conv supp P_X, (S1)-(S2) vacuous, yet M_H(x0) has a negative entry "
+   "(the earlier claim 'S3 implied when A is inside the hull' fails)",
+   M_x0.min() < 0 and not np.any(np.all(np.isclose(supp, x0), axis=1)))
+
+# Remark 5.2: with A a singleton (nonempty relative interior in its own affine hull) Theta_O is unbounded.
+xs = np.ones(3) / 3
+Qh = [0.5 * np.ones((3, 3)), 0.5 * np.ones((3, 3))]
+A1, b1 = outer_constraints(Qh, [xs])
+res = linprog(np.array([-1.0, 0, 0]), A_ub=A1, b_ub=b1, bounds=[(None, None)] * 3, method="highs")
+Kc = K_from_vec(np.array([1.0, -1.0, 1.0]), 3, 2)             # k = (1, -1, 1) gives K_1 x0 = 0
+ok("Remark 5.2: A = {x0}, Q = J/2: K_1 x0 = 0 along a line, and the LP is unbounded",
+   np.allclose(Kc[0] @ xs, 0) and res.status == 3)
+Af, bf = outer_constraints(Qh, list(np.eye(3)))
+resf = [linprog(sgn * np.eye(3)[j], A_ub=Af, b_ub=bf, bounds=[(None, None)] * 3, method="highs").status
+        for j in range(3) for sgn in (1, -1)]
+ok("Remark 5.2: with A full-dimensional (the simplex), the same LP is bounded in every coordinate",
+   all(st == 0 for st in resf))
+
+# Prop 7 regularity: V(Q, mu) = max{mu k : -Q <= k <= Q} = mu Q is not jointly concave.
+def V(Qs, mu):
+    r = linprog([-mu], A_ub=[[1.0], [-1.0]], b_ub=[Qs, Qs], bounds=[(None, None)], method="highs")
+    return -r.fun
+p1, p2 = (1.0, 1.0), (3.0, 3.0)
+mid = V(2.0, 2.0); avg = (V(*p1) + V(*p2)) / 2
+ok(f"Prop 7: joint value function is not concave (V(midpoint) = {mid:.1f} < average {avg:.1f})", mid < avg - 1e-9)
+ok("Prop 7: for fixed mu the value is concave (here linear) in Q",
+   abs(V(2.0, 1.5) - (V(1.0, 1.5) + V(3.0, 1.5)) / 2) < 1e-9)
+
+# ---------- Workstreams 2-3 after review ----------
+# Remark 1.1: for R = 3 five compositions never identify Q (6 coefficients); six generic ones do.
+def quad_design(P):
+    return np.column_stack([P[:, r] * P[:, s] for r in range(3) for s in range(r, 3)])
+P6 = rng.dirichlet(np.ones(3), 6)
+ok("Remark 1.1: R=3, five compositions give rank <= 5 < 6; six generic compositions give rank 6",
+   np.linalg.matrix_rank(quad_design(P6[:5])) == 5 and np.linalg.matrix_rank(quad_design(P6)) == 6)
+
+# Remark 4.2(1): vertices of the unit DD polytope in counts are integer tables (integer margins).
+bad = 0
+for _ in range(200):
+    R_, C_ = int(rng.integers(2, 5)), int(rng.integers(2, 5)); Ntot = int(rng.integers(5, 400))
+    rows = rng.multinomial(Ntot, np.ones(R_) / R_); cols = rng.multinomial(Ntot, np.ones(C_) / C_)
+    Aeq = np.vstack([np.kron(np.eye(R_), np.ones(C_)), np.kron(np.ones(R_), np.eye(C_))])
+    res = linprog(rng.normal(size=R_ * C_), A_eq=Aeq, b_eq=np.r_[rows, cols], bounds=[(0, None)] * (R_ * C_),
+                  method="highs-ds")
+    bad += res.status != 0 or np.max(np.abs(res.x - np.round(res.x))) > 1e-7
+ok("Remark 4.2(1): LP optima over integer-margin transportation polytopes are integer tables (200 cases)", bad == 0)
+
+# Prop 5: Theta_O is empty as soon as some Q_{c,rs} < 0.
+Qneg = [np.array([[0.6, -0.05], [-0.05, 0.5]]), None]; Qneg[1] = np.ones((2, 2)) - Qneg[0]
+An, bn = outer_constraints(Qneg, list(np.eye(2)))
+ok("Prop 5: a negative Q_{c,rs} makes Theta_O (A = simplex) empty",
+   linprog(np.zeros(1), A_ub=An, b_ub=bn, bounds=[(None, None)], method="highs").status == 2)
+
+# Prop 7': units outside A. 2x2 population on a grid of X; the linear model holds everywhere (noise-free T),
+# A = [0.3, 0.7] is a strict subset of the support. Single cell (1, 1).
+xs_g = np.linspace(0.05, 0.95, 19); Ns = rng.integers(200, 2000, xs_g.size).astype(float)
+def Mx(t): return np.array([[0.55 + 0.30 * t, 0.45 - 0.30 * t], [0.20 + 0.25 * t, 0.80 - 0.25 * t]])
+Bt = [Mx(t) for t in xs_g]; Tg = np.array([np.array([t, 1 - t]) @ B for t, B in zip(xs_g, Bt)])
+mu1 = np.sum(Ns * xs_g)
+truth = np.sum(Ns * xs_g * np.array([B[0, 0] for B in Bt])) / mu1
+inA = (xs_g >= 0.3 - 1e-12) & (xs_g <= 0.7 + 1e-12)
+# Q from the noise-free regression on A (exact), constraints at the vertices of A
+Xa = np.column_stack([xs_g[inA], 1 - xs_g[inA]])
+Z = np.column_stack([Xa[:, 0] ** 2, 2 * Xa[:, 0] * Xa[:, 1], Xa[:, 1] ** 2])
+coef = np.linalg.lstsq(Z, Tg[inA, 0], rcond=None)[0]
+Q1 = np.array([[coef[0], coef[1]], [coef[1], coef[2]]]); Qa = [Q1, np.ones((2, 2)) - Q1]
+Av, bv = outer_constraints(Qa, [np.array([0.3, 0.7]), np.array([0.7, 0.3])])
+mA = lambda f: np.sum((Ns * f)[inA])
+phi0 = (Q1[0, 0] * mA(xs_g ** 2) + Q1[0, 1] * mA(xs_g * (1 - xs_g))) / mu1
+gam = np.array([mA(xs_g * (1 - xs_g)) / mu1])               # coefficient of kappa = K_{1,12}
+lo_in, hi_in = lp_range(gam, Av, bv)
+out = ~inA
+U_out = np.sum((Ns * np.minimum(xs_g, Tg[:, 0]))[out]) / mu1
+L_out = np.sum((Ns * np.maximum(0, xs_g + Tg[:, 0] - 1))[out]) / mu1
+lo7, hi7 = phi0 + lo_in + L_out, phi0 + hi_in + U_out
+dd = (np.sum(Ns * np.maximum(0, xs_g + Tg[:, 0] - 1)) / mu1, np.sum(Ns * np.minimum(xs_g, Tg[:, 0])) / mu1)
+ok(f"Prop 7': truth {truth:.4f} lies in [{lo7:.4f}, {hi7:.4f}], which is inside DD [{dd[0]:.4f}, {dd[1]:.4f}]",
+   lo7 - 1e-9 <= truth <= hi7 + 1e-9 and dd[0] - 1e-9 <= lo7 and hi7 <= dd[1] + 1e-9)
+
+# [supp] (corrected after review, Batch B): continuous functions equal P_X-a.e. on A agree on the support of
+# the RESTRICTED measure P_X|_A, which can be smaller than supp P_X cap A. X ~ U[0,1] (row-1 share), A = {1/2}.
+# P(X in A cap U) = length(A cap U) = 0 for every open U, so supp(P_X|_A) is empty, while supp P_X cap A = {1/2}.
+A_pt = 0.5
+f_s, g_s = (lambda t: 0.0), (lambda t: 1.0)                 # agree P_X-a.e. on A, since P(X in A) = 0
+mass_A_near = lambda x, eps: 0.0                            # P(X in A cap (x-eps, x+eps)) = Lebesgue length of a point
+supp_restricted = [x for x in [A_pt] if all(mass_A_near(x, e) > 0 for e in (1e-1, 1e-3, 1e-6))]
+old_set = [A_pt] if 0 <= A_pt <= 1 else []                  # supp P_X cap A
+old_claim = all(f_s(x) == g_s(x) for x in old_set)          # old [supp]: they agree on supp P_X cap A
+new_claim = all(f_s(x) == g_s(x) for x in supp_restricted)  # new [supp]: they agree on supp(P_X|_A)
+ok("[supp] [F] (Batch B): X~U[0,1], A={1/2}: old tag claims 0 = 1 at 1/2 (fails); restricted support is empty "
+   "and the corrected tag holds", (not old_claim) and new_claim and supp_restricted == [])

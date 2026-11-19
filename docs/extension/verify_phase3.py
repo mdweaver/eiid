@@ -118,3 +118,188 @@ if claim(bounds(Q, V_all, 0, 1, 0.0)):
     print(f"     breakdown eta* for 'loyalty > 0.30': {lo_e:.4f}")
     ok("Breakdown: claim holds just below eta* and fails just above",
        claim(bounds(Q, V_all, 0, 1, lo_e * 0.99)) and not claim(bounds(Q, V_all, 0, 1, hi_e * 1.01 + 1e-6)))
+
+# ---------- Correction after review: Theorem P3.4(ii) needs distinct projected gradients ----------
+reps = 200000
+Sig = np.diag([1.0, 0.0])                                    # singular limiting covariance
+Zs = rng.multivariate_normal(np.zeros(2), Sig, reps)
+g1, g2 = np.array([1.0, 0.0]), np.array([1.0, 1.0])          # g1 != g2, but (g1-g2)' Sig (g1-g2) = 0
+m_same = np.minimum(Zs @ g1, Zs @ g2).mean()
+Zi = rng.standard_normal((reps, 2))
+m_dist = np.minimum(Zi @ g1, Zi @ g2).mean()                 # Sig = I: Var(Y - Y') = 1, E min = -1/sqrt(2 pi)
+ok(f"Thm P3.4(ii): two active gradients equal on supp(Z) give mean {m_same:.4f} (normal limit; the earlier "
+   f"'non-singleton => negative mean' fails), distinct ones give {m_dist:.4f} ~ {-1/np.sqrt(2*np.pi):.4f}",
+   abs(m_same) < 0.01 and abs(m_dist + 1 / np.sqrt(2 * np.pi)) < 0.01)
+
+# ---------- Workstream 3: Proposition P3.5(b2) ----------
+from scipy.stats import chi2, norm
+# A small LP family: phi_U(b) = max{gam'k : b + A k >= 0}, k in R^2, m = 8 constraints (s(b) = b).
+m_, A_ = 8, None
+ang = np.linspace(0, 2 * np.pi, m_, endpoint=False)
+A_ = -np.column_stack([np.cos(ang), np.sin(ang)])           # b_j - a_j'k >= 0: a bounded polygon
+gam_ = np.array([1.0, 0.3])
+b0 = np.full(m_, 1.0) + 0.02 * np.arange(m_)
+
+def primal(b):
+    r = linprog(-gam_, A_ub=-A_, b_ub=b, bounds=[(None, None)] * 2, method="highs")
+    return -r.fun, -r.ineqlin.marginals                      # value, optimal dual (>= 0)
+
+phiU0, _ = primal(b0)
+# (1) weak duality: every dual-feasible lambda (A'lambda = -gam, lambda >= 0) gives lambda'b0 >= phi_U(b0)
+viol = 0
+for _ in range(500):
+    r = linprog(rng.exponential(size=m_), A_eq=A_.T, b_eq=-gam_, bounds=[(0, None)] * m_, method="highs")
+    lam = r.x
+    viol += lam @ b0 < phiU0 - 1e-9
+ok("Prop P3.5(b2) step 1: every dual-feasible lambda gives an upper bound at beta_0 (500 random duals)", viol == 0)
+
+# (2) coverage of the projection version with a data-dependent candidate set (the plug-in optimal dual only)
+n_, reps_ = 400, 3000
+kq = np.sqrt(chi2.ppf(0.95, m_))
+cover_proj = cover_naive = 0
+for _ in range(reps_):
+    bh = b0 + rng.standard_normal(m_) / np.sqrt(n_)
+    val, lam = primal(bh)
+    se = np.linalg.norm(lam) / np.sqrt(n_)
+    cover_proj += phiU0 <= lam @ bh + kq * se
+    cover_naive += phiU0 <= lam @ bh + norm.ppf(0.95) * se
+ok(f"Prop P3.5(b2)(ii): projection upper bound with a data-dependent candidate covers {cover_proj / reps_:.3f} "
+   f">= 0.95 (one-candidate z-bound: {cover_naive / reps_:.3f})", cover_proj / reps_ >= 0.95)
+
+# ---------- Workstream 4: Theorem P3.8 (finite-sample CI), regime R2: M1, 2x2, 30 districts x 8 polls ----------
+def p38_once(rng_, D=30, nd=8, a_s=0.05, a_E=0.01, target="Btilde"):
+    Hr = np.array([[0.7, 0.5], [0.3, 0.2]])                    # column-1 rates: (H x)_r = Hr[r,0] x1 + Hr[r,1] x2
+    zeta = np.vstack([np.zeros(2), rng_.uniform(-0.08, 0.08, (D - 1, 2))])
+    X1, Dl, Nn_ = [], [], []
+    for d in range(D):
+        a = rng_.uniform(0.05, 0.5); b = min(0.95, a + rng_.uniform(0.2, 0.45))
+        X1.append(rng_.uniform(a, b, nd)); Dl += [d] * nd; Nn_.append(rng_.integers(200, 1000, nd))
+    X1 = np.concatenate(X1); X2 = 1 - X1; Dl = np.array(Dl); Nn_ = np.concatenate(Nn_).astype(float)
+    m = np.column_stack([Hr[0, 0] * X1 + Hr[0, 1] * X2 + zeta[Dl, 0], Hr[1, 0] * X1 + Hr[1, 1] * X2 + zeta[Dl, 1]])
+    conc = 15.0
+    beta = rng_.beta(m * conc, (1 - m) * conc)
+    T1 = X1 * beta[:, 0] + X2 * beta[:, 1]
+    # M1 regression: pooled quadratic + district x X_r shifts (d >= 2)
+    Zs = [X1 ** 2, 2 * X1 * X2, X2 ** 2]
+    for d in range(1, D):
+        Zs += [(Dl == d) * X1, (Dl == d) * X2]
+    Z = np.column_stack(Zs); L = np.linalg.solve(Z.T @ Z, Z.T)  # beta_hat = L @ T1
+    bh = L @ T1
+    def zidx(d, r): return None if d == 0 else 3 + 2 * (d - 1) + r
+    def rad(b, delta):                                          # Hoeffding radius of b'beta_hat (column 1 only)
+        w = b @ L
+        return np.sqrt(0.5 * np.log(1 / delta) * np.sum(w ** 2))
+    cons = []                                                   # (b vector, f0, a): s = f0 + b'beta, constraint s + a kappa >= 0
+    for d in range(D):
+        xs_d = X1[Dl == d]
+        for t in (xs_d.min(), xs_d.max()):
+            b1 = np.zeros(Z.shape[1]); b1[0] = t; b1[1] = 1 - t
+            if d: b1[zidx(d, 0)] = 1
+            b2 = np.zeros(Z.shape[1]); b2[1] = t; b2[2] = 1 - t
+            if d: b2[zidx(d, 1)] = 1
+            cons += [(b1, 0.0, 1 - t), (b2, 0.0, -t), (-b1, 1.0, -(1 - t)), (-b2, 1.0, t)]
+    J = len(cons); delta = a_s / (J + 2)
+    lo, hi = -np.inf, np.inf
+    for b, f0, a in cons:
+        sh = f0 + b @ bh + rad(b, delta)
+        if a > 0: lo = max(lo, -sh / a)
+        else: hi = min(hi, sh / (-a))
+    om = Nn_ * X1 / np.sum(Nn_ * X1)
+    bc = np.zeros(Z.shape[1]); bc[0] = om @ X1; bc[1] = om @ X2
+    for d in range(1, D): bc[zidx(d, 0)] = om[Dl == d].sum()
+    gam_k = om @ X2
+    hc = rad(bc, delta)
+    Bt = om @ m[:, 0]; Br = om @ beta[:, 0]
+    if lo > hi: return None, Bt, Br
+    tE = np.sqrt(0.5 * np.log(2 / a_E) * np.sum(om ** 2)) if target == "B" else 0.0
+    ci = (bc @ bh - hc + gam_k * lo - tE, bc @ bh + hc + gam_k * hi + tE)
+    return ci, Bt, Br
+
+r8 = np.random.default_rng(88)
+cov_t = cov_b = empty = 0; wid = []
+reps8 = 300
+for _ in range(reps8):
+    ci, Bt, Br = p38_once(r8, target="Btilde")
+    if ci is None: empty += 1; continue
+    cov_t += ci[0] <= Bt <= ci[1]; wid.append(ci[1] - ci[0])
+for _ in range(reps8):
+    ci2, Bt2, Br2 = p38_once(r8, a_s=0.04, a_E=0.01, target="B")
+    if ci2 is not None: cov_b += ci2[0] <= Br2 <= ci2[1]
+print(f"     Thm P3.8, M1 2x2, 30 districts x 8 polls: CI for B~ covers {cov_t / reps8:.3f}, for B {cov_b / reps8:.3f}; "
+      f"empty {empty}; median unclipped width {np.median(wid):.2f} (valid but uninformative; see P3 section 5.1)")
+ok("Thm P3.8: finite-sample CI covers B~ and B at >= 95% in an R2 design (300 reps each); emptiness rate <= 5%",
+   cov_t / reps8 >= 0.95 and cov_b / reps8 >= 0.95 and empty / reps8 <= 0.05)
+
+# Prop P3.6(c): with affinely spanning districts, district shifts that are constant within district cannot be
+# written as G X_i unless they are all zero (conditional-on-design pooling test).
+Xd = [rng.dirichlet(np.ones(3), 4) for _ in range(3)]
+zs = [np.zeros(3), np.array([0.05, -0.02, 0.01]), np.array([-0.03, 0.04, 0.0])]
+Xs_ = np.vstack(Xd); Zt = np.vstack([np.tile(z, (4, 1)) for z in zs])
+G_, res_, *_ = np.linalg.lstsq(Xs_, Zt, rcond=None)
+Zt0 = np.zeros_like(Zt); _, res0, *_ = np.linalg.lstsq(Xs_, Zt0, rcond=None)
+ok("Prop P3.6(c): nonzero district shifts are not of the form G X_i (residual > 0); zero shifts are",
+   res_.sum() > 1e-6 and (len(res0) == 0 or res0.sum() < 1e-20))
+
+# ---------- Batch B review (Nov 2026): two corrections in P3.5 ----------
+# (1) P3.5(b2)(ii) null direction. Error (Z/sqrt(n), -1/n): limit covariance diag(1, 0), rank 1. The old rule
+#     (q = rank Sigma, pseudoinverse) gives the second coordinate standard error 0, so its upper bound
+#     beta_hat_2 + 0 misses beta_0,2 in every sample. Under the corrected (ii-b) the null-direction error is
+#     exactly zero (beta_hat = L eta_hat + b), and the same projection bound covers.
+from scipy.stats import chi2 as _chi2, norm as _norm
+n_ = 10_000; reps_ = 2000; kq = np.sqrt(_chi2.ppf(0.95, 1)); beta0 = np.array([0.3, 0.6])
+Zs = rng.standard_normal(reps_)
+Sig_hat = np.diag([1.0, 0.0])                                # estimated limit covariance, singular
+g2 = np.array([0.0, 1.0]); se2 = np.sqrt(g2 @ Sig_hat @ g2 / n_)   # = 0
+bh_old = beta0[None, :] + np.column_stack([Zs / np.sqrt(n_), np.full(reps_, -1.0 / n_)])
+cov_old = np.mean(bh_old[:, 1] + kq * se2 >= beta0[1])
+bh_new = beta0[None, :] + np.column_stack([Zs / np.sqrt(n_), np.zeros(reps_)])   # (ii-b): null error exactly 0
+g1 = np.array([1.0, 0.0]); se1 = np.sqrt(g1 @ Sig_hat @ g1 / n_)
+cov_new = np.mean((bh_new[:, 1] + kq * se2 >= beta0[1]) & (bh_new[:, 0] + kq * se1 >= beta0[0]))
+print(f"     P3.5(b2)(ii) null direction: old rule covers coordinate 2 in {cov_old:.3f} of {reps_}; "
+      f"under (ii-b) both coordinates covered in {cov_new:.3f}")
+ok("P3.5(b2)(ii) null direction [F] (Batch B): rank-q pseudoinverse rule misses surely (old statement fails); "
+   "reduced full-rank parameterisation covers (corrected statement holds)", cov_old == 0.0 and cov_new >= 0.95)
+
+# (2) P3.5(a) step 5, residual CLT. Weights w_i = 1/n (max w^2 / sum w^2 = 1/n -> 0) but only unit 1 has a
+#     positive residual variance (e_1 = +-1/2). E / sd(E) is Rademacher, not normal: the old "CLT under the
+#     weight condition" fails. The corrected step (Chebyshev branch, sd(E)/S_1 -> 0) still gives the bound.
+n_r = 400; w_r = np.full(n_r, 1.0 / n_r); S1_r = 0.5 * np.sqrt(np.sum(w_r ** 2)); sd_r = 0.5 / n_r
+E_r = w_r[0] * rng.choice([-0.5, 0.5], 20000)
+z_r = _norm.ppf(0.975)
+clt_tail = np.mean(np.abs(E_r / sd_r) > z_r)                 # would be ~0.05 if the old CLT claim held
+bound_tail = np.mean(np.abs(E_r) > z_r * S1_r)
+print(f"     P3.5(a) residual: P(|E/sd| > 1.96) = {clt_tail:.3f} (normal: 0.05); P(|E| > 1.96 S_1) = {bound_tail:.3f}; "
+      f"sd/S_1 = {sd_r / S1_r:.3f}")
+ok("P3.5(a) step 5 [F] (Batch B): weight condition alone does not give a standardised CLT (old step fails); "
+   "the allowance z*S_1 still holds (Chebyshev branch)", clt_tail == 0.0 and bound_tail <= 0.05)
+
+
+# ---------- Round-2 review (Nov 2026) ----------
+# (3) Proposition P3.4' [F]. The referee's f_n(theta) = min{theta, -theta + n^{-1/2}}, theta_0 = 0. The first piece
+#     is uniquely active for every n, so the old reading of P3.4 (fixed sample hull, unique active candidate =>
+#     normal limit) predicts N(0,1). The limit is min{Z, 1 - Z}: P3.4' with localised slacks c = (0, 1).
+n4 = 10_000; Z4 = rng.standard_normal(200_000)
+th_hat = Z4 / np.sqrt(n4)
+f_hat = np.minimum(th_hat, -th_hat + n4 ** -0.5)
+lim = np.sqrt(n4) * (f_hat - 0.0)
+pred = np.minimum(Z4, 1 - Z4)
+from scipy.stats import kstest as _ks
+ks_normal = _ks(lim, "norm").statistic
+print(f"     P3.4': mean of sqrt(n)(f_n(theta_hat) - f_n(theta_0)) = {lim.mean():.3f} (normal: 0; min(Z, 1-Z): "
+      f"{pred.mean():.3f}); KS distance to N(0,1) = {ks_normal:.3f}")
+ok("P3.4' [F] (round 2): a uniquely active candidate with an O(n^-1/2) gap gives the non-normal limit min{Z, 1-Z} "
+   "(old fixed-hull reading fails); P3.4' with c = (0, 1) matches", ks_normal > 0.05 and np.allclose(lim, pred))
+
+# (4) Proposition P3.5(c) [F]/[V]. (i) BD is not conservative if the interval for mbar fails: true mbar = .5 gives
+#     m(1-m) = .25, a wrong interval inside [0, .1] gives at most .09. (ii) With mbar taken from an interval that
+#     covers, the allowance z * S_BD covers the residual: n units, w_i = 1/n, true rates m_i = .3, e_i Bernoulli
+#     deviations; CI_v = [.25, .35] (covers .3).
+true_var, wrong_var = .5 * .5, max(m * (1 - m) for m in np.linspace(0, .1, 101))
+n5 = 400; w5 = np.full(n5, 1 / n5); m5 = .3
+E5 = (rng.binomial(1, m5, (20000, n5)) - m5) @ w5
+SBD = np.sqrt(np.sum(w5 ** 2) * max(m * (1 - m) for m in np.linspace(.25, .35, 101)))
+cov5 = np.mean(np.abs(E5) <= _norm.ppf(.975) * SBD)
+print(f"     P3.5(c): BD bound from a wrong interval {wrong_var:.3f} < true {true_var:.3f}; with a covering interval "
+      f"P(|E| <= 1.96 S_BD) = {cov5:.3f}")
+ok("P3.5(c) [V] (round 2): BD from a failed interval is not conservative; BD from a covering interval keeps the "
+   "allowance (>= 0.95)", wrong_var < true_var and cov5 >= 0.94)

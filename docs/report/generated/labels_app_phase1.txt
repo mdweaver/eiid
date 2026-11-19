@@ -1,0 +1,3 @@
+Lemma 1	pA-res-lemma-1
+Proposition 2-RC	pA-res-proposition-2-RC
+Theorem 1	pA-res-theorem-1

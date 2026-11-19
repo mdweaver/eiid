@@ -1,0 +1,99 @@
+% Section 11: package mapping
+\section{Package mapping: \texttt{eiPartialID} 0.3.1}\label{sec:package}
+
+Sources: \texttt{PHASE4\_implementation.md}, \texttt{package/eiPartialID/NEWS.md},
+\texttt{R/rxc\_api.R}, \texttt{R/rxc\_infer.R}, \texttt{R/rxc\_sign.R},
+\texttt{R/rxc\_modules.R}, and the vignettes \texttt{eiPartialID\_rxc.Rmd} and
+\texttt{eiPartialID\_usage.Rmd}. The original $2\times2$ functions
+(\texttt{generateBounds}, \texttt{evaluateBounds}) are unchanged; with
+\texttt{range\_offset = 1e-5} and \texttt{vcov = "HC1"} the new code reproduces
+them on \texttt{eco::census} to $10^{-10}$.
+
+\begin{longtable}{@{}L{0.30\linewidth}L{0.32\linewidth}L{0.30\linewidth}@{}}
+\caption{Functions and options, and the results they implement.}\label{tab:package}\\
+\toprule Function / option & What it does & Result \\ \midrule\endfirsthead
+\toprule Function / option & What it does & Result \\ \midrule\endhead
+\texttt{eiBounds()} & bounds and CIs under one rung & PHASE2a Prop.~7 (LP); PHASE2b Thm~2(b); P3.5 \\
+\texttt{model = "M0"} & pooled LCE & PHASE2a Props~2, 7 \\
+\texttt{"M2"}, \texttt{"M1"}, \texttt{"M1delta"} & district rungs & PHASE2b Thm~2, Props~D3, D5, D6 \\
+\texttt{"L4"}, \texttt{"L5"}, \texttt{"L6"} & no contextual effect for one row; constancy & PHASE2b Prop.~D7 \\
+\texttt{range = "hull"} (default) & group-wise sample hull & P3.2(c) (conservative) \\
+\texttt{range = "trim"} & dropped units enter through DD & PHASE2a Prop.~7$'$ \\
+\texttt{range = "extrapolate"} & pure units or a user matrix (warning) & PHASE2a Prop.~5 (extrapolation; (S3) assumed) \\
+\texttt{restrictions = list(zeros, order, sign, slope, linear, external)} & extra LP rows & PHASE2b Thm~2(b); PHASE2c M5(b) for \texttt{order} \\
+\texttt{restrictions = list(assoc = ...)} & signs on $\delta_B$ (W1, pair) and $\delta_W$ (W1, W2) & PHASE2c M5(a); PHASE5a R3, R10(a) (pooled M0) \\
+\texttt{restrictions = list(cr = ...)} & contextual reinforcement: W1/$2\times2$ slab or branch union & PHASE5a R3(c)(d), R10(b)(c) \\
+\texttt{union = "pieces"/"hull"} & print every piece, or the hull & PHASE5a R3(c) \\
+\texttt{eiRedundancy()} & face test; added first and added last; already-implied table; CR certificate; weight concentration & PHASE5a R2 \\
+\texttt{ci = "clr"} (default) & CLR with simulated candidates (\texttt{ndraw = 100}) & Conjecture P3.5(b3): \emph{algorithmic} \\
+\texttt{proj\_model\_*}, \texttt{proj\_actual\_*} & projection intervals, $q=\dim\beta$ (0.3.1) & P3.5(b2)(ii); for $B$, P3.5(c1) \\
+\texttt{ci = "conservative"} & simultaneous row inflation & P3.5(a) \\
+\texttt{fpc = "bhatia-davis"} (default) / \texttt{"popoviciu"} & residual allowance for $B$ & P3.5(c1) (projection), (c2) (CLR); P3.5(a) with $S_1$ \\
+\texttt{jkst = TRUE} & JKST $\mathrm{CI}_x$ with revert-to-DD & JKST Prop.~4 \\
+\texttt{fit\$tests} & emptiness test; M1 vs M2; pooling test; wild-bootstrap p-values & P3.6(a)--(c); calibration simulation-supported \\
+\texttt{ladder()} & all rungs, most to least plausible & PHASE2b Thm~2(c) \\
+\texttt{sensitivity(dial = "eta")}, \texttt{breakdown()} & bounded nonlinearity and breakdown & P3 Prop.~S1; PHASE2c M2(d) (scalar path) \\
+\texttt{sensitivity(dial = "slack")} & slack on sign beliefs & PHASE2c M2(d); PHASE5a \S5 \\
+\texttt{eiModules()} & registry of restriction types with \texttt{meta\$proof\_status} & PACKAGE\_DESIGN \S1.1 \\
+\texttt{eiBenchmark()} & coverage on data with known truth & --- \\
+\bottomrule
+\end{longtable}
+
+\paragraph{Not implemented.} N1 (sign rows on realised tables), N2, M-LOC, the
+M-SHARP series bound ($\ThX$), the finite-sample interval of Theorem~P3.8
+(\texttt{ci\_method = "finite"} was deferred because it is uninformative), DiD
+wrappers, covariates, integer tables.
+
+\subsection{What \texttt{print()} reports as status (0.3.1)}
+
+From 0.3.1 every fit prints a \texttt{status:} line chosen by
+\texttt{.rxc\_ci\_status()} in \texttt{R/rxc\_api.R}:
+\begin{itemize}[nosep]
+\item \textbf{Pooled M0}: ``\texttt{proj\_*}: asymptotic guarantee (P3.5(b2)(ii)),
+pooled model'' (or ``\texttt{ci\_*} (conservative): \ldots P3.5(a)'' with
+\texttt{ci = "conservative"}); with sign or CR rows the line adds ``with sign/CR
+rows PHASE5a R10, pooled M0''. The rank of $\hat V$ is printed as a diagnostic, and
+the number of candidates dropped by the rank guard (a safeguard) if any.
+\item \textbf{Grouped rungs without sign rows}: ``asymptotic guarantee only with few,
+large groups (P3 regime R1); with many small groups a simulation finding''.
+\item \textbf{Grouped rungs with sign or CR rows}: ``\texttt{proj\_*} and
+\texttt{ci\_*}: no coverage theorem for sign/CR restrictions under grouped rungs
+(R16 open)''.
+\end{itemize}
+Further labels:
+\begin{itemize}[nosep]
+\item CLR lines carry ``CLR: algorithmic, coverage supported by simulation, not
+proved''; for $B$, ``its Bhatia--Davis bound also uses a CLR interval''; with CR,
+\texttt{ci\_*} is ``the union of the CLR branch intervals (algorithmic)''.
+\item Every sign or CR restriction prints an \texttt{EXPERIMENTAL module} line with
+its \texttt{proof\_status}. Grouped M-SIGN fits print that each sign is one pooled
+restriction across groups and that the bound is an ``outer set; sharpness under
+grouped rungs not yet proved''.
+\item A note when the Bhatia--Davis allowance's interval for $\bar m$ lies within
+$[0,.05]$ or $[.95,1]$, recommending \texttt{fpc = "popoviciu"} (P3.5(c1)'s
+condition is doubtful there).
+\item Notes for near-boundary fits (Slater slack below 0.005), few units per group
+(median below 30: CLR coverage rests on simulation), unbounded estimates
+(hull not full-dimensional), empty estimates (``a sample diagnostic, not a test''),
+and joint rejection (naming the combination and whether the rung alone is
+rejected).
+\item With restrictions, the rung alone is fitted and printed beside the restricted
+result (\texttt{base\_*}); with several restrictions it is labelled their joint
+effect.
+\end{itemize}
+
+\subsection{Version history relevant to the reviews}
+
+\begin{description}[nosep]
+\item[0.2.0] R$\times$C and district rungs, CLR default (PHASE1--4).
+\item[0.2.1 work (WS5)] \texttt{cluster} removed; projection intervals reported beside
+CLR; pooling test; rank errors naming groups; boundary and small-group notes
+(Phases~1--3 referee, round~1).
+\item[0.3.0] M-SIGN (experimental); Batch~B response: wording on refutation,
+every union piece printed, base intervals, weight concentration, projection rank
+guard, zero-variance candidate check, wild-bootstrap calibration of both tests,
+\texttt{proj\_actual} from a projection interval.
+\item[0.3.1] Round~2: \texttt{proj\_actual} per P3.5(c1) (rung alone); $q=\dim\beta$;
+per-fit \texttt{status:} line; the $\bar m$ boundary note; pairwise-CR label naming
+both sides; joint-effect label for the base block. No reference estimate changed.
+\end{description}

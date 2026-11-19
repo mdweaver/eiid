@@ -9,7 +9,7 @@ design (Section~\ref{sec:evidence}).
 district effects, the unit rates are independent with $\E[\beta_i\mid\text{design}]=m(V_i)$.
 \textbf{(P3-S2)} Inference is conditional on the design, so the sample-hull
 vertices are fixed. The uncertainty is model-based, conditional on the design
-(\S0.4): every unit is observed, nothing is assigned, and district shocks are fixed
+(\S0.4, following Abadie, Athey, Imbens and Wooldridge~\citep{aaiw2023}): every unit is observed, nothing is assigned, and district shocks are fixed
 features of this electorate (in the mean under M1/M2; a misspecification under
 M0). No clustered variance is used. Independence is a substantive assumption: it
 does not follow from observing every unit, and within-district dependence with
@@ -29,7 +29,7 @@ $s_j(\beta)+a_j^\top k\ge0$ with $s_j$ linear in the coefficients $\beta$; the
 target is $\tilde B(k)=c(\beta)+\gamma^\top k$ with sample weights. The plug-in
 bound is $c(\hat\beta)+[\min,\max]\{\gamma^\top k:s(\hat\beta)+Ak\ge0\}$.
 
-\begin{longtable}{@{}p{0.12\linewidth}p{0.13\linewidth}p{0.42\linewidth}p{0.25\linewidth}@{}}
+\begin{longtable}{@{}L{0.12\linewidth}L{0.13\linewidth}L{0.42\linewidth}L{0.25\linewidth}@{}}
 \caption{Which result holds in which regime (PHASE3 \S0.5).}\label{tab:regimes}\\
 \toprule Model & Regime & Formal result & Status \\ \midrule\endfirsthead
 \toprule Model & Regime & Formal result & Status \\ \midrule\endhead
@@ -144,7 +144,7 @@ $\hat\beta$ and at simulated draws. A reduction to (b1) is proved when the
 collected set contains CLR's selected set and a minimiser; recovery of rare
 vertices, the downward effect on $k_p$, and growing $|\Lambda|$ are open.
 \item[(c1)] \textbf{Variance-adaptive allowance} (\status{proved}; register R18).
-Replace $S_1$ by the Bhatia--Davis bound $\hat S_{BD}$ computed from a P3.5(a) or
+Replace $S_1$ by the Bhatia--Davis~\citep{bhatiadavis2000} bound $\hat S_{BD}$ computed from a P3.5(a) or
 projection interval for $\bar m=\sum_i\pi_im_i$ on the rung's own constraints;
 if $\max_iw_i^2/\bar s^2\to0$, coverage is $\ge1-\alpha_{\rm est}-\alpha_E-\alpha_v$.
 \item[(c2)] With a CLR interval for $\bar m$: coverage conditional on that interval
@@ -220,7 +220,7 @@ $\chi^2$ 0.057). Scripts: \texttt{benchmarks/pooling\_test\_size.R},
 
 \begin{result}[Theorem P3.8, finite-sample CI and emptiness test --- PHASE3 \S5.1]\label{res:p38}
 \status{Proved.} Under P3-S1a, a correctly specified mean model and a full-rank
-design, with Hoeffding radii for every constraint and the target constant (union
+design, with Hoeffding~\citep{hoeffding1963} radii for every constraint and the target constant (union
 bound over $J+2$ events) and $t_E=(\tfrac12\log(2/\alpha_E)\sum_iw_{ir}^2)^{1/2}$:
 for every $n$ and in every regime, (a) $P(B\in\mathrm{CI}^{\rm fin}\mid\text{design})\ge1-\alpha_s-\alpha_E$;
 (b) without $t_E$ it covers $\tilde B$ at $1-\alpha_s$; (c) the emptiness test has

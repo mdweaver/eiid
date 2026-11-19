@@ -1,0 +1,55 @@
+% Appendices B-H: the repository's theory documents, reproduced verbatim.
+% The files in generated/ are produced by tools/make_appendices.py (pandoc);
+% do not edit them by hand.
+\clearpage
+\section*{About the reproduced appendices}
+\addcontentsline{toc}{section}{About the reproduced appendices}
+Appendices~\ref{app:phase1}--\ref{app:pkgdesign} reproduce the repository's theory
+documents at commit \texttt{b270285}. They were converted mechanically from
+Markdown to \LaTeX\ with pandoc (\texttt{tools/make\_appendices.py}); the text,
+proofs, justification tags and correction notes are those of the source. Internal
+cross-references in them (``2a Lemma~1'', ``P3 \S5'', ``[2c:M3]'') use the
+repository's labels, which this report keeps. Section numbers inside each appendix
+are the source document's own. References to files are to the repository.
+PHASE1b and PHASE2d are not reproduced (proposals, not reviewed; see
+Section~\ref{sec:did}).
+
+\begingroup
+\small
+\setcounter{secnumdepth}{1}
+
+\clearpage
+\section{PHASE1: structural foundations and assumptions}\label{app:phase1}
+\textit{Source: \texttt{docs/extension/PHASE1\_foundations.md}.}\par
+\input{generated/app_phase1}
+
+\clearpage
+\section{PHASE2a: R$\times$C bounds, derivations and proofs}\label{app:phase2a}
+\textit{Source: \texttt{docs/extension/PHASE2a\_rxc.md}.}\par
+\input{generated/app_phase2a}
+
+\clearpage
+\section{PHASE2b: units nested in groups, and the assumption ladder}\label{app:phase2b}
+\textit{Source: \texttt{docs/extension/PHASE2b\_districts.md}.}\par
+\input{generated/app_phase2b}
+
+\clearpage
+\section{PHASE2c: monotone ecological inference in R$\times$C}\label{app:phase2c}
+\textit{Source: \texttt{docs/extension/PHASE2c\_monotone.md}.}\par
+\input{generated/app_phase2c}
+
+\clearpage
+\section{PHASE3: estimation, inference and sensitivity}\label{app:phase3}
+\textit{Source: \texttt{docs/extension/PHASE3\_inference.md}.}\par
+\input{generated/app_phase3}
+
+\clearpage
+\section{PHASE5a: the sign module (M-SIGN)}\label{app:phase5a}
+\textit{Source: \texttt{docs/extension/PHASE5a\_sign\_module.md}.}\par
+\input{generated/app_phase5a}
+
+\clearpage
+\section{PACKAGE\_DESIGN: audit, new results and proof register (excerpts)}\label{app:pkgdesign}
+\textit{Source: \texttt{docs/extension/PACKAGE\_DESIGN.md}, \S\S2, 5 and 8 (the other sections are design notes).}\par
+\input{generated/app_pkgdesign}
+\endgroup

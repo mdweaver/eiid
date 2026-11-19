@@ -1,0 +1,87 @@
+% Section 9: DiD material
+\section{Changes across periods and difference-in-differences}\label{sec:did}
+
+Only one DiD result has been through external review: PHASE2b Proposition~D8,
+which treats election periods as ``districts'' under M1. The rest of the DiD
+material, in PHASE1b (\texttt{PHASE1b\_monotone\_did.md}) and PHASE2d
+(\texttt{PHASE2d\_did.md}), is a \textbf{proposal that has not been reviewed}
+(\texttt{MSIGN\_REVIEW\_LOG.md} item M-13; \texttt{EXTERNAL\_REVIEW\_PLAN.md}).
+It is summarised here only so that the status table is complete; it is not
+reproduced in the appendices, and nothing in Sections~\ref{sec:rxc}--\ref{sec:inference}
+depends on it.
+
+\subsection{The reviewed result: Proposition D8}
+
+\begin{result}[Proposition D8, the change in rates under M1 with periods as districts --- PHASE2b \S5]\label{res:d8}
+\status{Proved.} Let $D\in\{\text{pre},\text{post}\}$; assume M1, (S1)--(S2-d),
+$P(X\in A_D)=1$ and A5-M1. With per-period moments $\mu^{[t]}$,
+\[
+B^*_{rc,\text{post}}-B^*_{rc,\text{pre}}=\text{(identified)}+L(K),\qquad
+L(K)=\sum_{s\ne r}K_{c,rs}\,\Delta q_{rs},\quad
+\Delta q_{rs}=\frac{\mu^{[\text{post}]}_{rs}}{\mu^{[\text{post}]}_r}-\frac{\mu^{[\text{pre}]}_{rs}}{\mu^{[\text{pre}]}_r}.
+\]
+(a) \emph{Identification by cancellation:} the change does not depend on $K$ for
+every $K\in\Kspace$ iff $\Delta q_{rs}=0$ for all $s\ne r$ (for example when the
+size-and-composition moments are equal across periods). (b) \emph{Identification
+given the feasible set:} the change is point-identified iff
+$\max_{K\in\Theta}L(K)-\min_{K\in\Theta}L(K)=0$, where $\Theta$ is the identified
+set for $K$. This holds under (a), and also when $\Theta$ fixes $L$ although
+$\Delta q\ne0$ (example: $2\times2$, $Q_{1,12}=0$, LCE on the whole simplex, so
+$\Theta=\{0\}$).
+\end{result}
+\begin{plain}
+If contextual effects are unchanged between two elections and only baselines move
+(M1 across periods), the change in ecological transition rates is pinned down when
+the electorate's size-weighted composition moments are the same in both periods,
+or when the bounds happen to fix the unknown combination. Otherwise the change is
+bounded by projecting the common identified set. This is a statement about the
+difference of two ecological rates. A causal (difference-in-differences) reading
+needs further structure, developed in PHASE2d, which is not yet reviewed.
+\end{plain}
+\proofref{Appendix~\ref{app:phase2b}, \S5, Proposition~D8 steps 1--5; check D8b [F]}
+\begin{revnote}
+(R-24; A2-4.) Round~1: promoted from Remark~6.2 to a proposition with the exact
+moment condition. Round~2: the proposition said the change is point-identified,
+whatever the identified set for $K$, \emph{iff} $\Delta q=0$; that is false as a
+statement about identification (referee's example). It now separates (a)
+cancellation, which is sufficient, from (b), necessary and sufficient given the
+identified set, and drops the causal reading.
+\end{revnote}
+
+\subsection{Proposals not yet reviewed (PHASE1b, PHASE2d)}
+
+PHASE2d develops DiD bounds for the Wisconsin and Iowa suffrage referenda (rows:
+veterans and non-veterans; columns: yes, no, abstain). Its results are written
+with proofs and checked in \texttt{verify\_phase2d.py} (16 PASS) and
+\texttt{verify\_phase1\_mei\_did.py}, but they have \textbf{not been reviewed}.
+In brief:
+\begin{itemize}[nosep]
+\item \textbf{Lemma G}: a general sharpness lemma for affine mean models with
+convex selection sets (as PHASE2b Thm~1$'$).
+\item \textbf{Proposition $\Delta0$}: with no link between periods, the DiD of the
+gap lies in the difference of the two periods' DD ranges; widths add.
+\item \textbf{Lemma FD1}: under first-difference LCE the regression of $\Delta T$
+identifies $\Delta Q$ and leaves $\Delta K$ unidentified.
+\item \textbf{Propositions FD2, FD3 and FD4}: single restrictions R1 (no differential
+spillover onto non-veterans), R2 and R4 (Goodman on changes) each point-identify
+the DiD, with R4 between R1 and R2; a bounded change $|\Delta w_1|\le\delta$ gives
+an interval and a breakdown value; FD4 is the outer set with no restriction on
+$\Delta K$.
+\item \textbf{Proposition $\Delta4$}: Monotone EI applied to individual changes;
+the DiD lies between Goodman-on-changes and the neighbourhood model on changes
+under CR on changes.
+\item \textbf{Proposition $\Delta6$}: with changing population counts, R1 gives a
+short interval rather than a point.
+\item \textbf{Propositions C1--C2, Remark C3}: composition change (stayers,
+aging-in, exits).
+\item \textbf{Proposition CL}: monotone treatment response, no decline absent
+service and a selection assumption bound the ATT and are jointly refutable.
+\item \textbf{Propositions P2--P3}: party information (a structural zero alone does
+not help; selection on party only does).
+\end{itemize}
+PACKAGE\_DESIGN \S7 lists the change-versions of the modules (M-SIGN-$\Delta$,
+M-ORD-$\Delta$, M-LOC-$\Delta$ and the sandwich DiD-S); DiD-S validity is
+proved there by applying P-S to changes, and the rest of R11 is open. The DiD
+rungs were renamed $\Delta0$--$\Delta8$ to avoid a clash with PHASE2b's
+Propositions~D0--D8 (M-14). The PHASE1b and PHASE2d clustering language was
+revised to ``one unit observed twice'' and to county effects in the mean (M-5).

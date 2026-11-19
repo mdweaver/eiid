@@ -418,6 +418,21 @@ Conventions:
 * Finite-sample interval: Thm P3.8 holds in every row.
 * CLR: Conjecture P3.5(b3) everywhere. All its figures are simulation findings.
 * The projection interval for $B$ (`proj_B`) uses the Bhatia–Davis allowance with $\bar m$ bounded by a projection interval on the rung alone, so it is covered by P3.5(b2)(ii) and P3.5(c1), subject to (c1)'s Lindeberg condition. *(Corrected after review, round 2, Nov 2026: this bullet said the variance bound came from a CLR interval "as in the package". Since 0.3.0 the package takes it from the projection interval, and the §8 column has been rerun to match (table below). The CLR-based version, `proj_B_clrbd`, is not covered by any theorem.)*
+* **Rerun (round 2, Nov 2026)** of the projection column for $B$ with the P3.5(c1) bound, same seeds (no other column uses the changed code, and every other column reproduces the earlier run exactly; `phase3_montecarlo_output.txt`):
+
+  | Design | `proj_B` (P3.5(c1), $\bar m$ from the projection interval): coverage / median width | `proj_B_clrbd` ($\bar m$ from CLR; earlier column, **not covered**) |
+  |---|---|---|
+  | A 10 × 93 (M1) | 1.000 / 0.662 | 1.000 / 0.662 |
+  | A 93 × 30 (M1) | 1.000 / 0.964 | 1.000 / 0.964 |
+  | R2 30 × 10, 93 × 10, 200 × 10 (M1) | 1.000 / 1.000 each | 1.000 / 1.000 each |
+  | C boundary (M0) | 1.000 / 0.059 | 1.000 / 0.059 |
+  | E Slater (M0) | 1.000 / 0.251 | 1.000 / 0.249 |
+  | S0, S1 (M0; M1) | 1.000 / 0.436, 0.444; 1.000 / 0.808, 0.773 | identical |
+  | S2 non-affine (M0, misspecified) | 0.206 (SE 0.013) / 0.038, empty 0.478 | identical |
+  | S2 (M1) | 1.000 / 0.611 | 1.000 / 0.611 |
+  | B 3×3, four targets (M0) | 1.000 / 0.679, 0.445, 0.378, 0.661 | 1.000 / 0.679, 0.445, 0.377, 0.661 |
+
+  Coverage is unchanged in every design, and widths change by at most 0.002 (design E and one design-B target). In these designs the projection interval for $\bar m$ is only slightly wider than CLR's, and the Bhatia–Davis maximum $\max m(1-m)$ over it is flat near the plausible rates. So the provably valid version costs essentially nothing here. The S2/M0 row is misspecification, not a failure of the theorem.
 
 **Rank of $\hat\Sigma$ in the projection interval** (`phase3_montecarlo_rank.py`, `phase3_montecarlo_rank_output.txt`; same seeds, 1000 replications per design). These runs use $q=\operatorname{rank}\hat\Sigma$, which equals $\dim\beta$ in every 2×2 design and the exact adding-up reduction in design B (below); after the round-2 review the theorem is claimed with $q=\dim\beta$ or a documented exact reduction, and a numerical cutoff is only a safeguard (remark after P3.5(b2)). Since the Batch B correction P3.5(b2)(ii) requires either a positive definite $\Sigma$ (ii-a) or a reduced parameterisation with exactly zero error in the null directions (ii-b). If $\hat\Sigma$ were singular while the estimation error had a component in its null space, those directions would not be controlled. The numerical rank (eigenvalues above $10^{-10}$ times the largest) equals $\dim\beta$ in every replication of every 2×2 design, from $\dim\beta=3$ to 401.
 * Conditioning: the smallest-to-largest eigenvalue ratio is 0.005–0.04 for the pooled fits, and falls with the number of districts, to a minimum of $2.6\times10^{-8}$ at 200 × 10. That is still far above the rank threshold.

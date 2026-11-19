@@ -16,6 +16,8 @@ Description: Estimate district-level bounds for 2x2 ecological inference based o
     intervals for intersection bounds, optional additional restrictions and sensitivity
     analysis. Version 0.3.0 adds signs on mean associations and contextual reinforcement
     (experimental), projection intervals with a rank guard, and a bootstrap pooling test.
+    Version 0.3.1 prints which result covers each fit's confidence intervals and bases the
+    projection intervals and their variance bound on proved results only.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

@@ -1,4 +1,4 @@
-### Code Version 0.3.0
+### Code Version 0.3.1
 
 This repo includes the R package for replicating the results in:
 
@@ -12,9 +12,13 @@ For convenience, this repo only includes the standalone R package (eiPartialID) 
 
 [package/eiPartialID/vignettes/rendered_html_archive/2019_02_04/eiPartialID_usage_2019_02_04.html](package/eiPartialID/vignettes/rendered_html_archive/2019_02_04/eiPartialID_usage_2019_02_04.html)
 
+### New in 0.3.1: inference status and corrections after the second review round
+
+`print()` now states which result covers each fit's confidence intervals: pooled M0 (proved), grouped fits without signs (proved only with few, large groups) and grouped fits with signs or reinforcement (no theorem yet). The projection critical value uses the full parameter dimension, and the rank guard is a safeguard. `proj_actual` takes its variance bound from a projection interval for the rung alone, with a note when that interval lies near 0 or 1. The guide and vignette correct the W1 explanation and the coverage figures. M-SIGN stays experimental. A technical report collecting the methods and proofs is in `docs/report/` (`eiPartialID_report.pdf`). See `package/eiPartialID/NEWS.md`.
+
 ### New in 0.3.0: signs on associations and contextual reinforcement (experimental)
 
-`eiBounds(restrictions = list(assoc = ..., cr = ...))` adds signs on mean associations and contextual reinforcement (the M-SIGN module, `docs/extension/PHASE5a_sign_module.md`). The module is **experimental** while two referee reports on it are answered (`docs/extension/reviews/B_PI_RESPONSE_PLAN.md`); `print()` flags it, and under grouped rungs each sign is one pooled restriction across groups. This release also adds a rank guard for the projection intervals, a projection-based variance bound in `proj_actual`, a wild-bootstrap pooling test, every piece of a union in the printout, and the rung-only result beside restricted results. See `package/eiPartialID/NEWS.md`.
+`eiBounds(restrictions = list(assoc = ..., cr = ...))` adds signs on mean associations and contextual reinforcement (the M-SIGN module, `docs/extension/PHASE5a_sign_module.md`). The module is **experimental**: its sharpness and inference results are proved for the pooled model only (`docs/extension/reviews/` holds the two referees' reports and our responses); `print()` flags it, and under grouped rungs each sign is one pooled restriction across groups. This release also adds a rank guard for the projection intervals, a projection-based variance bound in `proj_actual`, a wild-bootstrap pooling test, every piece of a union in the printout, and the rung-only result beside restricted results. See `package/eiPartialID/NEWS.md`.
 
 ### New in 0.2.0: R x C tables, grouped units and an assumption ladder
 

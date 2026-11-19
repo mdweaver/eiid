@@ -377,5 +377,5 @@ supp_restricted = [x for x in [A_pt] if all(mass_A_near(x, e) > 0 for e in (1e-1
 old_set = [A_pt] if 0 <= A_pt <= 1 else []                  # supp P_X cap A
 old_claim = all(f_s(x) == g_s(x) for x in old_set)          # old [supp]: they agree on supp P_X cap A
 new_claim = all(f_s(x) == g_s(x) for x in supp_restricted)  # new [supp]: they agree on supp(P_X|_A)
-ok("[supp] (Batch B): X~U[0,1], A={1/2}: old tag claims 0 = 1 at 1/2 (fails); restricted support is empty "
+ok("[supp] [F] (Batch B): X~U[0,1], A={1/2}: old tag claims 0 = 1 at 1/2 (fails); restricted support is empty "
    "and the corrected tag holds", (not old_claim) and new_claim and supp_restricted == [])

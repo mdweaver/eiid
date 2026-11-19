@@ -34,4 +34,4 @@ PASS Remark 1.1: R=3, five compositions give rank <= 5 < 6; six generic composit
 PASS Remark 4.2(1): LP optima over integer-margin transportation polytopes are integer tables (200 cases)
 PASS Prop 5: a negative Q_{c,rs} makes Theta_O (A = simplex) empty
 PASS Prop 7': truth 0.7489 lies in [0.4665, 0.9194], which is inside DD [0.4188, 0.9307]
-PASS [supp] (Batch B): X~U[0,1], A={1/2}: old tag claims 0 = 1 at 1/2 (fails); restricted support is empty and the corrected tag holds
+PASS [supp] [F] (Batch B): X~U[0,1], A={1/2}: old tag claims 0 = 1 at 1/2 (fails); restricted support is empty and the corrected tag holds

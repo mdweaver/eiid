@@ -13,12 +13,13 @@ interior: true D~ = 0.200, ER* = 0.309, delta*_W = 3.5e-03, delta*_B = 0.040; n 
    CR-slab   coverage 1.000  empty 0.000  median length 0.480
    CR-union  coverage 1.000  empty 0.000  median length 0.480  (hull span 0.480; unmerged sum, old statistic, 0.480; positive overlap in 0/600 runs)
    CR-naive  coverage 1.000  empty 0.000  median length 0.388
-V9 R10(e) analytic (three-point design): ER(q) = [-1.00000000e+00  1.15648232e-18  1.00000000e+00], c_D(q) = [-0.583333  0.        0.583333]; se ratio = 0.583333 (7/12 = 0.583333); limsup coverage <= 0.933525; with 4000 draws <= 0.940092; far-edge design ratio 0.564, bound 0.927  PASS
-V10 5a §3.5 item 4: naive (intersect, then expand) = None; bracket cap JKST CI = (0.15, 0.2); old containment claim holds: False  PASS
-V11 union length: unmerged sum 0.60 > merged (Lebesgue) 0.50  PASS
-V12 false CR, n = 150, s = 0.00, true gap 0.100: JKST covers 400/400, empty 0, median width 1.262; CR-slab covers 399/400, empty 0, median width 0.306
-V12 false CR, n = 150, s = 0.08, true gap 0.170: JKST covers 400/400, empty 0, median width 1.256; CR-slab covers 336/400, empty 0, median width 0.304
-V12 false CR, n = 150, s = 0.25, true gap 0.318: JKST covers 400/400, empty 0, median width 1.254; CR-slab covers 2/400, empty 0, median width 0.303
-V12 false CR, n = 600, s = 0.00, true gap 0.100: JKST covers 400/400, empty 0, median width 1.074; CR-slab covers 398/400, empty 0, median width 0.194
-V12 false CR, n = 600, s = 0.08, true gap 0.169: JKST covers 400/400, empty 0, median width 1.069; CR-slab covers 110/400, empty 0, median width 0.196
-V12 false CR, n = 600, s = 0.25, true gap 0.317: JKST covers 400/400, empty 0, median width 1.066; CR-slab covers 0/400, empty 0, median width 0.195
+V9 [V] R10(e) analytic (three-point design): ER(q) = [-1.00000000e+00  1.15648232e-18  1.00000000e+00], c_D(q) = [-0.583333  0.        0.583333]; se ratio = 0.583333 (7/12 = 0.583333); limsup coverage <= 0.933525; with 4000 draws <= 0.940092; far-edge design ratio 0.564, bound 0.927  PASS
+V10 [F] 5a §3.5 item 4: naive (intersect, then expand) = None; bracket cap JKST CI = (0.15, 0.2); old containment claim holds: False  PASS
+V11 [V] union length: unmerged sum 0.60 > merged (Lebesgue) 0.50  PASS
+V12 [I] false CR, n = 150, s = 0.00, true gap 0.100: JKST covers 400/400, empty 0, median width 1.262; CR-slab covers 399/400, empty 0, median width 0.306
+V12 [I] false CR, n = 150, s = 0.08, true gap 0.170: JKST covers 400/400, empty 0, median width 1.256; CR-slab covers 336/400, empty 0, median width 0.304
+V12 [I] false CR, n = 150, s = 0.25, true gap 0.318: JKST covers 400/400, empty 0, median width 1.254; CR-slab covers 2/400, empty 0, median width 0.303
+V12 [I] false CR, n = 600, s = 0.00, true gap 0.100: JKST covers 400/400, empty 0, median width 1.074; CR-slab covers 398/400, empty 0, median width 0.194
+V12 [I] false CR, n = 600, s = 0.08, true gap 0.169: JKST covers 400/400, empty 0, median width 1.069; CR-slab covers 110/400, empty 0, median width 0.196
+V12 [I] false CR, n = 600, s = 0.25, true gap 0.317: JKST covers 400/400, empty 0, median width 1.066; CR-slab covers 0/400, empty 0, median width 0.195
+V13 [V] literal intersection (fitted bracket cap completed JKST CI) covers 304/600; CR-naive (bracket, then target inflation) covers 550/600; the 8-10% miss rate refers to CR-naive only  PASS

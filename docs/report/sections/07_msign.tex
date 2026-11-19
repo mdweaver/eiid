@@ -1,0 +1,190 @@
+% Section 7: M-SIGN (PHASE5a)
+\section{The sign module M-SIGN: R3, R2 and R10}\label{sec:msign}
+
+Source: PHASE5a (Appendix~\ref{app:phase5a}), proof-register items R3, R2 and
+R10. Checks: \texttt{verify\_R3.py}, \texttt{verify\_R2.py},
+\texttt{verify\_R10.py}. \textbf{Scope: every statement is for the pooled LCE
+model M0.} The sign and CR rows are valid linear rows under the district rungs
+too (Prop.~M5(a)), but sharpness and inference there are proof item R16, not
+proved. The package labels the module \emph{experimental} in 0.3.0 and 0.3.1.
+
+\paragraph{Setting.} $\ThI$ and $\ThO$ are viewed in the free coordinates $k$.
+The target is a model-implied linear $\varphi(k)=\varphi_0+h^\top k$ (for example
+$\tilde B_{rc}$ or the gap $\tilde D=\tilde B_1-\tilde B_2$). An \emph{admissible
+restriction} is a set $C(P)$ that is (C1) closed and convex and (C2) depends on
+$P$ only through the design and $Q(P)$. Examples: any sign on $\delta^*_B$,
+$\Delta^*_r$ or $\delta^{r*}_W$; mean-level ordering on $A$; the M-LOC rows. A
+\emph{union restriction} is $C_+\cup C_-$; contextual reinforcement (CR) for a pair
+$(g_B,g_W)$ is $C_\pm=\{\pm g_B\ge0,\pm g_W\ge0\}$.
+
+\subsection{R3: sharpness of LCE plus restrictions}
+
+\begin{result}[Theorem R3 --- PHASE5a \S1]\label{res:r3}
+\status{Proved under conditions} (pooled M0). Assume A1--A5, standing
+integrability, $P(X\in A)=1$ and $\operatorname{affdim}(A)=R-1$.
+\begin{enumerate}[label=(\alph*),nosep]
+\item For admissible $C$, the sharp identified set for $\varphi$ under LCE $\cap\,C$
+is $[\min_{\ThI\cap C}\varphi,\max_{\ThI\cap C}\varphi]$ or empty.
+\item $\ThO\cap C=\bigcup_{P'\in\mathcal P(P)}(\ThI(P')\cap C(P'))$: the LP
+interval is sharp for the regression and the design; a finite LP when $C$ is
+polyhedral; equal to (a) when $\ThI=\ThO$; weakly outer otherwise.
+\item For a union, the set is $\varphi(\Theta\cap C_+)\cup\varphi(\Theta\cap C_-)$,
+at most two intervals; the hull is sharp iff they intersect; a common witness in
+$\Theta\cap C_+\cap C_-$ certifies that (sufficient only).
+\item One-vs-rest (W1) CR is one LP: $C_+\cup C_-=\{D^{r*}(k)\in\operatorname{hull}\{\gamma_rER^{r*},ER^{r*}\}\}$,
+two linear rows; in $2\times2$ this is the only CR, and under it
+$\operatorname{sign}\tilde D=\operatorname{sign}ER^*$.
+\item Refutation is joint: an empty population LP rejects the conjunction LCE
+$\cap\,C$, not either part alone.
+\end{enumerate}
+\end{result}
+\begin{plain}
+Adding a sign or ordering belief to the pooled linear rung keeps the bound
+``as tight as the regression allows'': nothing narrower can be learned from the
+regression and the design. The full data could rule out more (Remark~R3.1). For
+the default one-vs-rest comparison, reinforcement becomes a single band in the
+gap, so no union is needed. If the bound is empty, it is the combination that is
+contradicted, not the belief on its own.
+\end{plain}
+\begin{sketch}
+(a) The identified set is the image of the convex compact $\ThI\cap C$ under an
+affine map. (b) Apply the construction of PHASE2a Prop.~2 to each $k\in\ThO\cap
+C$; (C2) keeps $C$ unchanged across laws with the same regression. (d) Apply
+Lemma~M1(c) to the model means: $\delta^{r*}_W=\Var_p(X_r)(ER^{r*}-D^{r*})$ and
+$\delta^{r*}_B=\mu_r(1-\mu_r)(D^{r*}-\gamma_rER^{r*})$; the union of the two
+same-sign cases is the hull.
+\end{sketch}
+\proofref{Appendix~\ref{app:phase5a}, \S1.3, steps 1--15; checks S1--S7 (\S1.5)}
+\begin{revnote}
+(M-1; P-B15, P-B16, P-B17; I.7.) The dimension hypothesis is
+$\operatorname{affdim}(A)=R-1$, not ``nonempty relative interior''. ``The LP
+interval'' is a finite LP only for polyhedral $C$, and in round~2 the
+finite-LP sentence was narrowed to $\ThO\cap C$. (e) earlier read ``never $C$
+alone''; it now says the conjunction is rejected and gives both directions of
+counterexample. The scope was restricted to pooled M0 (P-B7).
+\end{revnote}
+
+\paragraph{Remark R3.1 (full law versus regression).} On $X\in\{1/4,1/2,3/4\}$ with
+a fair binary $T$ at every composition, the full law forces $k=0$, but the
+regression admits a range. For $C=\{k\in[.2,.4]\}$ the full-law set is empty
+while the regression-only gap set is $[1/6,1/3]$ (check S6 [V]).
+
+\paragraph{Remark R3.2 (LCE can exclude CR although LCE fits).} On
+$X\in\{0,1/4,1\}$ with $m_0=1-x$, $m_1=(49/55)x$, the vertex rows force $k=0$, so
+LCE fits with a single point, $ER=0$ and $\tilde D=-261/1925$; both CR branches
+are empty. In the model-free continuous problem CR is still feasible. Any ``cannot
+be refuted'' statement must name its base system (check S7 [F]).
+
+\paragraph{\S1.4: what fails.} For CR pairings other than W1, (d) fails: both
+branches can be non-empty with disjoint images (search S5 found gaps up to about
+31\% of hull width). For the pairwise version only $\delta^*_B(r,s)$ is pairwise;
+$\Delta^*_r$ pools all groups (E2-1). N2 shapes, N1 realised signs and targets
+mixing $\tilde B$ with $B$ are not covered.
+
+\subsection{R2: when does an added restriction tighten the bound?}
+
+\begin{result}[Proposition R2 --- PHASE5a \S2]\label{res:r2}
+\status{Proved.} Let $F$ be the current (non-empty, compact) feasible set,
+$F^*_U,F^*_L$ its optimal faces for $\varphi$, and $N$ an admissible restriction
+with $F\cap N\ne\emptyset$.
+\begin{enumerate}[label=(\alph*),nosep]
+\item $U_N<U$ iff $F^*_U\cap N=\emptyset$ (one feasibility LP, carrying the
+target intercept: $h^\top k\ge U-\varphi_0$).
+\item For one row $a^\top k\le b$: tightening iff $\min_{F^*_U}a^\top k>b$ iff
+every optimal dual multiplier is positive. A positive multiplier from one solver
+optimum does not certify tightening.
+\item $N$ is implied iff it tightens no linear target (the witness need not be a
+reported target).
+\item In $2\times2$ under LCE with $\gamma<1$, each of the four sign rows is either
+implied or tightens any target non-constant in $w_1$; closed forms are those of G2.
+\item For stacks, report added-first and added-last gains; zero added-last gain
+means zero incremental gain for this target, not that the row is implied.
+\end{enumerate}
+\end{result}
+\begin{plain}
+A belief narrows a quantity only if it removes every table that attains that end
+of the bound. The package tests this with one feasibility LP per end and never
+trusts solver dual values. A belief can narrow the set of possible tables without
+narrowing the quantity you care about; with three or more groups this was common
+in simulation (28\% of cases).
+\end{plain}
+\proofref{Appendix~\ref{app:phase5a}, \S2.3, steps 1--14; checks T1--T4, T1b, T1c, T4b}
+\begin{revnote}
+(P-B18--P-B22.) The face LP in step~4 omitted the target intercept (the code
+was correct; check T1c [F]); the duplicate-row example shows a positive dual does
+not certify tightening; (d) gained its qualifications; (e)'s ``redundant given
+the others'' read as ``implied'' and was reworded (T4b [F]); width-gain
+inference must treat both endpoints jointly.
+\end{revnote}
+
+\subsection{R10: inference with added rows, unions and near-empty sets}
+
+\begin{result}[Theorem R10 --- PHASE5a \S3]\label{res:r10}
+\status{Proved under conditions} (pooled M0; by interval version, below). Assume
+P3.5's conditions for the augmented row system and that the restrictions hold at
+the truth.
+\begin{enumerate}[label=(\alph*),nosep]
+\item \emph{Added rows.} For finitely many rows linear in $\beta$, P3.5 and
+P3.6(a) hold for the augmented system, version by version. For actual contrasts
+the residual allowance must cover the contrast (a contrast envelope, or the
+per-cell sum the package uses).
+\item \emph{Parallel disjunction (version (a) only).} Inflate each piece, then take
+the maximum; this covers at the nominal level. W1 and $2\times2$ CR are of this
+form (the ``slab''); no branch is selected from $\widehat{ER}$.
+\item \emph{General union.} $\mathrm{CI}(C_+)\cup\mathrm{CI}(C_-)$, each at the
+full level, covers the true target with probability $\ge1-\alpha$ asymptotically;
+no Bonferroni split is needed. This is point coverage only.
+\item \emph{Near-empty sets.} $P(\mathrm{CI}=\emptyset)\to\le\alpha_U+\alpha_L$
+under the model, including point-identified cases; conditioning on non-emptiness
+can only raise coverage. If the restrictions are false, no coverage statement
+holds; a narrow non-empty interval is no evidence that they are true.
+\item \emph{Plug-in brackets are not valid.} Imposing the estimated bracket
+$\operatorname{hull}\{\gamma_r\widehat{ER},\widehat{ER}\}$ without inflation can
+under-cover persistently: in a repeated three-point design
+$\limsup_nP(\tilde D_0\in\mathrm{CI}_{\rm naive})\le\Phi(\tfrac7{12}z_{.995})=0.9335<0.95$.
+\end{enumerate}
+\end{result}
+
+\begin{longtable}{@{}p{0.30\linewidth}p{0.42\linewidth}p{0.20\linewidth}@{}}
+\caption{Status of R10 by interval version (PHASE5a \S3.2).}\label{tab:r10}\\
+\toprule Interval version & What R10 claims & Status \\ \midrule\endfirsthead
+\toprule Interval version & What R10 claims & Status \\ \midrule\endhead
+P3.5(a), conservative & (a)--(d), including the slab (b) & Proved \\
+P3.5(b1), CLR over all dual vertices & (a), (c), (d) under the full augmented CLR conditions & Cited \\
+P3.5(b2)(i), fixed superset & branch union and crossing arguments & Proved \\
+P3.5(b2)(ii), projection & both ends, any candidate set; $\Sigma$ p.d.\ or exact reduction & Proved \\
+P3.5(b3), CLR on simulated candidates (package default for CR) & the inclusion and crossing steps are deterministic; their probabilities are conjectural & Algorithm \\
+\bottomrule
+\end{longtable}
+
+\begin{plain}
+Sign beliefs enter the same confidence-interval machinery as the rung's own
+constraints. Reinforcement uses a band whose two pieces are each widened by their
+own uncertainty before the larger is taken; this is valid without knowing which
+branch is true. The tempting shortcut, plugging the estimated neighbourhood and
+Goodman numbers into the bracket, is not a confidence interval, and more data do
+not cure it. When the belief is false, the interval stays narrow and can be
+reproducibly wrong (Section~\ref{sec:evidence}).
+\end{plain}
+\proofref{Appendix~\ref{app:phase5a}, \S3.3, steps 1--23 (step 18--23 is the referee's fixed-design proof of (e)); checks V9--V13}
+\begin{revnote}
+(M-2; P-B23--P-B27, P-E17, P-E21, P-E22, P-E33; I.2; E2-2, E2-3.) The status of
+each claim is now given by interval version (table above) with CLR's
+Condition~P spelled out; zero-variance candidates are exact only with zero
+gradient; the contrast envelope was added; (b)--(d) gained the one-event,
+point-coverage and triangular-array qualifications and the belief-selection
+sentence; (e) became an analytic theorem (referee's proof, credited) instead of a
+Monte Carlo sketch; ``a fortiori'' was replaced by a direct $\le\tfrac12$ argument
+(V10 [F]); union lengths are occupied lengths (V11). In round~2 the R10 scope was
+narrowed to pooled M0 (I.2), and the coverage figure was tied to the procedure:
+the literal intersection covered 304/600, CR-naive 550/600 (V13 [V]).
+\end{revnote}
+
+\paragraph{Consequences for the package (PHASE5a \S\S1.6, 2.5, 3.5).} For pooled
+M0 with sign, ordering or local rows the LP interval may be labelled ``sharp for
+the regression''; under district rungs, ``outer for the regression''. W1 and
+$2\times2$ CR use the slab for the conservative interval and the branch union for
+CLR (the default, algorithmic). Other CR pairings use the union of branch CIs and
+can print two or more pieces. Redundancy verdicts use the face test. Emptiness is
+reported as a test result, naming the rejected combination and whether the rung
+alone is rejected.

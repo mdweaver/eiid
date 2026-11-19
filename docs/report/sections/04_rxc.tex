@@ -1,0 +1,338 @@
+% Section 4: R x C under LCE (PHASE2a)
+\section{R$\times$C under linear contextual effects}\label{sec:rxc}
+
+Source: PHASE2a (Appendix~\ref{app:phase2a}), which builds on PHASE1
+(Appendix~\ref{app:phase1}). Every proof in PHASE2a is written in numbered
+steps with a justification tag; the tag legend is PHASE2a \S0.3 and the citation
+check is \S0.4. Numerical and symbolic checks: \texttt{verify\_phase2a.py},
+32/32 PASS. The model $\mathcal M(H;A)$ is the set of laws of $(W,\beta)$ with
+(S1) $\beta\in\Bset$ and $T=\beta^\top X$; (S2) $\E[\beta\mid V]=M_H(X)$ on
+$\{X\in A\}$; (S3) $M_H(x)\in\Bset$ for every $x\in A$.
+
+\subsection{The unit polytope and what the data identify}
+
+\begin{result}[Lemma 0 --- PHASE2a \S1]\label{res:p2a-l0}
+\status{Proved.} For all $x\in\Delta^{R-1}$, $t\in\Delta^{C-1}$: (a)
+$S(x,t)\ne\emptyset$; (b) it is compact and convex; (c) $(x,t)\mapsto S(x,t)$ has
+closed graph, is upper hemicontinuous and Borel; (d) $h_S$ is sublinear and
+$\sqrt R$-Lipschitz in $u$, concave in $t$, Borel; (e) $S$ is the intersection
+of its supporting half-spaces.
+\end{result}
+\begin{plain}
+Each unit's set of possible rate tables is never empty (``everyone in the unit
+behaves like the unit average'' always fits), and it is a well-behaved convex
+polytope. These are the regularity facts every later proof uses.
+\end{plain}
+\proofref{Appendix~\ref{app:phase2a}, \S1, steps 1--13}
+
+\begin{result}[Lemma 1, identification decomposition --- PHASE2a \S2]\label{res:p2a-l1}
+\status{Proved.} Under the model and A5: (a) $\E[T_c\mid X=x]=x^\top Q_cx$ and
+$Q_c$ is unique; (b) $\sum_cH_c=J$, hence $\sum_cQ_c=J$ and $\sum_cK_c=0$;
+(c) every $K'\in\Kspace$ gives the same regression, and
+$\dim\Kspace=(C-1)R(R-1)/2$.
+\end{result}
+\begin{plain}
+The data reveal the symmetric part $Q$ of the contextual-effect matrices, and
+nothing about the skew part $K$. For each pair of groups and each outcome, the
+data identify the sum ``effect of $s$-share on group $r$ plus effect of $r$-share
+on group $s$'' but not how it splits. A $2\times2$ table has one unknown, a
+$3\times3$ table six.
+\end{plain}
+\begin{sketch}
+Take conditional expectations of the accounting identity: $\E[T_c\mid X]=X^\top
+H_cX$. A skew matrix vanishes in a quadratic form, so only $Q_c$ appears. A5
+makes the quadratic form determine $Q_c$. Row sums of $\beta$ equal one, which
+under A5 forces $\sum_cH_c=J$.
+\end{sketch}
+\proofref{Appendix~\ref{app:phase2a}, \S2, (a) steps 1--8, (b) steps 1--7, (c) steps 1--3}
+\begin{revnote}
+(R-01, R-02, P-B39.) The derivation of $\sum_cH_c=J$ now uses A5 rather than an
+unassumed open set. A5 is a matrix rank condition stated on
+$\supp_AP_X$, the support of $P_X$ restricted to $A$; the earlier
+$\supp P_X\cap A$ is wrong when $A$ carries less than full mass
+($X\sim U[0,1]$, $A=\{1/2\}$).
+\end{revnote}
+
+\paragraph{Remarks 1.0--1.2 (PHASE2a \S2).} \emph{Remark~1.0}: A2 cannot be
+validated by goodness of fit; Prop.~9 exhibits nonlinear departures that leave
+the data unchanged (moved forward after review, R-16). \emph{Remark~1.1}
+(proved): for $R=2$, A5 holds iff there are at least three distinct
+compositions; for $R=3$ six points off a common conic are needed, and five are
+never enough. \emph{Remark~1.2} (proved): column-by-column OLS on the quadratic
+monomials gives $\sum_c\hat Q_c=J$ exactly, so no constrained regression is
+needed.
+
+\begin{result}[Lemma 2, the estimand --- PHASE2a \S3]\label{res:p2a-l2}
+\status{Proved.} Under (S1)--(S2) with $P(X\in A)=1$,
+\[
+B^*_{rc}=\frac1{\mu_r}\Big[\sum_sQ_{c,rs}\mu_{rs}+\sum_{s\ne r}K_{c,rs}\mu_{rs}\Big],
+\]
+affine in $K$, with coefficient $\mu_{rs}/\mu_r\ge0$ on the ambient entry $K_{c,rs}$.
+\end{result}
+\begin{plain}
+The target is a known number plus a weighted sum of the unknown $K$ entries. The
+weights $\mu_{rs}/\mu_r$ measure how much group $r$ lives alongside group $s$:
+the more mixed the units, the more the unknown split matters.
+\end{plain}
+\proofref{Appendix~\ref{app:phase2a}, \S3, steps 1--7; $2\times2$ check against JKST (16)}
+\begin{revnote}
+(R-03, R-05.) The coefficient is stated in ambient coordinates, with the free
+coordinates in Prop.~7. $P(X\in A)=1$ is now explicit; Remark~2.1 and
+Prop.~7$'$ treat units outside $A$.
+\end{revnote}
+
+\subsection{The sharp identified set}
+
+\begin{result}[Theorem 1, characterisation of $\ThI$ --- PHASE2a \S4]\label{res:p2a-t1}
+\status{Proved} (measure-theoretic steps rest on the cited theorems of PHASE2a
+\S0.4). Assume A1, A5, standing integrability, $H=Q(P)+K$ with $K\in\Kspace$.
+Then $K\in\ThI(P;A)$ iff (S3) holds and, outside one $P_V$-null set, for every
+$v=(x,n)$ with $x\in A$,
+\[
+\langle u,M_H(x)\rangle\le\psi(u;v):=\int h_S(u;x,t)\,P_{T\mid V=v}(dt)\quad\text{for all }u\in\mathbb R^{R\times C}. \tag{T1}
+\]
+$\ThI$ is convex and closed; it is compact when $\operatorname{affdim}(A)=R-1$,
+which A5 implies.
+\end{result}
+\begin{plain}
+A value of the unknown $K$ is consistent with the data exactly when, at every
+composition and size, the implied average rate table could be the average of
+rate tables that each fit some unit's margins. It is the strongest possible
+use of the data under the model. It needs the whole conditional distribution of
+outcomes given composition and size, which in real data must be smoothed, so it
+is not what the package computes.
+\end{plain}
+\begin{sketch}
+Necessity: each unit's $\beta$ lies in its polytope, so its conditional mean lies
+in the conditional selection expectation; one common null set for all $u$ is
+obtained from a countable dense set and Lipschitz continuity. Sufficiency: the
+set of measurable selections is weakly compact in $L^1$ (Dunford--Pettis,
+Mazur); its image under $\E[\cdot\mid V]$ is weakly compact and convex; if the
+target mean were outside it, Hahn--Banach would separate it, contradicting
+(T1) evaluated at the separating direction (a measurable argmax attains the
+support function). No auxiliary randomisation is needed (Remark~4.1).
+\end{sketch}
+\proofref{Appendix~\ref{app:phase2a}, \S4: (i)$\Rightarrow$(ii) steps 1--11; facts F1--F7; (ii)$\Rightarrow$(i) steps 1--22; convexity and compactness steps 1--4}
+\begin{revnote}
+(R-07, R-08, R-09.) Compactness needs $\operatorname{affdim}(A)=R-1$, not
+``nonempty relative interior''. The sufficiency proof was expanded into
+facts F1--F7 with checked citations, and a paragraph explains why (T1) must hold
+for all $u$ outside one null set.
+\end{revnote}
+
+\paragraph{Remark 4.2 (continuous versus integer rates; PHASE2a \S4).}
+Sharpness is relative to real-valued latent rates. Part~(1), that every vertex of
+the transportation polytope is an integer table, is a standard fact checked on
+200 cases. Part~(2), that randomising over integer vertices would leave the
+sharp set unchanged, is \emph{only a sketch} (not verified) and is not used
+anywhere (R-12).
+
+\begin{result}[Corollary 1, sharp bounds for a linear target --- PHASE2a \S4]
+\status{Proved.} If $P(X\in A)=1$ and $\ThI\ne\emptyset$, the sharp set for
+$\varphi$ is $[\min_{\ThI}\varphi(K),\max_{\ThI}\varphi(K)]$.
+\end{result}
+\begin{plain}
+Because the unknown enters the target linearly and the consistent set is convex
+and compact, the answer is always an interval.
+\end{plain}
+\proofref{Appendix~\ref{app:phase2a}, \S4, Corollary~1 steps 1--3}
+
+\subsection{The outer set: reduction, nesting, sharpness for the regression}
+
+\begin{result}[Lemma 3 --- PHASE2a \S5]\label{res:p2a-l3}
+\status{Proved.} (a) For a polytope $A$, linear constraints on $A$ reduce to its
+vertices. (b) If $\operatorname{affdim}(A)=R-1$, $\ThO$ is bounded (a polytope);
+otherwise it is a closed convex polyhedron. (c) Under (S1)--(S2), if
+$A\subseteq\conv(\supp_AP_X)$, (S3) holds automatically, in particular for the
+population hull.
+\end{result}
+\begin{plain}
+Only the most extreme units matter for the constraints. If the region $A$ is
+the range of the data, probability validity of the straight lines is automatic;
+if $A$ extrapolates beyond the data, validity there is an extra assumption.
+\end{plain}
+\proofref{Appendix~\ref{app:phase2a}, \S5, steps 1--9; Remarks~5.1--5.2 give the counterexamples}
+\begin{revnote}
+(R-04, R-07, P-B39.) (c) was restated: (S3) is automatic only when
+$A\subseteq\conv(\supp_AP_X)$. Remark~5.1 (a singleton inside the hull with no
+mass) and Remark~5.2 (a singleton $A$ makes $\ThO$ unbounded; A5 rules it out)
+were added. Checks in \texttt{verify\_phase2a.py} fail on the earlier statements.
+\end{revnote}
+
+\begin{result}[Proposition 1, nesting --- PHASE2a \S5]\label{res:p2a-p1}
+\status{Proved.} $\ThI(P;A)\subseteq\ThX(P;A)\subseteq\ThO(P;A)$.
+\end{result}
+\begin{plain}
+Using more of the data can only narrow the set. The outer set uses only the
+regression, so it is the widest of the three.
+\end{plain}
+\begin{sketch}
+Conditioning on $(X,N)$ implies conditioning on $X$ (tower property). Conditional
+expectations of valid rate tables are valid rate tables, which is JKST's Jensen
+step.
+\end{sketch}
+\proofref{Appendix~\ref{app:phase2a}, \S5, Proposition~1 steps 1--5}
+
+\begin{result}[Proposition 2, $\ThO$ is sharp for the regression function --- PHASE2a \S5]\label{res:p2a-p2}
+\status{Proved.} Let $\mathcal P(P)$ be the laws with the same law of $(N,X)$
+and the same regression $\E[T\mid X]$. If $P(X\in A)=1$,
+$\ThO(P;A)=\bigcup_{P'\in\mathcal P(P)}\ThI(P';A)$.
+\end{result}
+\begin{plain}
+The outer bound is exactly what can be learned from the regression alone. It is
+the sharp set for any data set in which units with the same composition have
+identical outcomes. Calling it ``sharp'' without that qualifier is wrong.
+\end{plain}
+\begin{sketch}
+Given $K\in\ThO$, set every unit's rates equal to the implied mean $M_H(X)$;
+this is a valid law with the same regression, and $K$ is in its sharp set.
+\end{sketch}
+\proofref{Appendix~\ref{app:phase2a}, \S5, Proposition~2 steps 1--10}
+
+\begin{result}[Corollary 2 and Proposition 3 --- PHASE2a \S5]
+\status{Proved.} If $T=\E[T\mid X]$ a.s., then $\ThI=\ThO$ (Cor.~2). More
+generally (Prop.~3, a \emph{sufficient} condition), if $\E[T\mid V]=\E[T\mid X]$
+and, for a.e.\ $v$ and every $u$, $t\mapsto h_S(u;x,t)$ is affine on the
+convex hull of the conditional support of $T$, then $\ThI=\ThO$.
+\end{result}
+\begin{plain}
+The regression-only bound loses nothing unless units with similar composition
+are so different that some sit at a Duncan--Davis corner and others do not
+(Remark~3.1, the $2\times2$ reading). In 400 random valid $2\times2$ designs the
+inclusion was strict in 46.
+\end{plain}
+\proofref{Appendix~\ref{app:phase2a}, \S5, Corollary~2 steps 1--3; Proposition~3 steps 1--7}
+
+\subsection{Closed forms and the linear program}
+
+\begin{result}[Proposition 4, equivalence with JKST --- PHASE2a \S6.1]\label{res:p2a-p4}
+\status{Proved.} In $2\times2$ with $A=[l,u]$: (a) $Q_{1,22}=w_0$,
+$Q_{1,12}=w_0+c_1/2$, $Q_{1,11}=w_0+c_1+d_1$, $K=c_1/2-w_1$; (b) $\ThO$ is JKST
+Prop.~2; (c) with $A=\Delta^1$ it is JKST Prop.~3; (d) with $P(l\le X\le u)=1$,
+$B^*(K)$ is JKST eq.~(16).
+\end{result}
+\begin{plain}
+The R$\times$C machinery contains the published $2\times2$ method exactly; the
+package's existing bounds are a special case.
+\end{plain}
+\proofref{Appendix~\ref{app:phase2a}, \S6.1, derivations (a)--(d); numerically to $10^{-16}$}
+
+\begin{result}[Proposition 5, $A$ the whole simplex --- PHASE2a \S6.2]
+\status{Proved.} With $A=\Delta^{R-1}$, $\ThO=\{|K_{c,rs}|\le Q_{c,rs}\}$; it is
+non-empty iff every $Q_{c,rs}\ge0$; each $K_{c,rs}$ ranges over
+$[-m_{c,rs},m_{c,rs}]$ with $m_{c,rs}=\min\{Q_{c,rs},1-Q_{c,rs}\}$, and $B^*$
+has a closed form.
+\end{result}
+\begin{plain}
+If the straight lines are trusted all the way to pure units, two hypothetical
+probabilities with known average $Q$ can split it by at most
+$\pm\min(Q,1-Q)$. This is narrower than the hull-based bound but assumes
+extrapolation.
+\end{plain}
+\proofref{Appendix~\ref{app:phase2a}, \S6.2, steps 1--8; checked against an LP in 200 tables}
+
+\begin{result}[Lemma 4, box $\cap$ hyperplane --- PHASE2a \S6.3]
+\status{Proved.} For $\mathcal P=\{\ell\le\kappa\le h,\sum_c\kappa_c=0\}$:
+(a) non-empty iff $\sum\ell\le0\le\sum h$; (b) coordinate projections in closed
+form; (c) linear objectives are maximised by a greedy rule.
+\end{result}
+\proofref{Appendix~\ref{app:phase2a}, \S6.3, steps 1--6}
+
+\begin{result}[Proposition 6, two rows, any number of columns --- PHASE2a \S6.4]
+\status{Proved.} For $R=2$ and $A=[l,u]$ with $0<l<u<1$, $\ThO=\{\ell\le\kappa\le
+h,\ \sum_c\kappa_c=0\}$ with closed-form $\ell_c,h_c$; target bounds follow by
+Lemma~4.
+\end{result}
+\proofref{Appendix~\ref{app:phase2a}, \S6.4, steps 1--6; checked against an LP in 300 cases}
+
+\begin{result}[Corollary 6.1, joint versus collapsed --- PHASE2a \S6.4]
+\status{Proved.} For $R=2$: (a) the joint interval for $\kappa_c$ lies inside the
+collapsed one; (b) they are equal when, for each row, the $Q_{c',rr}$ ($c'\ne c$)
+share a sign; (c) strict tightening therefore requires some negative
+extrapolated pure-poll rate. For $R\ge3$ the joint bound can be strictly tighter
+with all rates valid; a characterisation is open.
+\end{result}
+\begin{plain}
+With two groups, fitting all outcome columns jointly helps only if the straight
+lines would give an impossible rate at some pure unit. With three or more groups,
+joint fitting can help even when everything is valid.
+\end{plain}
+\proofref{Appendix~\ref{app:phase2a}, \S6.4, Corollary~6.1 steps 1--7}
+\begin{revnote}
+(R-14; PHASE2a \S10 item~1.) PHASE1's general claim of strict joint gain was
+withdrawn; the exact sign condition replaced ``strong contextual effects''.
+\end{revnote}
+
+\begin{result}[Proposition 7, the general LP --- PHASE2a \S6.5]\label{res:p2a-p7}
+\status{Proved.} With free coordinates $k_{c,rs}$ ($c<C$, $r<s$),
+$\ThO=\{k:Gk\le g\}$, one row per (vertex, row, column), and
+$\varphi(k)=\varphi_0+\gamma^\top k$ with explicit $\varphi_0$ and
+$\gamma_{c,rs}=\mu_{rs}[(a_{rc}-a_{rC})/\mu_r-(a_{sc}-a_{sC})/\mu_s]$. Imposing
+the rows at every observed $X_i$ equals imposing them at the hull vertices.
+\end{result}
+\begin{plain}
+The computable bound is a small linear program: one variable per unknown
+direction, one constraint per extreme unit, group and outcome. This is the
+\emph{outer} set, not an LP form of the sharp set.
+\end{plain}
+\proofref{Appendix~\ref{app:phase2a}, \S6.5, steps 1--5}
+\begin{revnote}
+(R-06.) The closing paragraph on regularity was wrong: the value function is
+concave and piecewise linear in $Q$ for fixed $\mu$, convex in $\gamma$ for
+fixed $Q$, and in general neither jointly ($V=\mu Q$). Lemma~P3.1 is the
+fixed-design case. Check: \texttt{verify\_phase2a.py} (midpoint test).
+\end{revnote}
+
+\begin{result}[Proposition 7$'$, units outside $A$ --- PHASE2a \S6.6]
+\status{Proved.} If $P(X\in A)>0$ only, the bound is the LP over units in $A$
+plus the support-function (Duncan--Davis) terms of the units outside $A$; each
+endpoint is attained. This is what \texttt{range = "trim"} computes for single
+cells.
+\end{result}
+\begin{plain}
+Units outside the region where straight lines are trusted contribute their
+model-free range; nothing links them to the model.
+\end{plain}
+\proofref{Appendix~\ref{app:phase2a}, \S6.6, steps 1--6}
+\begin{revnote}
+(R-05; decision D2.) New result written after review to document the existing
+\texttt{trim} option.
+\end{revnote}
+
+\subsection{Refutability and undetectable violations}
+
+\begin{result}[Proposition 8, non-emptiness --- PHASE2a \S7]
+\status{Proved.} If $P$ is generated by the model with $P(X\in A)=1$, then the
+true $K_0\in\ThI\subseteq\ThO$ and $B^*_{rc}\in[\varphi_L,\varphi_U]\cap DD^*_{rc}$.
+An empty $\ThO$, or an empty intersection with $DD^*$, refutes A1--A5 jointly.
+\end{result}
+\begin{plain}
+If the model is right, the population bound is never empty. An empty bound is
+evidence against the model (in samples it can also be noise; Phase~3 turns it
+into a test).
+\end{plain}
+\proofref{Appendix~\ref{app:phase2a}, \S7, steps 1--5}
+
+\begin{result}[Proposition 9, what the data can never rule out --- PHASE2a \S7]\label{res:p2a-p9}
+\status{Proved.} If $\Delta(x)$ satisfies $x^\top\Delta(x)=0$, $\Delta(x)\mathbf
+1=0$ and keeps $M_H+\Delta$ valid on the support, then $\beta=M_H(X)+\Delta(X)$
+and $\beta'=M_H(X)$ give the same $P$ but different $B^*$. Under A5 the linear
+such $\Delta$ are exactly $M_{K'}$, $K'\in\Kspace$.
+\end{result}
+\begin{plain}
+There are nonlinear contextual effects that cancel in the aggregate and leave
+the data identical, yet change the transition rates. The linearity assumption is
+therefore a genuine leap that no fit statistic can confirm. Phase~3 bounds its
+consequences with the sensitivity parameter $\eta$ (Prop.~S1).
+\end{plain}
+\proofref{Appendix~\ref{app:phase2a}, \S7, Proposition~9 steps 1--4}
+
+\paragraph{Illustration (PHASE2a \S8).} In a noise-free BC $3\times3$ design with
+2000 polls, the $\ThO$ bounds on loyalty, defection, demobilisation and
+mobilisation have width ratios 0.52--0.64 relative to DD and all contain the
+truth. They remain wide because six numbers are unidentified.
+
+\paragraph{Relation to Cross--Manski (PHASE2a \S12).} Cross and
+Manski~\citep{crossmanski2002} treat Goodman-type constancy (an instrument) and
+obtain a point; LCE is weaker, and the R$\times$C bounds sit between their
+data-alone region and their point.

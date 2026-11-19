@@ -1,0 +1,278 @@
+% Section 8: inference (PHASE3)
+\section{Inference}\label{sec:inference}
+
+Source: PHASE3 (Appendix~\ref{app:phase3}). Checks: \texttt{verify\_phase3.py},
+17/17 PASS. Monte Carlo: \texttt{phase3\_montecarlo.py}, 1000 replications per
+design (Section~\ref{sec:evidence}).
+
+\paragraph{Sampling (PHASE3 \S0.1).} \textbf{(P3-S1a)} Given the design and the
+district effects, the unit rates are independent with $\E[\beta_i\mid\text{design}]=m(V_i)$.
+\textbf{(P3-S2)} Inference is conditional on the design, so the sample-hull
+vertices are fixed. The uncertainty is model-based, conditional on the design
+(\S0.4): every unit is observed, nothing is assigned, and district shocks are fixed
+features of this electorate (in the mean under M1/M2; a misspecification under
+M0). No clustered variance is used. Independence is a substantive assumption: it
+does not follow from observing every unit, and within-district dependence with
+no mean shift violates it without being detected by the pooling test.
+\begin{revnote}
+(R-28, R-36; A2-5.) Round~1: the earlier P3-S1 allowed arbitrary within-district
+dependence for M0 while P3.5(a) assumed independence; it was replaced by P3-S1a,
+the \texttt{cluster} option was removed and the pooling test added. Round~2: the
+two arguments (``assume independence given district effects'' versus ``all units
+observed, so no dependence'') were separated; only the first is made.
+\end{revnote}
+
+\paragraph{Estimators (PHASE3 \S1).} OLS of each of $C-1$ columns on the
+homogeneous quadratic monomials (plus district $\times X_r$ shifts for M1; one
+regression per district for M2), with HC3 covariance. Each constraint is
+$s_j(\beta)+a_j^\top k\ge0$ with $s_j$ linear in the coefficients $\beta$; the
+target is $\tilde B(k)=c(\beta)+\gamma^\top k$ with sample weights. The plug-in
+bound is $c(\hat\beta)+[\min,\max]\{\gamma^\top k:s(\hat\beta)+Ak\ge0\}$.
+
+\begin{longtable}{@{}p{0.12\linewidth}p{0.13\linewidth}p{0.42\linewidth}p{0.25\linewidth}@{}}
+\caption{Which result holds in which regime (PHASE3 \S0.5).}\label{tab:regimes}\\
+\toprule Model & Regime & Formal result & Status \\ \midrule\endfirsthead
+\toprule Model & Regime & Formal result & Status \\ \midrule\endhead
+any rung & any, any $n$ & Theorem P3.8 (finite-sample CI and emptiness test) & Theorem; uninformative in width \\
+M0 & any & P3.2, P3.4, P3.5(a), (b1), (b2) & Theorem (asymptotic) \\
+M1, M2 & R1 ($D^\star$ fixed) & P3.2, P3.4, P3.5(a), (b1), (b2) & Theorem (asymptotic) \\
+M1, M2 & R3 & the same with a high-dimensional Gaussian approximation & Conjecture \\
+M1 & R2 & coverage of the CLR interval & Simulation finding \\
+any & any & the CLR interval as implemented & Conjecture P3.5(b3) \\
+\bottomrule
+\end{longtable}
+
+\begin{result}[Lemma P3.1, the endpoint is a minimum of linear functions --- PHASE3 \S2]\label{res:p31}
+\status{Proved} (fixed constraint system). If the LP is feasible and bounded at
+$\beta$, $\varphi_U(\beta)=c(\beta)+\min_{\lambda\in\Lambda}\lambda^\top s(\beta)$
+with $\Lambda$ the finite set of dual vertices; $\varphi_U$ is concave and
+piecewise linear in $\beta$.
+\end{result}
+\begin{plain}
+Each end of the bound is the tightest of finitely many candidate limits, each
+linear in the regression coefficients. JKST's case has four candidates and assumes
+one wins clearly; in R$\times$C with districts there are many and near-ties are
+the norm.
+\end{plain}
+\proofref{Appendix~\ref{app:phase3}, \S2, steps 1--5}
+\begin{revnote}(R-25.) Stated for a fixed constraint matrix and objective; joint variation in $(Q,\mu)$ is not covered.\end{revnote}
+
+\begin{result}[Proposition P3.2, consistency and rate --- PHASE3 \S3]\label{res:p32}
+\status{Proved.} Under P3-S1--S2, A1--A5, $\sqrt n(\hat\beta-\beta_0)=O_p(1)$ and
+Slater (strict feasibility): (a) $\hat\varphi_U-\varphi_U(\beta_0;\hat A)=O_p(n^{-1/2})$;
+(b) $\varphi_U(\beta_0;\hat A)\to\varphi_U(\beta_0;A)$ for nested or boundedly
+convergent hulls; (c) since $\hat A_d\subseteq A_d$, estimating the hull only widens
+the bound.
+\end{result}
+\begin{plain}
+The plug-in bound converges at the usual rate to the bound for the sample hull,
+which is weakly wider than the population bound. Coverage of the true parameter
+never depends on the hull, because the true parameter satisfies the constraints at
+every observed composition. Slater fails when an implied rate is exactly 0 at a
+vertex (a structural zero); the rate result is then open, but coverage results do
+not use Slater.
+\end{plain}
+\proofref{Appendix~\ref{app:phase3}, \S3, steps 1--9; Remarks}
+\begin{revnote}(R-26, R-32.) Non-nested hulls; Slater as an interiority condition; the error split into estimation ($O_p(n^{-1/2})$) and hull ($\ge0$, rate not shown) parts.\end{revnote}
+
+\begin{result}[Theorem P3.4, asymptotic distribution for a fixed constraint system --- PHASE3 \S4]\label{res:p34}
+\status{Cited structure} (directional delta method~\citep{fangsantos2019}).
+If the constraint system is fixed along the sequence and
+$\sqrt n(\hat\beta-\beta_0)\Rightarrow\mathcal Z\sim N(0,\Sigma)$, then
+$\sqrt n(\hat\varphi_U-\varphi_U)\Rightarrow\min_{\lambda\in\Lambda^*}g_\lambda^\top\mathcal Z$.
+(i) A single active candidate gives a normal limit. (ii) If two active gradients
+differ in a direction where the estimator varies, the limit has strictly negative
+mean: the plug-in bound is too narrow. (iii) Then the standard bootstrap is
+inconsistent.
+\end{result}
+\begin{plain}
+When several candidate limits are nearly tied, the plug-in end picks the one that
+looks tightest by chance, so the estimated bound is biased inward. This is why the
+plug-in is not a confidence interval.
+\end{plain}
+\proofref{Appendix~\ref{app:phase3}, \S4, steps 1--6; Remark~P3.4.1 (use $C-1$ columns)}
+\begin{revnote}
+(R-27; A2-2.) Round~1: (ii) needs gradients that differ where $\Sigma$ has
+variance (a null-direction difference gives a normal limit). Round~2: the theorem
+was stated ``with the sample hull fixed'', which is not coherent as the hull grows;
+it now requires a fixed constraint system (referee's $f_n=\min\{\theta,-\theta+n^{-1/2}\}$
+gives $\min\{Z,1-Z\}$).
+\end{revnote}
+
+\begin{result}[Proposition P3.4$'$, triangular arrays --- PHASE3 \S4; register R17]\label{res:p34prime}
+\status{Proved.} If the constraint system changes with $n$, $|\Lambda_n|\le\bar L$,
+gradients converge and the localised slacks
+$c_{\lambda,n}=\sqrt n(\theta_{\lambda,n}(\beta_0)-\varphi_{U,n}(\beta_0))\to c_\lambda\in[0,\infty]$,
+then $\sqrt n(\hat\varphi_{U,n}-\varphi_{U,n}(\beta_0))\Rightarrow\min_{\lambda:c_\lambda<\infty}(g_\lambda^\top\mathcal Z+c_\lambda)$.
+P3.4's limit obtains under separation ($c_\lambda\in\{0,\infty\}$).
+\end{result}
+\begin{plain}
+A candidate that is inactive only by a gap of order $1/\sqrt n$ still shapes the
+limit. The result describes the sample-hull endpoint; it says nothing about the
+population-hull error.
+\end{plain}
+\begin{sketch}
+By Lemma~P3.1 the scaled error equals exactly $\min_\lambda(g_{\lambda,n}^\top\sqrt
+n(\hat\beta-\beta_0)+c_{\lambda,n})$; candidates with $c\to\infty$ drop out;
+continuous mapping.
+\end{sketch}
+\proofref{Appendix~\ref{app:phase3}, \S4, Proposition~P3.4$'$ steps 1--4; check ``P3.4$'$ [F]''}
+\begin{revnote}(A2-2.) New in round~2.\end{revnote}
+
+\begin{result}[Theorem P3.5, confidence intervals --- PHASE3 \S5]\label{res:p35}
+Fix levels $\alpha_U,\alpha_L,\alpha_E$; candidate upper endpoints
+$\theta_\lambda(\beta)=g_\lambda^\top\beta$ with standard errors $\hat\sigma_\lambda$.
+\begin{enumerate}[label=(\alph*),nosep]
+\item \textbf{Conservative} (\status{proved}). Inflate every constraint and the target
+constant by a simultaneous Gaussian critical value $\hat k$, solve the LP over the
+inflated set $\hat\Theta^+$, and add $\pm z_{\alpha_E}S_1$ with
+$S_1=\tfrac12(\sum_iw_{ir}^2)^{1/2}$. Then
+$\liminf P(B_{rc}\in\mathrm{CI})\ge1-\alpha_U-\alpha_L-\alpha_E$; without $S_1$ it
+covers $\tilde B$.
+\item[(b1)] \textbf{CLR with the full candidate set} (\status{cited}: Chernozhukov, Lee
+and Rosen~\citep{clr2013}, Thm~4, under Condition~P). Same coverage.
+\item[(b2)] \textbf{Any candidate set with a simultaneous critical value}
+(\status{proved}). For any data-dependent set of dual-feasible points,
+$\hat U=\min_{\lambda\in\hat\Lambda}(\hat\theta_\lambda+\hat k\hat\sigma_\lambda)$
+covers $\varphi_U$ with probability $\ge1-\alpha_U$ asymptotically if (i) $\hat k$ is
+computed over a fixed finite superset, or (ii) $\hat k=\sqrt{\chi^2_{q,1-\alpha}}$
+(projection) with $\Sigma$ positive definite and $q=\dim\beta$, or an exact reduced
+full-rank parameterisation.
+\item[(b3)] \textbf{The CLR procedure as implemented} (\status{conjecture /
+algorithm}). Candidates are collected from the optimal dual vertices at
+$\hat\beta$ and at simulated draws. A reduction to (b1) is proved when the
+collected set contains CLR's selected set and a minimiser; recovery of rare
+vertices, the downward effect on $k_p$, and growing $|\Lambda|$ are open.
+\item[(c1)] \textbf{Variance-adaptive allowance} (\status{proved}; register R18).
+Replace $S_1$ by the Bhatia--Davis bound $\hat S_{BD}$ computed from a P3.5(a) or
+projection interval for $\bar m=\sum_i\pi_im_i$ on the rung's own constraints;
+if $\max_iw_i^2/\bar s^2\to0$, coverage is $\ge1-\alpha_{\rm est}-\alpha_E-\alpha_v$.
+\item[(c2)] With a CLR interval for $\bar m$: coverage conditional on that interval
+covering; inherits (b3)'s status.
+\end{enumerate}
+\end{result}
+\begin{plain}
+The confidence interval widens each candidate limit by its own uncertainty before
+taking the tightest, so noisy candidates (for example, districts with few polls)
+rarely set the limit. Three versions carry proofs: the conservative interval (all
+constraints widened at once), the projection interval (one ellipsoid for the
+whole coefficient vector; valid for any set of candidates, but wide when there
+are many coefficients) and the fixed-superset version. The package's default,
+CLR with simulated candidates, is narrower in grouped designs and covered in every
+simulation design, but its validity is not proved: it is an \emph{algorithm}.
+For the actual rate $B$, an extra allowance covers each unit's local luck; a
+tighter, variance-adaptive allowance is valid if its own input interval comes
+from a proved method.
+\end{plain}
+\begin{sketch}
+(a) On one simultaneous event the true $k_0$ is feasible for the inflated
+constraints, so $\tilde B$ is inside the inflated LP range; the residual term is
+handled by Chebyshev or Lindeberg along subsequences. (b2) By weak duality every
+dual-feasible candidate is an upper bound for $\varphi_U(\beta_0)$; a simultaneous
+event for all candidates (a fixed superset, or Cauchy--Schwarz in the metric of
+$\hat\Sigma$ for projection) then covers. (c1) Concavity of $m(1-m)$ bounds the
+residual variance by $\bar s^2$; on the event that the $\bar m$ interval covers,
+$\hat S_{BD}\ge\bar s$; a union bound finishes.
+\end{sketch}
+\proofref{Appendix~\ref{app:phase3}, \S5: (a) steps 1--7; (b2) steps 1--4; (b3) proved reduction; (c1) steps 1--5}
+\begin{revnote}
+(R-29; P-B40, P-B41; I.3; A2-3.) Round~1 (Phases~1--3 referee): the simulated-candidate
+CLR was claimed as a theorem; P3.5(b) was split into (b1) cited, (b2) proved and
+(b3) conjecture, and the package labels CLR algorithmic with projection alongside.
+Batch~B: (b2)(ii) took $q=\operatorname{rank}\Sigma$ with a pseudoinverse, which
+does not control errors in null directions (counterexample $(Z/\sqrt n,-1/n)$);
+it now needs $\Sigma$ positive definite or an exact reduction. The residual step
+of (a) applied a CLT under the weight condition alone; the referee's
+Chebyshev/Lindeberg subsequence argument replaced it. Round~2: a numerical rank
+cutoff is a safeguard, not case (ii-b), so the package uses $q=\dim\beta$; the
+projection interval for $B$ was not covered when its Bhatia--Davis bound came from
+CLR, which led to P3.5(c).
+\end{revnote}
+
+\begin{result}[Proposition P3.6, tests --- PHASE3 \S5]\label{res:p36}
+(a) \textbf{Emptiness test} (\status{proved}): reject the rung if $\hat\Theta^+$ is
+empty; level $\le\alpha_U+\alpha_L$. (b) \textbf{M1 against M2}: Wald test of the
+$(D^\star-1)(C-1)R(R-1)/2$ overidentifying restrictions; $\chi^2$ calibration
+\status{proved for fixed dimension} (R1). (c) \textbf{Pooling, M0 against M1}
+(\status{proved}): conditional on the design, with $R$ affinely independent
+compositions per district, M0's mean model holds iff all district shifts vanish;
+test $\zeta=0$ with $(D^\star-1)(C-1)R$ restrictions. It tests mean shifts only.
+\end{result}
+\begin{plain}
+An empty confidence set is a real rejection at the stated level. The curvature
+test checks M1's testable part. The pooling test says whether the pooled model is
+wrong for this design; rejection does not mean its intervals fail (design S1), and
+the test has no power against within-district dependence.
+\end{plain}
+\proofref{Appendix~\ref{app:phase3}, \S5, Proposition~P3.6 proofs of (a) and (c)}
+
+\paragraph{Calibration by restricted wild bootstrap (package 0.3.0; PHASE3 \S5).}
+\status{Simulation-supported, not proved for growing dimension.} In moderate
+dimension the HC3 Wald statistic against $\chi^2$ over-rejects (pooling test, 38
+restrictions: 0.078 at nominal 5\%). The package fits the null model, draws
+$Y^*=\hat Y_0+\hat e_0v$ with Rademacher $v_i$ shared across the $C-1$ equations,
+refits the larger model and recomputes the HC Wald statistic;
+$p=(1+\#\{W^*\ge W\})/(B+1)$, $B=399$ by default. Rejection rates at 5\% in design
+S0: pooling 0.043 (SE 0.005; $\chi^2$ 0.078, F 0.072); M1 vs M2 0.054 (SE 0.007;
+$\chi^2$ 0.057). Scripts: \texttt{benchmarks/pooling\_test\_size.R},
+\texttt{benchmarks/m1\_test\_size.R}.
+\begin{revnote}(R-30, R-37; WS6; A2-5.) Degrees of freedom corrected; bootstrap added after the over-rejection was found; the pooling test is stated as a test of mean shifts only.\end{revnote}
+
+\begin{result}[Theorem P3.8, finite-sample CI and emptiness test --- PHASE3 \S5.1]\label{res:p38}
+\status{Proved.} Under P3-S1a, a correctly specified mean model and a full-rank
+design, with Hoeffding radii for every constraint and the target constant (union
+bound over $J+2$ events) and $t_E=(\tfrac12\log(2/\alpha_E)\sum_iw_{ir}^2)^{1/2}$:
+for every $n$ and in every regime, (a) $P(B\in\mathrm{CI}^{\rm fin}\mid\text{design})\ge1-\alpha_s-\alpha_E$;
+(b) without $t_E$ it covers $\tilde B$ at $1-\alpha_s$; (c) the emptiness test has
+exact level $\le\alpha_s$; (d) intersecting with DD keeps (a).
+\end{result}
+\begin{plain}
+This interval needs no large-sample theory and no fixed number of districts, so it
+is the only formal guarantee with many small districts. In every design tried it is
+as wide as the logical range $[0,1]$, mainly because of the
+constraint-by-constraint union bound. It is valid but not yet useful, and is not
+in the package.
+\end{plain}
+\proofref{Appendix~\ref{app:phase3}, \S5.1, steps 1--7}
+\begin{revnote}(R-31; A2-6.) New after round~1; round~2 agreed it is a fallback guarantee and left informative R2 inference open.\end{revnote}
+
+\begin{result}[Proposition P3.7, many districts with few units --- PHASE3 \S6]
+\status{Proved.} (a) Dropping districts' constraints is conservative. (b) If the
+retained districts are chosen from the design only, any procedure keeps its
+conditional coverage; asymptotic results transfer only if their regime conditions
+hold for the retained districts.
+\end{result}
+\proofref{Appendix~\ref{app:phase3}, \S6, steps 1--2}
+\begin{revnote}(R-31.) (b) was weakened from ``every result holds conditionally'' to a conditional statement.\end{revnote}
+
+\begin{result}[Proposition S1, bounded nonlinearity --- PHASE3 \S7]\label{res:s1}
+\status{Proved} (an outer bound). If $\E[\beta\mid V]=M_H(X)+\Delta(X)$ with $\Delta$ in
+the undetectable class of PHASE2a Prop.~9 and $\|\Delta\|_\infty\le\eta$, then
+$\tilde B_{rc}\in[\min_{\ThO(\eta)}\varphi-\eta,\max_{\ThO(\eta)}\varphi+\eta]$ with
+$\ThO(\eta)=\{k:s+Ak\ge-\eta\mathbf 1\}$.
+\end{result}
+\begin{plain}
+If rates may depart from straight lines, invisibly, by up to $\eta$, the bound
+widens in a controlled way. The breakdown value $\eta^*$ of a conclusion is the
+largest departure under which it survives; in the $3\times3$ example,
+$\eta^*(\text{loyalty}>0.30)=0.060$. The same logic applies to the dials $\delta$
+(district heterogeneity, change between periods).
+\end{plain}
+\proofref{Appendix~\ref{app:phase3}, \S7, steps 1--3}
+\begin{revnote}(R-34.) Labelled an outer bound under bounded deviations, not the sharp set of the relaxed model.\end{revnote}
+
+\paragraph{Boundary cases and JKST's $\mathrm{CI}_x$ (PHASE3 \S\S4--5).} When the
+true $K$ is on the boundary, coverage is close to nominal; in the interior it tends
+to one (Imbens--Manski). Near point identification, one-sided intervals per
+endpoint under-cover unless the critical value adapts~\citep{stoye2009}; the
+two-sided split used here is uniformly valid at some cost in width. JKST's
+$\mathrm{CI}_x$ is version (b) with a single candidate per side.
+
+\paragraph{Practical recipe (PHASE3 \S9).} Fit on $C-1$ columns with HC3; report
+the plug-in as an estimate of the identified set; report CLR (algorithmic) for
+$\tilde B$ and $B$ with the projection interval alongside (for $B$, with $\bar m$
+from the projection interval on the rung alone, or Popoviciu); intersect with DD;
+report the emptiness, M1 and pooling tests; report sensitivity in $\eta$ and
+$\delta$ with breakdown values; with few units per district, prefer selection,
+M1($\delta$) or coarser groups, and say that CLR's coverage there rests on
+simulation.

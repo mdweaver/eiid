@@ -1,0 +1,292 @@
+% Section 2: setting, notation, targets, assumptions
+\section{Setting, notation and assumptions}\label{sec:setting}
+
+Source: PHASE1 \S\S1--3 (Appendix~\ref{app:phase1}) and PHASE2a \S0
+(Appendix~\ref{app:phase2a}). Notation follows
+\texttt{docs/extension/notation.tex}; Table~\ref{tab:notation} reproduces it.
+
+\subsection{Data, latent rates and the accounting identity}
+
+There are units $i=1,\dots,p$ (in Phase~3, $n$), nested in districts
+$d=1,\dots,D$ (written $D^\star$ for the number of districts in PHASE2b and
+PHASE3). Unit $i$ has size $N_i$, district $D_i$, row shares
+$X_i\in\Delta^{R-1}$ and column shares $T_i\in\Delta^{C-1}$. The latent rate
+$\beta_{irc}=N_{irc}/N_{ir}$ is the share of the $N_{ir}$ row-$r$ members of
+unit $i$ who fall in column $c$, and $\beta_i\in\Bset:=(\Delta^{C-1})^R$. The
+accounting identity is
+\begin{equation}\label{eq:acc}
+T_{ic}=\sum_{r=1}^RX_{ir}\beta_{irc},\qquad\text{i.e.}\quad T_i=\beta_i^\top X_i .
+\end{equation}
+The unit Duncan--Davis polytope $S(x,t)=\{b\in\Bset:b^\top x=t\}$ is the set of
+rate matrices consistent with one unit's margins. Its support function is
+$h_S(u;x,t)=\max_{b\in S(x,t)}\langle u,b\rangle$.
+
+\subsection{Three targets}
+
+PHASE1 \S1.7 and PHASE3 \S0.2 distinguish three targets. Each result says which
+one it is about.
+\begin{itemize}[nosep]
+\item $B_{rc}=\sum_iN_iX_{ir}\beta_{irc}/\sum_iN_iX_{ir}$: the \emph{actual}
+(realised, finite-population) rate in this electorate. This is JKST's target.
+\item $\tilde B_{rc}=\sum_iw_{ir}m_{rc}(V_i)$, with $w_{ir}=N_iX_{ir}/\sum_jN_jX_{jr}$,
+$V_i=(X_i,N_i,D_i)$ and $m=\E[\beta\mid V]$: the \emph{model-implied} rate at
+the observed design. It is the conditional mean of $B$ given the design.
+\item $B^*_{rc}=\E[NX_r\beta_{rc}]/\E[NX_r]$: the \emph{superpopulation} rate
+used in the identification results.
+\end{itemize}
+$B=\tilde B+E$, where $E_{rc}=\sum_iw_{ir}e_{irc}$ and $e_i=\beta_i-m(V_i)$ is
+the unit residual. Only $\tilde B$ and $B^*$ are affine in the unknown
+parameter. All inference is conditional on the design and covers $B$ or
+$\tilde B$; inference for $B^*$ is not pursued. Any linear target is written
+$\varphi=\sum_{rc}a_{rc}B_{rc}$ (loyalty, defection, demobilisation, a gap
+between groups).
+
+\paragraph{In plain terms.} $B$ is ``what these voters actually did''.
+$\tilde B$ is ``what the systematic pattern implies these units did''; it
+ignores the local luck of each unit. The confidence interval for $B$ is wider
+because it must allow for that luck.
+
+\subsection{Linear contextual effects in homogeneous form}
+
+Because $\mathbf 1^\top X=1$, an affine function of $X$ can be written as a
+homogeneous linear one. The pooled LCE model (M0) says that for each column $c$
+there is $H_c\in\mathbb R^{R\times R}$ with
+\begin{equation}\label{eq:lce}
+\E[\beta_{irc}\mid X_i,N_i]=e_r^\top H_cX_i\qquad\text{on }\{X_i\in A\},
+\end{equation}
+where $A\subseteq\Delta^{R-1}$ is the region on which the model is assumed
+(by default the population hull $\conv\supp P_X$). Write
+$H_c=Q_c+K_c$ with $Q_c=\tfrac12(H_c+H_c^\top)$ symmetric and
+$K_c=\tfrac12(H_c-H_c^\top)$ skew. Then
+\[
+\tau_c(x):=\E[T_c\mid X=x]=x^\top H_cx=x^\top Q_cx,
+\]
+because $x^\top K_cx=0$. The regression identifies $Q$; it never sees $K$.
+The unknown $K=(K_1,\dots,K_C)$ lives in
+$\Kspace=\{K_c^\top=-K_c,\ \sum_cK_c=0\}$, of dimension $(C-1)R(R-1)/2$: one
+number in $2\times2$, two in $2\times3$, six in $3\times3$.
+$M_H(x)=[e_r^\top H_cx]_{rc}$ is the implied mean transition matrix.
+
+\paragraph{What $H$ and $K$ mean (PHASE1 \S7.2).} $H_{c,rs}$ is the rate at which
+row-$r$ voters go to column $c$ in a hypothetical unit made up entirely of
+row-$s$ voters. $Q_{c,rs}$ is the average of ``$r$-voters in pure-$s$ units''
+and ``$s$-voters in pure-$r$ units''; the data identify it. $K_{c,rs}$ is half
+the gap between the two; the data never identify it. It is the R$\times$C version
+of JKST's question ``is turnout low because Black residents vote less, or
+because white residents in Black areas vote less?''
+
+\subsection{Three identified sets and three hulls}
+
+PHASE1 \S1.7 names three nested sets, $\ThI\subseteq\ThX\subseteq\ThO$
+(PHASE2a Prop.~1):
+\begin{itemize}[nosep]
+\item $\ThI$: the sharp set, using the full law of $(N,X,T)$ and conditioning
+on $(X,N)$ (PHASE2a Thm~1). Not a finite LP.
+\item $\ThX$: the same, conditioning on $X$ only (JKST Prop.~1).
+\item $\ThO$: the outer set, using only the regression $\E[T\mid X]$ and
+probability validity (PHASE2a Prop.~7). A finite LP; sharp \emph{for the
+regression function} only (PHASE2a Prop.~2).
+\end{itemize}
+The rule of the documents is that $\ThO$ is never called ``sharp'' without
+``for the regression function''. There are also three hulls: the population hull
+$A=\conv\supp P_X$ (the default in identification), the hull of the empirical
+law (exact for finite-sample identification), and the sample hull used as an
+estimate of $A$. Since the sample hull lies inside $A$, estimating it only
+widens the outer bound (PHASE3 Prop.~P3.2(c)). Every ``sharp'' statement is
+relative to continuous (real-valued) latent rates, not integer cell counts
+(PHASE2a Remark~4.2).
+
+\subsection{The assumptions, and what each implies}\label{sec:assumptions}
+
+Each assumption is stated as in PHASE1 \S2, followed by a plain-language
+reading: what it rules in or out, when it is credible, and what goes wrong if it
+fails. Which rungs use which assumption is shown in Table~\ref{tab:assumption-use}.
+
+\begin{assumption}[A1: closed population / accounting identity]
+$T_i=\beta_i^\top X_i$ exactly, with $N_i$ the same people in both margins.
+\end{assumption}
+\begin{plain}
+Both margins describe the same people: the same electorate in both elections,
+or the same eligible population for group and outcome. It rules out turnover,
+moving, deaths, new registrants and boundary changes. It is credible when both
+margins come from one register and the row and column categories include
+abstention and, where relevant, ``entered'' or ``left''. If it fails, the
+Duncan--Davis sets and the regression identity both shift, and every bound can
+exclude the truth. Bounded turnover is an open extension: it cannot be handled
+by widening the final interval (PHASE1 A1, as corrected after review). Every
+rung, including DD, needs A1.
+\end{plain}
+
+\begin{assumption}[A2: linear contextual effects on $A$]
+Equation~\eqref{eq:lce}: each group's mean rate is linear in the unit's
+composition on $A$.
+\end{assumption}
+\begin{plain}
+A group's behaviour may depend on its surroundings, but only along a straight
+line: for example, in-party loyalty rises steadily as the in-party share of the
+poll rises. It rules out thresholds and tipping (a machine that mobilises only
+above 50\%) and U-shapes (competitive polls mobilising both sides). It is the
+\emph{only} identifying restriction of the LCE rungs. If it fails, the
+quadratic regression is misspecified and the bound can miss the truth by an
+amount that does not shrink with more data. Some violations are invisible:
+nonlinear departures that cancel in the aggregate leave the data unchanged
+while moving the target (PHASE2a Prop.~9). A cubic term or an empty bound can
+reveal some failures; goodness of fit can never validate A2.
+\end{plain}
+
+\begin{assumption}[A3: mean independence from size]
+$\E[\beta\mid X,N]=\E[\beta\mid X]$ (with $D$ added to both sides under the
+district rungs).
+\end{assumption}
+\begin{plain}
+Large and small units with the same mix behave alike. It matters because the
+target weights units by size. If large urban polls differ in loyalty from small
+rural ones with the same partisan mix, the size-weighted target is biased by
+$\Cov(NX_r,\beta_{rc}-M(X))/\E[NX_r]$. District dummies help when size differs
+by district (PHASE2b Prop.~D4). It is partly testable through $X\cdot\log N$
+interactions.
+\end{plain}
+
+\begin{assumption}[A4: support and extrapolation]
+$\supp(X)\subseteq A$, compact, and A2 holds on all of $A$.
+\end{assumption}
+\begin{plain}
+The straight lines are trusted over the whole region $A$, whose corners (the
+most extreme units) set the constraints. A larger $A$ gives tighter bounds but
+assumes more: using the whole simplex assumes the lines extend to pure units
+that may not exist (PHASE2a Prop.~5). Outlier units at the hull's corners can
+make constraints bind spuriously. Check by trimming the hull. PHASE2a adds
+the condition (S3), probability validity on all of $A$; it is automatic for
+the population hull (PHASE2a Lemma~3(c)).
+\end{plain}
+
+\begin{assumption}[A5: rank / richness]
+For symmetric $D$, $x^\top Dx=0$ for all $x\in\supp_AP_X$ implies $D=0$, where
+$\supp_AP_X$ is the support of $P_X$ restricted to $A$.
+\end{assumption}
+\begin{plain}
+The compositions vary enough to fit the quadratic regression. For two groups it
+means at least three distinct compositions. For three groups it needs six
+compositions not on a common conic: five are never enough (PHASE2a
+Remark~1.1). It fails, or nearly fails, when shares barely vary (JKST's
+``gender'' problem). Then $Q$ is weakly identified and the bound is wide and
+unstable. Check the condition number of the design matrix.
+\end{plain}
+
+\begin{assumption}[A6: source of randomness and independence]
+Given the design $\{(N_i,X_i,D_i)\}$ and the district effects, the unit rates
+$\beta_i$ are random with mean $m(V_i)$, and the residuals $e_i$ are
+independent across units (P3-S1a).
+\end{assumption}
+\begin{plain}
+Every unit is observed, so the uncertainty is not from sampling units. It is
+model-based: given its characteristics, each unit's behaviour has a random part.
+District shocks are fixed features of this electorate (part of the mean under
+M1/M2; a misspecification under M0). Independence is a substantive assumption.
+Neighbourhood spillovers within a district violate it, and then the variances
+and residual allowances are too small. Observing every unit does \emph{not}
+remove dependence (PHASE3 \S0.4, as corrected in round~2). The pooling test
+does not test it.
+\end{plain}
+
+\begin{assumption}[A7: regularity for inference]
+A unique active constraint at the optimum, $\mu_{rs}>0$, and $\ThO$ not a
+singleton.
+\end{assumption}
+\begin{plain}
+This is JKST's tie-breaking condition. With it the bound's endpoint is a smooth
+function of the regression coefficients and the delta method applies. In
+R$\times$C, and especially with many districts, near-ties are the norm, so the
+inference of Phase~3 is built not to need it.
+\end{plain}
+
+\begin{assumption}[A8: homogeneous contextual effects across districts (M1)]
+$K$ (and the symmetric slope parts) are common to all districts; only
+intercepts vary.
+\end{assumption}
+\begin{plain}
+The way composition shifts behaviour is the same in every district, while each
+district may be more or less loyal across the board (parallel lines). It is
+what produces the intersection gain of M1. It fails if, say, a strong
+incumbent changes the contextual gradient in one district, or if ceiling and
+floor effects make an additive shift impossible near 0 or 1, which is most
+likely in the lopsided districts that tighten the bound most. The bound can then
+exclude the truth and still look narrow. The symmetric part is testable
+(PHASE2b Lemma~D1(b)); the shared $K$ is not.
+\end{plain}
+
+\begin{assumption}[A9: within-district richness]
+Under M2, A5 within each district. Under M1, each district's support contains
+$R$ affinely independent compositions and the stacked design has full column
+rank (PHASE2b Lemma~D1(d)).
+\end{assumption}
+\begin{plain}
+Districts with few, similar units identify almost nothing. Under M1 the bar is
+lower than under M2: a district's baseline needs only $R$ affinely
+independent compositions. Weak identification per district, combined with a
+max/min over districts, biases plug-in bounds inward.
+\end{plain}
+
+\begin{assumption}[A10: asymptotic regime (a choice)]
+(R1) $D$ fixed, $p_d\to\infty$; (R2) $D\to\infty$, $p_d$ bounded; (R3) both
+grow.
+\end{assumption}
+\begin{plain}
+Which limit theory applies depends on the design. With ten polls in each of
+ninety ridings (R2), district intercepts are incidental parameters and the
+plug-in intersection is badly too narrow. PHASE3 \S0.5 says which result holds
+in which regime (Table~\ref{tab:regimes} in Section~\ref{sec:inference}).
+\end{plain}
+
+\paragraph{Assumptions explicitly not made.} No distributional form for $\beta$
+(unlike King's truncated normal), no independence between $\beta$ and $X$
+(contextual effects are the point), and no point-identifying nonlinearity.
+
+\begin{longtable}{@{}p{0.30\linewidth}p{0.62\linewidth}@{}}
+\caption{Which rungs use which assumption (PLAIN\_LANGUAGE\_GUIDE \S2; PHASE2c \S0).}\label{tab:assumption-use}\\
+\toprule Rung & Assumptions used \\ \midrule\endfirsthead
+\toprule Rung & Assumptions used \\ \midrule\endhead
+DD & A1 only. \\
+N1 (sign rows on realised tables) & A1; continuous unit tables; no regression and no sampling inference. \\
+M0 & A1--A5; inference adds A6, and A7 only for the normal limit of P3.4(i). \\
+M1, M1($\delta$), M2, L4, L5, L6 & A1--A5 within districts (A5 replaced by A9), A8 for M1 and its relatives; inference adds A6 and the regime A10. \\
+N2 & A1, A3 and the finite-support convention of PHASE2c \S4. \\
+M-SIGN rows & Those of the rung they are added to. \\
+\bottomrule
+\end{longtable}
+
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+Symbol & Meaning \\
+\midrule
+$i=1,\dots,p$ & unit (precinct) index \\
+$d=1,\dots,D$;\ $D_i$;\ $\mathcal I_d$;\ $p_d$ & district; district of unit $i$; units in $d$; their number \\
+$r,s=1,\dots,R$ & row categories (election-1 choice / group) \\
+$c=1,\dots,C$ & column categories (election-2 choice) \\
+$N_i,\ N_{ir},\ N_{irc}$ & unit size; row count; latent cell count \\
+$X_i\in\Delta^{R-1}$;\ $T_i\in\Delta^{C-1}$ & observed row shares; observed column shares \\
+$\beta_i=[\beta_{irc}]\in\mathfrak B=(\Delta^{C-1})^R$ & latent transition matrix of unit $i$ \\
+$W_i=(N_i,X_i,T_i,Z_i,D_i)$;\ $V=(X,N,D)$ & observables of unit $i$; conditioning variables \\
+$P$;\ $\mathbb Q$ & law of $W$ (observable); law of $(W,\beta)$ \\
+$\mathcal G=\sigma(V)$ & conditioning $\sigma$-algebra of the contextual model \\
+$B_{rc}$,\ $\tilde B_{rc}$,\ $B^*_{rc}$ & actual, model-implied, superpopulation rate \\
+$\varphi=\sum_{rc}a_{rc}B_{rc}$ & linear target \\
+$A\subseteq\Delta^{R-1}$,\ $\operatorname{vert}(A)$ & region where LCE is assumed; its vertices \\
+$H_c$;\ $Q_c=\tfrac12(H_c+H_c^\top)$;\ $K_c=\tfrac12(H_c-H_c^\top)$ & LCE coefficients; identified part; unidentified part \\
+$\mathcal K$;\ $k$ & space of $K$, $\dim=(C-1)R(R-1)/2$; its free coordinates \\
+$\kappa_c=K_{c,12}$ & unidentified scalar per column when $R=2$ \\
+$M_H(x)=[e_r^\top H_cx]_{rc}$;\ $\tau_c(x)=E[T_c\mid X=x]$ & implied mean transition matrix; regression function \\
+$\mu_r=E[NX_r]$,\ $\mu_{rs}=E[NX_rX_s]$ & weighting moments \\
+$S(x,t)$;\ $h_S(u;x,t)$ & unit Duncan--Davis polytope; its support function \\
+$\Theta_I\subseteq\Theta_X\subseteq\Theta_O$ & sharp set; JKST Prop.~1 set; outer set \\
+$\zeta_{c,d}\in\mathbb R^R$ & district intercept shifts (M1), identified \\
+$Q^{(d)}_c,\ K^{(d)}_c,\ A_d$ & district-level identified part, unidentified part, support hull \\
+$\delta_B,\ \delta_W,\ \Delta$ & between, within (W1) and pooled-within (W2) associations (PHASE2c) \\
+$\mathrm{CI}_x,\ S_1$ & JKST confidence interval; residual (Popoviciu) standard-error term \\
+$\Phi$ & standard normal CDF \\
+\bottomrule
+\end{tabular}
+\caption{Notation (after \texttt{docs/extension/notation.tex}, extended with symbols used later).}\label{tab:notation}
+\end{table}

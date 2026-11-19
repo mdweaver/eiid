@@ -1,0 +1,198 @@
+% Appendix: consolidated revision table
+\section{Consolidated revision table}\label{app:revisions}
+
+This appendix maps every referee point to the result it changed and the change
+made. It covers both rounds and all three referees. IDs are those of the
+repository's ledgers, so each row can be traced:
+\begin{itemize}[nosep]
+\item \textbf{R-01 to R-37}: the Phases~1--3 referee, round~1 (two reports:
+Phases~1--2a, then 1--3). Ledger: \texttt{REVIEW\_RESPONSE\_PLAN.md} \S1;
+letter: \texttt{REVIEW\_RESPONSE.md}.
+\item \textbf{P-B1 to P-B43}: the Batch~B partial-identification referee, round~1.
+\textbf{P-E1 to P-E33}: the Batch~B ecological-inference referee, round~1.
+Ledger: \texttt{reviews/B\_PI\_RESPONSE\_PLAN.md} \S2; responses:
+\texttt{reviews/B\_*\_response.md}.
+\item \textbf{A2-1 to A2-7}: the Phases~1--3 referee, round~2, numbered by the
+report's sections~1--7 (\texttt{reviews/A\_phases1to3\_report\_round2.md};
+response \texttt{REVIEW\_RESPONSE\_ROUND2.md}).
+\item \textbf{I.1 to I.13}: the partial-identification referee, round~2
+(\texttt{reviews/ROUND2\_THEORY\_PLAN.md} Part~I;
+\texttt{reviews/B\_partial\_identification\_response\_round2.md}).
+\item \textbf{E2-1 to E2-5}: the ecological-inference referee, round~2, numbered
+by the response's items (corrections 1--4 and the final paragraph;
+\texttt{reviews/B\_ecological\_inference\_response\_round2.md}).
+\item \textbf{M-1 to M-17}: the internal consistency log of the merged M-SIGN
+material (\texttt{MSIGN\_REVIEW\_LOG.md}), listed for completeness; it is not
+an external referee.
+\end{itemize}
+Types: \textbf{E} a claim wrong as stated; \textbf{S} scope; \textbf{P} proof
+detail; \textbf{X} exposition; \textbf{C} code. ``Check'' names the numerical
+check added, with its [F]/[V]/[I] class where the repository gives one.
+
+{\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{@{}p{0.06\linewidth}p{0.03\linewidth}p{0.30\linewidth}p{0.17\linewidth}p{0.30\linewidth}p{0.08\linewidth}@{}}
+\toprule
+ID & T & Referee point & Result changed & Change made & Check \\
+\midrule\endfirsthead
+\toprule ID & T & Referee point & Result changed & Change made & Check \\ \midrule\endhead
+\multicolumn{6}{@{}l}{\textbf{Phases 1--3 referee, round 1, first report (Phases 1, 2a)}}\\
+R-01 & X & $\sum_cH_c=J$ argued from an unassumed open set & P1 (1.5); 2a L1(b) & Derived from A5 (2a Lemma~1(b)). & --- \\
+R-02 & S & A5 must be a matrix rank condition; three points not enough for $R=3$ & P1 A5; 2a L1, Rem.~1.1 & A5 in matrix form; Remark~1.1 (six points off a conic). Package rank error. & 2a \\
+R-03 & X & Derivative wording in Lemma~2 & 2a Lemma~2 & Coefficient in the free coordinates of Prop.~7. & --- \\
+R-04 & E & (S3) does not follow from (S1)--(S2) for every $A$ & 2a (S3), Lemma~3(c), Rem.~5.1 & (S3) automatic only when $A\subseteq\conv(\supp_AP_X)$; singleton counterexample. & 2a (singleton) \\
+R-05 & S & $P(X\in A)=1$ used silently & 2a Props 4--7, Cor.~1 & Hypothesis added; new Prop.~7$'$ (units outside $A$; \texttt{range="trim"}). & 2a \\
+R-06 & E & Value function claimed jointly concave & 2a Prop.~7 (regularity) & Concave in $Q$, convex in $\gamma$, neither jointly; example $V=\mu Q$. & 2a [F] \\
+R-07 & E & ``Nonempty relative interior'' too weak for compactness & 2a Thm~1, Lemma~3(b), Rem.~5.2 & $\operatorname{affdim}(A)=R-1$; A5 implies it; $\ThO$ a polyhedron until bounded. & 2a (unbounded LP) \\
+R-08 & P & Sufficiency proof of Thm~1 too brief & 2a Thm~1 & Facts F1--F7; ``all $u$ at once'' paragraph. & --- \\
+R-09 & P & Citations from memory & 2a \S0.4 & Citation table; CLR ``Thm~2'' corrected to Thm~4. & --- \\
+R-10 & S & $\ThO$ called sharp & 2a Props 2--4, 7 & ``Sharp for the regression function'' only; ``outer bounds'' in package. & --- \\
+R-11 & S & Hulls conflated & P1 \S1.7 & Three hulls named. & --- \\
+R-12 & S & Sharpness vs integer counts & 2a Rem.~4.2 & Sharp only for continuous latent rates. & 2a (integer vertices) \\
+R-13 & X & Prop.~5 nonemptiness & 2a Prop.~5 & Empty iff some $Q_{c,rs}<0$. & 2a \\
+R-14 & X & Cor.~6.1(c) vague & 2a Cor.~6.1(c) & Exact sign condition (a negative pure-poll rate). & 2a \\
+R-15 & S & Covariates not covered by the proofs & P1 \S1.5--1.6, A3 & $Z$ removed from $\mathcal G$; covariates a planned extension. & --- \\
+R-16 & X & Prop.~9 domain; motivation & 2a Prop.~9, Rem.~1.0 & Domain stated; moved forward as Remark~1.0. & --- \\
+R-17 & X & What each set needs from the data & 2a \S4.3 & New table. & --- \\
+\multicolumn{6}{@{}l}{\textbf{Phases 1--3 referee, round 1, revised report (adds 2b and 3)}}\\
+R-18 & X & D0: per-cell vs joint set & 2b Prop.~D0 & Joint set $\mathcal B^*_{DD}$ is not a product. & 2b \\
+R-19 & S & ``$R$ distinct compositions'' insufficient under M1 & 2b Lemma~D1(d); P1 A9 & Stacked rank condition (A5-M1); affinely independent points; Rem.~D1.1. & 2b \\
+R-20 & P & Thm~1$'$ hypotheses implicit & 2b Thm~1$'$ & H1--H4 listed. & --- \\
+R-21 & X & M1(0) status & 2b Thm~2(c), Prop.~D6(d) & Labelled a sensitivity benchmark. & --- \\
+R-22 & S & D3 divides by $t$ and $1-t$ & 2b Prop.~D3 & $0<l_d\le u_d<1$ visible; pure-composition vertices treated. & 2b (195 inst.) \\
+R-23 & E & D4(b) conditioned on $X$ only & 2b Prop.~D4(b), Rem.~D4.1; P1 (D4) & Condition on $(X,N)$; $D\perp X$ not enough. & 2b [F] \\
+R-24 & X & DiD remark deserves a proposition & 2b Prop.~D8 & Promoted; exact moment condition. & --- \\
+R-25 & S & Lemma P3.1 scope & P3 Lemma P3.1 & Fixed constraint system only. & --- \\
+R-26 & S/P & P3.2 hulls and Slater & P3 Prop.~P3.2 & Non-nested hulls; Slater as interiority; error decomposition. & --- \\
+R-27 & E & P3.4(ii) negative mean claimed too widely & P3 Thm~P3.4(ii), Rem.~P3.4.1 & Needs active gradients differing in a direction where the estimator varies; $C-1$ columns. & P3 [F] \\
+R-28 & E & P3.5(a) used independence not granted; clustering & P3-S1a, \S0.4; P1 A6 & Independence given design and district effects; no clustering; \texttt{cluster} removed; pooling test P3.6(c). & --- \\
+R-29 & E & CLR with simulated candidates claimed as theorem & P3.5(b) & Split: (b1) cited, (b2) proved, (b3) conjecture; package labels CLR algorithmic. & P3 (weak duality) \\
+R-30 & E & Overidentification count & P1 (D2); P3.6(b) & $(D^\star-1)(C-1)R(R-1)/2$. & 2b \\
+R-31 & E & Asymptotic scope by regime & P3 \S0.5, P3.7, new P3.8 & Regime table; finite-sample Thm~P3.8; CLR in R2 a simulation finding. & P3 \\
+R-32 & S & Coverage vs hull & P3.2, P3.5 & Coverage of the true parameter does not depend on the hull. & --- \\
+R-33 & S/X & Three targets; ``both linear in $K$'' & P3 \S0.2; P1 \S1.7 & $B$, $\tilde B$, $B^*$; only $\tilde B$ affine in $K$. & --- \\
+R-34 & S & S1 sharpness & P3 Prop.~S1 & Labelled an outer bound. & --- \\
+R-35 & E & Turnover said to be treated & P1 A1 & Open extension. & --- \\
+R-36 & S & A6, A10 alignment & P1 A6, A10 & Aligned with P3-S1a and \S0.5. & --- \\
+R-37 & X & Monte Carlo too small & P3 \S8 & 1000 reps, MC SEs; designs E (Slater fails), R2, S0--S2 (shocks). & MC \\
+\multicolumn{6}{@{}l}{\textbf{Batch B partial-identification referee, round 1}}\\
+P-B1 & S & M2 sharp only for continuous tables & 2c M2, Rem.~M2.1 & Relabelled; 2$\times$2 lattice proposition; integer N1 = R15 (U1). & C7 [F] \\
+P-B2 & S & Scalar breakdown needs a path & 2c M2(d) & Componentwise nesting; frontier; scalar path. & C7b [V] \\
+P-B3 & E & M3(d) fails at $\gamma=1$ & 2c M3(d) & Cases $\gamma<1$, $\gamma=1$, $D_{ER}=0$. & C8 [F] \\
+P-B4 & S & M3(c) witness removable & 2c M3 hypotheses & No unit restrictions, no other sign rows. & C8b [F] \\
+P-B5 & E & ``CR never refuted'' & 2c M3, Reading; 5a; guide; package & Names its base system. & C7 \\
+P-B6 & --- & M4 established & 2c M4 & No action. & --- \\
+P-B7 & E & M5 wrong for district rungs & 2c M5; PD P-N, \S4.2 & Stacked form (a); per-district ordering (b); (c) for M0 only; R16 opened. & C9 [F] \\
+P-B8 & E & $p^{-1/2}$ claim for $\delta-\delta^*$ & 2c Rem.~M5.1 & Root sum of squared coefficients, under P3-S1a. & --- \\
+P-B9 & S & N2 support ambiguous & 2c N2.2(a)(b) & Finite empirical design law; grids are relaxations. & C10 [F] \\
+P-B10 & E & Proposed sharp N2 not sharp & 2c N2.2(a), Rem.~N2.2.1 & $V$-conditional statement as Conjecture N2.2$'$. & C10b [F] \\
+P-B11 & E & Derivative not identified on finite support & 2c N2.3 & Structural identity only; N2-local rows dropped (U4(a)). & C11 [F] \\
+P-B12 & X & Smooth witness for N2.3(d) & 2c N2.3(d) & Smooth example; reverse direction. & C13 [I] \\
+P-B13 & E & Binning argument wrong & 2c Lemma~N2.4 & Person-weighted bin rates (new lemma). & C12 [F] \\
+P-B14 & E & CV-selected degree then fixed-degree inference & 2c \S6 & Prespecified degree; $q$ vs $J_X$. & C12b [F] \\
+P-B15 & X/S & R3(b) ``LP''; full law vs regression & 5a R3(b), Rem.~R3.1 & Finite LP for polyhedral $C$; example. & S6 [V] \\
+P-B16 & E & R3(e) ``never $C$ alone''; ``unrefutable'' & 5a R3(e), Rem.~R3.2 & Conjunction rejected; LCE can exclude CR. & S7 [F] \\
+P-B17 & X & Certificate only sufficient & 5a \S1.4 & Square example. & --- \\
+P-B18 & E & Face LP omitted target intercept & 5a R2 step~4 & $h^\top k\ge U-\varphi_0$ (code already correct). & T1c [F] \\
+P-B19 & X & Positive dual does not certify & 5a R2(b)(c) & Duplicate-row example; witness need not be a reported target. & --- \\
+P-B20 & S & R2(d) qualifications & 5a R2(d) & $\gamma<1$; non-constant target. & --- \\
+P-B21 & E & ``Redundant given the others'' & 5a R2(e) & Zero incremental gain for this target. & T4b [F] \\
+P-B22 & S & Width-gain inference & 5a \S2.5 & Joint treatment required. & --- \\
+P-B23 & S & R10 conditions per version & 5a R10 status table & Version table; Condition P stated; zero-variance candidates. & --- \\
+P-B24 & P & Residual for contrasts & 5a R10(a) & Contrast envelope; per-cell sum valid. & --- \\
+P-B25 & S/P & R10(b)--(d) qualifications & 5a R10(b)--(d) & One simultaneous event; point coverage; triangular arrays. & --- \\
+P-B26 & P & R10(e) only by Monte Carlo & 5a R10(e) & Analytic proof (referee's, credited): $\le0.9335$. & V9 [V] \\
+P-B27 & E & ``A fortiori'' transfer false & 5a \S3.5 item~4 & Direct $\le\tfrac12$ argument. & V10 [F] \\
+P-B28 & X & Lemma M1 hypotheses; W2 sums & 2c Lemma~M1, Def.~1 & Per-part hypotheses; W2 is one sum. & --- \\
+P-B29 & X/S & Ladder wording; simplex chart & 2c \S5, N2.2(e) & Same-direction ``both signs''; chart. & C5(c$'$) [V] \\
+P-B30 & X/C & Population vs sample emptiness & 5a \S1.6; package & ``Empty at the point estimate''. & pkg test \\
+P-B31 & S & EGGHM mixed-unit condition & 2c \S0, M3 & Added. & --- \\
+P-B32 & S & EGGHM sharpness is continuous & 2c M2, M3 & Cited with P-B1. & --- \\
+P-B33 & X & EGGHM theorem mapping & 1b & Fixed. & --- \\
+P-B34 & S & EGGHM local results & 2c N2.3 & With P-B11. & --- \\
+P-B35 & C & C4 construction invalid & \texttt{verify\_phase2c.py} & C4 rebuilt. & C4 [V] \\
+P-B36 & C/X & S2 labels & \texttt{verify\_R3.py} & Empty / point / positive-width. & --- \\
+P-B37 & C & T4 solver status & \texttt{verify\_R2.py} & Status printed. & --- \\
+P-B38 & C/X & Union length double-counted & 5a \S3.4 & Occupied length. & V11 [V] \\
+P-B39 & E & [supp]: support of the restricted measure & 2a \S0.1, L1, L3(c), Rems 5.1--5.2; P1 A5; 2b D1 & $\supp_AP_X$ throughout. & 2a [supp] [F] \\
+P-B40 & E & Projection under singular $\Sigma$ & P3.5(b2)(ii) & Positive definite $\Sigma$ or exact reduced parameterisation; package guard. & P3 [F] \\
+P-B41 & P & Residual CLT gap & P3.5(a) step~5 & Chebyshev/Lindeberg subsequence argument (referee's). & P3 [F] \\
+P-B42 & X & 1b mapping; pure units & 1b & Fixed. & --- \\
+P-B43 & X & Process: internal review missed items & 5a \S4; review plan & Pre-screen must cover scope documents. & --- \\
+\multicolumn{6}{@{}l}{\textbf{Batch B ecological-inference referee, round 1}}\\
+P-E1 & E & W2 is one pooled sum; W1 and W2 can disagree & 2c Def.~1; guide; vignette & Wording; two-unit example. & C14 [F] \\
+P-E2 & E & W1 predictor & vignette; guide & Reworded. & --- \\
+P-E3 & X & $\delta_B$ weights & 2c Def.~1 remarks & Weighting sentence; weight diagnostics. & --- \\
+P-E4 & X & Sorting; causal reading & 2c remarks; guide & Sentence added. & --- \\
+P-E5 & E & Goodman bias not signed & 2c Def.~1 remarks; 1b & $g-B=M^{-1}\Delta$. & --- \\
+P-E6 & S/C & Pairwise CR mixes pairings & 5a \S1.4; package & Both terms printed. & pkg test \\
+P-E7 & X/C & Pre-specification; pooled restriction & guide; vignette; package & Checklist; base interval printed (U7). & --- \\
+P-E8 & X & EGGHM extensions & 2c remarks & W2, pair, CR marked extensions. & --- \\
+P-E9 & X & What a sign does not mean & guide & List added. & --- \\
+P-E10 & X & ``Exact'' & guide; vignette & Dropped. & --- \\
+P-E11 & S & Integer endpoint failure & 2c Rem.~M2.1 & Second example. & C7 \\
+P-E12 & E & Equal-rates witness; three events & 2c M3 Reading; 5a & R$\times$C witness; three distinct events. & C8b \\
+P-E13 & E & M3(d) at $\gamma=1$ & 2c M3(d) & As P-B3. & C8 \\
+P-E14 & X & Slab orientation & vignette & Hull notation. & --- \\
+P-E15 & C & Print hides pieces & package & Every piece printed. & pkg test \\
+P-E16 & C/X & Estimated set vs CI & package; vignette & Separate lines; interpretation. & --- \\
+P-E17 & X/C & CLR CR status; numbers per method & guide; 5a & Method named with each number (U6). & --- \\
+P-E18 & X/C & Descriptive values & package; guide & Labels; design-specific miss rates. & --- \\
+P-E19 & C/X & Verdict labels; unions & 5a \S2.5; package & Base and order named; hull span. & pkg test \\
+P-E20 & C & Report table; L5/L6 signs & package & Base column; L5/L6 check (later). & --- \\
+P-E21 & C/X & Union lengths & 5a \S3.4 & As P-B38. & V11 \\
+P-E22 & X/C & False-belief experiment & 5a \S3.4; guide & V12 added; slack dial exists (5a \S5 corrected). & V12 [I] \\
+P-E23 & E/S & N2 points & 2c \S\S4, 6 & As P-B9 to P-B14. & C10--C12 \\
+P-E24 & X & Turnout example & guide; vignette & Added. & --- \\
+P-E25 & C/X & Weight concentration & 2c Rem.~M5.1; package & Concentration in \texttt{eiRedundancy()}. & --- \\
+P-E26 & X & King's EI comparison & guide & Paragraph added. & --- \\
+P-E27 & X & Adding-up; complementary columns & 2c \S5; guide & Sentences added. & --- \\
+P-E28 & X & One status key; stale slack line & 5a \S5; 2c header & Fixed. & --- \\
+P-E29 & X & 1b CR as two LPs superseded & 1b & Marked superseded. & --- \\
+P-E30 & X & 1b W2 wording & 1b & Fixed. & --- \\
+P-E31 & X & Guide \S2: requirements per rung & guide & Fixed. & --- \\
+P-E32 & X & Aggregate reversal not evidence & 1b & Fixed. & --- \\
+P-E33 & X & Belief selection & 5a R10(d) & Sentence added. & --- \\
+\multicolumn{6}{@{}l}{\textbf{Phases 1--3 referee, round 2}}\\
+A2-1 & --- & Overall assessment & --- & No action asked. & --- \\
+A2-2 & E/S & P3.4 with changing sample hulls ($f_n$ counterexample) & P3 Thm~P3.4; new Prop.~P3.4$'$ (R17) & Fixed constraint system; triangular-array limit under localisation. & P3.4$'$ [F] \\
+A2-3 & S & Projection interval for $B$ not covered & new P3.5(c) (R18); P3 \S8 & (c1) valid, (c2) algorithmic; MC column rerun; package 0.3.1 \texttt{proj\_actual} per (c1). & P3.5(c) [V] \\
+A2-4 & E & D8 ``iff'' false & 2b Prop.~D8 & (a) cancellation; (b) given the identified set; no causal reading. & D8b [F] \\
+A2-5 & S & Independence is substantive & P3 \S0.4, after P3.6(c) & Two arguments separated; pooling test does not test it. & --- \\
+A2-6 & --- & P3.8 a successful addition & P3.8 & Emphasis kept; R2 open. & --- \\
+A2-7 & --- & CLR treatment appropriate & P3 \S10 & ``Uniformly'' added to the (b3) question. & --- \\
+\multicolumn{6}{@{}l}{\textbf{Batch B partial-identification referee, round 2}}\\
+I.1 & E & Equal-rates witness gives the CR union, not both branches & 2c M3 Reading & Referee's wording; three-row example. & C15 [F] \\
+I.2 & S & R10 scope said ``or M1/M2 in R1'' & 5a Thm~R10 & Pooled M0 only. & --- \\
+I.3 & S & Numerical rank cutoff is not (ii-b) & P3.5(b2) remark; package & Safeguard only; $q=\dim\beta$ in 0.3.1. & --- \\
+I.4 & E & N2.3(d) premise & 2c N2.3(d) & Monotone on a neighbourhood of $x$. & C16 [F] \\
+I.5 & X & Lattice step needs both totals & 2c Rem.~M2.1 & $1/N_1+1/N_0$; worked example. & --- \\
+I.6 & S & Model-implied bin mean & 2c Lemma~N2.4, \S6 & $\bar\tau_b=E_b\tau$; specification caveat. & --- \\
+I.7 & X & ``Every computation is a finite LP'' & 5a \S1.1 & Narrowed to $\ThO\cap C$. & --- \\
+I.8 & E & M4 example backwards & 2c M4 & Same sign on complementary columns forces $D=ER$. & C3b \\
+I.9 & X & Branch vs image & 2c M3(d) & Distinguished. & --- \\
+I.10 & X & Set vs frontier & 2c M2(d) & Boundary is the frontier. & C7b \\
+I.11 & --- & N2.2$'$ sufficiency argument & 2c Rem.~N2.2.1 & Credited remark; conjecture stays open. & --- \\
+I.12 & X & ``Every check fails on the old statement'' overstated & 2c, 5a headers; scripts & [F]/[V]/[I] classes. & labels \\
+I.13 & --- & R2, R3 (pooled), R10 (restricted) accepted & --- & No action. & --- \\
+\multicolumn{6}{@{}l}{\textbf{Batch B ecological-inference referee, round 2}}\\
+E2-1 & E & W1 example and pairwise CR & guide; vignette; 5a \S1.4; package label & Either part may be negative; pair changes one side only. & pkg tests \\
+E2-2 & E & Coverage figure for the procedure described & 5a \S3.5 item~4; guide & Literal intersection 304/600; CR-naive 550/600. & V13 [V] \\
+E2-3 & E & False-belief results & guide; vignette & All three counts (398, 110, 0 of 400). & --- \\
+E2-4 & S & Projection guarantee scoped to the fit & 5a R10; 2c M5; package \texttt{print()} & Status line per fit; R16 for grouped M-SIGN. & pkg tests \\
+E2-5 & X/C & Rung-only comparison; open items & guide; vignette; package & Joint effect of removing all beliefs; ``Not yet available'' list. & pkg test \\
+\multicolumn{6}{@{}l}{\textbf{Internal consistency log of merged M-SIGN material (not an external referee)}}\\
+M-1 & S & R3 dimension hypothesis & 5a R3, R2 & $\operatorname{affdim}(A)=R-1$. & --- \\
+M-2 & S & R10 after the P3.5 split & 5a R10 & Status note by version. & --- \\
+M-3 & S & Relaxed-candidate device & 5a \S5 & Justified by weak duality; coverage = (b3). & --- \\
+M-4 & X & 1b ``uniformly'' claim & 1b & Dropped. & --- \\
+M-5 & S & Clustering in 1b/2d & 1b, 2d & One unit observed twice; county effects in the mean. & --- \\
+M-6, M-7 & X & Old theorem numbers; ``proved'' for CLR & PD, 5a, 2c & Renumbered; CLR algorithmic. & --- \\
+M-8 & C & \texttt{cluster} argument & package & Removed. & --- \\
+M-9--M-13 & --- & Items needing external review & 5a, 2c, 1b, 2d & Reviewed in Batch~B (M-9 to M-12); 1b/2d (M-13) not yet. & --- \\
+M-14 & X & Name clash D4 & 1b, 2d, PD & DiD rungs renamed $\Delta0$--$\Delta8$. & --- \\
+M-15 & --- & NEW\_AVENUES cluster claims & NEW\_AVENUES & Marked for re-derivation. & --- \\
+M-16, M-17 & C & Code review; coverage MC & package & Partly via referees; batch~E code review open. & --- \\
+\bottomrule
+\end{longtable}
+}

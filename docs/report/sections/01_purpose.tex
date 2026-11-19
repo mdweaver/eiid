@@ -1,0 +1,134 @@
+% Section 1: purpose and scope
+\section{Purpose and scope}\label{sec:purpose}
+
+\subsection{The problem}
+
+Ecological inference (EI) asks how groups behaved when only group shares and
+outcome shares are observed for each unit. A unit is a polling place, a
+precinct, a county or a riding. For unit $i$ we see the row shares
+$X_i\in\Delta^{R-1}$ (for example, how its electorate voted in election~1, or
+its racial composition) and the column shares $T_i\in\Delta^{C-1}$ (for
+example, how it voted in election~2). Here $\Delta^{k-1}$ is the probability
+simplex in $\mathbb R^k$. We want the latent $R\times C$ table of rates
+$\beta_i=[\beta_{irc}]$, where $\beta_{irc}$ is the share of row-$r$ members
+of unit $i$ who chose column $c$, and above all its electorate-wide average,
+the transition rate $B_{rc}$ (Section~\ref{sec:setting}).
+
+The data link rows and columns only through the accounting identity
+$T_i=\beta_i^\top X_i$. In each unit there are $RC$ unknown rates and only
+$C-1$ free equations. Without further structure the rates are not
+point-identified.
+
+\subsection{Why partial identification}
+
+The classical answers either assume enough to obtain a point (Goodman's
+constancy; King's truncated normal; hierarchical R$\times$C models) or give the
+widest possible range (the Duncan--Davis ``method of bounds''). The first
+kind of answer can be confidently wrong when its assumption fails. The second
+is always valid but often too wide to be useful.
+
+Partial identification takes the middle road. It states an assumption, derives
+the set of values of the target that are consistent with the data and that
+assumption (the \emph{identified set}), and reports that set. When the
+assumption is weak, the set is wide but credible. When it is strong, the set is
+narrow but rests on more. The researcher can see exactly what each assumption
+buys. Jiang, King, Schmaltz and Tanner~\citep{jkst2019} (JKST below) did this
+for $2\times2$ tables under \emph{linear contextual effects} (LCE): each
+group's mean rate may depend linearly on the composition of the unit. The
+present work extends that programme to general R$\times$C tables, to units
+nested in districts, to sign and monotonicity beliefs from Monotone EI
+\citep{egghm2025}, and to valid inference for all of these.
+
+\subsection{The plan of the work: a ladder of assumptions}
+
+The work organises assumptions as a ladder. Each rung adds an assumption, and
+under the conditions stated in each result, its identified set lies inside the
+one before it. The rungs are not all on one line: some are non-nested and are
+reported side by side. Table~\ref{tab:ladder} lists them with what each adds.
+
+\begin{longtable}{@{}p{0.17\linewidth}p{0.42\linewidth}p{0.33\linewidth}@{}}
+\caption{The rungs and what each adds.}\label{tab:ladder}\\
+\toprule
+Rung & Assumption added (plain) & What it buys \\
+\midrule\endfirsthead
+\toprule Rung & Assumption added (plain) & What it buys \\ \midrule\endhead
+DD (Duncan--Davis) & None beyond the accounting identity (A1). & The model-free range; the baseline everyone can accept. Districts add nothing here (Prop.~D0). \\
+M2 & Each district has its own linear contextual effects. & Usually little: district bounds add up (Prop.~D5). \\
+M1($\delta$) & District contextual effects differ from a shared set by at most $\delta$. & A sensitivity dial from M2 ($\delta$ large) to M1 ($\delta=0$) (Prop.~D6). \\
+M1 & Shared contextual effects, district baselines (``riding dummies''). & One district with lopsided units and an extreme baseline tightens the bound for all (Prop.~D3). \\
+L4($r$) & Row $r$ has no contextual effect. & Pins $(C-1)(R-1)$ unknown directions; point identification when $R=2$ (Prop.~D7(b)). \\
+L5 & Constancy within each district (Goodman by district). & A point (Prop.~D7(a)); best used as a diagnostic. \\
+L6 & Constancy everywhere (Goodman). & A point; historical reference. \\
+M0 (pooled, beside the ladder) & One set of linear contextual effects for all units, no districts. & JKST's model in R$\times$C; non-nested with M1 (Prop.~D4). \\
+M-SIGN (any linear rung) & The sign of the between or within association, or that the two reinforce each other (CR). & Large gains in simulation; a false belief gives narrow, wrong intervals (PHASE5a~\S3.4). \\
+N1 & The same sign beliefs on realised unit tables, no linear model. & Bounds sharp for continuous unit tables (Prop.~M2). Not in the package. \\
+N2 & Each group's mean rate is monotone in composition, any shape. & An outer LP that contains LCE with signed slopes (Prop.~N2.2). Not in the package. \\
+\bottomrule
+\end{longtable}
+
+What each rung adds, in one sentence each:
+\begin{itemize}[nosep]
+\item \textbf{LCE (M0) over DD.} The regression of $T$ on $X$ is quadratic under
+LCE and identifies the symmetric part $Q$ of the coefficient matrices. Only the
+skew part $K$, of dimension $(C-1)R(R-1)/2$, is left unknown, and requiring the
+implied rates to be probabilities at the extreme units bounds it.
+\item \textbf{Districts (M1 and relatives) over M0.} District baselines protect
+against between-district aggregation bias, and shared contextual effects carry
+the information of the most informative district to all districts.
+\item \textbf{Signs and reinforcement (M-SIGN) over a linear rung.} One or two
+extra linear rows in $K$ can cut the bound substantially; the price is a
+belief that the data cannot always check.
+\item \textbf{Inference.} Every bound is computed from an estimated regression.
+The plug-in bound is too narrow, so confidence intervals that treat each end
+as an intersection of many estimated candidates are needed (Phase~3).
+\end{itemize}
+
+\subsection{What this report contains and how to read it}
+
+This report collects the theory, the package mapping and two rounds of
+external referee review into one document. It is pinned to commit
+\texttt{b270285} of branch \texttt{claude/wizardly-volta-lbh4bm} of the
+repository \texttt{mdweaver/eiid}.
+
+\begin{itemize}[nosep]
+\item Sections~\ref{sec:setting}--\ref{sec:did} state each result, give its
+source label in the repository (for example ``Proposition P3.4$'$ (PHASE3
+\S4)''), explain it in plain terms, sketch the argument and point to the full
+proof in the appendices. Where a referee changed a result, a \emph{revision
+note} follows it.
+\item Section~\ref{sec:evidence} collects the numerical evidence. It is
+evidence, not proof.
+\item Section~\ref{sec:package} maps results to the R package
+\texttt{eiPartialID} 0.3.1.
+\item Section~\ref{sec:status} is the status table of every result.
+Section~\ref{sec:open} lists what is open.
+\item Appendix~\ref{app:revisions} is the consolidated table of every referee
+point, the result it changed and the change made.
+\item Appendices~\ref{app:phase1}--\ref{app:pkgdesign} reproduce the
+repository's theory documents verbatim (converted mechanically from Markdown).
+They contain every detailed proof, with the justification tag on each step.
+\end{itemize}
+
+\paragraph{Status labels.} The referees insisted that established results,
+conjectures and algorithmic procedures be kept apart. Every result carries one
+of these labels:
+\begin{description}[nosep,font=\normalfont\sffamily]
+\item[Proved] A proof is written in the repository, in numbered steps with
+justification tags, and checked numerically where possible.
+\item[Proved under conditions] Proved, but only under a stated scope (for
+example, the pooled model M0 only, or a fixed number of districts).
+\item[Cited] The result applies a published theorem whose conditions are
+checked here but whose proof is not repeated.
+\item[Sketch] Only an outline of a proof exists in the repository.
+\item[Conjecture] Stated precisely, supported by checks or simulation, not
+proved.
+\item[Algorithm] A procedure whose validity is not proved (for example, the
+CLR interval as implemented). Simulation evidence cannot promote it.
+\item[Open] Not settled.
+\item[Proposal] Written in a Phase-1 or Phase-2 proposal document that has not
+been through the review rounds (PHASE1b, PHASE2d).
+\end{description}
+Verification checks are tagged as in the repository: \textbf{[F]} fails on an
+earlier statement and passes on the corrected one; \textbf{[V]} verifies a
+corrected or new statement; \textbf{[I]} illustrates or strengthens a
+statement that was already true.

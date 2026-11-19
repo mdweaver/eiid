@@ -1,0 +1,83 @@
+% Section 3: the 2x2 original
+\section{The $2\times2$ original: Duncan--Davis and JKST}\label{sec:2x2}
+
+Source: PHASE1 \S0 (Appendix~\ref{app:phase1}), PHASE2a \S6.1, and the
+original paper and package~\citep{jkst2019,duncan1953}.
+
+\subsection{Duncan--Davis (the method of bounds)}
+
+With two rows (Black, white; or group 1 and the rest) and a binary outcome, the
+accounting identity in unit $i$ is $T_i=X_i\beta^b_i+(1-X_i)\beta^w_i$. Each
+unit's rate for one group then lies in an interval:
+\[
+\beta^w_i\in\Big[\max\Big\{0,\tfrac{T_i-X_i}{1-X_i}\Big\},\ \min\Big\{1,\tfrac{T_i}{1-X_i}\Big\}\Big],
+\]
+and the same for $\beta^b_i$. Aggregating with the target weights gives the
+Duncan--Davis (DD) bound on $B$ \citep{duncan1953}. In R$\times$C the per-cell
+version is the Fréchet--Hoeffding bound
+$n_{rc}\in[\max\{0,x_r+t_c-1\},\min\{x_r,t_c\}]$ (PHASE2a Prop.~8;
+PHASE2b Prop.~D0).
+
+\begin{plain}
+DD uses nothing but arithmetic. It is always valid when A1 holds, never empty,
+and often wide: in the BC $3\times3$ illustration of PHASE2a \S8 the DD bound
+on loyalty is $[0.131,0.973]$.
+\end{plain}
+
+\subsection{JKST: linear contextual effects in $2\times2$}
+
+JKST's Assumption~1 is that $(\beta^b_i,\beta^w_i,X_i,N_i)$ are iid with
+$\E(\beta^w_i\mid X_i,N_i)=w_0+w_1X_i$ and
+$\E(\beta^b_i\mid X_i,N_i)=b_0+b_1X_i$. The accounting identity then gives
+\[
+\E(T_i\mid X_i)=w_0+c_1X_i+d_1X_i^2 ,
+\]
+which identifies $(w_0,c_1,d_1)$ and leaves one free parameter, $w_1$.
+\begin{itemize}[nosep]
+\item \textbf{JKST Prop.~1} bounds $w_1$ through
+$\E(L_i\mid X_i)\le w_0+w_1X_i\le \E(U_i\mid X_i)$ on a set $A$, where $L_i,U_i$
+are the unit DD ends. It uses the conditional law of $T$ given $X$.
+\item \textbf{JKST Prop.~2} relaxes Prop.~1 by Jensen's inequality and uses the
+quadratic regression only. \emph{The package implements only Prop.~2}, with
+$A=[\min X_i+10^{-5},\max X_i-10^{-5}]$, so the package bound is an outer set,
+not the sharp one (PHASE1 \S0, fact~2).
+\item \textbf{JKST Prop.~3} is the version with $A=[0,1]$ (extrapolation to pure
+units).
+\item \textbf{JKST Prop.~4 / App.~A (inference)}:
+$\mathrm{CI}_x=[\hat B_L-xS_L,\ \hat B_U+xS_U]\cap DD$, with an HC1 sandwich
+variance and the Popoviciu bound $\Var(\beta)\le1/4$ for the finite-population
+term $S_1$. It needs tie-breaking (one active constraint) and covers the
+parameter $B$ with probability at least $\Phi(x)$, in the spirit of
+Imbens--Manski~\citep{imbensmanski2004}.
+\item \textbf{App.~B}: the package reverts to DD when $\mathrm{CI}_0\cap DD$ is
+empty; under the model $\mathrm{CI}_0\ne\emptyset$ in the large-$p$ limit.
+\item \textbf{App.~C (covariates)}: covariates enter the intercept additively,
+with a common slope; only $\tilde w_1$ is unidentified. Not in the package.
+\end{itemize}
+
+\begin{plain}
+JKST's insight is that LCE leaves exactly one number unknown in $2\times2$: how
+the curvature of the aggregate regression splits between the two groups'
+contextual slopes. The requirement that both groups' implied rates be
+probabilities at the two extreme compositions bounds that number, and hence $B$.
+\end{plain}
+
+\subsection{How the R$\times$C work contains JKST}
+
+PHASE1 \S0 (fact~6) rewrote Prop.~2 in the homogeneous form of
+Section~\ref{sec:setting} and checked numerically that it reproduces the
+package's \texttt{generateBounds} to $10^{-16}$
+(\texttt{docs/extension/check\_2x2\_equivalence.py}). PHASE2a Prop.~4
+(Result~\ref{res:p2a-p4} below) proves the equivalence: the outer set $\ThO$ in
+$2\times2$ is JKST Prop.~2 (with $A=[l,u]$) or Prop.~3 (with $A=\Delta^1$), the
+dictionary is $K=c_1/2-w_1$, and $B^*(K)$ is JKST eq.~(16). PHASE2a Thm~1
+(Result~\ref{res:p2a-t1}) confirms JKST's ``tightest bound'' claim for Prop.~1
+when conditioning on $X$ only, and shows that conditioning on $(X,N)$ can be
+strictly tighter.
+
+\begin{revnote}
+The Phases~1--3 referee asked that ``sharp'' never be applied to $\ThO$ without
+``for the regression function'', and that the three sets, three hulls and three
+targets be named in every statement. PHASE1 \S1.7 was added for this
+(Appendix~\ref{app:revisions}, rows R-10, R-11 and R-33).
+\end{revnote}

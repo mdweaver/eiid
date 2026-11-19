@@ -1,6 +1,6 @@
 # Plan: responding to the two reviewer reports
 
-*Covers the first report (Phases 1 and 2a) and the revised report (Phases 1, 2a, 2b and 3). Each comment gets an ID (R-xx), a type, the files it touches, the action, any package impact, and how the fix will be checked. Work is grouped into workstreams. They run in the order given because later ones cite the corrected statements from earlier ones.*
+*Covers the first report (Phases 1 and 2a; `reviews/A_phases1to2a_report_round1.md`) and the revised report (Phases 1, 2a, 2b and 3; `reviews/A_phases1to3_report_round1_revised.md`). Each comment gets an ID (R-xx), a type, the files it touches, the action, any package impact, and how the fix will be checked. Work is grouped into workstreams. They run in the order given because later ones cite the corrected statements from earlier ones.*
 
 **Types:**
 * **E**: a mathematical claim that is wrong as stated

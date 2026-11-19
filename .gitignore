@@ -42,3 +42,7 @@ rsconnect/
 # R CMD build/check output inside package/
 package/*.tar.gz
 package/*.Rcheck/
+
+# Python bytecode (from the check scripts)
+__pycache__/
+*.pyc

@@ -1,194 +1,211 @@
 phase3_montecarlo.py: 1000 replications per design, 4 processes. Coverage: share of replications (MC standard error in parentheses; when every replication covers, [>= b] is the exact one-sided 95% lower confidence bound 0.05^(1/R)). Widths: median, clipped to [0, 1].
 
-Design A_10x93 (7 s)
+Design A_10x93 (8 s)
   A_10x93 / M1: reps 1000, DD width 0.574, q = rank Sigma = 21
-    plug       target B : cover 0.982 (0.004), empty 0.000, median width 0.287
-    cons_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.696
-    clr_B_pop  target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.530
-    clr_B_bd   target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.538
-    proj_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.662
-    fin_B      target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
-    cons_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.596
-    clr_Bt     target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.432
-    proj_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.554
-    fin_Bt     target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
+    plug         target B : cover 0.982 (0.004), empty 0.000, median width 0.287
+    cons_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.696
+    clr_B_pop    target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.530
+    clr_B_bd     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.538
+    proj_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.662
+    proj_B_clrbd target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.662
+    fin_B        target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
+    cons_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.596
+    clr_Bt       target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.432
+    proj_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.554
+    fin_Bt       target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
     pooling test (Wald, zeta = 0, df 18): rejection rate at 5% 1.000 (0.000)
 
-Design A_93x30 (229 s)
+Design A_93x30 (220 s)
   A_93x30 / M1: reps 1000, DD width 0.567, q = rank Sigma = 187
-    plug       target B : cover 0.656 (0.015), empty 0.002, median width 0.160
-    cons_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.694
-    clr_B_pop  target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.472
-    clr_B_bd   target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.477
-    proj_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.964
-    fin_B      target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
-    cons_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.633
-    clr_Bt     target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.414
-    proj_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.932
-    fin_Bt     target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
+    plug         target B : cover 0.656 (0.015), empty 0.002, median width 0.160
+    cons_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.694
+    clr_B_pop    target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.472
+    clr_B_bd     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.477
+    proj_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.964
+    proj_B_clrbd target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.964
+    fin_B        target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
+    cons_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.633
+    clr_Bt       target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.414
+    proj_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.932
+    fin_Bt       target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
     pooling test (Wald, zeta = 0, df 184): rejection rate at 5% 1.000 (0.000)
 
-Design R2_30x10 (21 s)
+Design R2_30x10 (22 s)
   R2_30x10 / M1: reps 1000, DD width 0.571, q = rank Sigma = 61
-    plug       target B : cover 0.305 (0.015), empty 0.241, median width 0.103
-    cons_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
-    clr_B_pop  target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.731
-    clr_B_bd   target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.746
-    proj_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
-    fin_B      target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
-    cons_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.938
-    clr_Bt     target Bt: cover 0.999 (0.001), empty 0.000, median width 0.557
-    proj_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.967
-    fin_Bt     target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
+    plug         target B : cover 0.305 (0.015), empty 0.241, median width 0.103
+    cons_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
+    clr_B_pop    target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.731
+    clr_B_bd     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.746
+    proj_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
+    proj_B_clrbd target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
+    fin_B        target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
+    cons_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.938
+    clr_Bt       target Bt: cover 0.999 (0.001), empty 0.000, median width 0.557
+    proj_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.967
+    fin_Bt       target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
     pooling test (Wald, zeta = 0, df 58): rejection rate at 5% 1.000 (0.000)
 
-Design R2_93x10 (288 s)
+Design R2_93x10 (242 s)
   R2_93x10 / M1: reps 1000, DD width 0.566, q = rank Sigma = 187
-    plug       target B : cover 0.042 (0.006), empty 0.463, median width 0.052
-    cons_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.930
-    clr_B_pop  target B : cover 0.998 (0.001), empty 0.000, median width 0.566
-    clr_B_bd   target B : cover 0.998 (0.001), empty 0.000, median width 0.575
-    proj_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
-    fin_B      target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
-    cons_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.870
-    clr_Bt     target Bt: cover 0.995 (0.002), empty 0.000, median width 0.467
-    proj_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
-    fin_Bt     target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
+    plug         target B : cover 0.042 (0.006), empty 0.463, median width 0.052
+    cons_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.930
+    clr_B_pop    target B : cover 0.998 (0.001), empty 0.000, median width 0.566
+    clr_B_bd     target B : cover 0.998 (0.001), empty 0.000, median width 0.575
+    proj_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
+    proj_B_clrbd target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
+    fin_B        target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
+    cons_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.870
+    clr_Bt       target Bt: cover 0.995 (0.002), empty 0.000, median width 0.467
+    proj_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
+    fin_Bt       target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
     pooling test (Wald, zeta = 0, df 184): rejection rate at 5% 1.000 (0.000)
 
-Design R2_200x10 (1861 s)
+Design R2_200x10 (1242 s)
   R2_200x10 / M1: reps 1000, DD width 0.566, q = rank Sigma = 401
-    plug       target B : cover 0.005 (0.002), empty 0.717, median width 0.028
-    cons_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.890
-    clr_B_pop  target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.485
-    clr_B_bd   target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.491
-    proj_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
-    fin_B      target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
-    cons_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.844
-    clr_Bt     target Bt: cover 0.996 (0.002), empty 0.000, median width 0.416
-    proj_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
-    fin_Bt     target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
+    plug         target B : cover 0.005 (0.002), empty 0.717, median width 0.028
+    cons_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.890
+    clr_B_pop    target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.485
+    clr_B_bd     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.491
+    proj_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
+    proj_B_clrbd target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
+    fin_B        target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
+    cons_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.844
+    clr_Bt       target Bt: cover 0.996 (0.002), empty 0.000, median width 0.416
+    proj_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
+    fin_Bt       target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 1.000
     pooling test (Wald, zeta = 0, df 398): rejection rate at 5% 1.000 (0.000)
 
-Design C_boundary (3 s)
+Design C_boundary (2 s)
   C_boundary / M0: reps 1000, DD width 0.325, q = rank Sigma = 3
-    plug       target B : cover 0.661 (0.015), empty 0.076, median width 0.031
-    cons_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.087
-    clr_B_pop  target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.086
-    clr_B_bd   target B : cover 0.999 (0.001), empty 0.000, median width 0.057
-    proj_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.059
-    cons_Bt    target Bt: cover 0.996 (0.002), empty 0.000, median width 0.041
-    clr_Bt     target Bt: cover 0.994 (0.002), empty 0.000, median width 0.039
-    proj_Bt    target Bt: cover 0.999 (0.001), empty 0.000, median width 0.041
+    plug         target B : cover 0.661 (0.015), empty 0.076, median width 0.031
+    cons_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.087
+    clr_B_pop    target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.086
+    clr_B_bd     target B : cover 0.999 (0.001), empty 0.000, median width 0.057
+    proj_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.059
+    proj_B_clrbd target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.059
+    cons_Bt      target Bt: cover 0.996 (0.002), empty 0.000, median width 0.041
+    clr_Bt       target Bt: cover 0.994 (0.002), empty 0.000, median width 0.039
+    proj_Bt      target Bt: cover 0.999 (0.001), empty 0.000, median width 0.041
 
-Design E_slater (3 s)
+Design E_slater (2 s)
   E_slater / M0: reps 1000, DD width 0.271, q = rank Sigma = 3
-    plug       target B : cover 0.267 (0.014), empty 0.503, median width 0.038
-    cons_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.249
-    clr_B_pop  target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.221
-    clr_B_bd   target B : cover 0.998 (0.001), empty 0.000, median width 0.207
-    proj_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.249
-    cons_Bt    target Bt: cover 0.990 (0.003), empty 0.001, median width 0.179
-    clr_Bt     target Bt: cover 0.944 (0.007), empty 0.009, median width 0.143
-    proj_Bt    target Bt: cover 0.995 (0.002), empty 0.000, median width 0.194
+    plug         target B : cover 0.267 (0.014), empty 0.503, median width 0.038
+    cons_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.249
+    clr_B_pop    target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.221
+    clr_B_bd     target B : cover 0.998 (0.001), empty 0.000, median width 0.207
+    proj_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.251
+    proj_B_clrbd target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.249
+    cons_Bt      target Bt: cover 0.990 (0.003), empty 0.001, median width 0.179
+    clr_Bt       target Bt: cover 0.944 (0.007), empty 0.009, median width 0.143
+    proj_Bt      target Bt: cover 0.995 (0.002), empty 0.000, median width 0.194
 
-Design S0_noshift (27 s)
+Design S0_noshift (15 s)
   S0_noshift / M0: reps 1000, DD width 0.580, q = rank Sigma = 3
-    plug       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.312
-    cons_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.433
-    clr_B_pop  target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.421
-    clr_B_bd   target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.429
-    proj_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.436
-    cons_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.342
-    clr_Bt     target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.329
-    proj_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.336
+    plug         target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.312
+    cons_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.433
+    clr_B_pop    target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.421
+    clr_B_bd     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.429
+    proj_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.436
+    proj_B_clrbd target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.436
+    cons_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.342
+    clr_Bt       target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.329
+    proj_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.336
   S0_noshift / M1: reps 1000, DD width 0.580, q = rank Sigma = 41
-    plug       target B : cover 0.999 (0.001), empty 0.000, median width 0.262
-    cons_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.766
-    clr_B_pop  target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.563
-    clr_B_bd   target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.571
-    proj_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.808
-    cons_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.667
-    clr_Bt     target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.468
-    proj_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.704
+    plug         target B : cover 0.999 (0.001), empty 0.000, median width 0.262
+    cons_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.766
+    clr_B_pop    target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.563
+    clr_B_bd     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.571
+    proj_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.808
+    proj_B_clrbd target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.808
+    cons_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.667
+    clr_Bt       target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.468
+    proj_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.704
     pooling test (Wald, zeta = 0, df 38): rejection rate at 5% 0.090 (0.009)
 
-Design S1_affine (18 s)
+Design S1_affine (14 s)
   S1_affine / M0: reps 1000, DD width 0.571, q = rank Sigma = 3
-    plug       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.312
-    cons_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.443
-    clr_B_pop  target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.427
-    clr_B_bd   target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.435
-    proj_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.444
-    cons_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.351
-    clr_Bt     target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.335
-    proj_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.344
+    plug         target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.312
+    cons_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.443
+    clr_B_pop    target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.427
+    clr_B_bd     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.435
+    proj_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.444
+    proj_B_clrbd target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.444
+    cons_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.351
+    clr_Bt       target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.335
+    proj_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.344
   S1_affine / M1: reps 1000, DD width 0.571, q = rank Sigma = 41
-    plug       target B : cover 0.938 (0.008), empty 0.000, median width 0.240
-    cons_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.734
-    clr_B_pop  target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.531
-    clr_B_bd   target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.539
-    proj_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.773
-    cons_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.638
-    clr_Bt     target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.437
-    proj_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.672
+    plug         target B : cover 0.938 (0.008), empty 0.000, median width 0.240
+    cons_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.734
+    clr_B_pop    target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.531
+    clr_B_bd     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.539
+    proj_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.773
+    proj_B_clrbd target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.773
+    cons_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.638
+    clr_Bt       target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.437
+    proj_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.672
     pooling test (Wald, zeta = 0, df 38): rejection rate at 5% 1.000 (0.000)
 
-Design S2_nonaffine (19 s)
+Design S2_nonaffine (15 s)
   S2_nonaffine / M0: reps 1000, DD width 0.469, q = rank Sigma = 3
-    plug       target B : cover 0.002 (0.001), empty 0.987, median width 0.016
-    cons_B     target B : cover 0.038 (0.006), empty 0.962, median width 0.140
-    clr_B_pop  target B : cover 0.127 (0.011), empty 0.642, median width 0.033
-    clr_B_bd   target B : cover 0.155 (0.011), empty 0.585, median width 0.035
-    proj_B     target B : cover 0.206 (0.013), empty 0.478, median width 0.038
-    cons_Bt    target Bt: cover 0.015 (0.004), empty 0.964, median width 0.047
-    clr_Bt     target Bt: cover 0.009 (0.003), empty 0.963, median width 0.023
-    proj_Bt    target Bt: cover 0.013 (0.004), empty 0.950, median width 0.031
+    plug         target B : cover 0.002 (0.001), empty 0.987, median width 0.016
+    cons_B       target B : cover 0.038 (0.006), empty 0.962, median width 0.140
+    clr_B_pop    target B : cover 0.127 (0.011), empty 0.642, median width 0.033
+    clr_B_bd     target B : cover 0.155 (0.011), empty 0.585, median width 0.035
+    proj_B       target B : cover 0.206 (0.013), empty 0.478, median width 0.038
+    proj_B_clrbd target B : cover 0.206 (0.013), empty 0.478, median width 0.038
+    cons_Bt      target Bt: cover 0.015 (0.004), empty 0.964, median width 0.047
+    clr_Bt       target Bt: cover 0.009 (0.003), empty 0.963, median width 0.023
+    proj_Bt      target Bt: cover 0.013 (0.004), empty 0.950, median width 0.031
   S2_nonaffine / M1: reps 1000, DD width 0.469, q = rank Sigma = 41
-    plug       target B : cover 0.997 (0.002), empty 0.002, median width 0.188
-    cons_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.637
-    clr_B_pop  target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.421
-    clr_B_bd   target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.429
-    proj_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.611
-    cons_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.541
-    clr_Bt     target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.328
-    proj_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.509
+    plug         target B : cover 0.997 (0.002), empty 0.002, median width 0.188
+    cons_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.637
+    clr_B_pop    target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.421
+    clr_B_bd     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.429
+    proj_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.611
+    proj_B_clrbd target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.611
+    cons_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.541
+    clr_Bt       target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.328
+    proj_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.509
     pooling test (Wald, zeta = 0, df 38): rejection rate at 5% 1.000 (0.000)
 
-Design B_3x3 (1028 s)
+Design B_3x3 (1089 s)
   B_3x3 loyalty P->P / M0: reps 1000, DD width 0.835, q = rank Sigma = 12
-    plug       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.533
-    cons_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.675
-    clr_B_pop  target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.651
-    clr_B_bd   target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.659
-    proj_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.679
-    cons_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.592
-    clr_Bt     target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.557
-    proj_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.581
+    plug         target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.533
+    cons_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.675
+    clr_B_pop    target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.651
+    clr_B_bd     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.659
+    proj_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.679
+    proj_B_clrbd target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.679
+    cons_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.592
+    clr_Bt       target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.557
+    proj_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.581
   B_3x3 defection P->O / M0: reps 1000, DD width 0.635, q = rank Sigma = 12
-    plug       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.348
-    cons_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.447
-    clr_B_pop  target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.428
-    clr_B_bd   target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.431
-    proj_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.445
-    cons_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.399
-    clr_Bt     target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.369
-    proj_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.395
+    plug         target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.348
+    cons_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.447
+    clr_B_pop    target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.428
+    clr_B_bd     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.431
+    proj_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.445
+    proj_B_clrbd target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.445
+    cons_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.399
+    clr_Bt       target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.369
+    proj_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.395
   B_3x3 demobilisation P->abstain / M0: reps 1000, DD width 0.533, q = rank Sigma = 12
-    plug       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.283
-    cons_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.381
-    clr_B_pop  target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.363
-    clr_B_bd   target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.363
-    proj_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.377
-    cons_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.333
-    clr_Bt     target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.304
-    proj_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.329
+    plug         target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.283
+    cons_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.381
+    clr_B_pop    target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.363
+    clr_B_bd     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.363
+    proj_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.378
+    proj_B_clrbd target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.377
+    cons_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.333
+    clr_Bt       target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.304
+    proj_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.329
   B_3x3 mobilisation N->P / M0: reps 1000, DD width 0.884, q = rank Sigma = 12
-    plug       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.528
-    cons_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.683
-    clr_B_pop  target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.641
-    clr_B_bd   target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.646
-    proj_B     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.661
-    cons_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.619
-    clr_Bt     target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.559
-    proj_Bt    target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.595
+    plug         target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.528
+    cons_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.683
+    clr_B_pop    target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.641
+    clr_B_bd     target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.646
+    proj_B       target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.661
+    proj_B_clrbd target B : cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.661
+    cons_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.619
+    clr_Bt       target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.559
+    proj_Bt      target Bt: cover 1.000 (0.000) [>= 0.997], empty 0.000, median width 0.595

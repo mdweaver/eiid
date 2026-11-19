@@ -257,7 +257,7 @@ g1 = np.array([1.0, 0.0]); se1 = np.sqrt(g1 @ Sig_hat @ g1 / n_)
 cov_new = np.mean((bh_new[:, 1] + kq * se2 >= beta0[1]) & (bh_new[:, 0] + kq * se1 >= beta0[0]))
 print(f"     P3.5(b2)(ii) null direction: old rule covers coordinate 2 in {cov_old:.3f} of {reps_}; "
       f"under (ii-b) both coordinates covered in {cov_new:.3f}")
-ok("P3.5(b2)(ii) null direction (Batch B): rank-q pseudoinverse rule misses surely (old statement fails); "
+ok("P3.5(b2)(ii) null direction [F] (Batch B): rank-q pseudoinverse rule misses surely (old statement fails); "
    "reduced full-rank parameterisation covers (corrected statement holds)", cov_old == 0.0 and cov_new >= 0.95)
 
 # (2) P3.5(a) step 5, residual CLT. Weights w_i = 1/n (max w^2 / sum w^2 = 1/n -> 0) but only unit 1 has a
@@ -270,5 +270,36 @@ clt_tail = np.mean(np.abs(E_r / sd_r) > z_r)                 # would be ~0.05 if
 bound_tail = np.mean(np.abs(E_r) > z_r * S1_r)
 print(f"     P3.5(a) residual: P(|E/sd| > 1.96) = {clt_tail:.3f} (normal: 0.05); P(|E| > 1.96 S_1) = {bound_tail:.3f}; "
       f"sd/S_1 = {sd_r / S1_r:.3f}")
-ok("P3.5(a) step 5 (Batch B): weight condition alone does not give a standardised CLT (old step fails); "
+ok("P3.5(a) step 5 [F] (Batch B): weight condition alone does not give a standardised CLT (old step fails); "
    "the allowance z*S_1 still holds (Chebyshev branch)", clt_tail == 0.0 and bound_tail <= 0.05)
+
+
+# ---------- Round-2 review (Nov 2026) ----------
+# (3) Proposition P3.4' [F]. The referee's f_n(theta) = min{theta, -theta + n^{-1/2}}, theta_0 = 0. The first piece
+#     is uniquely active for every n, so the old reading of P3.4 (fixed sample hull, unique active candidate =>
+#     normal limit) predicts N(0,1). The limit is min{Z, 1 - Z}: P3.4' with localised slacks c = (0, 1).
+n4 = 10_000; Z4 = rng.standard_normal(200_000)
+th_hat = Z4 / np.sqrt(n4)
+f_hat = np.minimum(th_hat, -th_hat + n4 ** -0.5)
+lim = np.sqrt(n4) * (f_hat - 0.0)
+pred = np.minimum(Z4, 1 - Z4)
+from scipy.stats import kstest as _ks
+ks_normal = _ks(lim, "norm").statistic
+print(f"     P3.4': mean of sqrt(n)(f_n(theta_hat) - f_n(theta_0)) = {lim.mean():.3f} (normal: 0; min(Z, 1-Z): "
+      f"{pred.mean():.3f}); KS distance to N(0,1) = {ks_normal:.3f}")
+ok("P3.4' [F] (round 2): a uniquely active candidate with an O(n^-1/2) gap gives the non-normal limit min{Z, 1-Z} "
+   "(old fixed-hull reading fails); P3.4' with c = (0, 1) matches", ks_normal > 0.05 and np.allclose(lim, pred))
+
+# (4) Proposition P3.5(c) [F]/[V]. (i) BD is not conservative if the interval for mbar fails: true mbar = .5 gives
+#     m(1-m) = .25, a wrong interval inside [0, .1] gives at most .09. (ii) With mbar taken from an interval that
+#     covers, the allowance z * S_BD covers the residual: n units, w_i = 1/n, true rates m_i = .3, e_i Bernoulli
+#     deviations; CI_v = [.25, .35] (covers .3).
+true_var, wrong_var = .5 * .5, max(m * (1 - m) for m in np.linspace(0, .1, 101))
+n5 = 400; w5 = np.full(n5, 1 / n5); m5 = .3
+E5 = (rng.binomial(1, m5, (20000, n5)) - m5) @ w5
+SBD = np.sqrt(np.sum(w5 ** 2) * max(m * (1 - m) for m in np.linspace(.25, .35, 101)))
+cov5 = np.mean(np.abs(E5) <= _norm.ppf(.975) * SBD)
+print(f"     P3.5(c): BD bound from a wrong interval {wrong_var:.3f} < true {true_var:.3f}; with a covering interval "
+      f"P(|E| <= 1.96 S_BD) = {cov5:.3f}")
+ok("P3.5(c) [V] (round 2): BD from a failed interval is not conservative; BD from a covering interval keeps the "
+   "allowance (>= 0.95)", wrong_var < true_var and cov5 >= 0.94)

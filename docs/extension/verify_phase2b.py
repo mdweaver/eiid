@@ -489,3 +489,22 @@ for _ in range(100):
             bad += not (abs(L - pl) < 1e-7 and abs(U - pu) < 1e-7)
 ok(f"Prop D3 with pure-composition vertices (t = 0, 1): modified closed form matches the LP ({n} instances)",
    bad == 0 and n > 20)
+
+# Prop D8b [F] (added after review, round 2, Nov 2026). Delta q = 0 is sufficient for point identification of the
+# change, not necessary. 2x2, A = simplex (vertices e1, e2), column 1: m1(e2) = Q12 + k >= 0, m0(e1) = Q12 - k >= 0
+# (and the complements <= 1). With Q12 = 0 the outer set is {k = 0}: the change is point-identified although the
+# composition moments differ across periods (Delta q != 0). With Q12 = .2 it is not (positive width).
+rng_d8 = np.random.default_rng(88)
+def q12(x, N):                      # mu_12 / mu_1 = E[N X1 X2] / E[N X1]
+    return np.sum(N * x * (1 - x)) / np.sum(N * x)
+x_pre, x_post = rng_d8.uniform(.1, .5, 40), rng_d8.uniform(.4, .9, 40)
+N_pre, N_post = rng_d8.integers(200, 2000, 40).astype(float), rng_d8.integers(200, 2000, 40).astype(float)
+dq = q12(x_post, N_post) - q12(x_pre, N_pre)
+def k_range(Q12):
+    lo, hi = max(-Q12, Q12 - 1), min(Q12, 1 - Q12)     # Q12 + k in [0,1] and Q12 - k in [0,1]
+    return lo, hi
+w0 = (k_range(0.0)[1] - k_range(0.0)[0]) * abs(dq)    # width of the change's identified set = width of L(Theta)
+w2 = (k_range(0.2)[1] - k_range(0.2)[0]) * abs(dq)
+ok(f"Prop D8b [F] (round 2): Delta q = {dq:.3f} != 0, yet with Q12 = 0 the change is point-identified (width {w0:.3f}); "
+   f"with Q12 = .2 it is not (width {w2:.3f}). The old 'iff Delta q = 0' fails; the max-min criterion holds",
+   abs(dq) > 0.01 and w0 == 0 and w2 > 0.01)

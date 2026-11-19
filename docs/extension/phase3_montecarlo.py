@@ -5,7 +5,12 @@
 #   * the conservative CI (Theorem P3.5(a)),
 #   * the CLR CI as implemented (Conjecture P3.5(b3); Popoviciu and Bhatia-Davis allowances for B),
 #   * the projection CI (Proposition P3.5(b2)(ii): k = sqrt(chi2_{q,1-alpha}), q = rank of Sigma-hat,
-#     applied to the same candidates as CLR),
+#     applied to the same candidates as CLR). q = dim(beta) in every 2x2 design (full rank); in B_3x3
+#     the rank is 12 of 18 because of the exact adding-up reduction (case (ii-b)). For B the
+#     Bhatia-Davis allowance takes mbar from the PROJECTION interval at level ALPHA_V (proj_B, covered
+#     by P3.5(b2)(ii) + P3.5(c1)); the earlier CLR-based version is kept as proj_B_clrbd ("not covered").
+#     (Changed after the round-2 review, Nov 2026. Neither uses random draws, so every other column
+#     reproduces the earlier run exactly.)
 #   * the finite-sample CI (Theorem P3.8; 2x2 M1 designs only), clipped to [0, 1].
 # Every CI is nominal 95%. Widths are medians after clipping to [0, 1] (the logical range).
 #
@@ -279,7 +284,10 @@ def run22(seed, simf, simargs, models=("M1",), finite=False):
         kq = np.sqrt(chi2.ppf(1 - ALPHA, q))
         r["proj_Bt"] = (-proj_upper(-thL, -GL, V, kq), proj_upper(thU, GU, V, kq))
         kq4 = np.sqrt(chi2.ppf(1 - 2 * ALPHA_SIDE_EST, q))
-        r["proj_B"] = (-proj_upper(-thL, -GL, V, kq4) - zE2 * S1bd, proj_upper(thU, GU, V, kq4) + zE2 * S1bd)
+        r["proj_B_clrbd"] = (-proj_upper(-thL, -GL, V, kq4) - zE2 * S1bd, proj_upper(thU, GU, V, kq4) + zE2 * S1bd)
+        kv = np.sqrt(chi2.ppf(1 - ALPHA_V, q))       # projection interval for mbar, level ALPHA_V (P3.5(c1))
+        S1bdp = bd_sd(w, -proj_upper(-(GLp @ beta + iLp), -GLp, V, kv), proj_upper(GUp @ beta + iUp, GUp, V, kv))
+        r["proj_B"] = (-proj_upper(-thL, -GL, V, kq4) - zE2 * S1bdp, proj_upper(thU, GU, V, kq4) + zE2 * S1bdp)
         r["q"] = q
         if finite and model == "M1":
             r["fin_Bt"] = p38(beta, Z, t, S, A, one, c, gam, w, ALPHA, 0.0)
@@ -413,7 +421,10 @@ def run_B(seed, p=1000, conc=40.0):
         zE2 = norm.ppf(1 - ALPHA_SIDE_E_BD)
         rr["clr_B_bd"] = (-Ln - zE2 * S1bd, U + zE2 * S1bd)
         rr["proj_Bt"] = (-proj_upper(-thL, -GL, V, kq), proj_upper(thU, GU, V, kq))
-        rr["proj_B"] = (-proj_upper(-thL, -GL, V, kq4) - zE2 * S1bd, proj_upper(thU, GU, V, kq4) + zE2 * S1bd)
+        rr["proj_B_clrbd"] = (-proj_upper(-thL, -GL, V, kq4) - zE2 * S1bd, proj_upper(thU, GU, V, kq4) + zE2 * S1bd)
+        kv = np.sqrt(chi2.ppf(1 - ALPHA_V, q))
+        S1bdp = bd_sd(w, -proj_upper(-(GLp @ beta), -GLp, V, kv), proj_upper(GUp @ beta, GUp, V, kv))
+        rr["proj_B"] = (-proj_upper(-thL, -GL, V, kq4) - zE2 * S1bdp, proj_upper(thU, GU, V, kq4) + zE2 * S1bdp)
         rr["q"] = q
         out["M0"] = rr
         res.append(out)
@@ -421,7 +432,7 @@ def run_B(seed, p=1000, conc=40.0):
 
 
 # ======================= driver and summaries =======================
-METHODS = [("plug", "B"), ("cons_B", "B"), ("clr_B_pop", "B"), ("clr_B_bd", "B"), ("proj_B", "B"),
+METHODS = [("plug", "B"), ("cons_B", "B"), ("clr_B_pop", "B"), ("clr_B_bd", "B"), ("proj_B", "B"), ("proj_B_clrbd", "B"),
            ("fin_B", "B"), ("cons_Bt", "Bt"), ("clr_Bt", "Bt"), ("proj_Bt", "Bt"), ("fin_Bt", "Bt")]
 
 
@@ -494,7 +505,7 @@ def print_summary(name, model, sm):
     for meth, tgt in METHODS:
         if meth in sm:
             m = sm[meth]
-            print(f"    {meth:10s} target {tgt:2s}: cover {fmt_cov(m)}, empty {m['empty']:.3f}, median width {m['width']:.3f}")
+            print(f"    {meth:12s} target {tgt:2s}: cover {fmt_cov(m)}, empty {m['empty']:.3f}, median width {m['width']:.3f}")
     if "pool" in sm:
         print(f"    pooling test (Wald, zeta = 0, df {sm['pool']['df']}): rejection rate at 5% {sm['pool']['reject']:.3f} ({sm['pool']['se']:.3f})")
 

@@ -1,6 +1,6 @@
 # Phase 2b: units nested in groups, and the assumption ladder
 
-*Builds on `PHASE1_foundations.md` (P1) and `PHASE2a_rxc.md` (2a). Every proof step ends with a justification tag; tags are those of 2a §0.3 plus the new ones in §0.3. All closed forms, inclusions and examples are checked in `verify_phase2b.py` (output: `verify_phase2b_output.txt`, 21/21 PASS).*
+*Builds on `PHASE1_foundations.md` (P1) and `PHASE2a_rxc.md` (2a). Every proof step ends with a justification tag; tags are those of 2a §0.3 plus the new ones in §0.3. All closed forms, inclusions and examples are checked in `verify_phase2b.py` (output: `verify_phase2b_output.txt`, 22/22 PASS).*
 
 *"District" means any partition of the units into groups: ridings, counties within states, schools within boards, or, as Remark 6.2 shows, election periods. The results do not use anything specific to voter transitions.*
 
@@ -267,22 +267,25 @@ Verified: under a DGP with zero contextual effects, the L5 point equals the trut
 
 **Remark 6.2 (periods as districts: the DiD link).** Take "districts" to be election periods: the same counties observed twice, $D\in\{\text{pre},\text{post}\}$.
 * **M1** then says the contextual effects are the same in both periods, with only baselines shifting, which is exactly the "contextual effects unchanged" assumption in `ASSUMPTION_MENU.md` item 18.
-* Lemma D1(b) identifies the baseline shifts $\zeta$, and Proposition D8 below gives the exact condition under which the change $B^*_\text{post}-B^*_\text{pre}$ is point-identified. That recovers the owner's earlier result as a special case of M1.
+* Lemma D1(b) identifies the baseline shifts $\zeta$, and Proposition D8 below gives a sufficient moment condition (by cancellation) and the necessary and sufficient condition given the identified set, under which the change $B^*_\text{post}-B^*_\text{pre}$ is point-identified. That recovers the owner's earlier result as a special case of M1.
 * Theorem 2(b) adds that the *levels* in both periods are bounded by the intersection of the two periods' sets.
 * **M1($\delta$)** is the bounded-change version (item 19).
 * The overidentifying restrictions of D1(b) are the testable part, "equal quadratic coefficients across periods" (menu note to item 18).
 
 **Proposition D8 (the DiD under M1 with periods as districts; promoted from Remark 6.2 after review).** Let $D\in\{\text{pre},\text{post}\}$, assume M1, (S1)–(S2-d), $P(X\in A_D)=1$ and (A5-M1). For period $t$ write $\mu^{[t]}_{rs}=E[NX_rX_s\mid D=t]$, $\mu^{[t]}_r=E[NX_r\mid D=t]$ and $B^*_{rc,t}=E[NX_r\beta_{rc}\mid D=t]/\mu^{[t]}_r$. Then
 $$B^*_{rc,\text{post}}-B^*_{rc,\text{pre}}=\text{(identified)}+\sum_{s\ne r}K_{c,rs}\Big(\frac{\mu^{[\text{post}]}_{rs}}{\mu^{[\text{post}]}_r}-\frac{\mu^{[\text{pre}]}_{rs}}{\mu^{[\text{pre}]}_r}\Big).$$
-So the change is point-identified, whatever the identified set for $K$, iff
-$$\frac{\mu^{[\text{post}]}_{rs}}{\mu^{[\text{post}]}_r}=\frac{\mu^{[\text{pre}]}_{rs}}{\mu^{[\text{pre}]}_r}\qquad\text{for all }s\ne r.$$
-This holds in particular when the size-and-composition moments are equal across the periods, $\mu^{[\text{post}]}=\mu^{[\text{pre}]}$. It is a condition on the $NX_rX_s$ and $NX_r$ moments, not merely on similar-looking distributions of vote shares.
+Write $\Delta q_{rs}:=\mu^{[\text{post}]}_{rs}/\mu^{[\text{post}]}_r-\mu^{[\text{pre}]}_{rs}/\mu^{[\text{pre}]}_r$ and $L(K):=\sum_{s\ne r}K_{c,rs}\Delta q_{rs}$, and let $\Theta$ be the identified set for $K$.
+(a) **Identification by cancellation.** The change does not depend on $K$ for every $K\in\mathcal K$ iff $\Delta q_{rs}=0$ for all $s\ne r$. This holds in particular when the size-and-composition moments are equal across the periods, $\mu^{[\text{post}]}=\mu^{[\text{pre}]}$. It is a condition on the $NX_rX_s$ and $NX_r$ moments, not merely on similar-looking distributions of vote shares.
+(b) **Identification given the feasible set.** The change is point-identified iff $\max_{K\in\Theta}L(K)-\min_{K\in\Theta}L(K)=0$. This is necessary and sufficient given $\Theta$. It holds under (a), and also when $\Theta$ fixes $L$ although $\Delta q\ne0$. Example: 2×2 with $Q_{1,12}=0$ and LCE on the whole simplex; probability validity at the vertices forces $K_{1,12}=0$, so $\Theta=\{0\}$ and the change is point-identified whatever $\Delta q$ is.
+
+*(Corrected after review, round 2, Nov 2026: the proposition said the change is point-identified, "whatever the identified set for $K$", **iff** $\Delta q=0$. As a statement about identification that is false (the example above, due to the Phases 1–3 referee); $\Delta q=0$ is sufficient, and necessary only for invariance to every $K\in\mathcal K$. Check: `verify_phase2b.py`, "D8b".)*
 *Proof.*
 1. Within period $t$, Lemma D2 applied to the conditional law gives $B^*_{rc,t}=\big[\sum_sQ^{(t)}_{c,rs}\mu^{[t]}_{rs}+\sum_{s\ne r}K^{(t)}_{c,rs}\mu^{[t]}_{rs}\big]/\mu^{[t]}_r$. [D2; cond-D]
 2. Under M1, $Q^{(t)}$ and $\operatorname{skew}(\zeta_{\cdot,t}\mathbf 1^\top)$ are identified, and $K^{(t)}=K+\operatorname{skew}(\zeta_{\cdot,t}\mathbf 1^\top)$ with $K$ common. [D1(b), D1(d)]
 3. Subtracting the two periods, every term except $\sum_{s\ne r}K_{c,rs}(\cdot)$ is identified. [1–2; lin]
-4. If every coefficient is zero, the change does not depend on $K$, so it is point-identified. If some coefficient is nonzero, the change moves with the corresponding entry of $K$, so it is point-identified only if the identified set happens to fix that linear combination. "Point-identified for every $K$" in the statement means: whatever the identified set for $K$ is. [3; alg] ∎
-*Reading.* The DiD of transition rates is point-identified when the contextual effects are unchanged across periods (M1) and the electorate's size-weighted composition moments are the same in both periods. With changing composition the change is only bounded; the bound is the projection of the common identified set for $K$ (Theorem 2(b)) through the coefficients above.
+4. (a): $L$ is a linear form in the free entries of $K\in\mathcal K$ with coefficients $\Delta q_{rs}$; it vanishes on all of $\mathcal K$ iff every coefficient is zero. [3; alg; the entries $K_{c,rs}$, $s\ne r$, are free in $\mathcal K$ for $c<C$]
+5. (b): by 3 the change equals an identified constant plus $L(K)$, and its identified set is $L(\Theta)$ shifted by that constant. A set of reals is a point iff its max and min agree. [3; Def identified set] ∎
+*Reading.* The change in ecological transition rates between the periods is point-identified when the contextual effects are unchanged across periods (M1) and the electorate's size-weighted composition moments are the same in both periods (a), or when the identified set happens to fix $L$ (b). Otherwise the change is only bounded; the bound is the projection of the common identified set for $K$ (Theorem 2(b)) through the coefficients above. This is a statement about the difference of two ecological rates. A causal (difference-in-differences) reading needs further structure (2d). *(Reading corrected after review, round 2.)*
 
 **Remark 6.3 (other groupings).** Nothing above uses the nesting being geographic. Groups can be states (with counties as units), demographic strata of units, or time.
 

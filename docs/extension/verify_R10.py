@@ -308,17 +308,65 @@ def V12(reps=400):
 
 if __name__ == "__main__":
     er, cD, ratio, pop, draws, far_ratio, far = V9()
-    print(f"V9 R10(e) analytic (three-point design): ER(q) = {er}, c_D(q) = {np.round(cD, 6)}; "
+    print(f"V9 [V] R10(e) analytic (three-point design): ER(q) = {er}, c_D(q) = {np.round(cD, 6)}; "
           f"se ratio = {ratio:.6f} (7/12 = {7 / 12:.6f}); limsup coverage <= {pop:.6f}; with 4000 draws <= {draws:.6f}; "
           f"far-edge design ratio {far_ratio:.3f}, bound {far:.3f}  "
           f"{'PASS' if abs(ratio - 7 / 12) < 1e-12 and pop < .95 and draws < .95 else 'FAIL'}")
     naive, br_jk, contains = V10()
-    print(f"V10 5a §3.5 item 4: naive (intersect, then expand) = {naive}; bracket cap JKST CI = {br_jk}; "
+    print(f"V10 [F] 5a §3.5 item 4: naive (intersect, then expand) = {naive}; bracket cap JKST CI = {br_jk}; "
           f"old containment claim holds: {contains}  {'PASS' if not contains else 'FAIL'}")
     raw, merged = V11()
-    print(f"V11 union length: unmerged sum {raw:.2f} > merged (Lebesgue) {merged:.2f}  "
+    print(f"V11 [V] union length: unmerged sum {raw:.2f} > merged (Lebesgue) {merged:.2f}  "
           f"{'PASS' if raw > merged + 1e-12 else 'FAIL'}")
     for n, s_, truth, res in V12():
-        print(f"V12 false CR, n = {n}, s = {s_:.2f}, true gap {truth:.3f}: " +
+        print(f"V12 [I] false CR, n = {n}, s = {s_:.2f}, true gap {truth:.3f}: " +
               "; ".join(f"{name} covers {c}/400, empty {e}, median width {np.median(w):.3f}"
                         for name, (c, e, w) in res.items()))
+
+
+def V13(reps=600):
+    """Round-2 EI referee: which plug-in procedure the 8-10% miss rate describes. Same 600 replications of the
+    150-precinct positive-edge design as run() (seed 20261105; the two beta draws of each replication are
+    recorded, so the random stream is unchanged). Literal intersection of the fitted bracket hull{gamma ER, ER}
+    with the completed JKST interval, versus CR-naive (bracket imposed, then the target's own inflation)."""
+    global RNG
+    gen = np.random.default_rng(20261105)
+    RNG = gen
+    x, p = design(150)
+    theta, ab = make_truth(x, p, "boundary, ER far from 0")
+    parts = linear_parts(x, p)
+    truth = parts[3](theta)["D"]
+    gamma = parts[2]
+    F = np.column_stack(((1 - x) ** 2, 2 * x * (1 - x), x ** 2))
+    fit = np.linalg.solve(F.T @ F, F.T)
+    er_weights = (p * (x - p @ x)) @ F @ fit / (p @ ((x - p @ x) ** 2))
+
+    class CaptureRates:
+        def __init__(self, generator):
+            self.generator, self.rates = generator, []
+        def beta(self, *args):
+            out = self.generator.beta(*args); self.rates.append(out); return out
+        def __getattr__(self, name):
+            return getattr(self.generator, name)
+
+    RNG = CaptureRates(gen)
+    literal = expanded = 0
+    for _ in range(reps):
+        RNG.rates.clear()
+        out = one_rep(x, p, theta, ab, 15, parts)
+        b0, b1 = RNG.rates
+        er = er_weights @ ((1 - x) * b0 + x * b1)
+        lo, hi = sorted([gamma * er, er])
+        base = out["JKST"]
+        literal += base is not None and max(lo, base[0]) <= truth <= min(hi, base[1])
+        ci_ = out["CR-naive"]
+        expanded += ci_ is not None and ci_[0] <= truth <= ci_[1]
+    RNG = gen
+    return literal, expanded
+
+
+if __name__ == "__main__":
+    lit, exp_ = V13()
+    print(f"V13 [V] literal intersection (fitted bracket cap completed JKST CI) covers {lit}/600; "
+          f"CR-naive (bracket, then target inflation) covers {exp_}/600; the 8-10% miss rate refers to CR-naive only  "
+          f"{'PASS' if lit == 304 and exp_ == 550 else 'FAIL'}")

@@ -1,6 +1,6 @@
 # Phase 3: estimation, inference and sensitivity
 
-*Builds on P1, 2a and 2b. Proof steps carry justification tags (2a §0.3, 2b §0.3, plus §0.3 below). Theorems marked "(cited)" apply a published result whose conditions are verified here but whose proof is not repeated. Checks: `verify_phase3.py` (15/15 PASS; `verify_phase3_output.txt`). Monte Carlo: `phase3_montecarlo.py`, 1000 replications per design, with Monte Carlo standard errors (`phase3_montecarlo_output.txt`; cross-check against the package in `phase3_montecarlo_crosscheck.py`).*
+*Builds on P1, 2a and 2b. Proof steps carry justification tags (2a §0.3, 2b §0.3, plus §0.3 below). Theorems marked "(cited)" apply a published result whose conditions are verified here but whose proof is not repeated. Checks: `verify_phase3.py` (17/17 PASS; `verify_phase3_output.txt`). Monte Carlo: `phase3_montecarlo.py`, 1000 replications per design, with Monte Carlo standard errors (`phase3_montecarlo_output.txt`; cross-check against the package in `phase3_montecarlo_crosscheck.py`).*
 
 ---
 
@@ -59,6 +59,11 @@ Within this framework:
   * Under M1/M2 it is a district effect, part of the mean $m(V_i)$.
   * Under M0 a district shock is not a variance problem but a misspecification. Conditional on the design, M0's mean model holds for the observed units only if the district shifts are zero (Prop. P3.6(c)). Clustered standard errors would not repair it.
 * **What remains assumed** (P3-S1a): no dependence within a district beyond its district effect. Neighbourhood spillovers between adjacent precincts would violate it. This is a stated limitation. A partial check is residual correlation between neighbouring precincts after fitting M1.
+* **Independence is a substantive assumption** *(added after review, round 2, Nov 2026)*. Two arguments must be kept apart.
+  1. Conditioning on observed district effects and **assuming** that the remaining residuals are independent (P3-S1a) is a coherent model.
+  2. "Every unit is observed, so dependence need not be considered" does **not** follow. Observing every unit removes sampling uncertainty about which units exist; it says nothing about dependence among their residuals.
+
+  Within-district shocks can make $\operatorname{Cov}(e_i,e_j\mid\text{design})\ne0$ with no district mean shift. That violates P3-S1a without violating the mean model, so the pooling test P3.6(c), which tests mean shifts, is **not** a test of within-district dependence. P3-S1a must therefore be argued for each application; residual correlation within districts and between neighbours is a diagnostic, not a test that can confirm it. We do not reintroduce clustered standard errors, for the reasons above. Under dependence, the variance and residual-allowance statements of P3.5 and P3.8 are not covered.
 * **A superpopulation target that averages over re-drawn district shocks** ("behaviour in a typical riding") would need cluster methods and many districts. It is not pursued.
 
 ### 0.5 Which result holds in which regime
@@ -125,7 +130,7 @@ Checked: concavity and piecewise linearity along random directions (`verify_phas
 9. Non-nested case: $\Theta(A)\subseteq\Theta(\hat A_n)$ for every $n$ by 1. If $k_n\in\Theta(\hat A_n)$ and $k_{n_j}\to k$, then for each $v\in A$ pick $v_j\in\hat A_{n_j}$ with $v_j\to v$. Continuity of the constraints in $(k,v)$ gives the constraint at $v$, so $k\in\Theta(A)$. The upper Kuratowski limit is therefore $\Theta(A)$, which is also contained in every term. In a common bounded set this is Hausdorff convergence. [1; Def; continuity; Hausdorff] ∎(b)
 
 **Remarks.**
-* **Error decomposition.** $\hat\varphi_U-\varphi_U(\beta_0;A)=\underbrace{[\hat\varphi_U-\varphi_U(\beta_0;\hat A)]}_{O_p(n^{-1/2})\text{ by (a)}}+\underbrace{[\varphi_U(\beta_0;\hat A)-\varphi_U(\beta_0;A)]}_{\ge0,\ \to0\text{ by (b), rate not shown}}$. The second term is not shown to be $O_p(n^{-1/2})$, and can be larger. So Theorem P3.4's limit is stated for the **sample-hull** endpoint $\varphi_U(\beta_0;\hat A)$, conditional on the design, and not for the population-hull endpoint.
+* **Error decomposition.** $\hat\varphi_U-\varphi_U(\beta_0;A)=\underbrace{[\hat\varphi_U-\varphi_U(\beta_0;\hat A)]}_{O_p(n^{-1/2})\text{ by (a)}}+\underbrace{[\varphi_U(\beta_0;\hat A)-\varphi_U(\beta_0;A)]}_{\ge0,\ \to0\text{ by (b), rate not shown}}$. The second term is not shown to be $O_p(n^{-1/2})$, and can be larger. So Theorem P3.4's limit concerns the **sample-hull** endpoint $\varphi_U(\beta_0;\hat A)$, and not the population-hull endpoint. Theorem P3.4 itself is for a **fixed** constraint system; as the sample hull changes with $n$, the limit is given by Proposition P3.4′ under its localisation condition. *(Corrected after review, round 2, Nov 2026.)*
 * **Slater is a strict-interiority condition.** It requires a $k$ at which every implied rate at every hull vertex is at least $\varepsilon>0$. It fails when every feasible $k$ makes some implied rate exactly 0 at some vertex, e.g. a true structural zero, which is not exotic in EI. Design E of §8 is an example: the identified set is a single point. (Design C has a rate close to 0 at one vertex: Slater holds, but only just.) The Lipschitz bound in (a) is proved only under Slater; boundary cases are open (§10). The coverage results of §5 do **not** use Slater: P3.5(a) step 2 uses only that the true $k_0$ is feasible.
 * The hull effect in (c) is a one-sided (conservative) bias. Its size depends on how much mass $P_X$ puts near the boundary of $A_d$; it can vanish slowly. Report the bound's sensitivity to trimming the hull (P1 A4).
 * The $O_p(n^{-1/2})$ rate is for the estimation part. The target $B$ adds $E=O_p(n^{-1/2})$ as well (§5). Bounds do not shrink to a point: their width converges to the population width, which is $O(1)$.
@@ -134,12 +139,14 @@ Checked: concavity and piecewise linearity along random directions (`verify_phas
 
 ## 4. Asymptotic distribution
 
-**Theorem P3.4 (cited structure: [dDM]).** Under Proposition P3.2's assumptions and $\sqrt n(\hat\beta-\beta_0)\Rightarrow\mathcal Z\sim N(0,\Sigma)$, with the design and the sample hull $\hat A$ fixed, so that $\varphi_U(\beta_0)$ means $\varphi_U(\beta_0;\hat A)$ (see the error decomposition after P3.2):
+**Theorem P3.4 (cited structure: [dDM]; fixed constraint system).** Under Proposition P3.2's assumptions and $\sqrt n(\hat\beta-\beta_0)\Rightarrow\mathcal Z\sim N(0,\Sigma)$, suppose the **constraint system is fixed** along the sequence: the vertex set entering the LP does not depend on $n$, so $A$, $\gamma$, $\Lambda$ and the gradients $g_\lambda$ are fixed. This holds for a prespecified polytope $A$ with fixed vertices, or along a design sequence whose sample hull is eventually constant, $\hat A_n=A$ for $n\ge n_0$ (for instance, when $A$ is a polytope whose vertices are atoms of the design law). Then
 $$\sqrt n\big(\hat\varphi_U-\varphi_U(\beta_0)\big)\Rightarrow\min_{\lambda\in\Lambda^*}\big(c+S^\top\lambda\big)^\top\mathcal Z,$$
 where $\Lambda^*\subseteq\Lambda$ is the set of optimal dual vertices at $\beta_0$.
 * (i) If $\Lambda^*$ is a singleton (JKST's tie-breaking), the limit is $N(0,g^{*\top}\Sigma g^*)$ with $g^*=c+S^\top\lambda^*$.
 * (ii) If two active gradients differ in a direction in which the estimator varies, i.e. $(g_\lambda-g_{\lambda'})^\top\Sigma(g_\lambda-g_{\lambda'})>0$ for some $\lambda,\lambda'\in\Lambda^*$, the limit is a minimum of correlated normals that are not a.s. equal, and it has strictly negative mean. The plug-in upper endpoint is then biased *downward*, and the lower endpoint upward, both by order $n^{-1/2}$. That is, the plug-in bound is too narrow. If instead all active gradients agree on the support of $\mathcal Z$, all the $g_\lambda^\top\mathcal Z$ are a.s. equal and the limit is normal, as in (i), even though $\Lambda^*$ is not a singleton. *(Corrected after review: an earlier version claimed a negative mean whenever $\Lambda^*$ is not a singleton.)*
 * (iii) In case (ii) the standard bootstrap is inconsistent (Fang & Santos 2019, Cor. 3.1†).
+
+*(Corrected after review, round 2, Nov 2026. The theorem was stated "with the design and the sample hull $\hat A$ fixed". The proof is correct for a fixed set of affine maps, but as $n$ grows the sample hull, the dual vertices and the active set can change, and gaps between nearly binding candidates can shrink at rate $n^{-1/2}$. The referee's example: $f_n(\theta)=\min\{\theta,-\theta+n^{-1/2}\}$, $\theta_0=0$, $\sqrt n(\hat\theta-\theta_0)\Rightarrow Z$. The first piece is uniquely active for every $n$, yet $\sqrt n(f_n(\hat\theta)-f_n(\theta_0))\Rightarrow\min\{Z,1-Z\}$, which is not normal. The theorem is now stated for a fixed constraint system; changing systems are Proposition P3.4′. Neither affects the coverage results of §5, which do not use P3.4.)*
 
 *Proof.*
 1. $\varphi_U(\beta)=\min_{\lambda\in\Lambda}g_\lambda^\top\beta$ with $g_\lambda=c+S^\top\lambda$: a finite minimum of linear maps. [P3.1]
@@ -150,6 +157,23 @@ where $\Lambda^*\subseteq\Lambda$ is the set of optimal dual vertices at $\beta_
 6. (iii): in case (ii) the derivative is nonlinear on the support of $\mathcal Z$, so the condition for bootstrap consistency fails. [Fang & Santos 2019†] ∎
 
 **Remark P3.4.1 (parametrise $C-1$ columns).** The shares satisfy $\sum_cT_c=1$, so the coefficient vectors of the $C$ column regressions sum to a known constant, and the joint covariance of all $C$ columns is singular. State $\hat\beta$, $\Sigma$ and the gradients $g_\lambda$ for the first $C-1$ columns and recover column $C$ by adding up. Then $\Sigma$ can be nonsingular. When it is positive definite, the condition in (ii) reduces to $g_\lambda\neq g_{\lambda'}$ in the reduced parametrisation.
+
+**Proposition P3.4′ (triangular arrays; added after review, round 2).** Let the design, and hence the constraint system, change with $n$. Write $\Lambda_n$ for the dual vertex set of the design-$n$ LP, with $\lvert\Lambda_n\rvert\le\bar L$ for all $n$, gradients $g_{\lambda,n}=c_n+S_n^\top\lambda$ (bounded), and **localised slacks**
+$$c_{\lambda,n}:=\sqrt n\big(\theta_{\lambda,n}(\beta_0)-\varphi_{U,n}(\beta_0)\big)\ \ge0,\qquad\theta_{\lambda,n}(\beta)=g_{\lambda,n}^\top\beta .$$
+**Localisation condition.** After relabelling the candidates, $g_{\lambda,n}\to g_\lambda$ and $c_{\lambda,n}\to c_\lambda\in[0,\infty]$ for each $\lambda$. Then
+$$\sqrt n\big(\hat\varphi_{U,n}-\varphi_{U,n}(\beta_0)\big)\Rightarrow\min_{\lambda:\ c_\lambda<\infty}\big(g_\lambda^\top\mathcal Z+c_\lambda\big).$$
+(Without the condition, the same holds along every subsequence on which it holds; the limit can then differ between subsequences.)
+* **Separation condition.** The limit of Theorem P3.4 (a minimum of $g_\lambda^\top\mathcal Z$ over the active set) obtains when every $c_\lambda\in\{0,\infty\}$: each candidate is either exactly active at $\beta_0$ or inactive by more than $n^{-1/2}$, $\sqrt n\min_{\lambda\notin\Lambda^*_n}\{\theta_{\lambda,n}(\beta_0)-\varphi_{U,n}(\beta_0)\}\to\infty$, with a stable active set and convergent gradients.
+* A candidate inactive by a gap of exact order $n^{-1/2}$ ($0<c_\lambda<\infty$) stays in the limit. The referee's $f_n$ has $c=1$ for the second piece and gives $\min\{Z,1-Z\}$.
+* This is a limit for the sample-hull endpoint along the design sequence. It says nothing about the population-hull error (remark after P3.2).
+
+*Proof.*
+1. $\varphi_{U,n}(\beta)=\min_{\lambda\in\Lambda_n}\theta_{\lambda,n}(\beta)$ for every $\beta$ at which the LP is feasible and bounded. [P3.1, for the design-$n$ system]
+2. Hence, exactly, $\sqrt n(\hat\varphi_{U,n}-\varphi_{U,n}(\beta_0))=\min_\lambda\big(g_{\lambda,n}^\top\sqrt n(\hat\beta-\beta_0)+c_{\lambda,n}\big)$. [1; Def $c_{\lambda,n}$; linearity]
+3. $\sqrt n(\hat\beta-\beta_0)=O_p(1)$ and the gradients are bounded, so a candidate with $c_{\lambda,n}\to\infty$ exceeds the active candidates' terms with probability $\to1$ and drops out of the minimum. [OLS; 2]
+4. The remaining finitely many terms converge jointly in distribution to $(g_\lambda^\top\mathcal Z+c_\lambda)_\lambda$, and the minimum is continuous. [2–3; continuous mapping] ∎
+
+Checked (`verify_phase3.py`, "P3.4′ [F]"): the referee's $f_n$ at $n=10^4$; the limit is $\min\{Z,1-Z\}$ (mean $\approx-0.40$, Kolmogorov distance 0.31 from $N(0,1)$), not the normal limit the old reading gives.
 
 Checked: with two tied constraints and unit noise, the mean plug-in error is $-0.564\approx-1/\sqrt\pi$; with a unique active constraint it is 0.007. With two active gradients that differ only in a null direction of $\Sigma$, the mean is 0 (normal limit), as the corrected (ii) states.
 
@@ -190,6 +214,8 @@ The same coverage bound holds. With $\alpha_E=0$ and no $S_1$ term, either versi
 $$\lvert g^\top(\hat\beta-\beta_0)\rvert\le\big(\hat e^\top\hat\Sigma_\eta^{-1}\hat e\big)^{1/2}\big(g^\top L\hat\Sigma_\eta L^\top g\big)^{1/2}=\big(n\,\hat e^\top\hat\Sigma_\eta^{-1}\hat e\big)^{1/2}\hat\sigma_g .$$
 This holds for every $g$ at once, including $g$ with $L^\top g=0$, for which both sides are 0. By continuous mapping, $n\,\hat e^\top\hat\Sigma_\eta^{-1}\hat e\Rightarrow\chi^2_q$, since $\Sigma_\eta$ is nonsingular. So $\mathcal E$ holds for all $\lambda$ at once, and for both ends, with probability $\to1-\alpha$. Nonsingularity of $\Sigma_\eta$ is what the earlier rank-$q$ pseudoinverse argument lacked: there, a null-direction error of order $o(n^{-1/2})$ is neither zero nor controlled. [alg; OLS; continuous mapping] ∎
 
+*Remark (exact versus numerical reduction; added after review, round 2).* Case (ii-b) is claimed only for a documented **exact** reduction: the adding-up identity that removes column $C$ (Remark P3.4.1), or coordinates fixed by the design. When the rank of $\hat\Sigma$ comes from a numerical cutoff, the theorem applies only with $q=\dim\beta$ (case (ii-a), assuming the true $\Sigma$ is positive definite). Dropping candidates whose gradients load on a numerically null direction of $\hat\Sigma$ is then a **safeguard**: it can only widen the interval (the minimum is over fewer terms), but it neither establishes the identities of (ii-b) nor calibrates a rank-$q$ critical value. *(An earlier response described that drop rule as case (ii-b); it is not.)*
+
 (ii) needs no enumeration of vertices and is valid for any collection rule. It is conservative, increasingly so as $q$ grows (many districts). (i) is sharper, but needs a fixed superset, and enumerating all dual vertices is feasible only in small problems. Checked (`verify_phase3.py`): weak duality on 500 random dual-feasible points. In a small LP, the projection bound built from the plug-in dual alone covered in 100% of 3000 replications, against 94.5% for a one-candidate $z$-bound.
 
 **Conjecture P3.5(b3) (the implemented CLR procedure).** The package collects $\hat\Lambda$ as the optimal dual vertices at $\hat\beta$ and at `ndraw` Gaussian draws, and computes both $k_p$ and $\hat k$ over $\hat\Lambda$. The conjecture is that it has asymptotic coverage $\ge1-\alpha_U$ under (b1)'s conditions as `ndraw` $\to\infty$.
@@ -214,14 +240,31 @@ Until this is settled, the CLR-type interval as implemented is an *Algorithm* wi
 *(b1)* replaces step 1 by CLR's coverage of each intersection bound, which needs the finite index set $\Lambda$ (Lemma P3.1) and their Condition P [CLR]. Steps 4–7 are unchanged. *(b2)* is proved above. The simulation-based collection of candidates is the subject of Conjecture P3.5(b3); it is not claimed as a theorem.
 
 **Remarks.**
-* **Better variance bound for the residual term.** $\operatorname{Var}(e_{irc}\mid V)\le m(1-m)$ [BD], with $m=E[\beta_{irc}\mid V]$, which is bounded through the identified set. Taking the maximum of $m(1-m)$ over that set's range at $X_i$ gives a smaller, still valid $S_1$.
+* **Better variance bound for the residual term.** $\operatorname{Var}(e_{irc}\mid V)\le m(1-m)$ [BD], with $m=E[\beta_{irc}\mid V]$, which is bounded through the identified set. A data-dependent version needs its own coverage argument: Proposition P3.5(c) below.
+
+**Proposition P3.5(c) (variance-adaptive residual allowance; added after review, round 2, Nov 2026).** Fix a cell $(r,c)$ with weights $w_i=w_{ir}$, put $\pi_i=w_i^2/\sum_jw_j^2$ and $\bar m=\sum_i\pi_im_{rc}(V_i)$, the $\pi$-weighted model-implied rate (a linear target in $(\beta,k)$). By concavity of $m(1-m)$,
+$$s_n^2:=\operatorname{Var}(E\mid\text{design})\le\sum_iw_i^2m_i(1-m_i)\le\Big(\sum_iw_i^2\Big)\bar m(1-\bar m)=:\bar s^2 .$$
+Let $\mathrm{CI}_v$ be a confidence interval for $\bar m$ at level $1-\alpha_v$, and $\hat S_{BD}=\big(\sum_iw_i^2\max_{m\in\mathrm{CI}_v\cap[0,1]}m(1-m)\big)^{1/2}$.
+* **(c1) Valid version.** Suppose $\mathrm{CI}_v$ is a P3.5(a) interval or a P3.5(b2)(ii) projection interval for $\bar m$, computed on the **rung's own constraint system** (no added sign or CR rows), and suppose $\max_iw_i^2/\bar s^2\to0$ (Lindeberg relative to $\bar s$; it holds, for instance, when $\bar m$ stays bounded away from 0 and 1). Replacing $z_{\alpha_E}S_1$ by $z_{\alpha_E}\hat S_{BD}$ in P3.5(a), or in the projection interval for $B$, gives
+$$\liminf_nP(B_{rc}\in\mathrm{CI})\ge1-\alpha_{\rm est}-\alpha_E-\alpha_v ,$$
+with $\alpha_{\rm est}$ the level spent on the estimation part. The Popoviciu version ($S_1$, no $\alpha_v$) needs only $\max_iw_i^2/\sum_iw_i^2\to0$ (step 5 of (a)).
+* **(c2) Adaptive version.** If $\mathrm{CI}_v$ is the CLR interval (Conjecture P3.5(b3)), the same bound holds conditional on $\mathrm{CI}_v$ covering $\bar m$; the result inherits the algorithmic status of (b3).
+
+*Proof of (c1).*
+1. $\bar m$ is a linear target under the rung (2a Prop. 7 with weights $\pi$), and the rung alone holds at the truth, so $\mathcal E_v=\{\bar m\in\mathrm{CI}_v\}$ has $\liminf P(\mathcal E_v)\ge1-\alpha_v$. [P3.5(a) or (b2)(ii)]
+2. On $\mathcal E_v$, $\hat S_{BD}\ge\bar s\ge s_n$. [concavity above; Def $\hat S_{BD}$]
+3. So $\{\lvert E\rvert>z_{\alpha_E}\hat S_{BD}\}\subseteq\{\lvert E\rvert>z_{\alpha_E}\bar s\}\cup\mathcal E_v^c$, with $\bar s$ deterministic given the design. [2]
+4. $\limsup P(\lvert E\rvert>z_{\alpha_E}\bar s)\le\alpha_E$: along a subsequence with $s_n/\bar s\to0$ use Chebyshev; otherwise $\max_i\lvert w_i\rvert/s_n\to0$ by the Lindeberg condition relative to $\bar s$, and Lindeberg's CLT applies relative to $s_n$, as in step 5 of (a) with $\bar s$ in place of $S_1$. [Chebyshev; Lyap]
+5. Combine with the estimation event of (a) or (b2)(ii) by the union bound. [union; 1–4] ∎
+
+*Why the condition matters.* If $\mathrm{CI}_v$ fails, BD is not conservative: with true $\bar m=.5$ a wrong interval inside $[0,.1]$ gives a variance bound at most $.09$ against the true $.25$. And if $\bar s/S_1\to0$ (e.g. $\bar m\to0$), Lindeberg relative to $\bar s$ can fail, so step 4 needs its condition. Check: `verify_phase3.py`, "P3.5(c)". *(The referee asked that the provably valid projection interval for $B$ be separated from the variance-adaptive one. In the package (0.3.x), the projection column for $B$ uses (c1) with $\mathrm{CI}_v$ the projection interval on the rung alone, and prints a note when $\mathrm{CI}_v$ comes near 0 or 1; the CLR `ci_actual` uses (c2) and is labelled algorithmic. $\tilde B$ is unaffected.)*
 * **Optional assumption for a much smaller residual term.** If the poll-level deviations of different groups are not negatively correlated, then $\operatorname{Var}(X_{ir}e_{irc})\le\operatorname{Var}(T_{ic}\mid V_i)$, which is estimable. In simulation this would remove most of the residual allowance. It is an added assumption and belongs on the menu, not in the default.
 * **JKST's $\mathrm{CI}_x$** is version (b) with a single candidate per side (tie-breaking), no selection step, and $S_L=S_1+\hat\sigma_{\lambda^*}$, which combines the two error sources by adding standard deviations instead of by the union bound.
 
 **Proposition P3.6 (tests).**
 (a) **Emptiness test.** Reject the model (rung, foundations) at level $\alpha_U+\alpha_L$ if $\hat\Theta^+$ is empty.
 (b) **Test of M1's testable part.** Run a Wald/F test of the M1 regression against M2 (the overidentifying restrictions of 2b D1(b)), with $(D^\star-1)(C-1)R(R-1)/2$ restrictions. In 2×2: equal curvature across districts.
-(c) **Test of M0 against M1 (pooling).** Conditional on the design, suppose each district's observed compositions contain $R$ affinely independent points. Under M1, M0's mean model holds for the observed units iff all district shifts vanish, $\zeta_{c,d}=0$. So pooling is tested by a Wald/F test of $\zeta=0$ in the M1 regression, with $(D^\star-1)(C-1)R$ restrictions. *(Added after review. 2b Prop. D4(b) gives a weaker condition, $E[Z_D\mid X,N]$ affine in $X$. That condition averages over the district labels, so it describes the superpopulation pooled over re-drawn districts, which §0.4 does not target. Conditional on the observed labels, only $\zeta=0$ makes M0 correct.)*
+(c) **Test of M0 against M1 (pooling).** Conditional on the design, suppose each district's observed compositions contain $R$ affinely independent points. Under M1, M0's mean model holds for the observed units iff all district shifts vanish, $\zeta_{c,d}=0$. So pooling is tested by a Wald/F test of $\zeta=0$ in the M1 regression, with $(D^\star-1)(C-1)R$ restrictions. *(Added after review. 2b Prop. D4(b) gives a weaker condition, $E[Z_D\mid X,N]$ affine in $X$. That condition averages over the district labels, so it describes the superpopulation pooled over re-drawn districts, which §0.4 does not target. Conditional on the observed labels, only $\zeta=0$ makes M0 correct.)* (c) tests mean shifts only. It has no power against within-district residual dependence without mean shifts, which violates P3-S1a (§0.4). *(Sentence added after review, round 2.)*
 *Proof of (a).*
 1. Under the model, $k_0\in\hat\Theta^+$ on $\mathcal E$. [P3.5(a) step 2]
 2. So $P(\hat\Theta^+=\emptyset)\le P(\mathcal E^c)\to\le\alpha_U+\alpha_L$. [1]
@@ -359,7 +402,7 @@ Checked: a nonlinear undetectable violation with $\eta=0.02$ stays inside the bo
 * **plug-in**: the estimate of the identified set (not a CI);
 * **conservative** (Thm P3.5(a));
 * **CLR** as implemented (Conjecture P3.5(b3)), for $B$ with the Bhatia–Davis allowance (the package default) and for $\tilde B$;
-* **projection** (Prop. P3.5(b2)(ii)): $k=\sqrt{\chi^2_{q,1-\alpha}}$ with $q=\operatorname{rank}\hat\Sigma$, applied to the same candidates as CLR. In every 2×2 design here $\hat\Sigma$ has full rank, so $q=\dim\beta$ and this is case (ii-a) of the corrected proposition. (Since 0.3.0 the package also drops candidates whose gradients use a numerical null direction of $\hat V$, which is case (ii-b).) For $B$ it follows the package: estimation part at level 0.04, plus the Bhatia–Davis allowance;
+* **projection** (Prop. P3.5(b2)(ii)): $k=\sqrt{\chi^2_{q,1-\alpha}}$ with $q=\operatorname{rank}\hat\Sigma$, applied to the same candidates as CLR. In every 2×2 design here $\hat\Sigma$ has full rank, so $q=\dim\beta$ and this is case (ii-a) of the corrected proposition. (Since 0.3.0 the package also drops candidates whose gradients use a numerical null direction of $\hat V$. *Corrected after review, round 2:* that is a safeguard, not case (ii-b); see the remark after P3.5(b2).) For $B$: estimation part at level 0.04, plus the Bhatia–Davis allowance with $\bar m$ bounded by the **projection** interval at level $\alpha_V=0.005$ on the rung alone (P3.5(c1); column `proj_B`). The earlier runs took $\bar m$ from a CLR interval; that version is kept as `proj_B_clrbd`, labelled **not covered** (P3.5(c2));
 * **finite-sample** (Thm P3.8), in the 2×2 M1 designs.
 
 Conventions:
@@ -374,9 +417,24 @@ Conventions:
 * Conservative and projection intervals: Thm P3.5(a) and Prop. P3.5(b2)(ii) are asymptotic theorems for a fixed-dimensional regression: M0 in every design here, and M1 with few, large districts (A 10 × 93; S 20 × 50). In the R2 rows (93 × 30, and 10 polls per district) $q$ grows with $D^\star$, and their coverage there is a simulation finding (§0.5).
 * Finite-sample interval: Thm P3.8 holds in every row.
 * CLR: Conjecture P3.5(b3) everywhere. All its figures are simulation findings.
-* The projection interval for $B$ uses the Bhatia–Davis allowance, whose variance bound comes from a CLR interval (as in the package). Strictly, only the version with the Popoviciu allowance is fully covered by P3.5(b2).
+* The projection interval for $B$ (`proj_B`) uses the Bhatia–Davis allowance with $\bar m$ bounded by a projection interval on the rung alone, so it is covered by P3.5(b2)(ii) and P3.5(c1), subject to (c1)'s Lindeberg condition. *(Corrected after review, round 2, Nov 2026: this bullet said the variance bound came from a CLR interval "as in the package". Since 0.3.0 the package takes it from the projection interval, and the §8 column has been rerun to match (table below). The CLR-based version, `proj_B_clrbd`, is not covered by any theorem.)*
+* **Rerun (round 2, Nov 2026)** of the projection column for $B$ with the P3.5(c1) bound, same seeds (no other column uses the changed code, and every other column reproduces the earlier run exactly; `phase3_montecarlo_output.txt`):
 
-**Rank of $\hat\Sigma$ in the projection interval** (`phase3_montecarlo_rank.py`, `phase3_montecarlo_rank_output.txt`; same seeds, 1000 replications per design). Prop. P3.5(b2)(ii) uses $q=\operatorname{rank}\hat\Sigma$, and since the Batch B correction it requires either a positive definite $\Sigma$ (ii-a) or a reduced parameterisation with exactly zero error in the null directions (ii-b). If $\hat\Sigma$ were singular while the estimation error had a component in its null space, those directions would not be controlled. The numerical rank (eigenvalues above $10^{-10}$ times the largest) equals $\dim\beta$ in every replication of every 2×2 design, from $\dim\beta=3$ to 401.
+  | Design | `proj_B` (P3.5(c1), $\bar m$ from the projection interval): coverage / median width | `proj_B_clrbd` ($\bar m$ from CLR; earlier column, **not covered**) |
+  |---|---|---|
+  | A 10 × 93 (M1) | 1.000 / 0.662 | 1.000 / 0.662 |
+  | A 93 × 30 (M1) | 1.000 / 0.964 | 1.000 / 0.964 |
+  | R2 30 × 10, 93 × 10, 200 × 10 (M1) | 1.000 / 1.000 each | 1.000 / 1.000 each |
+  | C boundary (M0) | 1.000 / 0.059 | 1.000 / 0.059 |
+  | E Slater (M0) | 1.000 / 0.251 | 1.000 / 0.249 |
+  | S0, S1 (M0; M1) | 1.000 / 0.436, 0.444; 1.000 / 0.808, 0.773 | identical |
+  | S2 non-affine (M0, misspecified) | 0.206 (SE 0.013) / 0.038, empty 0.478 | identical |
+  | S2 (M1) | 1.000 / 0.611 | 1.000 / 0.611 |
+  | B 3×3, four targets (M0) | 1.000 / 0.679, 0.445, 0.378, 0.661 | 1.000 / 0.679, 0.445, 0.377, 0.661 |
+
+  Coverage is unchanged in every design, and widths change by at most 0.002 (design E and one design-B target). In these designs the projection interval for $\bar m$ is only slightly wider than CLR's, and the Bhatia–Davis maximum $\max m(1-m)$ over it is flat near the plausible rates. So the provably valid version costs essentially nothing here. The S2/M0 row is misspecification, not a failure of the theorem.
+
+**Rank of $\hat\Sigma$ in the projection interval** (`phase3_montecarlo_rank.py`, `phase3_montecarlo_rank_output.txt`; same seeds, 1000 replications per design). These runs use $q=\operatorname{rank}\hat\Sigma$, which equals $\dim\beta$ in every 2×2 design and the exact adding-up reduction in design B (below); after the round-2 review the theorem is claimed with $q=\dim\beta$ or a documented exact reduction, and a numerical cutoff is only a safeguard (remark after P3.5(b2)). Since the Batch B correction P3.5(b2)(ii) requires either a positive definite $\Sigma$ (ii-a) or a reduced parameterisation with exactly zero error in the null directions (ii-b). If $\hat\Sigma$ were singular while the estimation error had a component in its null space, those directions would not be controlled. The numerical rank (eigenvalues above $10^{-10}$ times the largest) equals $\dim\beta$ in every replication of every 2×2 design, from $\dim\beta=3$ to 401.
 * Conditioning: the smallest-to-largest eigenvalue ratio is 0.005–0.04 for the pooled fits, and falls with the number of districts, to a minimum of $2.6\times10^{-8}$ at 200 × 10. That is still far above the rank threshold.
 * Design B fits all three columns ($\dim\beta=18$) and has $q=12$ in every replication. The six null directions are the adding-up constraint: summed across columns, the coefficients are the regression of 1 on the design, which has no error. So the estimation error lies in the range of $\hat\Sigma$, and nothing is left uncontrolled.
 * On the $C-1$ free columns (Remark P3.4.1, as the package fits), $\hat\Sigma$ has full rank 12 in every replication.
@@ -461,7 +519,7 @@ The district shifts are added to both groups' rates, and depend on the district'
 
 1. Fit the rung's regression (M0 / M1 / M2) on $C-1$ columns with HC3 covariance (no clustering, §0.4), and the sample hulls.
 2. Build the LP (2a Prop. 7 / 2b Thm 2) and report the plug-in bound, labelled as an estimate of the identified set, not a confidence interval.
-3. Report the CLR confidence interval for $\tilde B$ (default) and for $B$, labelled algorithmic (Conjecture P3.5(b3)). Report the projection interval (P3.5(b2)(ii)) alongside it as the interval with an asymptotic guarantee. Intersect both with Duncan–Davis, which is valid because $B\in DD$ always.
+3. Report the CLR confidence interval for $\tilde B$ (default) and for $B$, labelled algorithmic (Conjecture P3.5(b3); for $B$ its Bhatia–Davis allowance is P3.5(c2)). Report the projection interval (P3.5(b2)(ii), with $q=\dim\beta$ or an exact reduction) alongside it as the interval with an asymptotic guarantee; for $B$ its Bhatia–Davis allowance must take $\bar m$ from the projection interval on the rung alone (P3.5(c1)), or use Popoviciu. Intersect both with Duncan–Davis, which is valid because $B\in DD$ always.
 4. Theorem P3.8 gives a finite-sample guarantee in every regime. In the designs tried, its width is that of the logical range, so it is not yet worth reporting by default. With many small districts (R2), say that the CLR interval's coverage there rests on simulation (§0.5).
 5. Report the emptiness test and, for M1, the test of its testable part (P3.6(b)) and the pooling test (P3.6(c)). The $\chi^2$ version of the pooling test over-rejects with many restrictions (9% at nominal 5% with 38 restrictions, §8.4); since 0.3.0 the package calibrates both tests by a restricted wild bootstrap (4.3% and 5.4% in design S0; P3.6). A rejection says M0 is wrong for this design, not that its intervals fail (§8.3, S1).
 6. Report the sensitivity curves in $\eta$ (and $\delta$), with the breakdown value of the headline conclusion.
@@ -470,6 +528,7 @@ The district shifts are added to both groups' rates, and depend on the district'
 ## 10. Open items
 
 * *Closed after review (Batch B, Nov 2026):* (1) P3.5(b2)(ii) now requires a positive definite $\Sigma$ or a reduced full-rank parameterisation; a singular $\hat V$ in the package's projection interval needs a guard (rank check, or $q=\dim\beta$ with a warning). (2) The residual step of P3.5(a) is completed by the Chebyshev/Lindeberg subsequence argument. Both repairs leave every default and every allowance unchanged.
+* *Added after review (round 2, Nov 2026):* uniform (in the design sequence) limit theory for the plug-in endpoint when candidates are within $O(n^{-1/2})$ of binding without a convergent localisation (Proposition P3.4′ covers convergent localised slacks).
 * Conjecture P3.5(b3): validity of collecting dual vertices by simulation, with $k_p$ computed over the collected set. A proved reduction to (b1) is given; recovery and the $k_p$ effect are open.
 * Boundary cases where Slater fails (implied rates exactly 0 at a vertex): rate and limit of the endpoint estimator.
 * The rate of the hull error $\varphi(\beta_0;\hat A)-\varphi(\beta_0;A)$, and inference for the population-hull endpoint.

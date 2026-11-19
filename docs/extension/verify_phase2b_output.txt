@@ -26,3 +26,4 @@ PASS M1 restriction count 3x3, D*=4: rank gap 9 per column, column C implied -> 
 PASS M1 restriction count 3x2, D*=5: rank gap 12 per column, column C implied -> 12 independent restrictions (earlier P1 count 24)
 PASS Lemma D1(d): A5 in one district + 3 affinely independent points elsewhere -> stacked M1 design full rank; 3 distinct but collinear points in a district -> rank deficient
 PASS Prop D3 with pure-composition vertices (t = 0, 1): modified closed form matches the LP (195 instances)
+PASS Prop D8b [F] (round 2): Delta q = -0.307 != 0, yet with Q12 = 0 the change is point-identified (width 0.000); with Q12 = .2 it is not (width 0.123). The old 'iff Delta q = 0' fails; the max-min criterion holds

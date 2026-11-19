@@ -113,3 +113,21 @@ Two external referee reports reviewed Batch B (`reviews/B_partial_identification
 | M-13 (DiD), M-15 (NEW_AVENUES) | Unchanged: batches C and D. |
 
 Still open: R15, R16, Conjecture N2.2′, batch E (code review).
+
+## 9. Round 2 of the external reviews (Nov 2026)
+
+The partial-identification referee recommended minor revision and the EI referee minor revision for the experimental release; the Phases 1–3 referee asked for targeted revisions. The theory plan is `reviews/ROUND2_THEORY_PLAN.md` (approved in full).
+
+| Item | Outcome |
+|---|---|
+| Equal-rates witness (2c Reading) | Gives the CR union, not both branches; three-row counterexample (check C15). |
+| R10 scope (5a) | Pooled M0 only; grouped rungs remain R16. 5a §5 adds the per-fit CI status the package prints. |
+| Projection rank | Theorem with $q=\dim\beta$ or an exact reduction; dropping numerically-null candidates is a safeguard (P3 §5 remark). |
+| N2.3(d), M2(d), M3(d), M4, Lemma N2.4, 5a l.30 | Wording corrected (checks C16, C3b). |
+| N2.2′ | Referee's sufficiency argument under the selection-expectation reading added as a credited remark; the conjecture stays open. |
+| Checks | Tagged [F] (fails on an earlier statement), [V] (verifies a new statement), [I] (illustration). |
+| P3.4 | Fixed-constraint theorem plus new Proposition P3.4′ (R17). |
+| P3.5(c) | Bhatia–Davis allowance: valid (c1) and adaptive (c2) versions (R18); P3 §8 projection column rerun. |
+| 2b D8 | Sufficient (cancellation) versus necessary and sufficient (given the identified set). |
+| P3 §0.4 | Independence stated as a substantive assumption; the pooling test does not test within-district dependence. |
+| 5a pairwise CR, coverage figures | $\Delta^*_r$ pools all groups; literal intersection 304/600 versus CR-naive 550/600 (V13). |

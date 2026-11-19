@@ -313,11 +313,11 @@ def S7():
 
 if __name__ == "__main__":
     reg, full = S6()
-    print(f"S6 full law vs regression (C = [.2, .4] on k): regression gap set [{reg[0]:.6f}, {reg[1]:.6f}] "
+    print(f"S6 [V] full law vs regression (C = [.2, .4] on k): regression gap set [{reg[0]:.6f}, {reg[1]:.6f}] "
           f"(1/6, 1/3 = {1 / 6:.6f}, {1 / 3:.6f}); full-law set {'empty' if not full else full}  "
           f"{'PASS' if abs(reg[0] - 1 / 6) < 1e-12 and abs(reg[1] - 1 / 3) < 1e-12 and not full else 'FAIL'}")
     lce_fits, kint, Dc, ER, cr_lce, dBw = S7()
-    print(f"S7 LCE excludes CR: LCE fits ({lce_fits}, k in [{kint[0]:.3g}, {kint[1]:.3g}]); ER = {ER:.2e}; "
+    print(f"S7 [F] LCE excludes CR: LCE fits ({lce_fits}, k in [{kint[0]:.3g}, {kint[1]:.3g}]); ER = {ER:.2e}; "
           f"D~ = {Dc:.6f} (-261/1925 = {-261 / 1925:.6f}); CR feasible under LCE: {cr_lce}; "
           f"model-free witness delta_B = {dBw:.1f} (CR feasible without LCE). Old 'unrefutable' as applied "
           f"in 5a §3.5 fails  {'PASS' if lce_fits and not cr_lce and abs(Dc + 261 / 1925) < 1e-12 and abs(ER) < 1e-12 else 'FAIL'}")

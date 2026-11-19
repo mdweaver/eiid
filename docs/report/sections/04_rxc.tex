@@ -4,7 +4,7 @@
 Source: PHASE2a (Appendix~\ref{app:phase2a}), which builds on PHASE1
 (Appendix~\ref{app:phase1}). Every proof in PHASE2a is written in numbered
 steps with a justification tag; the tag legend is PHASE2a \S0.3 and the citation
-check is \S0.4. Numerical and symbolic checks: \texttt{verify\_phase2a.py},
+check is \S0.4. Numerical and symbolic checks: \path{verify_phase2a.py},
 32/32 PASS. The model $\mathcal M(H;A)$ is the set of laws of $(W,\beta)$ with
 (S1) $\beta\in\Bset$ and $T=\beta^\top X$; (S2) $\E[\beta\mid V]=M_H(X)$ on
 $\{X\in A\}$; (S3) $M_H(x)\in\Bset$ for every $x\in A$.
@@ -23,7 +23,7 @@ Each unit's set of possible rate tables is never empty (``everyone in the unit
 behaves like the unit average'' always fits), and it is a well-behaved convex
 polytope. These are the regularity facts every later proof uses.
 \end{plain}
-\proofref{Appendix~\ref{app:phase2a}, \S1, steps 1--13}
+\proofref[pB-res-lemma-0]{Appendix~\ref{app:phase2a}, \S1, steps 1--13}
 
 \begin{result}[Lemma 1, identification decomposition --- PHASE2a \S2]\label{res:p2a-l1}
 \status{Proved.} Under the model and A5: (a) $\E[T_c\mid X=x]=x^\top Q_cx$ and
@@ -44,7 +44,7 @@ H_cX$. A skew matrix vanishes in a quadratic form, so only $Q_c$ appears. A5
 makes the quadratic form determine $Q_c$. Row sums of $\beta$ equal one, which
 under A5 forces $\sum_cH_c=J$.
 \end{sketch}
-\proofref{Appendix~\ref{app:phase2a}, \S2, (a) steps 1--8, (b) steps 1--7, (c) steps 1--3}
+\proofref[pB-res-lemma-1]{Appendix~\ref{app:phase2a}, \S2, (a) steps 1--8, (b) steps 1--7, (c) steps 1--3}
 \begin{revnote}
 (R-01, R-02, P-B39.) The derivation of $\sum_cH_c=J$ now uses A5 rather than an
 unassumed open set. A5 is a matrix rank condition stated on
@@ -74,7 +74,7 @@ The target is a known number plus a weighted sum of the unknown $K$ entries. The
 weights $\mu_{rs}/\mu_r$ measure how much group $r$ lives alongside group $s$:
 the more mixed the units, the more the unknown split matters.
 \end{plain}
-\proofref{Appendix~\ref{app:phase2a}, \S3, steps 1--7; $2\times2$ check against JKST (16)}
+\proofref[pB-res-lemma-2]{Appendix~\ref{app:phase2a}, \S3, steps 1--7; $2\times2$ check against JKST (16)}
 \begin{revnote}
 (R-03, R-05.) The coefficient is stated in ambient coordinates, with the free
 coordinates in Prop.~7. $P(X\in A)=1$ is now explicit; Remark~2.1 and
@@ -112,7 +112,7 @@ target mean were outside it, Hahn--Banach would separate it, contradicting
 (T1) evaluated at the separating direction (a measurable argmax attains the
 support function). No auxiliary randomisation is needed (Remark~4.1). The random-set formulation follows Beresteanu, Molchanov and Molinari~\citep{bmm2011}.
 \end{sketch}
-\proofref{Appendix~\ref{app:phase2a}, \S4: (i)$\Rightarrow$(ii) steps 1--11; facts F1--F7; (ii)$\Rightarrow$(i) steps 1--22; convexity and compactness steps 1--4}
+\proofref[pB-res-theorem-1]{Appendix~\ref{app:phase2a}, \S4: (i)$\Rightarrow$(ii) steps 1--11; facts F1--F7; (ii)$\Rightarrow$(i) steps 1--22; convexity and compactness steps 1--4}
 \begin{revnote}
 (R-07, R-08, R-09.) Compactness needs $\operatorname{affdim}(A)=R-1$, not
 ``nonempty relative interior''. The sufficiency proof was expanded into
@@ -135,7 +135,8 @@ $\varphi$ is $[\min_{\ThI}\varphi(K),\max_{\ThI}\varphi(K)]$.
 Because the unknown enters the target linearly and the consistent set is convex
 and compact, the answer is always an interval.
 \end{plain}
-\proofref{Appendix~\ref{app:phase2a}, \S4, Corollary~1 steps 1--3}
+\proofref[pB-res-corollary-1]{Appendix~\ref{app:phase2a}, \S4, Corollary~1 steps 1--3}
+\begin{revnote}(R-05.) The hypothesis $P(X\in A)=1$ was added to Corollary~1 and to every result that uses Lemma~2 (Props~4--7); Prop.~7$'$ covers units outside $A$.\end{revnote}
 
 \subsection{The outer set: reduction, nesting, sharpness for the regression}
 
@@ -151,12 +152,12 @@ Only the most extreme units matter for the constraints. If the region $A$ is
 the range of the data, probability validity of the straight lines is automatic;
 if $A$ extrapolates beyond the data, validity there is an extra assumption.
 \end{plain}
-\proofref{Appendix~\ref{app:phase2a}, \S5, steps 1--9; Remarks~5.1--5.2 give the counterexamples}
+\proofref[pB-res-lemma-3]{Appendix~\ref{app:phase2a}, \S5, steps 1--9; Remarks~5.1--5.2 give the counterexamples}
 \begin{revnote}
 (R-04, R-07, P-B39.) (c) was restated: (S3) is automatic only when
 $A\subseteq\conv(\supp_AP_X)$. Remark~5.1 (a singleton inside the hull with no
 mass) and Remark~5.2 (a singleton $A$ makes $\ThO$ unbounded; A5 rules it out)
-were added. Checks in \texttt{verify\_phase2a.py} fail on the earlier statements.
+were added. Checks in \path{verify_phase2a.py} fail on the earlier statements.
 \end{revnote}
 
 \begin{result}[Proposition 1, nesting --- PHASE2a \S5]\label{res:p2a-p1}
@@ -171,7 +172,7 @@ Conditioning on $(X,N)$ implies conditioning on $X$ (tower property). Conditiona
 expectations of valid rate tables are valid rate tables, which is JKST's Jensen
 step.
 \end{sketch}
-\proofref{Appendix~\ref{app:phase2a}, \S5, Proposition~1 steps 1--5}
+\proofref[pB-res-proposition-1]{Appendix~\ref{app:phase2a}, \S5, Proposition~1 steps 1--5}
 
 \begin{result}[Proposition 2, $\ThO$ is sharp for the regression function --- PHASE2a \S5]\label{res:p2a-p2}
 \status{Proved.} Let $\mathcal P(P)$ be the laws with the same law of $(N,X)$
@@ -187,7 +188,7 @@ identical outcomes. Calling it ``sharp'' without that qualifier is wrong.
 Given $K\in\ThO$, set every unit's rates equal to the implied mean $M_H(X)$;
 this is a valid law with the same regression, and $K$ is in its sharp set.
 \end{sketch}
-\proofref{Appendix~\ref{app:phase2a}, \S5, Proposition~2 steps 1--10}
+\proofref[pB-res-proposition-2]{Appendix~\ref{app:phase2a}, \S5, Proposition~2 steps 1--10}
 
 \begin{result}[Corollary 2 and Proposition 3 --- PHASE2a \S5]
 \status{Proved.} If $T=\E[T\mid X]$ a.s., then $\ThI=\ThO$ (Cor.~2). More
@@ -201,7 +202,7 @@ are so different that some sit at a Duncan--Davis corner and others do not
 (Remark~3.1, the $2\times2$ reading). In 400 random valid $2\times2$ designs the
 inclusion was strict in 46.
 \end{plain}
-\proofref{Appendix~\ref{app:phase2a}, \S5, Corollary~2 steps 1--3; Proposition~3 steps 1--7}
+\proofref[pB-res-corollary-2]{Appendix~\ref{app:phase2a}, \S5, Corollary~2 steps 1--3; Proposition~3 steps 1--7}
 
 \subsection{Closed forms and the linear program}
 
@@ -215,7 +216,8 @@ $B^*(K)$ is JKST eq.~(16).
 The R$\times$C machinery contains the published $2\times2$ method exactly; the
 package's existing bounds are a special case.
 \end{plain}
-\proofref{Appendix~\ref{app:phase2a}, \S6.1, derivations (a)--(d); numerically to $10^{-16}$}
+\proofref[pB-res-proposition-4]{Appendix~\ref{app:phase2a}, \S6.1, derivations (a)--(d); numerically to $10^{-16}$}
+\begin{revnote}(R-05, R-10.) Part (d), and any use of it for $B^*$, now states $P(l\le X\le u)=1$; the bounds are called bounds over the \emph{outer} set, sharp relative to the regression function only.\end{revnote}
 
 \begin{result}[Proposition 5, $A$ the whole simplex --- PHASE2a \S6.2]
 \status{Proved.} With $A=\Delta^{R-1}$, $\ThO=\{|K_{c,rs}|\le Q_{c,rs}\}$; it is
@@ -229,21 +231,37 @@ probabilities with known average $Q$ can split it by at most
 $\pm\min(Q,1-Q)$. This is narrower than the hull-based bound but assumes
 extrapolation.
 \end{plain}
-\proofref{Appendix~\ref{app:phase2a}, \S6.2, steps 1--8; checked against an LP in 200 tables}
+\proofref[pB-res-proposition-5]{Appendix~\ref{app:phase2a}, \S6.2, steps 1--8; checked against an LP in 200 tables}
+\begin{revnote}(R-13.) The non-emptiness condition was added: $\ThO\ne\emptyset$ iff every $Q_{c,rs}\ge0$, and then $\sum_cQ_{c,rs}=1$ gives $0\le m_{c,rs}\le\tfrac12$; a negative $Q_{c,rs}$ refutes the model with $A=\Delta^{R-1}$ (check in \path{verify_phase2a.py}).\end{revnote}
 
 \begin{result}[Lemma 4, box $\cap$ hyperplane --- PHASE2a \S6.3]
 \status{Proved.} For $\mathcal P=\{\ell\le\kappa\le h,\sum_c\kappa_c=0\}$:
 (a) non-empty iff $\sum\ell\le0\le\sum h$; (b) coordinate projections in closed
 form; (c) linear objectives are maximised by a greedy rule.
 \end{result}
-\proofref{Appendix~\ref{app:phase2a}, \S6.3, steps 1--6}
+\begin{plain}
+With two rows each column has one unknown, and the columns' unknowns must sum to
+zero. So the feasible set is a box cut by one hyperplane. This lemma gives its
+exact projection on each coordinate and shows that the best value of any linear
+target is reached by filling coordinates greedily, largest coefficient first.
+It is the computational engine of Props~5--6 and of PHASE2b Prop.~D3.
+\end{plain}
+\proofref[pB-res-lemma-4]{Appendix~\ref{app:phase2a}, \S6.3, steps 1--6}
 
 \begin{result}[Proposition 6, two rows, any number of columns --- PHASE2a \S6.4]
 \status{Proved.} For $R=2$ and $A=[l,u]$ with $0<l<u<1$, $\ThO=\{\ell\le\kappa\le
 h,\ \sum_c\kappa_c=0\}$ with closed-form $\ell_c,h_c$; target bounds follow by
 Lemma~4.
 \end{result}
-\proofref{Appendix~\ref{app:phase2a}, \S6.4, steps 1--6; checked against an LP in 300 cases}
+\begin{plain}
+For two groups and any number of outcomes, each outcome's unknown is squeezed
+between the tightest lower and upper limits implied by the two extreme units (the
+least and most group-1-heavy), and the unknowns must add up to zero across
+outcomes. The bound on any target is then a closed form, with no LP solver. Group
+1's rate rises and group 2's rate falls as the unknown rises, because the unknown
+is the share of the observed pattern attributed to group 1.
+\end{plain}
+\proofref[pB-res-proposition-6]{Appendix~\ref{app:phase2a}, \S6.4, steps 1--6; checked against an LP in 300 cases}
 
 \begin{result}[Corollary 6.1, joint versus collapsed --- PHASE2a \S6.4]
 \status{Proved.} For $R=2$: (a) the joint interval for $\kappa_c$ lies inside the
@@ -257,7 +275,7 @@ With two groups, fitting all outcome columns jointly helps only if the straight
 lines would give an impossible rate at some pure unit. With three or more groups,
 joint fitting can help even when everything is valid.
 \end{plain}
-\proofref{Appendix~\ref{app:phase2a}, \S6.4, Corollary~6.1 steps 1--7}
+\proofref[pB-res-corollary-6.1]{Appendix~\ref{app:phase2a}, \S6.4, Corollary~6.1 steps 1--7}
 \begin{revnote}
 (R-14; PHASE2a \S10 item~1.) PHASE1's general claim of strict joint gain was
 withdrawn; the exact sign condition replaced ``strong contextual effects''.
@@ -275,12 +293,12 @@ The computable bound is a small linear program: one variable per unknown
 direction, one constraint per extreme unit, group and outcome. This is the
 \emph{outer} set, not an LP form of the sharp set.
 \end{plain}
-\proofref{Appendix~\ref{app:phase2a}, \S6.5, steps 1--5}
+\proofref[pB-res-proposition-7]{Appendix~\ref{app:phase2a}, \S6.5, steps 1--5}
 \begin{revnote}
 (R-06.) The closing paragraph on regularity was wrong: the value function is
 concave and piecewise linear in $Q$ for fixed $\mu$, convex in $\gamma$ for
 fixed $Q$, and in general neither jointly ($V=\mu Q$). Lemma~P3.1 is the
-fixed-design case. Check: \texttt{verify\_phase2a.py} (midpoint test).
+fixed-design case. Check: \path{verify_phase2a.py} (midpoint test).
 \end{revnote}
 
 \begin{result}[Proposition 7$'$, units outside $A$ --- PHASE2a \S6.6]
@@ -293,7 +311,7 @@ cells.
 Units outside the region where straight lines are trusted contribute their
 model-free range; nothing links them to the model.
 \end{plain}
-\proofref{Appendix~\ref{app:phase2a}, \S6.6, steps 1--6}
+\proofref[pB-res-proposition-7p]{Appendix~\ref{app:phase2a}, \S6.6, steps 1--6}
 \begin{revnote}
 (R-05; decision D2.) New result written after review to document the existing
 \texttt{trim} option.
@@ -311,7 +329,7 @@ If the model is right, the population bound is never empty. An empty bound is
 evidence against the model (in samples it can also be noise; Phase~3 turns it
 into a test).
 \end{plain}
-\proofref{Appendix~\ref{app:phase2a}, \S7, steps 1--5}
+\proofref[pB-res-proposition-8]{Appendix~\ref{app:phase2a}, \S7, steps 1--5}
 
 \begin{result}[Proposition 9, what the data can never rule out --- PHASE2a \S7]\label{res:p2a-p9}
 \status{Proved.} If $\Delta(x)$ satisfies $x^\top\Delta(x)=0$, $\Delta(x)\mathbf
@@ -325,7 +343,7 @@ the data identical, yet change the transition rates. The linearity assumption is
 therefore a genuine leap that no fit statistic can confirm. Phase~3 bounds its
 consequences with the sensitivity parameter $\eta$ (Prop.~S1).
 \end{plain}
-\proofref{Appendix~\ref{app:phase2a}, \S7, Proposition~9 steps 1--4}
+\proofref[pB-res-proposition-9]{Appendix~\ref{app:phase2a}, \S7, Proposition~9 steps 1--4}
 
 \paragraph{Illustration (PHASE2a \S8).} In a noise-free BC $3\times3$ design with
 2000 polls, the $\ThO$ bounds on loyalty, defection, demobilisation and

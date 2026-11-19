@@ -7,19 +7,15 @@
 \subsubsection{2.1 Claims and verdicts}\label{pG-claims-and-verdicts}}
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}@{}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}@{}}
 \toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-\#
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Claim
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Verdict
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Basis
+\begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}\#
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Claim
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Verdict
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Basis
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
@@ -53,19 +49,15 @@ G9 & Joint sampling uncertainty & \textbf{Correct concern; handled} if all rows 
 \textbf{How often each adds information} {[}V2{]}, over 2000 random LCE designs with true signs imposed:
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}@{}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}@{}}
 \toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Restriction
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Strictly tightens JKST
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Redundant
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Median width ratio
+\begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Restriction
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Strictly tightens JKST
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Redundant
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Median width ratio
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
@@ -90,16 +82,53 @@ Write \(q_{rs}(x):=(Qx)_r-(Qx)_s\), which is identified, and \(g_{rs}(x;k):=(Kx)
 \[O_{rs}(x):=m_r(x)-m_s(x)=(Hx)_r-(Hx)_s,\qquad L_{rs}(x):=\sum_tx_t\,\partial_{e_r-e_s}m_t(x)=(x^\top H)_r-(x^\top H)_s.\]
 \(O\) is the between-group gap. \(L\) is the composition-weighted contextual derivative when a resident of group \(s\) is replaced by one of group \(r\).
 
-\textbf{Proposition P-S (proved).}
-* (a) \(O_{rs}(x)+L_{rs}(x)=2q_{rs}(x)=\partial_{e_r-e_s}\tau(x)\). This is the local Monotone-EI decomposition.
-* (b) \(O_{rs}(x)=q_{rs}(x)+g_{rs}(x;k)\) and \(L_{rs}(x)=q_{rs}(x)-g_{rs}(x;k)\).
-* (c) Hence \(O_{rs}\ge0\) and \(L_{rs}\ge0\) at \(x\) \(\iff\) \(\lvert g_{rs}(x;k)\rvert\le q_{rs}(x)\). This is non-empty only if \(q_{rs}(x)\ge0\), which is a data test.
+\phantomsection\label{pG-res-proposition-P-S}\textbf{Proposition P-S (proved).}
+
+\begin{itemize}
+\item
+  \begin{enumerate}
+  \def\labelenumi{(\alph{enumi})}
+  \tightlist
+  \item
+    \(O_{rs}(x)+L_{rs}(x)=2q_{rs}(x)=\partial_{e_r-e_s}\tau(x)\). This is the local Monotone-EI decomposition.
+  \end{enumerate}
+\item
+  \begin{enumerate}
+  \def\labelenumi{(\alph{enumi})}
+  \setcounter{enumi}{1}
+  \tightlist
+  \item
+    \(O_{rs}(x)=q_{rs}(x)+g_{rs}(x;k)\) and \(L_{rs}(x)=q_{rs}(x)-g_{rs}(x;k)\).
+  \end{enumerate}
+\item
+  \begin{enumerate}
+  \def\labelenumi{(\alph{enumi})}
+  \setcounter{enumi}{2}
+  \tightlist
+  \item
+    Hence \(O_{rs}\ge0\) and \(L_{rs}\ge0\) at \(x\) \(\iff\) \(\lvert g_{rs}(x;k)\rvert\le q_{rs}(x)\). This is non-empty only if \(q_{rs}(x)\ge0\), which is a data test.
+  \end{enumerate}
+\end{itemize}
 
 \emph{Proof.}
-1. \(\tau(x)=x^\top Hx\), so \(\nabla\tau=(H+H^\top)x=2Qx\). {[}def{]}
-2. \(x^\top H=(H^\top x)^\top\) and \(H^\top=Q-K\), since \(K\) is antisymmetric. {[}def{]}
-3. Substitute \(H=Q+K\) into \(O\) and \(H^\top=Q-K\) into \(L\). This gives (b); adding them gives (a). {[}alg{]}
-4. (c) follows from (b). ∎
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \(\tau(x)=x^\top Hx\), so \(\nabla\tau=(H+H^\top)x=2Qx\). {[}def{]}
+\item
+  \(x^\top H=(H^\top x)^\top\) and \(H^\top=Q-K\), since \(K\) is antisymmetric. {[}def{]}
+\item
+  Substitute \(H=Q+K\) into \(O\) and \(H^\top=Q-K\) into \(L\). This gives (b); adding them gives (a). {[}alg{]}
+\item
+  \begin{enumerate}
+  \def\labelenumii{(\alph{enumii})}
+  \setcounter{enumii}{2}
+  \tightlist
+  \item
+    follows from (b). ∎
+  \end{enumerate}
+\end{enumerate}
 
 Checked to \(4\times10^{-16}\) {[}V4{]}. With \(R=2\), \(x=\) the group-1 share and \(k=w_1\), this is exactly GPT's pair \(c_1-w_1+d_1x\ge0\) and \(w_1+d_1x\ge0\).
 
@@ -108,11 +137,41 @@ Checked to \(4\times10^{-16}\) {[}V4{]}. With \(R=2\), \(x=\) the group-1 share 
 
 For a pair \((r,s)\), \(g_{rs}(x;k)=\sum_t(K_{rt}-K_{st})x_t\). As \(x\) ranges over a full-dimensional subset of the simplex, the functionals reached are \(K_{rs}\) and \(K_{rt}-K_{st}\) for \(t\ne r,s\): that is, \(R-1\) independent directions.
 
-\textbf{Proposition P-R.}
-* (a) One pair restricts an \((R-1)\)-dimensional subspace of \(\mathcal K_c\). \textbf{Proved} (above).
-* (b) If the pairs form a star tree \(\{(0,s)\}\), all \(\binom R2\) directions are reached. \textbf{Proved}: \(K_{0s}\) comes directly, and then \(K_{st}=K_{0t}-(K_{0t}-K_{st})\).
-* (c) The same holds for any spanning tree. \textbf{Checked} for chain trees with \(R=3,4,5\) {[}V7{]}; general proof by induction on the tree (R5).
-* (d) Combined with P-S(c), M-ORD ∩ M-LOC on a spanning tree bounds \(K_c\) with no Duncan--Davis rows. \textbf{Follows from (b) and P-S} for star trees.
+\phantomsection\label{pG-res-proposition-P-R}\textbf{Proposition P-R.}
+
+\begin{itemize}
+\item
+  \begin{enumerate}
+  \def\labelenumi{(\alph{enumi})}
+  \tightlist
+  \item
+    One pair restricts an \((R-1)\)-dimensional subspace of \(\mathcal K_c\). \textbf{Proved} (above).
+  \end{enumerate}
+\item
+  \begin{enumerate}
+  \def\labelenumi{(\alph{enumi})}
+  \setcounter{enumi}{1}
+  \tightlist
+  \item
+    If the pairs form a star tree \(\{(0,s)\}\), all \(\binom R2\) directions are reached. \textbf{Proved}: \(K_{0s}\) comes directly, and then \(K_{st}=K_{0t}-(K_{0t}-K_{st})\).
+  \end{enumerate}
+\item
+  \begin{enumerate}
+  \def\labelenumi{(\alph{enumi})}
+  \setcounter{enumi}{2}
+  \tightlist
+  \item
+    The same holds for any spanning tree. \textbf{Checked} for chain trees with \(R=3,4,5\) {[}V7{]}; general proof by induction on the tree (R5).
+  \end{enumerate}
+\item
+  \begin{enumerate}
+  \def\labelenumi{(\alph{enumi})}
+  \setcounter{enumi}{3}
+  \tightlist
+  \item
+    Combined with P-S(c), M-ORD ∩ M-LOC on a spanning tree bounds \(K_c\) with no Duncan--Davis rows. \textbf{Follows from (b) and P-S} for star trees.
+  \end{enumerate}
+\end{itemize}
 
 Rank is necessary, not sufficient, for tightening: it says which directions can be cut, and the signs and the data decide whether they are. {[}V5{]} shows the practical effect in 3×2. With true restrictions only, ordering and local rows tighten about 2/3 of group-rate targets (median width 0.77 of DD under both). With near-1-D support they tighten more often (≈94\%, median 0.47), because DD alone is weaker there.
 
@@ -120,9 +179,97 @@ Rank is necessary, not sufficient, for tightening: it says which directions can 
 \subsubsection{5.3 Nesting in 2×2 under LCE (P-N)}\label{pG-nesting-in-22-under-lce-p-n}}
 
 Let \(a=\mu\operatorname{Var}_{w^1}(X)\), \(b=(1-\mu)\operatorname{Var}_{w^0}(X)\), and \(x^*=a/(a+b)\).
-* (a) Signed slopes (\(w_1\ge0\), \(w_1+d_1\ge0\)) ⇒ weighted-local on the hull. \textbf{Proved}: \(w_1+d_1x=(1-x)w_1+x(w_1+d_1)\).
-* (b) \(\delta_W=(a+b)(w_1+d_1x^*)\). \textbf{Proved} (M5(c); asserted in V3). Hence weighted-local on the hull ⇒ \(\delta_W\ge0\) whenever \(x^*\in[x_L,x_U]\), and the implication is strict when \(d_1\ne0\) and \(x^*\) is interior.
-* (c) \textbf{Conjecture C1:} \(x^*\) always lies in the composition hull. Evidence: 2000 random designs plus an adversarial search over 50,000 discrete designs with 2--4 support points and extreme weights found no violation beyond \(10^{-6}\) {[}V3{]}. A pairwise representation \(\operatorname{Var}_w(X)=\tfrac12\sum w_iw_j(X_i-X_j)^2\) writes \(x^*\) as a weighted mean of pair ratios, but individual ratios can leave the hull, so a proof needs a cancellation argument (R1).
+
+\begin{itemize}
+\item
+  \begin{enumerate}
+  \def\labelenumi{(\alph{enumi})}
+  \tightlist
+  \item
+    Signed slopes (\(w_1\ge0\), \(w_1+d_1\ge0\)) ⇒ weighted-local on the hull. \textbf{Proved}: \(w_1+d_1x=(1-x)w_1+x(w_1+d_1)\).
+  \end{enumerate}
+\item
+  \begin{enumerate}
+  \def\labelenumi{(\alph{enumi})}
+  \setcounter{enumi}{1}
+  \tightlist
+  \item
+    \(\delta_W=(a+b)(w_1+d_1x^*)\). \textbf{Proved} (M5(c); asserted in V3). Hence weighted-local on the hull ⇒ \(\delta_W\ge0\) whenever \(x^*\in[x_L,x_U]\), and the implication is strict when \(d_1\ne0\) and \(x^*\) is interior.
+  \end{enumerate}
+\item
+  \begin{enumerate}
+  \def\labelenumi{(\alph{enumi})}
+  \setcounter{enumi}{2}
+  \tightlist
+  \item
+    \textbf{Conjecture C1:} \(x^*\) always lies in the composition hull. Evidence: 2000 random designs plus an adversarial search over 50,000 discrete designs with 2--4 support points and extreme weights found no violation beyond \(10^{-6}\) {[}V3{]}. A pairwise representation \(\operatorname{Var}_w(X)=\tfrac12\sum w_iw_j(X_i-X_j)^2\) writes \(x^*\) as a weighted mean of pair ratios, but individual ratios can leave the hull, so a proof needs a cancellation argument (R1).
+  \end{enumerate}
+\end{itemize}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\hypertarget{pG-extension-to-difference-in-differences-same-units-two-elections}{%
+\subsection{7. Extension to difference-in-differences (same units, two elections)}\label{pG-extension-to-difference-in-differences-same-units-two-elections}}
+
+Setting: PHASE2d. Fixed population; rows \(v\) (veteran) and \(n\); per-period \(Q_t,K_t\); changes \(\Delta H=\Delta Q+\Delta K\) under first-difference LCE (FD, Lemma FD1). In 2×2, \(\text{DiD}=\text{(identified)}-(r+m_n)\Delta w_1\) (MENU item 18). Each module has a change-version obtained by applying it to \(\Delta m\) in place of \(m\):
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Module on changes
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Restriction
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Effect on DiD
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Status
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+M-SIGN-Δ (= Δ4) & sign of \(\delta^\Delta_W\) / \(\delta^\Delta_B\) / CR on the realised changes & one-sided cuts at Goodman-on-changes and NM-on-changes & proved (Δ4), sharp for continuous tables \\
+\textbf{M-ORD-Δ} (MTR) & \(\Delta m_v(x)\ge\Delta m_n(x)\) on the hull: \(\Delta c_1-\Delta w_1+\Delta d_1x\ge0\) & upper bound on \(\Delta w_1\) & rows; proved (affine) \\
+\textbf{M-LOC-Δ} (weighted spillover sign) & \(\Delta w_1+\Delta d_1x\ge0\) on the hull: replacing a non-veteran with a veteran does not lower the composition-weighted change & lower bound on \(\Delta w_1\) & rows; proved (affine) \\
+\textbf{DiD-S} = ORD-Δ ∩ LOC-Δ & P-S on changes: \(\lvert\Delta g(x)\rvert\le\Delta q(x)\) & closed-form interval for \(\Delta w_1\), so DiD \(\in\) identified \(-(r+m_n)\cdot[\max_x(-\Delta d_1x),\ \min_x(\Delta c_1+\Delta d_1x)]\) & \textbf{proved} (P-S with \(\Delta\)); empty iff \(\Delta q<0\) somewhere (test) \\
+M-CTX2-Δ & spillovers measured at a second scale bound the own-composition \(\Delta w_1\) & interval around R1, of width \(\propto M\) & proposal; replaces FD3's free δ with an identified yardstick \\
+M-CEIL-Δ & \(\lvert\Delta w_1\rvert\le s\), with \(s\) benchmarked from pre-period variation (relative magnitudes, Rambachan--Roth) & FD3 with a calibrated δ & FD3 proved; calibration open \\
+M-LCE levels ∩ M-SIGN-Δ & per-period LCE plus signs on changes & non-nested with FD (2d §10) & open (R11) \\
+M-DATA-Δ & per-period known tables; the pre-period table pins \(K_\text{pre}\) directions & tightens levels and DiD & proposal \\
+2×3 common base & DiD-S per column with \(\sum_c\Delta t_c=0\) linking columns through the DD rows & joint columns may tighten (cf.~V6) & R6 analogue \\
+\end{longtable}
+
+\textbf{R×C DiD.} A single-column DiD needs only that column's \(\Delta K_c\) (2a Lemma 2; PHASE1b B1 correction). P-R then says a spanning tree of pairwise change restrictions bounds every direction of \(\Delta K_c\).
+
+\textbf{Data tests for DiD:}
+
+\begin{itemize}
+\tightlist
+\item
+  the sign of the identified \(\Delta q_{rs}(x)\), which is required for DiD-S;
+\item
+  equal quadratic coefficients across periods (R1 + R2);
+\item
+  a placebo DiD on pre-periods;
+\item
+  emptiness at each rung.
+\end{itemize}
+
+\textbf{Composition change.} Every module above applies to the \emph{stayer} population of C1. With interval-valued bases (2d §7, D.7), the rows are written in cell-count coordinates and remain an LP.
+
+\textbf{Still to prove (R11):}
+
+\begin{itemize}
+\tightlist
+\item
+  sharpness of DiD-S within FD;
+\item
+  FD4 ∩ Δ4 (the outer set intersected with the exact sign cut, which mixes mean-level and realised quantities, ⚠);
+\item
+  LCE-in-levels ∩ sign-on-changes;
+\item
+  inference for unions of sign patterns across periods.
+\end{itemize}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -132,30 +279,25 @@ Let \(a=\mu\operatorname{Var}_{w^1}(X)\), \(b=(1-\mu)\operatorname{Var}_{w^0}(X)
 Status: \textbf{P} proved · \textbf{C} checked numerically · \textbf{J} conjecture · \textbf{O} open.
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}@{}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}@{}}
 \toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-ID
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Claim
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Status
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Strategy / check
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Blocks
+\begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}ID
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Claim
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Status
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Strategy / check
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Blocks
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
 R1 & C1: \(x^*\in\) hull (2×2), hence weighted-local ⇒ \(\delta_W\ge0\) under LCE & J (C {[}V3{]}) & pairwise variance representation plus a cancellation argument; try two-point designs first & the M-LOC ⇒ SIGN-W cell \\
-R2 & An added restriction moves an endpoint iff it removes the whole optimal face (one feasibility LP, with the target intercept); for one row, iff every optimal dual is positive (a solver's dual alone does not certify); implied ⇔ tightens no target; 2×2 closed form = G2; ``redundant'' = zero gain for this target & \textbf{P} (5a §2; \texttt{verify\_R2.py}; reviewed internally and externally (Batch B), corrections applied) & --- & redundancy diagnostic \\
-R3 & \textbf{Pooled} LCE ∩ any closed convex restriction on \(k\) is sharp for the model-implied target (full law, and for the regression); CR is a union, a single slab for W1/2×2, and may have a gap otherwise; the conjunction can be rejected under LCE (Remark R3.2) & \textbf{P} for the pooled model (5a §1; \texttt{verify\_R3.py}; reviewed internally and externally (Batch B), corrections applied). Grouped rungs: R16 & --- & M-SIGN reporting \\
+R2 & An added restriction moves an endpoint iff it removes the whole optimal face (one feasibility LP, with the target intercept); for one row, iff every optimal dual is positive (a solver's dual alone does not certify); implied ⇔ tightens no target; 2×2 closed form = G2; ``redundant'' = zero gain for this target & \textbf{P} (5a §2; \path{verify_R2.py}; reviewed internally and externally (Batch B), corrections applied) & --- & redundancy diagnostic \\
+R3 & \textbf{Pooled} LCE ∩ any closed convex restriction on \(k\) is sharp for the model-implied target (full law, and for the regression); CR is a union, a single slab for W1/2×2, and may have a gap otherwise; the conjunction can be rejected under LCE (Remark R3.2) & \textbf{P} for the pooled model (5a §1; \path{verify_R3.py}; reviewed internally and externally (Batch B), corrections applied). Grouped rungs: R16 & --- & M-SIGN reporting \\
 R4 & Refutability classification for \(R\ge3\) (which signs, orderings and local rows can produce emptiness, model-free and under LCE) & O & construct feasible completions; counterexamples & §4.2 codes, tests \\
 R5 & P-R(c): any spanning tree of pairs reaches all directions; behaviour with lower-dimensional support & P (star); C (chain) {[}V7{]} & induction on tree leaves; support rank & step 4 \\
 R6 & When joint column restrictions in 2×C are strictly tighter than the best single one; ordinal cumulative version & C {[}V6{]} & LP geometry in the \((C-1)\)-dimensional \(t\)-space & step 3 \\
@@ -169,14 +311,23 @@ R13 & G2 table (JKST + signs) & P (§2.2) {[}V1, V2{]} & --- & --- \\
 R14 & Single-index dimension \(C-1\) & J (NA check) & generic-rank argument & T2.4 \\
 R15 & Integer unit tables: N1 and Δ4 with integer cells (discrete target sets; integer branch feasibility). 2×2 with margins only: lattice of step \(1/(N\mu(1-\mu))\) inside the continuous interval (2c Remark M2.1) & O (2×2 margins-only case P) & integer programming; small tables first & integer-exact reporting \\
 R16 & Grouped rungs: R3′ (regression sharpness under M1/M1(δ)/M2 via 2b Thm 1′, with \(A_d\) and all free coordinates) and R10′ (inference, with the regime caveat) & O & 2b Thm 1′; tests on noise-free grouped designs & removing ``experimental'' for grouped M-SIGN \\
-R17 & P3.4′ (round 2, Nov 2026): limit of the plug-in endpoint along a triangular array of designs (changing hulls), under a localisation condition on the gradients and the slacks \(\sqrt n(\theta_\lambda-\varphi_U)\); P3.4 restated for a fixed constraint system & \textbf{P} (P3 §4; \texttt{verify\_phase3.py} ``P3.4′'') & continuous mapping after Lemma P3.1 & uniform limit theory (P3 §10, open) \\
-R18 & P3.5(c) (round 2, Nov 2026): variance-adaptive (Bhatia--Davis) residual allowance. (c1) valid when \(\bar m\) is bounded by a P3.5(a) or (b2)(ii) interval on the rung's own constraints and \(\max_iw_i^2/\bar s^2\to0\); (c2) with a CLR interval, algorithmic & (c1) \textbf{P}; (c2) inherits (b3) (P3 §5; \texttt{verify\_phase3.py} ``P3.5(c)'') & union bound; Chebyshev/Lindeberg relative to \(\bar s\) & the projection column for \(B\) (package: \(\bar m\) projection interval on the rung alone; note near 0 or 1) \\
+R17 & P3.4′ (round 2, Nov 2026): limit of the plug-in endpoint along a triangular array of designs (changing hulls), under a localisation condition on the gradients and the slacks \(\sqrt n(\theta_\lambda-\varphi_U)\); P3.4 restated for a fixed constraint system & \textbf{P} (P3 §4; \path{verify_phase3.py} ``P3.4′'') & continuous mapping after Lemma P3.1 & uniform limit theory (P3 §10, open) \\
+R18 & P3.5(c) (round 2, Nov 2026): variance-adaptive (Bhatia--Davis) residual allowance. (c1) valid when \(\bar m\) is bounded by a P3.5(a) or (b2)(ii) interval on the rung's own constraints and \(\max_iw_i^2/\bar s^2\to0\); (c2) with a CLR interval, algorithmic & (c1) \textbf{P}; (c2) inherits (b3) (P3 §5; \path{verify_phase3.py} ``P3.5(c)'') & union bound; Chebyshev/Lindeberg relative to \(\bar s\) & the projection column for \(B\) (package: \(\bar m\) projection interval on the rung alone; note near 0 or 1) \\
 \end{longtable}
 
 \textbf{Standard for ``proved'':}
-1. The proof is written in the numbered-step format used in PHASE2c, with a justification tag on each step.
-2. It is checked against brute force or the LP, including adversarial designs.
-3. An independent fresh-session review re-derives it (S12).
-4. The §4 tables are then updated.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  The proof is written in the numbered-step format used in PHASE2c, with a justification tag on each step.
+\item
+  It is checked against brute force or the LP, including adversarial designs.
+\item
+  An independent fresh-session review re-derives it (S12).
+\item
+  The §4 tables are then updated.
+\end{enumerate}
 
 Until then, the package labels any module that depends on the claim as \texttt{experimental} in \texttt{meta\$proof\_status}, and \texttt{ladder()} prints that label.

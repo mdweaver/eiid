@@ -2,8 +2,8 @@
 \section{The sign module M-SIGN: R3, R2 and R10}\label{sec:msign}
 
 Source: PHASE5a (Appendix~\ref{app:phase5a}), proof-register items R3, R2 and
-R10. Checks: \texttt{verify\_R3.py}, \texttt{verify\_R2.py},
-\texttt{verify\_R10.py}. \textbf{Scope: every statement is for the pooled LCE
+R10. Checks: \path{verify_R3.py}, \path{verify_R2.py},
+\path{verify_R10.py}. \textbf{Scope: every statement is for the pooled LCE
 model M0.} The sign and CR rows are valid linear rows under the district rungs
 too (Prop.~M5(a)), but sharpness and inference there are proof item R16, not
 proved. The package labels the module \emph{experimental} in 0.3.0 and 0.3.1.
@@ -54,7 +54,7 @@ Lemma~M1(c) to the model means: $\delta^{r*}_W=\Var_p(X_r)(ER^{r*}-D^{r*})$ and
 $\delta^{r*}_B=\mu_r(1-\mu_r)(D^{r*}-\gamma_rER^{r*})$; the union of the two
 same-sign cases is the hull.
 \end{sketch}
-\proofref{Appendix~\ref{app:phase5a}, \S1.3, steps 1--15; checks S1--S7 (\S1.5)}
+\proofref[pF-res-theorem-R3]{Appendix~\ref{app:phase5a}, \S1.3, steps 1--15; checks S1--S7 (\S1.5)}
 \begin{revnote}
 (M-1; P-B15, P-B16, P-B17; I.7.) The dimension hypothesis is
 $\operatorname{affdim}(A)=R-1$, not ``nonempty relative interior''. ``The LP
@@ -108,7 +108,17 @@ trusts solver dual values. A belief can narrow the set of possible tables withou
 narrowing the quantity you care about; with three or more groups this was common
 in simulation (28\% of cases).
 \end{plain}
-\proofref{Appendix~\ref{app:phase5a}, \S2.3, steps 1--14; checks T1--T4, T1b, T1c, T4b}
+\begin{sketch}
+Adding a restriction can only lower the maximum. If some maximiser survives the
+restriction, the maximum is unchanged; if none does, the restricted problem
+(compact, non-empty) attains a strictly smaller value. ``Some maximiser
+survives'' is one feasibility LP: the base rows, the new rows, and the target at
+least its old maximum (with the intercept subtracted). For one row, concavity of
+the LP perturbation function ties this to every optimal multiplier being
+positive; a strictly separating hyperplane gives the target-free ``implied''
+test.
+\end{sketch}
+\proofref[pF-res-proposition-R2]{Appendix~\ref{app:phase5a}, \S2.3, steps 1--14; checks T1--T4, T1b, T1c, T4b}
 \begin{revnote}
 (P-B18--P-B22.) The face LP in step~4 omitted the target intercept (the code
 was correct; check T1c [F]); the duplicate-row example shows a positive dual does
@@ -166,7 +176,21 @@ Goodman numbers into the bracket, is not a confidence interval, and more data do
 not cure it. When the belief is false, the interval stays narrow and can be
 reproducibly wrong (Section~\ref{sec:evidence}).
 \end{plain}
-\proofref{Appendix~\ref{app:phase5a}, \S3.3, steps 1--23 (step 18--23 is the referee's fixed-design proof of (e)); checks V9--V13}
+\begin{sketch}
+(a) The added rows are linear in the regression coefficients, so they join the
+same simultaneous Gaussian event; on it the true $k_0$ satisfies every inflated
+row and the P3.5 argument goes through. (b) For an either/or row, inflate each
+piece by its own critical value and take the maximum: the piece that holds at
+the truth is dominated on the same event, so no branch is ever chosen from the
+data. (c) The true branch is a fixed population fact; the interval for that
+branch alone has the full level and lies inside the union, so no Bonferroni
+split is needed. (d) An empty interval requires the coverage event to fail, so
+emptiness is part of the allowed error. (e) In a repeated three-point design the
+fitted bracket's edge has standard error $\tfrac7{12}$ of the regression slope's,
+and the critical value is at most $z_{.995}$ by the union bound, so coverage of a
+truth on the edge is at most $\Phi(\tfrac7{12}z_{.995})=0.9335$ in the limit.
+\end{sketch}
+\proofref[pF-res-theorem-R10]{Appendix~\ref{app:phase5a}, \S3.3, steps 1--23 (step 18--23 is the referee's fixed-design proof of (e)); checks V9--V13}
 \begin{revnote}
 (M-2; P-B23--P-B27, P-E17, P-E21, P-E22, P-E33; I.2; E2-2, E2-3.) The status of
 each claim is now given by interval version (table above) with CLR's
@@ -175,7 +199,7 @@ gradient; the contrast envelope was added; (b)--(d) gained the one-event,
 point-coverage and triangular-array qualifications and the belief-selection
 sentence; (e) became an analytic theorem (referee's proof, credited) instead of a
 Monte Carlo sketch; ``a fortiori'' was replaced by a direct $\le\tfrac12$ argument
-(V10 [F]); union lengths are occupied lengths (V11). In round~2 the R10 scope was
+(V10 [F]); union lengths are occupied lengths (P-B38, P-E21; V11). In round~2 the R10 scope was
 narrowed to pooled M0 (I.2), and the coverage figure was tied to the procedure:
 the literal intersection covered 304/600, CR-naive 550/600 (V13 [V]).
 \end{revnote}

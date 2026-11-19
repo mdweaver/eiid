@@ -3,7 +3,7 @@
 
 Source: PHASE1 \S\S1--3 (Appendix~\ref{app:phase1}) and PHASE2a \S0
 (Appendix~\ref{app:phase2a}). Notation follows
-\texttt{docs/extension/notation.tex}; Table~\ref{tab:notation} reproduces it.
+\path{docs/extension/notation.tex}; Table~\ref{tab:notation} reproduces it.
 
 \subsection{Data, latent rates and the accounting identity}
 
@@ -146,6 +146,7 @@ $\Cov(NX_r,\beta_{rc}-M(X))/\E[NX_r]$. District dummies help when size differs
 by district (PHASE2b Prop.~D4). It is partly testable through $X\cdot\log N$
 interactions.
 \end{plain}
+\begin{revnote}(R-15; decision D1.) Covariates $Z$ were removed from the conditioning set: A3 now reads $\E[\beta\mid X,N]=M_H(X)$ (with district shifts under M1/M2), and covariate adjustment is a planned extension that needs stronger assumptions. No result is claimed for the covariate case.\end{revnote}
 
 \begin{assumption}[A4: support and extrapolation]
 $\supp(X)\subseteq A$, compact, and A2 holds on all of $A$.
@@ -197,7 +198,11 @@ singleton.
 This is JKST's tie-breaking condition. With it the bound's endpoint is a smooth
 function of the regression coefficients and the delta method applies. In
 R$\times$C, and especially with many districts, near-ties are the norm, so the
-inference of Phase~3 is built not to need it.
+inference of Phase~3 is built not to need it. If it fails (a tie at the optimum),
+the endpoint is only directionally differentiable: the delta method and JKST's
+$\mathrm{CI}_x$ lose their justification and the naive bootstrap is inconsistent
+(Theorem~P3.4(ii)--(iii)). This is a failure of the inference, not a bias in
+identification.
 \end{plain}
 
 \begin{assumption}[A8: homogeneous contextual effects across districts (M1)]
@@ -240,7 +245,8 @@ in which regime (Table~\ref{tab:regimes} in Section~\ref{sec:inference}).
 
 \paragraph{Assumptions explicitly not made.} No distributional form for $\beta$
 (unlike King's truncated normal), no independence between $\beta$ and $X$
-(contextual effects are the point), and no point-identifying nonlinearity.
+(contextual effects are the point), no stationarity over time, and no
+point-identifying nonlinearity.
 
 \begin{longtable}{@{}L{0.30\linewidth}L{0.62\linewidth}@{}}
 \caption{Which rungs use which assumption (PLAIN\_LANGUAGE\_GUIDE \S2; PHASE2c \S0).}\label{tab:assumption-use}\\
@@ -256,8 +262,8 @@ M-SIGN rows & Those of the rung they are added to. \\
 \end{longtable}
 
 \begin{table}[ht]
-\centering\small
-\begin{tabular}{@{}ll@{}}
+\centering\footnotesize
+\begin{tabularx}{\linewidth}{@{}L{0.45\linewidth}>{\raggedright\arraybackslash}X@{}}
 \toprule
 Symbol & Meaning \\
 \midrule
@@ -287,6 +293,6 @@ $\delta_B,\ \delta_W,\ \Delta$ & between, within (W1) and pooled-within (W2) ass
 $\mathrm{CI}_x,\ S_1$ & JKST confidence interval; residual (Popoviciu) standard-error term \\
 $\Phi$ & standard normal CDF \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \caption{Notation (after \texttt{docs/extension/notation.tex}, extended with symbols used later).}\label{tab:notation}
 \end{table}

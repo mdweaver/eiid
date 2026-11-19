@@ -25,7 +25,7 @@ Nesting (1.13); equality conjecture & P1 \S1.5 & Nesting proved (2a P1); equalit
 Assumptions A1--A10 & P1 \S2 & Assumptions (A1 turnover open) & --- & \S\ref{sec:assumptions} \\
 \multicolumn{5}{@{}l}{\textbf{PHASE2a (R$\times$C under LCE)}}\\
 Lemma 0 & 2a \S1 & Proved & --- & \ref{res:p2a-l0} \\
-Lemma 1 (a)--(c) & 2a \S2 & Proved & \texttt{verify\_phase2a.py} (rank, symbolic); [supp] [F] & \ref{res:p2a-l1} \\
+Lemma 1 (a)--(c) & 2a \S2 & Proved & \path{verify_phase2a.py} (rank, symbolic); [supp] [F] & \ref{res:p2a-l1} \\
 Remarks 1.0--1.2 & 2a \S2 & Proved (1.1, 1.2); remark (1.0) & 2a (five points never identify $Q$) & \S\ref{sec:rxc} \\
 Lemma 2; Remark 2.1 & 2a \S3 & Proved & 2a & \ref{res:p2a-l2} \\
 Theorem 1 & 2a \S4 & Proved (cited measure theory) & ``$\Rightarrow$'' 227/227 & \ref{res:p2a-t1} \\
@@ -72,7 +72,7 @@ Proposition N2.3 (a)--(d) & 2c \S4 & Proved (structural identity); not observabl
 Lemma N2.4 & 2c \S4 & Proved & C12 [F] & \ref{res:n24} \\
 Degree selection (\S6) & 2c \S6 & Prespecify (counterexample proved by simulation) & C12b [F] & \S\ref{sec:monotone} \\
 \multicolumn{5}{@{}l}{\textbf{PHASE3 (inference)}}\\
-Lemma P3.1 & P3 \S2 & Proved (fixed system) & \texttt{verify\_phase3.py} & \ref{res:p31} \\
+Lemma P3.1 & P3 \S2 & Proved (fixed system) & \path{verify_phase3.py} & \ref{res:p31} \\
 Proposition P3.2 (a)--(c) & P3 \S3 & Proved (Slater for (a)) & 3 & \ref{res:p32} \\
 Theorem P3.4 (i)--(iii); Remark P3.4.1 & P3 \S4 & Cited structure (fixed system) & 3 (tied constraints; null direction) & \ref{res:p34} \\
 Proposition P3.4$'$ & P3 \S4 & Proved & ``P3.4$'$ [F]'' & \ref{res:p34prime} \\
@@ -97,10 +97,10 @@ G2 (JKST + signs) & PD \S2.2 & Proved & [V1], [V2] & \ref{res:g2} \\
 P-S (sandwich) & PD \S5.1 & Proved & [V4] & \ref{res:ps} \\
 P-R (a), (b), (d); (c) & PD \S5.2 & Proved; (c) checked & [V5], [V7] & \ref{res:pr} \\
 P-N (a), (b); Conjecture C1 & PD \S5.3 & Proved (M0); C1 conjecture & [V3] & \ref{res:pn} \\
-DiD-S & PD \S7 & Proved (validity; not reviewed) & --- & \S\ref{sec:did} \\
+DiD-S & PD \S7 (App.~\ref{app:pkgdesign}) & Proved (validity; not reviewed) & --- & \S\ref{sec:did} \\
 \multicolumn{5}{@{}l}{\textbf{PHASE1b and PHASE2d (proposals; not reviewed)}}\\
-1b \S\S A1--A5, B1--B5 (proposed objects, rungs, DiD restrictions) & 1b & Proposal; superseded by 2c, 2d & \texttt{verify\_phase1\_mei\_did.py} & \S\ref{sec:did} \\
-Lemma G; Props $\Delta0$, FD1--FD4, $\Delta4$, $\Delta6$, C1, C2, CL, P2, P3; Remark C3 & 2d & Proposal (proofs written, not reviewed) & \texttt{verify\_phase2d.py} (16 PASS) & \S\ref{sec:did} \\
+1b \S\S A1--A5, B1--B5 (proposed objects, rungs, DiD restrictions) & 1b & Proposal; superseded by 2c, 2d & \path{verify_phase1_mei_did.py} (10/10 PASS) & \S\ref{sec:did} \\
+Lemma G; Props $\Delta0$, FD1--FD4, $\Delta4$, $\Delta6$, C1, C2, CL, P2, P3; Remark C3 & 2d & Proposal (proofs written, not reviewed) & \path{verify_phase2d.py} (15/15 PASS) & \S\ref{sec:did} \\
 \bottomrule
 \end{longtable}
 }
@@ -111,7 +111,7 @@ Lemma G; Props $\Delta0$, FD1--FD4, $\Delta4$, $\Delta6$, C1, C2, CL, P2, P3; Re
 \toprule ID & Claim & Status & Where in this report \\ \midrule\endfirsthead
 \toprule ID & Claim & Status & Where in this report \\ \midrule\endhead
 R1 & C1: $x^*\in$ hull ($2\times2$), so weighted-local $\Rightarrow\delta_W\ge0$ & Conjecture (checked [V3]) & Result~\ref{res:pn} \\
-R2 & Face criterion for tightening; implied $\Leftrightarrow$ tightens nothing; G2 closed form & Proved (5a \S2; \texttt{verify\_R2.py}) & Result~\ref{res:r2} \\
+R2 & Face criterion for tightening; implied $\Leftrightarrow$ tightens nothing; G2 closed form & Proved (5a \S2; \path{verify_R2.py}) & Result~\ref{res:r2} \\
 R3 & Pooled LCE $\cap$ closed convex restriction is sharp for the model-implied target; CR union and slab & Proved for pooled M0 (grouped: R16) & Result~\ref{res:r3} \\
 R4 & Refutability classification for $R\ge3$ & Open & \S\ref{sec:open} \\
 R5 & P-R(c): any spanning tree reaches all directions & Proved (star); checked (chain) & Result~\ref{res:pr} \\

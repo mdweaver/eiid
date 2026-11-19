@@ -5,9 +5,10 @@
 Theory, Inference, Referee Revisions and the \texttt{eiPartialID} Package\\[4pt]
 \large Technical report}
 \author{Compiled from the \texttt{mdweaver/eiid} repository\\
-\small branch \texttt{claude/wizardly-volta-lbh4bm}, commit \texttt{b270285}}
+\small branch \texttt{claude/wizardly-volta-lbh4bm}, commit \texttt{ec3644f}}
 \date{November 2026}
 
+% For a process-free version set \revisionsfalse here (see preamble.tex).
 \begin{document}
 \maketitle
 
@@ -51,7 +52,7 @@ stated conditions, cited theorems, conjectures, algorithms and open problems.
 
 \clearpage
 \appendix
-\input{sections/A_revisions}
+\ifrevisions\input{sections/A_revisions}\fi
 \input{sections/B_reproduced}
 
 \end{document}

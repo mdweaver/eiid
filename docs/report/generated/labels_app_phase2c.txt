@@ -1,0 +1,15 @@
+Definition 1	pD-res-definition-1
+Lemma M1	pD-res-lemma-M1
+Definition 2	pD-res-definition-2
+Proposition M2	pD-res-proposition-M2
+Remark M2.1	pD-res-remark-M2.1
+Proposition M3	pD-res-proposition-M3
+Proposition M4	pD-res-proposition-M4
+Proposition M5	pD-res-proposition-M5
+Remark M5.1	pD-res-remark-M5.1
+Lemma N2.1	pD-res-lemma-N2.1
+Proposition N2.2	pD-res-proposition-N2.2
+Remark N2.2.1	pD-res-remark-N2.2.1
+Remark N2.2.2	pD-res-remark-N2.2.2
+Proposition N2.3	pD-res-proposition-N2.3
+Lemma N2.4	pD-res-lemma-N2.4

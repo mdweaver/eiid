@@ -1,4 +1,5 @@
 % Preamble for the eiPartialID technical report (pdflatex).
+\PassOptionsToPackage{hyphens}{url}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{lmodern}
@@ -14,8 +15,11 @@
 \usepackage[numbers,sort&compress]{natbib}
 \usepackage[hidelinks]{hyperref}
 \usepackage{bookmark}
+\usepackage{graphicx}
+\usepackage{environ}
+\urlstyle{tt}
 \usepackage{microtype}
-\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash\hspace{0pt}}p{#1}}
 \setlength{\emergencystretch}{3em}
 \providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \providecommand{\real}[1]{#1}
@@ -103,7 +107,11 @@
 \newtheorem{definitionx}[result]{Definition}
 \newenvironment{plain}{\par\smallskip\noindent\textbf{In plain terms.}\ }{\par\smallskip}
 \newenvironment{sketch}{\par\smallskip\noindent\textit{Sketch.}\ }{\par\smallskip}
-\newenvironment{revnote}{\par\smallskip\noindent\begin{minipage}{\linewidth}\color{black!75}\small\textbf{Revision note.}\ }{\end{minipage}\par\smallskip}
+% ---------- process material: switchable ----------
+% \revisionstrue (default) prints revision notes and Appendix A; set \revisionsfalse
+% for a process-free version (the same mathematics without references to the review).
+\newif\ifrevisions \revisionstrue
+\NewEnviron{revnote}{\ifrevisions\par\smallskip\noindent\begin{minipage}{\linewidth}\color{black!75}\small\textbf{Revision note.}\ \BODY\end{minipage}\par\smallskip\fi}
 \newcommand{\src}[1]{\textup{[\emph{#1}]}}
 \newcommand{\status}[1]{\textsf{\small #1}}
-\newcommand{\proofref}[1]{\par\noindent\textit{Proof:} #1.\par\smallskip}
+\newcommand{\proofref}[2][]{\par\noindent\textit{Proof:} #2\if\relax\detokenize{#1}\relax\else\ \textup{(\hyperref[#1]{\textrm{go to the result}}, p.~\pageref{#1})}\fi.\par\smallskip}

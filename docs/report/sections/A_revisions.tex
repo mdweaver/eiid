@@ -6,25 +6,37 @@ made. It covers both rounds and all three referees. IDs are those of the
 repository's ledgers, so each row can be traced:
 \begin{itemize}[nosep]
 \item \textbf{R-01 to R-37}: the Phases~1--3 referee, round~1 (two reports:
-Phases~1--2a, then 1--3). Ledger: \texttt{REVIEW\_RESPONSE\_PLAN.md} \S1;
-letter: \texttt{REVIEW\_RESPONSE.md}.
+Phases~1--2a, then 1--3). Ledger: \path{REVIEW_RESPONSE_PLAN.md} \S1;
+letter: \path{REVIEW_RESPONSE.md}.
 \item \textbf{P-B1 to P-B43}: the Batch~B partial-identification referee, round~1.
 \textbf{P-E1 to P-E33}: the Batch~B ecological-inference referee, round~1.
-Ledger: \texttt{reviews/B\_PI\_RESPONSE\_PLAN.md} \S2; responses:
+Ledger: \path{reviews/B_PI_RESPONSE_PLAN.md} \S2; responses:
 \texttt{reviews/B\_*\_response.md}.
 \item \textbf{A2-1 to A2-7}: the Phases~1--3 referee, round~2, numbered by the
-report's sections~1--7 (\texttt{reviews/A\_phases1to3\_report\_round2.md};
-response \texttt{REVIEW\_RESPONSE\_ROUND2.md}).
+report's sections~1--7 (\path{reviews/A_phases1to3_report_round2.md};
+response \path{REVIEW_RESPONSE_ROUND2.md}).
 \item \textbf{I.1 to I.13}: the partial-identification referee, round~2
-(\texttt{reviews/ROUND2\_THEORY\_PLAN.md} Part~I;
-\texttt{reviews/B\_partial\_identification\_response\_round2.md}).
+(\path{reviews/ROUND2_THEORY_PLAN.md} Part~I;
+\path{reviews/B_partial_identification_response_round2.md}).
 \item \textbf{E2-1 to E2-5}: the ecological-inference referee, round~2, numbered
 by the response's items (corrections 1--4 and the final paragraph;
-\texttt{reviews/B\_ecological\_inference\_response\_round2.md}).
+\path{reviews/B_ecological_inference_response_round2.md}).
 \item \textbf{M-1 to M-17}: the internal consistency log of the merged M-SIGN
-material (\texttt{MSIGN\_REVIEW\_LOG.md}), listed for completeness; it is not
+material (\path{MSIGN_REVIEW_LOG.md}), listed for completeness; it is not
 an external referee.
 \end{itemize}
+\paragraph{Decisions D1--D5 (\texttt{REVIEW\_RESPONSE\_PLAN.md} \S0).} Five owner
+decisions shaped the round-1 response to the Phases~1--3 referee:
+\textbf{D1} covariates are a planned, low-priority extension, and the revision keeps
+the no-covariate model (R-15); \textbf{D2} carry $P(X\in A)=1$ through PHASE2a \S6
+and add Prop.~7$'$ for \texttt{range = "trim"} (R-05); \textbf{D3} no superpopulation
+target and no cluster adjustment: inference is conditional on the design and the
+district effects (R-28); \textbf{D4} keep CLR as the default, labelled algorithmic,
+with the projection interval alongside (R-29); \textbf{D5} the asymptotic scope by
+regime, plus a finite-sample interval valid in every regime (R-31, Theorem~P3.8).
+The Batch~B decisions U1--U8 are in \path{reviews/B_PI_RESPONSE_PLAN.md} \S5 and
+are cited by name where they apply (U1, U2, U4, U6, U7, U8).
+
 Types: \textbf{E} a claim wrong as stated; \textbf{S} scope; \textbf{P} proof
 detail; \textbf{X} exposition; \textbf{C} code. ``Check'' names the numerical
 check added, with its [F]/[V]/[I] class where the repository gives one.
@@ -110,9 +122,9 @@ P-B31 & S & EGGHM mixed-unit condition & 2c \S0, M3 & Added. & --- \\
 P-B32 & S & EGGHM sharpness is continuous & 2c M2, M3 & Cited with P-B1. & --- \\
 P-B33 & X & EGGHM theorem mapping & 1b & Fixed. & --- \\
 P-B34 & S & EGGHM local results & 2c N2.3 & With P-B11. & --- \\
-P-B35 & C & C4 construction invalid & \texttt{verify\_phase2c.py} & C4 rebuilt. & C4 [V] \\
-P-B36 & C/X & S2 labels & \texttt{verify\_R3.py} & Empty / point / positive-width. & --- \\
-P-B37 & C & T4 solver status & \texttt{verify\_R2.py} & Status printed. & --- \\
+P-B35 & C & C4 construction invalid & \path{verify_phase2c.py} & C4 rebuilt. & C4 [V] \\
+P-B36 & C/X & S2 labels & \path{verify_R3.py} & Empty / point / positive-width. & --- \\
+P-B37 & C & T4 solver status & \path{verify_R2.py} & Status printed. & --- \\
 P-B38 & C/X & Union length double-counted & 5a \S3.4 & Occupied length. & V11 [V] \\
 P-B39 & E & [supp]: support of the restricted measure & 2a \S0.1, L1, L3(c), Rems 5.1--5.2; P1 A5; 2b D1 & $\supp_AP_X$ throughout. & 2a [supp] [F] \\
 P-B40 & E & Projection under singular $\Sigma$ & P3.5(b2)(ii) & Positive definite $\Sigma$ or exact reduced parameterisation; package guard. & P3 [F] \\

@@ -1,8 +1,8 @@
 % Section 8: inference (PHASE3)
 \section{Inference}\label{sec:inference}
 
-Source: PHASE3 (Appendix~\ref{app:phase3}). Checks: \texttt{verify\_phase3.py},
-17/17 PASS. Monte Carlo: \texttt{phase3\_montecarlo.py}, 1000 replications per
+Source: PHASE3 (Appendix~\ref{app:phase3}). Checks: \path{verify_phase3.py},
+17/17 PASS. Monte Carlo: \path{phase3_montecarlo.py}, 1000 replications per
 design (Section~\ref{sec:evidence}).
 
 \paragraph{Sampling (PHASE3 \S0.1).} \textbf{(P3-S1a)} Given the design and the
@@ -54,7 +54,7 @@ linear in the regression coefficients. JKST's case has four candidates and assum
 one wins clearly; in R$\times$C with districts there are many and near-ties are
 the norm.
 \end{plain}
-\proofref{Appendix~\ref{app:phase3}, \S2, steps 1--5}
+\proofref[pE-res-lemma-P3.1]{Appendix~\ref{app:phase3}, \S2, steps 1--5}
 \begin{revnote}(R-25.) Stated for a fixed constraint matrix and objective; joint variation in $(Q,\mu)$ is not covered.\end{revnote}
 
 \begin{result}[Proposition P3.2, consistency and rate --- PHASE3 \S3]\label{res:p32}
@@ -72,7 +72,7 @@ every observed composition. Slater fails when an implied rate is exactly 0 at a
 vertex (a structural zero); the rate result is then open, but coverage results do
 not use Slater.
 \end{plain}
-\proofref{Appendix~\ref{app:phase3}, \S3, steps 1--9; Remarks}
+\proofref[pE-res-proposition-P3.2]{Appendix~\ref{app:phase3}, \S3, steps 1--9; Remarks}
 \begin{revnote}(R-26, R-32.) Non-nested hulls; Slater as an interiority condition; the error split into estimation ($O_p(n^{-1/2})$) and hull ($\ge0$, rate not shown) parts.\end{revnote}
 
 \begin{result}[Theorem P3.4, asymptotic distribution for a fixed constraint system --- PHASE3 \S4]\label{res:p34}
@@ -90,7 +90,7 @@ When several candidate limits are nearly tied, the plug-in end picks the one tha
 looks tightest by chance, so the estimated bound is biased inward. This is why the
 plug-in is not a confidence interval.
 \end{plain}
-\proofref{Appendix~\ref{app:phase3}, \S4, steps 1--6; Remark~P3.4.1 (use $C-1$ columns)}
+\proofref[pE-res-theorem-P3.4]{Appendix~\ref{app:phase3}, \S4, steps 1--6; Remark~P3.4.1 (use $C-1$ columns)}
 \begin{revnote}
 (R-27; A2-2.) Round~1: (ii) needs gradients that differ where $\Sigma$ has
 variance (a null-direction difference gives a normal limit). Round~2: the theorem
@@ -116,7 +116,7 @@ By Lemma~P3.1 the scaled error equals exactly $\min_\lambda(g_{\lambda,n}^\top\s
 n(\hat\beta-\beta_0)+c_{\lambda,n})$; candidates with $c\to\infty$ drop out;
 continuous mapping.
 \end{sketch}
-\proofref{Appendix~\ref{app:phase3}, \S4, Proposition~P3.4$'$ steps 1--4; check ``P3.4$'$ [F]''}
+\proofref[pE-res-proposition-P3.4p]{Appendix~\ref{app:phase3}, \S4, Proposition~P3.4$'$ steps 1--4; check ``P3.4$'$ [F]''}
 \begin{revnote}(A2-2.) New in round~2.\end{revnote}
 
 \begin{result}[Theorem P3.5, confidence intervals --- PHASE3 \S5]\label{res:p35}
@@ -137,7 +137,11 @@ $\hat U=\min_{\lambda\in\hat\Lambda}(\hat\theta_\lambda+\hat k\hat\sigma_\lambda
 covers $\varphi_U$ with probability $\ge1-\alpha_U$ asymptotically if (i) $\hat k$ is
 computed over a fixed finite superset, or (ii) $\hat k=\sqrt{\chi^2_{q,1-\alpha}}$
 (projection) with $\Sigma$ positive definite and $q=\dim\beta$, or an exact reduced
-full-rank parameterisation.
+full-rank parameterisation. An exact reduction means documented identities
+(for example, adding-up removes column $C$); a rank taken from a numerical cutoff
+on $\hat\Sigma$ is not one, so then $q=\dim\beta$ must be used, and dropping
+candidates that load on numerically null directions is only a safeguard (it can
+only widen the interval).
 \item[(b3)] \textbf{The CLR procedure as implemented} (\status{conjecture /
 algorithm}). Candidates are collected from the optimal dual vertices at
 $\hat\beta$ and at simulated draws. A reduction to (b1) is proved when the
@@ -174,7 +178,7 @@ $\hat\Sigma$ for projection) then covers. (c1) Concavity of $m(1-m)$ bounds the
 residual variance by $\bar s^2$; on the event that the $\bar m$ interval covers,
 $\hat S_{BD}\ge\bar s$; a union bound finishes.
 \end{sketch}
-\proofref{Appendix~\ref{app:phase3}, \S5: (a) steps 1--7; (b2) steps 1--4; (b3) proved reduction; (c1) steps 1--5}
+\proofref[pE-res-theorem-P3.5]{Appendix~\ref{app:phase3}, \S5: (a) steps 1--7; (b2) steps 1--4; (b3) proved reduction; (c1) steps 1--5}
 \begin{revnote}
 (R-29; P-B40, P-B41; I.3; A2-3.) Round~1 (Phases~1--3 referee): the simulated-candidate
 CLR was claimed as a theorem; P3.5(b) was split into (b1) cited, (b2) proved and
@@ -204,7 +208,17 @@ test checks M1's testable part. The pooling test says whether the pooled model i
 wrong for this design; rejection does not mean its intervals fail (design S1), and
 the test has no power against within-district dependence.
 \end{plain}
-\proofref{Appendix~\ref{app:phase3}, \S5, Proposition~P3.6 proofs of (a) and (c)}
+\begin{sketch}
+(a) On the simultaneous event of P3.5(a) the true $k_0$ lies in the inflated set,
+so emptiness requires that event to fail. (c) If M0 held for the observed units,
+then in each district $(G_c-\zeta_{c,d}\mathbf 1^\top)X_i=0$ for all its units, with
+$G=H'-H$. Because the district has $R$ affinely independent compositions, which
+lie in $\{\mathbf 1^\top x=1\}$ and are therefore linearly independent, this forces
+$G_c=\zeta_{c,d}\mathbf 1^\top$ in every district. With $\zeta_{c,1}=0$, $G_c=0$ and all
+shifts vanish. So M0 holds iff $\zeta=0$, a linear hypothesis on the M1
+regression.
+\end{sketch}
+\proofref[pE-res-proposition-P3.6]{Appendix~\ref{app:phase3}, \S5, Proposition~P3.6 proofs of (a) and (c)}
 
 \paragraph{Calibration by restricted wild bootstrap (package 0.3.0; PHASE3 \S5).}
 \status{Simulation-supported, not proved for growing dimension.} In moderate
@@ -214,8 +228,8 @@ $Y^*=\hat Y_0+\hat e_0v$ with Rademacher $v_i$ shared across the $C-1$ equations
 refits the larger model and recomputes the HC Wald statistic;
 $p=(1+\#\{W^*\ge W\})/(B+1)$, $B=399$ by default. Rejection rates at 5\% in design
 S0: pooling 0.043 (SE 0.005; $\chi^2$ 0.078, F 0.072); M1 vs M2 0.054 (SE 0.007;
-$\chi^2$ 0.057). Scripts: \texttt{benchmarks/pooling\_test\_size.R},
-\texttt{benchmarks/m1\_test\_size.R}.
+$\chi^2$ 0.057). Scripts: \path{benchmarks/pooling_test_size.R},
+\path{benchmarks/m1_test_size.R}.
 \begin{revnote}(R-30, R-37; WS6; A2-5.) Degrees of freedom corrected; bootstrap added after the over-rejection was found; the pooling test is stated as a test of mean shifts only.\end{revnote}
 
 \begin{result}[Theorem P3.8, finite-sample CI and emptiness test --- PHASE3 \S5.1]\label{res:p38}
@@ -233,7 +247,16 @@ as wide as the logical range $[0,1]$, mainly because of the
 constraint-by-constraint union bound. It is valid but not yet useful, and is not
 in the package.
 \end{plain}
-\proofref{Appendix~\ref{app:phase3}, \S5.1, steps 1--7}
+\begin{sketch}
+Every constraint term and the target constant are linear functionals of the OLS
+fit, and each is a sum over units of independent terms whose range is known from
+the design (the outcome shares lie in the simplex). OLS is unbiased under the
+mean model, so Hoeffding's inequality gives a finite-sample radius for each. A
+union bound over the $J+2$ one-sided events puts the true $k_0$ in the widened
+set; the residual term gets its own Hoeffding radius. No Gaussian approximation
+is used, so nothing depends on the regime.
+\end{sketch}
+\proofref[pE-res-theorem-P3.8]{Appendix~\ref{app:phase3}, \S5.1, steps 1--7}
 \begin{revnote}(R-31; A2-6.) New after round~1; round~2 agreed it is a fallback guarantee and left informative R2 inference open.\end{revnote}
 
 \begin{result}[Proposition P3.7, many districts with few units --- PHASE3 \S6]
@@ -242,7 +265,15 @@ retained districts are chosen from the design only, any procedure keeps its
 conditional coverage; asymptotic results transfer only if their regime conditions
 hold for the retained districts.
 \end{result}
-\proofref{Appendix~\ref{app:phase3}, \S6, steps 1--2}
+\begin{plain}
+With many small districts, ignoring some districts' constraints can only widen
+the bound, so it never costs validity of the identified set. If the retained
+districts are chosen from the design alone (for example, those with at least 30
+polls or enough spread in composition), not from the outcomes, any interval that
+is valid for a fixed set of districts stays valid. Selection does not, by itself,
+move the problem into a regime where the asymptotic theory applies.
+\end{plain}
+\proofref[pE-res-proposition-P3.7]{Appendix~\ref{app:phase3}, \S6, steps 1--2}
 \begin{revnote}(R-31.) (b) was weakened from ``every result holds conditionally'' to a conditional statement.\end{revnote}
 
 \begin{result}[Proposition S1, bounded nonlinearity --- PHASE3 \S7]\label{res:s1}
@@ -258,7 +289,7 @@ largest departure under which it survives; in the $3\times3$ example,
 $\eta^*(\text{loyalty}>0.30)=0.060$. The same logic applies to the dials $\delta$
 (district heterogeneity, change between periods).
 \end{plain}
-\proofref{Appendix~\ref{app:phase3}, \S7, steps 1--3}
+\proofref[pE-res-proposition-S1]{Appendix~\ref{app:phase3}, \S7, steps 1--3}
 \begin{revnote}(R-34.) Labelled an outer bound under bounded deviations, not the sharp set of the relaxed model.\end{revnote}
 
 \paragraph{Boundary cases and JKST's $\mathrm{CI}_x$ (PHASE3 \S\S4--5).} When the

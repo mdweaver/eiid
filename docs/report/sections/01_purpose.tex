@@ -83,11 +83,43 @@ The plug-in bound is too narrow, so confidence intervals that treat each end
 as an intersection of many estimated candidates are needed (Phase~3).
 \end{itemize}
 
+\subsection{Method map: where each method is identified and where its inference is proved}
+
+Table~\ref{tab:methodmap} lists, for each method, the results that identify its
+bound, the results that cover its confidence intervals, its status, and where the
+proofs are. Appendix key: \ref{app:phase1} = PHASE1, \ref{app:phase2a} = PHASE2a,
+\ref{app:phase2b} = PHASE2b, \ref{app:phase2c} = PHASE2c, \ref{app:phase3} = PHASE3,
+\ref{app:phase5a} = PHASE5a, \ref{app:pkgdesign} = PACKAGE\_DESIGN.
+
+{\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{@{}L{0.13\linewidth}L{0.24\linewidth}L{0.29\linewidth}L{0.22\linewidth}L{0.07\linewidth}@{}}
+\caption{Method map.}\label{tab:methodmap}\\
+\toprule Method & Identification & Inference & Status & App. \\ \midrule\endfirsthead
+\toprule Method & Identification & Inference & Status & App. \\ \midrule\endhead
+DD & 2b Prop.~D0; 2a Prop.~8 (cell bounds) & none needed: no estimated quantity; CIs for $B$ are intersected with DD & Proved & \ref{app:phase2b}, \ref{app:phase2a} \\
+JKST ($2\times2$ M0) & 2a Prop.~4 (equivalence), Props~1--2 & P3.5 (JKST's $\mathrm{CI}_x$ is (b) with one candidate); P3.4 under tie-breaking & Proved & \ref{app:phase2a}, \ref{app:phase3} \\
+M0 (pooled LCE) & 2a Lemmas~1--3, Thm~1, Props~1--2, 7, 7$'$; Cor.~1 & P3.1, P3.2, P3.4/P3.4$'$; P3.5(a), (b2), (c1); P3.6(a); P3.8. CLR = Conjecture P3.5(b3) & Identification and (a), (b2), (c1) proved in every regime; CLR algorithmic & \ref{app:phase2a}, \ref{app:phase3} \\
+M2 & 2b Thm~1$'$, Thm~2, Prop.~D5 & P3.5(a), (b2) in regime R1; P3.8 in any regime; P3.6(a) & Proved (R1); R3 conjecture; R2: P3.8 only & \ref{app:phase2b}, \ref{app:phase3} \\
+M1($\delta$) & 2b Thm~2(c), Prop.~D6 & as M2 & as M2 & \ref{app:phase2b}, \ref{app:phase3} \\
+M1 & 2b Lemmas~D1--D2, Thm~2, Props~D3--D4 & as M2; plus P3.6(b) (M1 vs M2) and P3.6(c) (pooling), wild bootstrap; P3.7. CLR in R2: simulation finding & Proved (R1); bootstrap simulation-supported & \ref{app:phase2b}, \ref{app:phase3} \\
+L4($r$), L5, L6 & 2b Prop.~D7, Thm~2(c) & P3.5 (near point identification: two-sided split; P3 \S4) & Proved & \ref{app:phase2b}, \ref{app:phase3} \\
+Change across periods (M1) & 2b Prop.~D8 & via the M1 interval for the change & Proved (identification) & \ref{app:phase2b} \\
+N1 (signs on realised tables) & 2c Lemma~M1, Props~M2--M4, Rem.~M2.1 & none needed (no estimated quantity) & Proved for continuous tables; integer R15 open & \ref{app:phase2c} \\
+N2 (monotone means) & 2c Lemma~N2.1, Prop.~N2.2, Lemma~N2.4; Conj.~N2.2$'$ & P3.5 conditional on a prespecified degree (2c \S6); R7 open & Outer set proved; sharp set conjecture & \ref{app:phase2c} \\
+M-SIGN rows & 2c Prop.~M5; 5a Thm~R3, Prop.~R2 & 5a Thm~R10(a), by interval version & Proved for pooled M0; grouped rungs R16 open & \ref{app:phase2c}, \ref{app:phase5a} \\
+CR & 2c Prop.~M3; 5a Thm~R3(c)--(d) & 5a Thm~R10(b) (slab, conservative), (c) (branch union); CLR union algorithmic; R10(e) (plug-in bracket invalid) & Proved for pooled M0 & \ref{app:phase2c}, \ref{app:phase5a} \\
+Ordering / M-LOC & PD Props~P-S, P-R, P-N; 2c M5(b) & 5a Thm~R10(a) as added rows (pooled M0) & P-S proved; C1 conjecture; M-LOC not built & \ref{app:pkgdesign}, \ref{app:phase2c} \\
+Sensitivity $\eta$, $\delta$ & P3 Prop.~S1; 2b Prop.~D6 & CI version of the bound (P3 \S7) & Outer bound proved & \ref{app:phase3}, \ref{app:phase2b} \\
+\bottomrule
+\end{longtable}
+}
+
 \subsection{What this report contains and how to read it}
 
 This report collects the theory, the package mapping and two rounds of
 external referee review into one document. It is pinned to commit
-\texttt{b270285} of branch \texttt{claude/wizardly-volta-lbh4bm} of the
+\texttt{ec3644f} of branch \texttt{claude/wizardly-volta-lbh4bm} of the
 repository \texttt{mdweaver/eiid}.
 
 \begin{itemize}[nosep]

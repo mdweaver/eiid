@@ -1,10 +1,10 @@
 % Section 11: package mapping
 \section{Package mapping: \texttt{eiPartialID} 0.3.1}\label{sec:package}
 
-Sources: \texttt{PHASE4\_implementation.md}, \texttt{package/eiPartialID/NEWS.md},
-\texttt{R/rxc\_api.R}, \texttt{R/rxc\_infer.R}, \texttt{R/rxc\_sign.R},
-\texttt{R/rxc\_modules.R}, and the vignettes \texttt{eiPartialID\_rxc.Rmd} and
-\texttt{eiPartialID\_usage.Rmd}. The original $2\times2$ functions
+Sources: \path{PHASE4_implementation.md}, \path{package/eiPartialID/NEWS.md},
+\path{R/rxc_api.R}, \path{R/rxc_infer.R}, \path{R/rxc_sign.R},
+\path{R/rxc_modules.R}, and the vignettes \path{eiPartialID_rxc.Rmd} and
+\path{eiPartialID_usage.Rmd}. The original $2\times2$ functions
 (\texttt{generateBounds}, \texttt{evaluateBounds}) are unchanged; with
 \texttt{range\_offset = 1e-5} and \texttt{vcov = "HC1"} the new code reproduces
 them on \texttt{eco::census} to $10^{-10}$.
@@ -47,7 +47,7 @@ wrappers, covariates, integer tables.
 \subsection{What \texttt{print()} reports as status (0.3.1)}
 
 From 0.3.1 every fit prints a \texttt{status:} line chosen by
-\texttt{.rxc\_ci\_status()} in \texttt{R/rxc\_api.R}:
+\texttt{.rxc\_ci\_status()} in \path{R/rxc_api.R}:
 \begin{itemize}[nosep]
 \item \textbf{Pooled M0}: ``\texttt{proj\_*}: asymptotic guarantee (P3.5(b2)(ii)),
 pooled model'' (or ``\texttt{ci\_*} (conservative): \ldots P3.5(a)'' with

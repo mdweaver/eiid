@@ -2,7 +2,7 @@
 \section{Districts and the rung ladder}\label{sec:districts}
 
 Source: PHASE2b (Appendix~\ref{app:phase2b}). Checks:
-\texttt{verify\_phase2b.py}, 22/22 PASS. ``District'' means any partition of the
+\path{verify_phase2b.py}, 22/22 PASS. ``District'' means any partition of the
 units into groups (ridings, counties, schools, or election periods). The district
 model replaces (S2) by $\E[\beta\mid V]=M_{H^{(D)}}(X)$ and (S3) by validity on
 each district hull $A_d$. The rungs are restrictions on
@@ -30,7 +30,7 @@ but not the product of the cell intervals.
 District dummies cannot narrow the model-free bound: it is already computed unit
 by unit. Every gain from districts comes from an assumption that links districts.
 \end{plain}
-\proofref{Appendix~\ref{app:phase2b}, \S1, steps 1--8 (Gale's theorem)}
+\proofref[pC-res-proposition-D0]{Appendix~\ref{app:phase2b}, \S1, steps 1--8 (Gale's theorem)}
 \begin{revnote}(R-18.) The per-cell sharp interval is now separated from the joint set.\end{revnote}
 
 \begin{result}[Lemma D1, what each rung identifies --- PHASE2b \S2]\label{res:d1}
@@ -51,7 +51,7 @@ testable part. The shared contextual split $K$ is not testable. A district
 needs only a few compositions to fix its baseline, but they must not lie on a
 line (for three groups).
 \end{plain}
-\proofref{Appendix~\ref{app:phase2b}, \S2, proofs of (a), (b), (c), (d)}
+\proofref[pC-res-lemma-D1]{Appendix~\ref{app:phase2b}, \S2, proofs of (a), (b), (c), (d)}
 \begin{revnote}
 (R-19, R-30, P-B39.) Part (d) and Remark~D1.1 were added: ``$R$ distinct
 compositions'' is not enough, they must be affinely independent. The number of
@@ -64,7 +64,13 @@ the support of the restricted measure.
 r}K^{(d)}_{c,rs}\mu^{(d)}_{rs}]$; under M1 its sensitivity to the common $K_{c,rs}$
 is $\mu_{rs}/\mu_r$, as pooled.
 \end{result}
-\proofref{Appendix~\ref{app:phase2b}, \S2, Lemma~D2 steps 1--4}
+\begin{plain}
+The province-wide rate is a weighted sum of the district rates, each district
+weighted by its share of group $r$. Under M1 the shared unknown enters exactly as
+in the pooled model, so the district baselines change the known part of the
+target, not how much the unknown matters.
+\end{plain}
+\proofref[pC-res-lemma-D2]{Appendix~\ref{app:phase2b}, \S2, Lemma~D2 steps 1--4}
 
 \begin{result}[Theorem 1$'$, sharpness for any affine mean model --- PHASE2b \S3]\label{res:t1prime}
 \status{Proved} (by reduction to PHASE2a Thm~1; measure-theoretic content not
@@ -77,7 +83,7 @@ $\langle u,m_\theta(v)\rangle\le\psi(u;v)$ for a.e.\ $v$ and all $u$.
 The sharpness argument of the pooled model carries over to any model in which
 the mean is affine in the unknowns, including all the district rungs.
 \end{plain}
-\proofref{Appendix~\ref{app:phase2b}, \S3, Theorem~1$'$ (step-by-step correspondence with PHASE2a Thm~1)}
+\proofref[pC-res-theorem-1p]{Appendix~\ref{app:phase2b}, \S3, Theorem~1$'$ (step-by-step correspondence with PHASE2a Thm~1)}
 \begin{revnote}(R-20.) Hypotheses H1--H4 listed explicitly.\end{revnote}
 
 \begin{result}[Theorem 2, the rungs --- PHASE2b \S3]\label{res:t2}
@@ -101,7 +107,7 @@ Each rung is an affine mean model, so Thm~1$'$ applies district by district;
 the outer version replaces the sharp condition by vertex non-negativity;
 nesting follows because each step restricts the same polyhedral system further.
 \end{sketch}
-\proofref{Appendix~\ref{app:phase2b}, \S3, proofs of (a) steps 1--2, (b) steps 1--4, (c) steps 1--7}
+\proofref[pC-res-theorem-2]{Appendix~\ref{app:phase2b}, \S3, proofs of (a) steps 1--2, (b) steps 1--4, (c) steps 1--7}
 \begin{revnote}
 (R-21.) M1(0) is a \emph{sensitivity benchmark}: it keeps the common skew part
 but drops the testable symmetric restrictions of D1(b).
@@ -121,7 +127,15 @@ the shared contextual effect carries that information to every district. One
 riding with lopsided polls and an extreme baseline can tighten the province-wide
 bound.
 \end{plain}
-\proofref{Appendix~\ref{app:phase2b}, \S4, derivation steps 1--5; pure-composition case; checked against the LP (126 and 195 instances)}
+\begin{sketch}
+Under M1, district $d$'s mean for row 1 at a vertex $t$ is $Q_{c,11}t+(Q_{c,12}+\kappa_c)(1-t)+\zeta_{c,d,1}$.
+Requiring it to be non-negative and dividing by $1-t>0$ gives a lower limit on
+$\kappa_c$; row 2 gives an upper limit after dividing by $t$. The shared
+$\kappa_c$ must satisfy every district's limits at every vertex, hence the max and
+min over $d$ and $t$; the sum-to-zero constraint across columns then gives a box
+cut by a hyperplane (Lemma~4).
+\end{sketch}
+\proofref[pC-res-proposition-D3]{Appendix~\ref{app:phase2b}, \S4, derivation steps 1--5; pure-composition case; checked against the LP (126 and 195 instances)}
 \begin{revnote}(R-22.) $0<l_d\le u_d<1$ made visible; pure-composition vertices derived.\end{revnote}
 
 \begin{result}[Proposition D4, when dummies matter --- PHASE2b \S4]\label{res:d4}
@@ -138,11 +152,11 @@ district baselines correlate with unit size, the pooled fit mistakes baseline
 differences for contextual effects and can miss the truth. This is an
 ecological omitted-variable bias.
 \end{plain}
-\proofref{Appendix~\ref{app:phase2b}, \S4, (a) steps 1--2, (b) steps 1--6; Remark~D4.1}
+\proofref[pC-res-proposition-D4]{Appendix~\ref{app:phase2b}, \S4, (a) steps 1--2, (b) steps 1--6; Remark~D4.1}
 \begin{revnote}
 (R-23.) The earlier version conditioned on $X$ only and claimed $D\perp X$
 suffices; the size-weighted estimand uses $\E[\beta\mid X,N]$. Counterexample
-with district correlated with size; check in \texttt{verify\_phase2b.py} [F].
+with district correlated with size; check in \path{verify_phase2b.py} [F].
 Conditional on the observed design, P3.6(c) tests the stronger condition
 $\zeta=0$ (Section~\ref{sec:inference}).
 \end{revnote}
@@ -166,7 +180,17 @@ reported beside the bounds they show what ``no contextual effects'' implies
 (Remark~D7.1: in the $3\times3$ example L5 gives 0.870 against a truth of
 0.836, inside M1 but wrong).
 \end{plain}
-\proofref{Appendix~\ref{app:phase2b}, \S4, Propositions~D5 (steps 1--3), D6 (steps 1--4), D7 (a) and (b)}
+\paragraph{What fails if L4($r$) or M1($\delta$) is false.} If row $r$ does have a
+contextual effect, L4($r$) pins $(C-1)(R-1)$ coordinates at the wrong values: the
+pattern that belongs to row $r$ is attributed to the other rows, so the point
+($R=2$) or the bound is misspecified and can exclude the truth, with no warning
+except an empty set. With non-voters as row $r$ this is a real risk, because
+mobilisation often depends on local campaign intensity. If some district's
+contextual split differs from the shared one by more than $\delta$, M1($\delta$)
+fails in the same way as M1, but less sharply: the larger $\delta$, the more
+protection and the less narrowing.
+
+\proofref[pC-res-proposition-D5]{Appendix~\ref{app:phase2b}, \S4, Propositions~D5 (steps 1--3), D6 (steps 1--4), D7 (a) and (b)}
 
 \paragraph{Remarks 6.1--6.3 (PHASE2b \S5).} Remark~6.1: everything above is
 identification; with about ten polls per riding the plug-in intersection is

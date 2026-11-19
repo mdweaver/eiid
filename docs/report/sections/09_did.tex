@@ -3,9 +3,9 @@
 
 Only one DiD result has been through external review: PHASE2b Proposition~D8,
 which treats election periods as ``districts'' under M1. The rest of the DiD
-material, in PHASE1b (\texttt{PHASE1b\_monotone\_did.md}) and PHASE2d
-(\texttt{PHASE2d\_did.md}), is a \textbf{proposal that has not been reviewed}
-(\texttt{MSIGN\_REVIEW\_LOG.md} item M-13; \texttt{EXTERNAL\_REVIEW\_PLAN.md}).
+material, in PHASE1b (\path{PHASE1b_monotone_did.md}) and PHASE2d
+(\path{PHASE2d_did.md}), is a \textbf{proposal that has not been reviewed}
+(\path{MSIGN_REVIEW_LOG.md} item M-13; \path{EXTERNAL_REVIEW_PLAN.md}).
 It is summarised here only so that the status table is complete; it is not
 reproduced in the appendices, and nothing in Sections~\ref{sec:rxc}--\ref{sec:inference}
 depends on it.
@@ -38,7 +38,16 @@ bounded by projecting the common identified set. This is a statement about the
 difference of two ecological rates. A causal (difference-in-differences) reading
 needs further structure, developed in PHASE2d, which is not yet reviewed.
 \end{plain}
-\proofref{Appendix~\ref{app:phase2b}, \S5, Proposition~D8 steps 1--5; check D8b [F]}
+\begin{sketch}
+Apply Lemma~D2 within each period. Under M1 the period-specific symmetric parts and
+baseline shifts are identified, and the skew part is $K$ plus an identified term,
+with $K$ common to both periods. Subtracting, everything is identified except
+$L(K)=\sum_{s\ne r}K_{c,rs}\Delta q_{rs}$. (a) A linear form vanishes on all of
+$\Kspace$ iff its coefficients vanish. (b) The identified set of the change is
+$L(\Theta)$ shifted by a constant, which is a point iff $L$ has the same maximum
+and minimum on $\Theta$.
+\end{sketch}
+\proofref[pC-res-proposition-D8]{Appendix~\ref{app:phase2b}, \S5, Proposition~D8 steps 1--5; check D8b [F]}
 \begin{revnote}
 (R-24; A2-4.) Round~1: promoted from Remark~6.2 to a proposition with the exact
 moment condition. Round~2: the proposition said the change is point-identified,
@@ -52,8 +61,8 @@ identified set, and drops the causal reading.
 
 PHASE2d develops DiD bounds for the Wisconsin and Iowa suffrage referenda (rows:
 veterans and non-veterans; columns: yes, no, abstain). Its results are written
-with proofs and checked in \texttt{verify\_phase2d.py} (16 PASS) and
-\texttt{verify\_phase1\_mei\_did.py}, but they have \textbf{not been reviewed}.
+with proofs and checked in \path{verify_phase2d.py} (15/15 PASS) and
+\path{verify_phase1_mei_did.py} (10/10 PASS), but they have \textbf{not been reviewed}.
 In brief:
 \begin{itemize}[nosep]
 \item \textbf{Lemma G}: a general sharpness lemma for affine mean models with
@@ -70,8 +79,9 @@ $\Delta K$.
 \item \textbf{Proposition $\Delta4$}: Monotone EI applied to individual changes;
 the DiD lies between Goodman-on-changes and the neighbourhood model on changes
 under CR on changes.
-\item \textbf{Proposition $\Delta6$}: with changing population counts, R1 gives a
-short interval rather than a point.
+\item \textbf{Proposition $\Delta6$}: with changing population counts, R1 gives an
+interval of width $|s_1-s_0|$ times the length of the feasible set for the
+unknown, rather than a point (a point when $s_1=s_0$).
 \item \textbf{Propositions C1--C2, Remark C3}: composition change (stayers,
 aging-in, exits).
 \item \textbf{Proposition CL}: monotone treatment response, no decline absent
@@ -81,7 +91,8 @@ not help; selection on party only does).
 \end{itemize}
 PACKAGE\_DESIGN \S7 lists the change-versions of the modules (M-SIGN-$\Delta$,
 M-ORD-$\Delta$, M-LOC-$\Delta$ and the sandwich DiD-S); DiD-S validity is
-proved there by applying P-S to changes, and the rest of R11 is open. The DiD
+proved there by applying P-S to changes (Appendix~\ref{app:pkgdesign}, \S7,
+reproduced; not reviewed), and the rest of R11 is open. The DiD
 rungs were renamed $\Delta0$--$\Delta8$ to avoid a clash with PHASE2b's
 Propositions~D0--D8 (M-14). The PHASE1b and PHASE2d clustering language was
 revised to ``one unit observed twice'' and to county effects in the mean (M-5).

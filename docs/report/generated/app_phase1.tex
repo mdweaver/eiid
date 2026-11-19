@@ -7,7 +7,7 @@
 \hypertarget{pA-what-the-source-materials-actually-do-and-what-that-means-for-sharpness}{%
 \subsection{0. What the source materials actually do (and what that means for ``sharpness'')}\label{pA-what-the-source-materials-actually-do-and-what-that-means-for-sharpness}}
 
-I read the paper, the supplementary appendix (\texttt{appendix.tex}, Appendices A--C) and \texttt{package/eiPartialID/R/main.R}. Six facts shape everything below.
+I read the paper, the supplementary appendix (\path{appendix.tex}, Appendices A--C) and \path{package/eiPartialID/R/main.R}. Six facts shape everything below.
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -23,7 +23,7 @@ I read the paper, the supplementary appendix (\texttt{appendix.tex}, Appendices 
 \item
   \textbf{Covariates (App. C).} These enter additively in the intercept: \(E(\beta^w\mid X,Z)=\tilde w_0+\tilde w_1X+\tilde w_2Z\), and likewise for \(\beta^b\), with a common slope. Five parameters are identified and only \(\tilde w_1\) is not. The appendix bounds it by restricting \(A\) to a line segment \(Z=a_0+a_1X\) (Prop. 3*). That choice throws away most of what a covariate can contribute. Apart from the \(\log N\) example, it does not analyse \emph{discrete} covariates such as district dummies. None of App. C is in the package.
 \item
-  \textbf{Verified equivalence.} I rewrote Prop. 2 in the homogeneous form used below (§1.4) and checked numerically that it reproduces \texttt{generateBounds} to \(10^{-16}\) (\texttt{docs/extension/check\_2x2\_equivalence.py}). The R×C generalisation therefore contains the existing package as the special case \(R=C=2\).
+  \textbf{Verified equivalence.} I rewrote Prop. 2 in the homogeneous form used below (§1.4) and checked numerically that it reproduces \texttt{generateBounds} to \(10^{-16}\) (\path{docs/extension/check_2x2_equivalence.py}). The R×C generalisation therefore contains the existing package as the special case \(R=C=2\).
 \end{enumerate}
 
 \textbf{Consequence for the brief.} You asked for a proof that ``the bounds'' are sharp. Under JKST's assumptions the bound the package computes is \textbf{not} sharp. There are three nested sets, \(\Theta_I\subseteq\Theta_X\subseteq\Theta_O\) (§1.5), and Phase 2 will prove sharpness for \(\Theta_I\), prove validity for \(\Theta_O\), and characterise when they coincide. I will not claim sharpness for \(\Theta_O\).
@@ -85,11 +85,19 @@ Rows of \(\beta\) sum to 1, so \(\sum_c e_r^\top H_c x=1=\mathbf 1^\top x\) for 
 \]
 Write \(H_c=Q_c+K_c\) with \(K_c:=\tfrac12(H_c-H_c^\top)\) skew-symmetric. A skew part never shows up in a quadratic form, since \(x^\top Kx=0\).
 
-\textbf{Lemma 1 (identification decomposition) (to prove).} Assume A5 below (the support of \(X\) is not contained in a quadric). Then:
-(a) \(Q=(Q_1,\dots,Q_C)\) is point-identified from \(\tau(\cdot)\);
-(b) \(K=(K_1,\dots,K_C)\) is \emph{completely} unidentified by \(\tau\) and is constrained only by \(\sum_cK_c=0\) (from 1.5 together with \(\sum_cQ_c=J\));
-(c) so the unidentified parameter lives in the linear space
-\[\mathcal K=\Big\{(K_1,\dots,K_C):K_c^\top=-K_c,\ \textstyle\sum_cK_c=0\Big\},\qquad \dim\mathcal K=(C-1)\,\tfrac{R(R-1)}{2}. \tag{1.7}\]
+\phantomsection\label{pA-res-lemma-1}\textbf{Lemma 1 (identification decomposition) (to prove).} Assume A5 below (the support of \(X\) is not contained in a quadric). Then:
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\tightlist
+\item
+  \(Q=(Q_1,\dots,Q_C)\) is point-identified from \(\tau(\cdot)\);
+\item
+  \(K=(K_1,\dots,K_C)\) is \emph{completely} unidentified by \(\tau\) and is constrained only by \(\sum_cK_c=0\) (from 1.5 together with \(\sum_cQ_c=J\));
+\item
+  so the unidentified parameter lives in the linear space
+  \[\mathcal K=\Big\{(K_1,\dots,K_C):K_c^\top=-K_c,\ \textstyle\sum_cK_c=0\Big\},\qquad \dim\mathcal K=(C-1)\,\tfrac{R(R-1)}{2}. \tag{1.7}\]
+\end{enumerate}
 
 Check: \(2\times2\Rightarrow1\) (JKST's \(w_1\), with \(K_{1,12}=c_1/2-w_1\)). \textbf{\(2\times3\Rightarrow 2\).} \(3\times3\Rightarrow 6\). Interpretation: for each pair of rows \((r,s)\) and each column \(c\), the data identify the \emph{sum} of ``the effect of \(s\)-share on row \(r\)'' and ``the effect of \(r\)-share on row \(s\)'', but not how that sum splits between them. This is the R×C version of ``is turnout low because blacks vote less, or because whites in black areas vote less?'' (JKST Fig. 1).
 
@@ -108,7 +116,7 @@ Let \(A\subseteq\Delta^{R-1}\) be a compact convex polytope on which (1.4) is as
 \boxed{\;\Theta_O(P;A)=\Big\{K\in\mathcal K:\ (Q_c(P)+K_c)\,v\ \ge 0\ \text{(elementwise)}\quad\forall c,\ \forall v\in\operatorname{vert}(A)\Big\}\;} \tag{1.9}
 \]
 
-\textbf{Proposition 2-RC (to prove).} (i) \(\Theta_O\) is a convex polyhedron containing the true \(K\) under M0; it is bounded (a polytope) when \(A\) is full-dimensional in the simplex, which A5 implies (proved in 2a Lemma 3(b) and Remark 5.2). (ii) For \(R=C=2\) and \(A=[l,u]\) it equals JKST Prop. 2; for \(A=\Delta^{R-1}\), where \(\operatorname{vert}(A)=\{e_s\}\) and the constraint becomes \(H_{c,rs}\ge0\), it equals JKST Prop. 3. (iii) It is exactly the set of \(K\) for which every implied conditional-mean row \(E[\beta_{r\cdot}\mid X=x]\) lies in \(\Delta^{C-1}\) for all \(x\in A\).
+\phantomsection\label{pA-res-proposition-2-RC}\textbf{Proposition 2-RC (to prove).} (i) \(\Theta_O\) is a convex polyhedron containing the true \(K\) under M0; it is bounded (a polytope) when \(A\) is full-dimensional in the simplex, which A5 implies (proved in 2a Lemma 3(b) and Remark 5.2). (ii) For \(R=C=2\) and \(A=[l,u]\) it equals JKST Prop. 2; for \(A=\Delta^{R-1}\), where \(\operatorname{vert}(A)=\{e_s\}\) and the constraint becomes \(H_{c,rs}\ge0\), it equals JKST Prop. 3. (iii) It is exactly the set of \(K\) for which every implied conditional-mean row \(E[\beta_{r\cdot}\mid X=x]\) lies in \(\Delta^{C-1}\) for all \(x\in A\).
 
 \emph{Why it has this form:} the JKST Jensen step \(E[U\mid X]\le\min\{1,E[T\mid X]/(1-X)\}\) generalises to ``the conditional mean of a selection of the DD polytope lies in the DD polytope evaluated at \(E[T\mid X]\)''. Because \(x^\top H_c x=\tau_c(x)\) holds by construction, the only constraint left is nonnegativity, and a linear function on a polytope is minimised at a vertex. (Remark 1.4: this is the form checked numerically against the package.)
 
@@ -141,7 +149,7 @@ Let \(A\subseteq\Delta^{R-1}\) be a compact convex polytope on which (1.4) is as
 
 \textbf{Random-set characterisation.} Let \(S(x,t)=\{b\in\mathfrak B: b^\top x=t\}\) be the unit-level DD polytope (a transportation polytope in cell-share coordinates \(n_{rc}=x_rb_{rc}\)), with support function \(h_S(u;x,t)=\max_{b\in S(x,t)}\langle u,b\rangle\), an LP that is concave in \(t\).
 
-\textbf{Theorem 1 (to prove).} Assume A1--A3 and that \(\mathcal F\) is rich enough to allow auxiliary randomisation. Then
+\phantomsection\label{pA-res-theorem-1}\textbf{Theorem 1 (to prove).} Assume A1--A3 and that \(\mathcal F\) is rich enough to allow auxiliary randomisation. Then
 \[
 K\in\Theta_I(P;A)\iff \langle u,M_{Q+K}(x)\rangle\le E\big[h_S(u;X,T)\mid X=x,N=n\big]\quad\forall u\in\mathbb S^{RC-1},\ P\text{-a.e. }(x,n),\ x\in A, \tag{1.12}
 \]
@@ -161,19 +169,15 @@ equivalently \(M_{Q+K}(x)\in\mathbb E[S(X,T)\mid\mathcal G]\), the conditional A
 Write the district-specific coefficient matrices as \(H_c^{(d)}\).
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}@{}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}@{}}
 \toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Model
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Assumption on \(E[\beta_{rc}\mid X,N,D=d]\)
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Unidentified parameter
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Identified set
+\begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Model
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Assumption on \(E[\beta_{rc}\mid X,N,D=d]\)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Unidentified parameter
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Identified set
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
@@ -215,19 +219,15 @@ The phases use three identified sets, three composition hulls and three targets.
 \textbf{Three identified sets} (nested: \(\Theta_I\subseteq\Theta_X\subseteq\Theta_O\), 2a Prop. 1):
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}@{}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}@{}}
 \toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Set
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Information it uses
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Sharp relative to
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-How computed
+\begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Set
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Information it uses
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Sharp relative to
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}How computed
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
@@ -241,14 +241,28 @@ How computed
 Rule: \(\Theta_O\) is never called ``sharp'' without ``for the regression function''. 2a Prop. 3 gives a \emph{sufficient} condition for \(\Theta_I=\Theta_O\), not a characterisation.
 
 \textbf{Three hulls:}
-* \textbf{Population hull} \(A=\operatorname{conv}\operatorname{supp}P_X\) (per district in 2b). This is the default region in all identification results, and it makes (S3) automatic (2a Lemma 3(c)).
-* \textbf{Hull of the empirical law} \(\operatorname{conv}\{X_1,\dots,X_n\}\), read as the population hull of \(P_n\). Identification statements with \(P\) replaced by \(P_n\) use it exactly. That is a finite-sample identification analysis, with no estimation step.
-* \textbf{Sample hull as an estimate of \(A\).} It is the same set, but used as a plug-in for the population hull. It is not a population assumption. Since \(\hat A\subseteq A\), the plug-in outer set is weakly larger, so estimating the hull only widens the bound (P3 Prop. P3.2(c)). The true parameter satisfies the constraints at the sample-hull vertices, because they lie in \(A\), so coverage of the true parameter does not depend on how well \(\hat A\) approximates \(A\) (to be stated in P3, WS4). What the hull error affects is width, and the distribution of the endpoint estimator, which P3 states for the fixed sample hull.
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Population hull} \(A=\operatorname{conv}\operatorname{supp}P_X\) (per district in 2b). This is the default region in all identification results, and it makes (S3) automatic (2a Lemma 3(c)).
+\item
+  \textbf{Hull of the empirical law} \(\operatorname{conv}\{X_1,\dots,X_n\}\), read as the population hull of \(P_n\). Identification statements with \(P\) replaced by \(P_n\) use it exactly. That is a finite-sample identification analysis, with no estimation step.
+\item
+  \textbf{Sample hull as an estimate of \(A\).} It is the same set, but used as a plug-in for the population hull. It is not a population assumption. Since \(\hat A\subseteq A\), the plug-in outer set is weakly larger, so estimating the hull only widens the bound (P3 Prop. P3.2(c)). The true parameter satisfies the constraints at the sample-hull vertices, because they lie in \(A\), so coverage of the true parameter does not depend on how well \(\hat A\) approximates \(A\) (to be stated in P3, WS4). What the hull error affects is width, and the distribution of the endpoint estimator, which P3 states for the fixed sample hull.
+\end{itemize}
 
 \textbf{Three targets:}
-* \(B^*_{rc}=E[NX_r\beta_{rc}]/E[NX_r]\): the superpopulation rate of the identification results.
-* \(B_{rc}\): the realised rate for this electorate (1.2), JKST's target.
-* \(\tilde B_{rc}=\sum_iw_{ir}m_{rc}(V_i)\) with \(w_{ir}=N_iX_{ir}/\sum_jN_jX_{jr}\): the finite-design conditional-mean rate. Under A6 it is \(E[B\mid\text{design}]\).
+
+\begin{itemize}
+\tightlist
+\item
+  \(B^*_{rc}=E[NX_r\beta_{rc}]/E[NX_r]\): the superpopulation rate of the identification results.
+\item
+  \(B_{rc}\): the realised rate for this electorate (1.2), JKST's target.
+\item
+  \(\tilde B_{rc}=\sum_iw_{ir}m_{rc}(V_i)\) with \(w_{ir}=N_iX_{ir}/\sum_jN_jX_{jr}\): the finite-design conditional-mean rate. Under A6 it is \(E[B\mid\text{design}]\).
+\end{itemize}
 
 Only \(\tilde B\) (and \(B^*\)) is affine in \(K\). \(B=\tilde B+E\) adds a residual term that does not depend on \(K\). Inference is conditional on the design and covers \(B\) or \(\tilde B\). Inference for \(B^*\) would also need the sampling variation of \((N_i,X_i,D_i)\), and is not pursued.
 
@@ -320,34 +334,48 @@ i.e.~\(\operatorname{supp}_AP_X\) lies in no quadric of the simplex. Here \(\ope
 \emph{Role:} under R2 the \(\zeta_d\) are incidental parameters that cannot be estimated consistently, and \(\max_d\hat\ell_{c,d}\) is biased upward. This needs intersection-bounds methods with precision correction (Chernozhukov, Lee \& Rosen 2013) or a hierarchical restriction on \(\zeta\).
 \emph{Transitions:} the answer depends on your design (see the questions at the end).
 \emph{Coverage of each regime (after review; full table in P3 §0.5):}
-* M0: fixed-dimension asymptotics in every regime.
-* M1/M2 in R1: fixed-dimension asymptotics.
-* M1/M2 in R3: high-dimensional Gaussian approximation under a rate condition.
-* Every regime, including R2: a finite-sample confidence interval (P3 Theorem P3.8). It is valid, but uninformative in width in the designs tried (P3 §5.1).
-* CLR coverage in R2: a simulation finding only.
+
+\begin{itemize}
+\tightlist
+\item
+  M0: fixed-dimension asymptotics in every regime.
+\item
+  M1/M2 in R1: fixed-dimension asymptotics.
+\item
+  M1/M2 in R3: high-dimensional Gaussian approximation under a rate condition.
+\item
+  Every regime, including R2: a finite-sample confidence interval (P3 Theorem P3.8). It is valid, but uninformative in width in the designs tried (P3 §5.1).
+\item
+  CLR coverage in R2: a simulation finding only.
+\end{itemize}
 
 \textbf{Assumptions explicitly not made:} no distributional form for \(\beta\) (unlike King's truncated bivariate normal), no independence between \(\beta\) and \(X\) (contextual effects are the point), no stationarity over time, and no point-identifying nonlinearity.
 
 \textbf{Optional shape restrictions} (each is a convex constraint on \(K\), so the bounds stay LPs):
-* \textbf{Sign or monotone contextual effects}, e.g.~``A-voters are no less loyal where A was stronger'': \(\partial_{x_A}E[\beta_{A,A}\mid x]\ge0\), a half-space in \(K\). The bounds shrink; if the sign is wrong, the truth can be excluded.
-* \textbf{Bounded heterogeneity} \(|K^{(d)}-K|\le\delta\) (between M1 and M2): a sensitivity parameter that interpolates between the two (Phase 3).
-* \textbf{Bhatia--Davis variance bound} \(\operatorname{Var}(\beta)\le m(1-m)\le\tfrac14\): tightens \(S_1\) (Phase 3); valid without extra assumptions.
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Sign or monotone contextual effects}, e.g.~``A-voters are no less loyal where A was stronger'': \(\partial_{x_A}E[\beta_{A,A}\mid x]\ge0\), a half-space in \(K\). The bounds shrink; if the sign is wrong, the truth can be excluded.
+\item
+  \textbf{Bounded heterogeneity} \(|K^{(d)}-K|\le\delta\) (between M1 and M2): a sensitivity parameter that interpolates between the two (Phase 3).
+\item
+  \textbf{Bhatia--Davis variance bound} \(\operatorname{Var}(\beta)\le m(1-m)\le\tfrac14\): tightens \(S_1\) (Phase 3); valid without extra assumptions.
+\end{itemize}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
 \hypertarget{pA-notation-dictionary}{%
 \subsection{3. Notation dictionary}\label{pA-notation-dictionary}}
 
-Also available as a LaTeX \texttt{tabular} in \texttt{docs/extension/notation.tex}.
+Also available as a LaTeX \texttt{tabular} in \path{docs/extension/notation.tex}.
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}@{}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}@{}}
 \toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Symbol
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Meaning
+\begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Symbol
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Meaning
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
@@ -365,7 +393,7 @@ Meaning
 \(W_i=(N_i,X_i,T_i,Z_i,D_i)\) & observables of unit \(i\) \\
 \(P\) & law of \(W\) (observable); \(\mathbb Q\): law of \((W,\beta)\) \\
 \((\Omega,\mathcal F)\) & underlying measurable space \\
-\(\mathcal G=\sigma(X,N,Z)\) (or \(\sigma(X,N,Z,D)\)) & conditioning σ-algebra of the contextual model \\
+\(\mathcal G=\sigma(X,N)\) (or \(\sigma(X,N,D)\); covariates \(Z\) were removed after review, R-15) & conditioning σ-algebra of the contextual model \\
 \(\mathcal O_p=\sigma(W_1,\dots,W_p)\) & σ-algebra of the sample \\
 \(B_{rc}(\mathcal S)\) & finite-population transition rate over units \(\mathcal S\) (1.2) \\
 \(B^*_{rc}\) & superpopulation analogue (1.3) \\
@@ -484,16 +512,13 @@ The three-phase structure works, but goal 2 and the code need their own steps. I
 The script uses a 2×2 setup for transparency: 93 ridings × 10 polls, riding baselines correlated with the riding's mean \(X\), and contextual slopes common to all ridings (M1 true). Results over 300 replications:
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3333}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3333}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3333}}@{}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 4\tabcolsep) * \real{0.3333}}@{}}
 \toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Bound
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Covers truth
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Median width
+\begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Bound
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Covers truth
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}Median width
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
@@ -536,15 +561,12 @@ Riding M1, \textbf{estimated} from 10 polls per riding & \textbf{0.72} & 0.172 \
 Rows: \(P\) = voted P last time (share \(x\)), \(O\) = everyone else. Outcome: votes P now. \emph{Loyalty} is the rate for P-voters; \emph{crossover} is the rate for O-voters. The example is noise-free, so it shows identification only.
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3333}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3333}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3333}}@{}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash\hspace{0pt}}p{(\columnwidth - 4\tabcolsep) * \real{0.3333}}@{}}
 \toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-M0: one model for the province
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-M1: riding dummies
+\begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}M0: one model for the province
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright\hspace{0pt}M1: riding dummies
 \end{minipage} \\
 \midrule\noalign{}
 \endhead

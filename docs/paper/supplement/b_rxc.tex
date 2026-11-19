@@ -1,0 +1,448 @@
+% S2 proofs for Section 3
+\section{Proofs for Section 3: identification in R$\times$C}\label{sec:proofs-rxc}
+
+\subsection{The unit polytope}
+
+\begin{restate}{Lemma~\ref{P-lem:polytope}}
+For $x\in\Delta^{R-1}$, $t\in\Delta^{C-1}$: (a) $S(x,t)\ne\emptyset$; (b) compact and
+convex; (c) closed graph, upper hemicontinuous, Borel; (d) $h_S$ sublinear and
+$\sqrt R$-Lipschitz in $u$, concave in $t$, Borel; (e) $S$ is the intersection of
+its supporting half-spaces.
+\end{restate}
+\begin{proofof}{Lemma~\ref{P-lem:polytope}}
+(a) Put $b_{rc}=t_c$. Each row of $b$ is $t\in\Delta^{C-1}$, so $b\in\Bset$, and
+$(b^\top x)_c=\sum_rx_rt_c=t_c$ because $\sum_rx_r=1$.
+
+(b) $\Bset$ is a finite product of simplices, hence compact and convex, and
+$\{b:b^\top x=t\}$ is an affine subspace. Their intersection is compact and convex.
+
+(c) The graph $\{(x,t,b):b\in\Bset,\ b^\top x=t\}$ is the zero set of a continuous
+map intersected with a compact set, hence closed. A closed-graph correspondence
+into the compact set $\Bset$ is upper hemicontinuous with compact values, and such
+correspondences are Borel measurable.
+
+(d) $h_S(\cdot;x,t)$ is a maximum of linear functions, hence convex and positively
+homogeneous. For $u,u'$, $|h_S(u)-h_S(u')|\le\max_{b\in\Bset}|\langle u-u',b\rangle|
+\le\sqrt R\|u-u'\|$ by Cauchy--Schwarz. If $b\in S(x,t)$, $b'\in S(x,t')$ and
+$\lambda\in[0,1]$, then $\lambda b+(1-\lambda)b'\in\Bset$ and
+$(\lambda b+(1-\lambda)b')^\top x=\lambda t+(1-\lambda)t'$; taking $b,b'$ to be
+maximisers gives $h_S(u;x,\lambda t+(1-\lambda)t')\ge\lambda h_S(u;x,t)+(1-\lambda)h_S(u;x,t')$.
+By Berge's theorem and (c), $h_S$ is upper semicontinuous in $(u,x,t)$, hence Borel.
+
+(e) $S(x,t)$ is closed and convex, so it is the intersection of its supporting
+half-spaces.
+\end{proofof}
+
+\subsection{What the data identify}
+
+\begin{restate}{Lemma~\ref{P-lem:decomp}}
+Let $\mathbb Q\in\mathcal M(H;A)$ have $W$-marginal $P$, and assume A5. Then (a)
+$\E[T_c\mid X=x]=x^\top Q_cx$ and $Q_c$ is unique; (b) $\sum_cH_c=J$, so
+$\sum_cQ_c=J$ and $\sum_cK_c=0$; (c) every $K'\in\Kspace$ gives the same regression,
+and $\dim\Kspace=(C-1)R(R-1)/2$.
+\end{restate}
+\begin{proofof}{Lemma~\ref{P-lem:decomp}}
+(a) By (S1), $T_c=\sum_rX_r\beta_{rc}$, so $\E[T_c\mid X]=\sum_rX_r\E[\beta_{rc}\mid X]$
+by linearity and because $X$ is $\sigma(X)$-measurable. By the tower property and
+(S2), $\E[\beta_{rc}\mid X]=\E[\E[\beta_{rc}\mid V]\mid X]=e_r^\top H_cX$ on
+$\{X\in A\}$, since $M_H(X)$ is $\sigma(X)$-measurable. Hence
+$\E[T_c\mid X]=\sum_{r,s}X_rH_{c,rs}X_s=X^\top H_cX$ there. For a skew $K_c$, the
+scalar $X^\top K_cX$ equals its transpose $X^\top K_c^\top X=-X^\top K_cX$, so it is
+zero, and $X^\top H_cX=X^\top Q_cX$. If symmetric $Q_c,Q'_c$ both satisfy this
+$P_X$-a.e.\ on $A$, then $x^\top(Q_c-Q'_c)x=0$ on $\supp_AP_X$ by
+Lemma~\ref{lem:supp}, and A5 gives $Q_c=Q'_c$.
+
+(b) Rows of $\beta$ sum to one, so taking conditional expectations as in (a),
+$\sum_ce_r^\top H_cx=1$ for $P_X$-a.e.\ $x\in A$. Let
+$d_r^\top=e_r^\top(\sum_cH_c-J)$. Then $d_r^\top x=1-\one^\top x=0$ on
+$\supp_AP_X$ (Lemma~\ref{lem:supp}), and therefore
+$x^\top\tfrac12(d_r\one^\top+\one d_r^\top)x=(d_r^\top x)(\one^\top x)=0$ there. The
+matrix is symmetric, so A5 gives $d_r\one^\top+\one d_r^\top=0$; its $(s,s)$ entry is
+$2d_{r,s}=0$, so $d_r=0$. Hence $\sum_cH_c=J$, and taking symmetric and skew parts,
+$\sum_cQ_c=J$ and $\sum_cK_c=0$.
+
+(c) For $K'\in\Kspace$, $x^\top(Q_c+K'_c)x=x^\top Q_cx$ as in (a). The map
+$(K_1,\dots,K_{C-1})\mapsto(K_1,\dots,K_{C-1},-\sum_{c<C}K_c)$ is a linear bijection
+from the $(C-1)$-fold product of the skew matrices onto $\Kspace$, and the skew
+$R\times R$ matrices have dimension $R(R-1)/2$.
+\end{proofof}
+
+\begin{proof}[Proof of Remark~\ref{P-rem:A5}]
+For $R=2$ and $x=(t,1-t)$, $x^\top\Psi x$ is a polynomial of degree at most two in
+$t$. If it vanishes at three distinct $t$ it is identically zero; then $t=0$ gives
+$\Psi_{22}=0$, $t=1$ gives $\Psi_{11}=0$, and so $\Psi_{12}=0$. With only two support
+points $t_1,t_2$, the non-zero form given by $(t-t_1)(t-t_2)$ in homogeneous form
+vanishes on both. For $R=3$, a symmetric $\Psi$ has six free entries and any five
+points lie on some conic. For the sum-to-one statement: $\sum_cT_{ic}=1=(\one^\top
+X_i)^2=X_i^\top JX_i$, OLS is linear in the response, so $\sum_c\hat Q_c$ is the OLS
+fit of the response 1, which $J$ fits exactly; the fit is unique when the design has
+full rank.
+\end{proof}
+
+\begin{restate}{Lemma~\ref{P-lem:estimand}}
+Under (S1)--(S2) with $P(X\in A)=1$,
+$B^*_{rc}=\mu_r^{-1}\big[\sum_sQ_{c,rs}\mu_{rs}+\sum_{s\ne r}K_{c,rs}\mu_{rs}\big]$.
+\end{restate}
+\begin{proofof}{Lemma~\ref{P-lem:estimand}}
+$0\le NX_r\beta_{rc}\le N$, so the expectation is finite. Since $NX_r$ is
+$V$-measurable, the tower property gives
+$\E[NX_r\beta_{rc}]=\E[NX_r\E[\beta_{rc}\mid V]]=\E[NX_re_r^\top H_cX]$, using (S2)
+and $P(X\in A)=1$. This equals $\sum_sH_{c,rs}\E[NX_rX_s]=\sum_sH_{c,rs}\mu_{rs}$.
+Substitute $H_{c,rs}=Q_{c,rs}+K_{c,rs}$, note $K_{c,rr}=0$, and divide by
+$\mu_r>0$. The coefficient $\mu_{rs}/\mu_r$ is non-negative because $N,X_r,X_s\ge0$.
+\end{proofof}
+
+In $2\times2$, with the dictionary of Proposition~\ref{P-prop:jkst} and
+$\mu_{11}+\mu_{12}=\mu_1$, the formula becomes
+$B^*=w_0+c_1+d_1\mu_{11}/\mu_1-w_1\mu_{12}/\mu_1$, the population version of JKST's
+equation~(16). If $P(X\notin A)>0$, the target splits into a term on $A$, which has
+the form above with $\mu_{rs}$ restricted to $\{X\in A\}$, and a term off $A$ that is
+bounded only by the units' Duncan--Davis polytopes; Proposition~\ref{P-prop:trim}
+turns this into bounds.
+
+\subsection{The sharp identified set}
+
+\begin{restate}{Theorem~\ref{P-thm:sharp}}
+Assume A1, A5 and $H=Q(P)+K$, $K\in\Kspace$. Then $K\in\ThI(P;A)$ iff (S3) holds and
+there is one $P_V$-null set $\mathcal N$ such that, for all $v=(x,n)\notin\mathcal N$
+with $x\in A$, $\langle u,M_H(x)\rangle\le\psi(u;v)$ for all $u$. $\ThI$ is convex
+and closed, and compact when $\affdim(A)=R-1$, which A5 implies.
+\end{restate}
+
+\paragraph{Why one null set for all directions.} One direction $u$ gives one
+half-space restriction on $M_H(x)$. The conclusion $M_H(x)\in\E[S(X,T)\mid V=v]$
+needs all half-spaces at the same $v$, because a closed convex set is the
+intersection of its supporting half-spaces. Each fixed $u$ comes with its own
+exceptional null set, and there are uncountably many $u$, so their union need not be
+null. The necessity proof below takes a countable dense set of directions and
+extends by continuity; the sufficiency proof then evaluates the inequality at a
+random direction, which is legitimate only because one null set serves all
+directions.
+
+\begin{proof}[Proof of necessity]
+Take $\mathbb Q\in\mathcal M(H;A)$ with $W$-marginal $P$; (S3) holds by membership.
+By (S1), $\beta\in S(X,T)$ a.s., so for each fixed $u$,
+$\langle u,\beta\rangle\le h_S(u;X,T)$ a.s. Both sides are bounded by
+$\sqrt R\|u\|$, so conditional expectations given $V$ preserve the inequality. The
+left side becomes $\langle u,M_H(X)\rangle$ on $\{X\in A\}$ by (S2). The right side
+becomes $\psi(u;V)$, because the regular conditional distribution of $T$ given $V$
+under $\mathbb Q$ is a version of $P_{T\mid V}$ (the $W$-marginal is $P$). So for each
+$u$ the inequality holds outside a null set $\mathcal N_u$. Let $U_0$ be a countable
+dense subset of $\R^{R\times C}$ and $\mathcal N=\bigcup_{u\in U_0}\mathcal N_u$, a
+null set. For $v\notin\mathcal N$ the left side is linear in $u$ and
+$|\psi(u;v)-\psi(u';v)|\le\sqrt R\|u-u'\|$ by Lemma~\ref{P-lem:polytope}(d), so the
+inequality extends from $U_0$ to all $u$.
+\end{proof}
+
+\paragraph{Functional-analytic facts.} Work on the canonical space
+$(\mathcal W,\mathcal B(\mathcal W),P)$ of one unit's observables, and let
+$L^1=L^1(\mathcal W,P;\R^{R\times C})$. Let $\mathcal S$ be the set of Borel maps
+$\xi:\mathcal W\to\R^{R\times C}$ with $\xi(w)\in S(x,t)$ $P$-a.s.
+\begin{itemize}
+\item[F1] $\mathcal S\subset L^1$, because $\|\xi\|\le\sqrt R$.
+\item[F2] A family bounded in $L^\infty$ on a probability space is uniformly
+integrable.
+\item[F3] Convex norm-closed subsets of a normed space are weakly closed (Mazur).
+\item[F4] Uniformly integrable subsets of $L^1$ are relatively weakly compact
+(Dunford--Pettis); with F3, a convex, norm-closed, uniformly integrable set is weakly
+compact.
+\item[F5] $\Pi=\E[\cdot\mid V]$ is a linear contraction of $L^1$, hence
+weak-to-weak continuous.
+\item[F6] For a bounded $V$-measurable direction $g$,
+$\sup_{\xi\in\mathcal S}\E\langle g,\xi\rangle$ is attained by a Borel selector of
+$w\mapsto\arg\max_{b\in S(x,t)}\langle g(v),b\rangle$: $S$ is non-empty and compact
+valued with a measurable graph (Lemma~\ref{P-lem:polytope}), the objective is
+Carathéodory, and the measurable maximum theorem applies.
+\item[F7] A point outside a weakly closed convex subset of $L^1(\sigma(V))$ is strictly
+separated from it by some $g\in L^\infty(\sigma(V))$ (Hahn--Banach with
+$(L^1)^*=L^\infty$).
+\end{itemize}
+
+\begin{proof}[Proof of sufficiency]
+(1) $\xi^0(w)_{rc}=t_c$ is Borel and belongs to $\mathcal S$, so $\mathcal S\ne\emptyset$;
+$\mathcal S$ is convex because each $S(x,t)$ is. (2) $\mathcal S$ is bounded in
+$L^\infty$, hence uniformly integrable (F2). If $\xi_n\to\xi$ in $L^1$ with
+$\xi_n\in\mathcal S$, a subsequence converges a.s., and since $S(x,t)$ is closed,
+$\xi\in\mathcal S$; so $\mathcal S$ is norm-closed, and by F3--F4 weakly compact.
+(3) By F5, $\mathcal C=\Pi(\mathcal S)$ is convex and weakly compact, hence weakly
+closed in $L^1(\sigma(V))$.
+
+(4) Put $\eta=M_H(X)\one\{X\in A\}+\Pi(\xi^0)\one\{X\notin A\}$, a bounded
+$V$-measurable map ($M_H$ is linear and $A$ compact). Suppose $\eta\notin\mathcal C$.
+By F7 there are $g\in L^\infty(\sigma(V))$ and $\varepsilon>0$ with
+$\E\langle g,\eta\rangle\ge\sup_{\zeta\in\mathcal C}\E\langle g,\zeta\rangle+\varepsilon$.
+(5) For $\xi\in\mathcal S$, $\E\langle g,\Pi\xi\rangle=\E\langle g,\xi\rangle$, because
+$g$ is $V$-measurable. Pointwise, $\sup_{\xi\in\mathcal S}\E\langle g,\xi\rangle\le
+\E[h_S(g(V);X,T)]$, and by F6 a Borel selector attains it, so
+$\sup_{\mathcal C}\E\langle g,\zeta\rangle=\E[h_S(g(V);X,T)]=\E[\psi(g(V);V)]$, the last
+step by disintegration applied to the bounded Borel function
+$(v,t)\mapsto h_S(g(v);x,t)$.
+(6) On $\{X\in A\}\setminus\{V\in\mathcal N\}$,
+$\langle g(V),\eta\rangle=\langle g(V),M_H(X)\rangle\le\psi(g(V);V)$: this is the
+hypothesis evaluated at the direction $u=g(V(w))$, valid because one null set serves
+all $u$. On $\{X\notin A\}$,
+$\langle g(V),\eta\rangle=\E[\langle g(V),\xi^0\rangle\mid V]\le\E[h_S(g(V);X,T)\mid V]=\psi(g(V);V)$.
+Integrating, $\E\langle g,\eta\rangle\le\E\psi(g(V);V)=\sup_{\mathcal C}\E\langle g,\zeta\rangle$,
+which contradicts (4).
+
+(7) Hence there is $\xi^\star\in\mathcal S$ with $\E[\xi^\star\mid V]=\eta$ a.s. Let
+$\beta=\xi^\star(W)$ and $\mathbb Q$ the law of $(W,\beta)$ under $P$. Its $W$-marginal is
+$P$; $\beta\in\Bset$ and $\beta^\top X=T$ a.s., which is (S1);
+$\E_{\mathbb Q}[\beta\mid V]=\eta=M_H(X)$ on $\{X\in A\}$, which is (S2); and (S3)
+holds by hypothesis. So $K\in\ThI(P;A)$.
+\end{proof}
+
+\begin{proof}[Proof of convexity, closedness and compactness]
+$K\mapsto M_{Q+K}(x)$ is affine, so the left side of the inequality is affine in $K$,
+and (S3) is a family of affine inequalities. If $K,K'$ satisfy the condition outside
+null sets $\mathcal N,\mathcal N'$, every convex combination satisfies it outside
+$\mathcal N\cup\mathcal N'$. If $K_n\to K$ and each $K_n$ satisfies it outside
+$\mathcal N_n$, then $K$ satisfies it outside the null set $\bigcup_n\mathcal N_n$, by
+continuity in $K$. Finally $\ThI\subseteq\ThO$ (Proposition~\ref{P-prop:nesting}),
+and $\ThO$ is bounded when $\affdim(A)=R-1$ (Lemma~\ref{P-lem:outer}(b)), which A5
+implies (proof of Lemma~\ref{P-lem:outer} below).
+\end{proof}
+
+No auxiliary randomisation is needed: because $S(x,t)$ is convex, the selection in
+step (7) is a function of $W$. On integer rates: in count coordinates
+$n_{rc}=Nx_rb_{rc}$, $S(x,t)$ is a transportation polytope with integer margins, and
+such polytopes have integer vertices by total unimodularity, so the Duncan--Davis
+bounds are attained by integer tables. The further claim that randomising over
+integer vertices of $S(X,T)$, with measurable barycentric weights of $\xi^\star(W)$,
+would leave the sharp set unchanged is \emph{only a sketch}: it needs a measurable
+choice of the weights and gives up the selection without randomisation. It is not
+used anywhere.
+
+\begin{proofof}{Corollary~\ref{P-cor:sharp}}
+For every law consistent with $P$, the target equals $\varphi(K)$ by
+Lemma~\ref{P-lem:estimand}. So the identified set is the image $\varphi(\ThI)$, and
+every point of it is attained by the construction of the sufficiency proof. $\varphi$
+is affine and $\ThI$ convex and compact, so the image is a compact interval.
+\end{proofof}
+
+\subsection{The outer set}
+
+\begin{proofof}{Lemma~\ref{P-lem:outer}}
+(a) If $\ell\ge0$ on $A$ it holds at the vertices. Conversely, every $x\in A$ is a
+convex combination $\sum_k\lambda_kv_k$ of the vertices, so $\ell(x)=\sum_k\lambda_k\ell(v_k)\ge0$.
+
+(b) For $K\in\ThO$ and $x\in A$, each row of $M_{Q+K}(x)$ is non-negative and sums to
+$e_r^\top Jx=1$ by Lemma~\ref{P-lem:decomp}(b), so it lies in the simplex. Hence
+$|e_r^\top K_cx|\le1+|e_r^\top Q_cx|$ on $A$. If $\affdim(A)=R-1$, $A$ contains $R$
+affinely independent points $x^{(1)},\dots,x^{(R)}$; they are linearly independent
+because they lie in $\{\one^\top x=1\}$, which misses the origin. So
+$K_c=[e_r^\top K_cx^{(k)}]_{r,k}[x^{(1)}\cdots x^{(R)}]^{-1}$ is bounded uniformly over
+$\ThO$.
+
+\emph{A5 implies $\affdim(A)=R-1$.} Suppose $\supp_AP_X$ lay in a proper hyperplane
+$a^\top x=b$ of the simplex, so $a-b\one\ne0$. Since $\one^\top x=1$,
+$x^\top\Psi x=((a-b\one)^\top x)(\one^\top x)=0$ there, with
+$\Psi=\tfrac12[(a-b\one)\one^\top+\one(a-b\one)^\top]\ne0$, contradicting A5. So
+$\supp_AP_X$, and the closed set $A$ containing it, is full-dimensional.
+
+(c) By (S1) and conditional Jensen for the closed convex set $\Bset$,
+$\E[\beta\mid V]\in\Bset$ a.s. By (S2), $M_H(x)\in\Bset$ for $P_X$-a.e.\ $x\in A$, and by
+continuity at every $x\in\supp_AP_X$ (Lemma~\ref{lem:supp}). $M_H$ is linear and
+$\Bset$ convex, so $M_H\in\Bset$ on $\conv(\supp_AP_X)\supseteq A$.
+\end{proofof}
+
+\emph{Counterexamples for the hypotheses.} (i) The hypothesis of (c) cannot be
+weakened to $A\subseteq\conv\supp P_X$: with $A=\{x_0\}$ interior to the hull but
+$P(X=x_0)=0$, (S2) restricts nothing and $M_H(x_0)$ need not be valid; here
+$\supp_AP_X=\emptyset$, so (c) does not apply. (ii) For (b): with $R=3$, $C=2$,
+$A=\{(\tfrac13,\tfrac13,\tfrac13)\}$, $Q_1=Q_2=\tfrac12J$ and $K_1=-K_2=t\Omega$ with
+$\Omega$ the cyclic skew matrix with rows $(0,1,-1)$, $(-1,0,1)$, $(1,-1,0)$,
+$K_1x_0=0$, so every $t\in\R$ is in $\ThO$.
+
+\begin{proofof}{Proposition~\ref{P-prop:nesting}}
+If $\mathbb Q\in\mathcal M(H;A)$, then
+$\E[\beta\mid X]=\E[\E[\beta\mid V]\mid X]=M_H(X)$ on $\{X\in A\}$, so $\mathbb Q$ belongs
+to the $X$-only model; hence $\ThI\subseteq\ThX$. If $K\in\ThX$ with witness
+$\mathbb Q$, then $M_H(X)=\E[\beta\mid X]\in\Bset$ a.s.\ on $\{X\in A\}$ by conditional
+Jensen, and (S3) gives $M_H(x)\in\Bset$ on all of $A$; in particular
+$(Q_c+K_c)x\ge0$, so $K\in\ThO$.
+\end{proofof}
+
+\begin{proofof}{Proposition~\ref{P-prop:sharpreg}}
+($\supseteq$) For $P'\in\mathcal P(P)$ the regression function and the law of $X$ are
+those of $P$, so $Q(P')=Q(P)$ by Lemma~\ref{P-lem:decomp}(a). $\ThO$ depends on $P$
+only through $Q(P)$ and $A$, so $\ThI(P')\subseteq\ThO(P')=\ThO(P)$ by
+Proposition~\ref{P-prop:nesting}.
+
+($\subseteq$) Let $K\in\ThO(P;A)$, $H=Q(P)+K$, $\beta=M_H(X)$ and $T'=\beta^\top X$.
+Since $P(X\in A)=1$ and $K\in\ThO$, $\beta$ is non-negative with unit row sums, so
+$\beta\in\Bset$ a.s., and (S1) holds by construction. $\beta$ is $V$-measurable, so
+$\E[\beta\mid V]=M_H(X)$, which is (S2); (S3) is the definition of $\ThO$. Finally
+$T'_c=X^\top H_cX=X^\top Q_cX=\E_P[T_c\mid X]$, so the law $P'$ of $(N,X,T')$ is in
+$\mathcal P(P)$, and the law of $(N,X,T',\beta)$ is in $\mathcal M(H;A)$ with
+$W$-marginal $P'$. So $K\in\ThI(P';A)$.
+\end{proofof}
+
+\begin{proofof}{Proposition~\ref{P-prop:IequalsO}}
+(a) $\ThI(P)\subseteq\ThO(P)$ by Proposition~\ref{P-prop:nesting}. In the proof of
+Proposition~\ref{P-prop:sharpreg}, $T'=\E_P[T\mid X]=T$ a.s., so $P'=P$, and every
+$K\in\ThO(P)$ lies in $\ThI(P)$.
+
+(b) Let $K\in\ThO$, $H=Q+K$, and fix such a $v$. Because $h_S(u;x,\cdot)$ is affine on
+the convex hull of the conditional support, its integral equals its value at the
+conditional mean, which lies in the closed convex hull of the support:
+$\psi(u;v)=h_S(u;x,\E[T\mid V=v])=h_S(u;x,\tau(x))$, using $\E[T\mid V]=\tau(X)$.
+Since $K\in\ThO$, $M_H(x)\in\Bset$ and $x^\top M_H(x)=(x^\top H_cx)_c=\tau(x)$, so
+$M_H(x)\in S(x,\tau(x))$ and $\langle u,M_H(x)\rangle\le h_S(u;x,\tau(x))=\psi(u;v)$
+for all $u$. Theorem~\ref{P-thm:sharp} gives $K\in\ThI$; the reverse inclusion is
+Proposition~\ref{P-prop:nesting}.
+
+\emph{The $2\times2$ reading.} There $S(x,t)$ is a segment, with the row-2 rate in
+$[L,U]$, $L=\max\{0,(t_1-x)/(1-x)\}$, $U=\min\{1,t_1/(1-x)\}$. The segment's direction
+depends on $x$ only, so for fixed $u$ the maximising endpoint is the same for every
+$t$, and $h_S(u;x,\cdot)$ is an affine image of $L$ or of $U$. These are piecewise
+affine in $t_1$ with kinks at $t_1=x$ and $t_1=1-x$. So (b) applies when, among units
+with the same composition, the outcome share never lies on both sides of $x$ or of
+$1-x$.
+\end{proofof}
+
+\subsection{Closed forms}
+
+\begin{proofof}{Proposition~\ref{P-prop:jkst}}
+Write $t=X$ and $Q=Q_1$.
+
+(a) $X^\top QX=Q_{11}t^2+2Q_{12}t(1-t)+Q_{22}(1-t)^2
+=Q_{22}+2(Q_{12}-Q_{22})t+(Q_{11}-2Q_{12}+Q_{22})t^2$. Matching with
+$w_0+c_1t+d_1t^2$ (unique by Lemma~\ref{P-lem:decomp}(a)) gives $Q_{22}=w_0$,
+$Q_{12}=w_0+c_1/2$ and $Q_{11}=w_0+c_1+d_1$. The row-2 mean is
+$H_{21}t+H_{22}(1-t)=H_{22}+(H_{21}-H_{22})t$, so $w_0=H_{22}$ and
+$w_1=H_{21}-H_{22}$. Since $H_{21}=Q_{12}-K$ and $H_{22}=Q_{22}$, $K=c_1/2-w_1$.
+
+(b) Column 2 is $H_2=J-H_1$. At a vertex $(t,1-t)$: row 2, column 1 gives
+$w_0+w_1t\ge0$, i.e.\ $w_1\ge-w_0/t$; row 2, column 2 gives $w_1\le(1-w_0)/t$. Row 1
+has $H_{11}=Q_{11}$ and $H_{12}=Q_{12}+K=w_0+c_1-w_1$, so its column-1 mean is
+$w_0+c_1+d_1t-w_1(1-t)$, which is non-negative iff
+$w_1\le(w_0+c_1+d_1t)/(1-t)$; column 2 gives $w_1\ge(w_0+c_1+d_1t-1)/(1-t)$, which
+equals JKST's $(w_0+c_1+d_1-1)/(1-t)-d_1$. Taking the maximum and minimum over the two
+vertices gives JKST's limits (Lemma~\ref{P-lem:outer}(a)).
+
+(c) With vertices $(1,0)$ and $(0,1)$: at $(1,0)$ the rows give $Q_{11}\in[0,1]$, free
+of $K$, and $w_0+w_1\in[0,1]$; at $(0,1)$, $H_{22}=w_0\in[0,1]$, free of $K$, and
+$H_{12}=w_0+c_1-w_1\in[0,1]$. Together,
+$\max\{-w_0,c_1+w_0-1\}\le w_1\le\min\{1-w_0,c_1+w_0\}$, JKST's Proposition~3.
+
+(d) By Lemma~\ref{P-lem:estimand} and (a),
+$\mu_1B^*=(w_0+c_1+d_1)\mu_{11}+(w_0+c_1-w_1)\mu_{12}=(w_0+c_1)\mu_1+d_1\mu_{11}-w_1\mu_{12}$,
+using $\mu_{11}+\mu_{12}=\E[NX(X+1-X)]=\mu_1$.
+\end{proofof}
+
+\begin{proofof}{Proposition~\ref{P-prop:simplex}}
+The vertices of $\Delta^{R-1}$ are $e_1,\dots,e_R$, so by Lemma~\ref{P-lem:outer}(a)
+$\ThO=\{K:Q_{c,rs}+K_{c,rs}\ge0\ \forall c,r,s\}$. For $r=s$, $K_{c,rr}=0$ and the
+condition is $Q_{c,rr}\ge0$. For $r\ne s$, the conditions for $(r,s)$ and $(s,r)$ read
+$Q_{c,rs}\pm K_{c,rs}\ge0$, since $Q$ is symmetric and $K$ skew: $|K_{c,rs}|\le
+Q_{c,rs}$. So the set is non-empty iff every $Q_{c,rs}\ge0$. The only other
+restriction, $\sum_cK_{c,rs}=0$, involves one pair at a time, so the set is a product
+over pairs. For a pair, Lemma~\ref{P-lem:box}(b) with $\ell_c=-Q_{c,rs}$ and
+$h_c=Q_{c,rs}$ gives the range
+$[\max\{-Q_{c,rs},-\sum_{c'\ne c}Q_{c',rs}\},\min\{Q_{c,rs},\sum_{c'\ne c}Q_{c',rs}\}]$,
+and $\sum_{c'}Q_{c',rs}=1$ (Lemma~\ref{P-lem:decomp}(b)) turns it into
+$[-m_{c,rs},m_{c,rs}]$, with $0\le m_{c,rs}\le\tfrac12$. $B^*_{rc}$ depends on
+$\{K_{c,rs}\}_{s\ne r}$, which belong to different pairs and so vary independently,
+each with coefficient $\mu_{rs}/\mu_r\ge0$; the range is attained coordinatewise.
+\end{proofof}
+
+\begin{proofof}{Lemma~\ref{P-lem:box}}
+The box $[\ell,h]$ is convex, so the image of $\kappa\mapsto\sum_c\kappa_c$ is an
+interval containing $\sum\ell$ and $\sum h$ and contained in $[\sum\ell,\sum h]$; it
+equals that interval, which gives (a). (b) $\kappa_c=k$ extends to a point of
+$\mathcal P$ iff $\ell_c\le k\le h_c$ and the box in the other coordinates contains a
+point with sum $-k$, i.e.\ $\sum_{c'\ne c}\ell_{c'}\le-k\le\sum_{c'\ne c}h_{c'}$.
+(c) Substitute $\kappa=\ell+y$ with $0\le y\le h-\ell$ and $\sum y=-\sum\ell\ge0$. If
+$y$ is optimal, $g_a>g_b$, $y_a<h_a-\ell_a$ and $y_b>0$, moving a small mass from $b$
+to $a$ stays feasible and raises the objective, a contradiction. So an optimum fills
+coordinates in decreasing order of $g$.
+\end{proofof}
+
+\begin{proofof}{Proposition~\ref{P-prop:tworows}}
+With $K_c=\kappa_c\begin{psmallmatrix}0&1\\-1&0\end{psmallmatrix}$, row 1 at
+$(t,1-t)$ requires $Q_{c,11}t+(Q_{c,12}+\kappa_c)(1-t)\ge0$, i.e.\
+$\kappa_c\ge\lambda_c(t)$ (dividing by $1-t>0$); row 2 requires
+$(Q_{c,12}-\kappa_c)t+Q_{c,22}(1-t)\ge0$, i.e.\ $\kappa_c\le\rho_c(t)$ (dividing by
+$t>0$). Over both vertices, $\ell_c\le\kappa_c\le h_c$, and $\sum_c\kappa_c=0$ completes
+the description. The formulas for $B^*$ are Lemma~\ref{P-lem:estimand} with $R=2$, and
+their monotonicity follows from $\mu_{12}\ge0$. A linear target is affine in $\kappa$
+with $g_c=\mu_{12}(a_{1c}/\mu_1-a_{2c}/\mu_2)$, and Lemma~\ref{P-lem:box}(c) applies.
+\end{proofof}
+
+\begin{proofof}{Corollary~\ref{P-cor:joint}}
+For the collapsed column $\neg c$, $Q_{\neg c}=J-Q_c$, so
+$\lambda_{\neg c}(t)=-(1-Q_{c,12})-(1-Q_{c,11})\tfrac t{1-t}=\sum_{c'\ne c}\lambda_{c'}(t)$
+because $\sum_{c'}Q_{c'}=J$. By Lemma~\ref{P-lem:box}(b) with two columns, the
+collapsed upper end is $\min\{h_c,-\ell_{\neg c}\}$ with
+$-\ell_{\neg c}=-\max_k\sum_{c'\ne c}\lambda_{c'}(t_k)$. Since the maximum of a sum is
+at most the sum of the maxima, $\max_k\sum_{c'}\lambda_{c'}(t_k)\le\sum_{c'\ne c}\ell_{c'}$,
+so the collapsed upper end is at least the joint one,
+$\min\{h_c,-\sum_{c'\ne c}\ell_{c'}\}$. The lower ends compare the same way using
+$\rho$. This proves (a). The map $t\mapsto t/(1-t)$ is increasing, so $\lambda_{c'}$ is
+monotone with direction set by the sign of $Q_{c',11}$; likewise $\rho_{c'}$ with the
+sign of $Q_{c',22}$. If these signs agree across $c'\ne c$, all $\lambda_{c'}$ are
+maximised at the same vertex and the inequality above is an equality; the same holds
+for $\rho$. This proves (b), and (c) is its contrapositive, since a set of numbers not
+of one sign contains a negative one and $H_{c',rr}=Q_{c',rr}$.
+\end{proofof}
+
+\begin{proofof}{Proposition~\ref{P-prop:lp}}
+The parametrisation is a bijection onto $\Kspace$ (proof of
+Lemma~\ref{P-lem:decomp}(c)). $(K_cv)_r=\sum_sK_{c,rs}v_s$ with $K_{c,rs}=k_{c,rs}$ for
+$r<s$, $-k_{c,sr}$ for $r>s$ and $0$ on the diagonal, so each constraint
+$(Q_c+K_c)v\ge0$ at a vertex is one row of $Gk\le g$ (Lemma~\ref{P-lem:outer}(a)).
+The target is affine in $K$ by Lemma~\ref{P-lem:estimand}: $k_{c,rs}$ enters
+$B^*_{rc}$ with $+\mu_{rs}/\mu_r$ and $B^*_{sc}$ with $-\mu_{rs}/\mu_s$, and column $C$
+with the opposite signs because $K_C=-\sum_{c<C}K_c$, which gives $\omega$. The
+vertices of the hull of $\{X_i\}$ are among the $X_i$, and every $X_i$ lies in the
+hull, so constraints at all $X_i$ and at the vertices are equivalent.
+\end{proofof}
+
+\emph{Value function.} For fixed $\mu$, only the right-hand side $g(Q)$ varies, and
+the value of a maximisation LP is concave and piecewise linear in its right-hand side
+where it is feasible and bounded. For fixed $Q$, $V$ is the support function of the
+polyhedron $\{Gk\le g(Q)\}$ evaluated at $\omega$, hence convex and piecewise linear
+in $\omega$. The example $\max\{\mu k:-Q\le k\le Q\}=\mu Q$ shows that joint concavity
+fails.
+
+\begin{proofof}{Proposition~\ref{P-prop:trim}}
+Split $\varphi=\sum_{rc}(a_{rc}/\mu_r)\{\E[NX_r\beta_{rc}\one\{X\in A\}]+\E[NX_r\beta_{rc}\one\{X\notin A\}]\}$.
+In the first term $NX_r\one\{X\in A\}$ is $V$-measurable, so (S2) on $A$ and the
+computation of Lemma~\ref{P-lem:estimand} give $\sum_sH_{c,rs}\mu^A_{rs}$; summed with
+the weights this is $\varphi^A_0+\omega^{A\top}k$. The second part is
+$\E[N\langle\tilde a(X),\beta\rangle\one\{X\notin A\}]$, and since $\beta\in S(X,T)$,
+$-h_S(-\tilde a;X,T)\le\langle\tilde a,\beta\rangle\le h_S(\tilde a;X,T)$, so it lies in
+$[L_{\rm out},U_{\rm out}]$. $K\in\ThO$ by Proposition~\ref{P-prop:nesting} applied to
+the law on $\{X\in A\}$; adding the two parts gives the interval. For attainment,
+nothing links $\beta$ off $A$ to $K$, so the two terms can be chosen separately: on $A$
+the construction of Proposition~\ref{P-prop:sharpreg} attains any $K\in\ThO$ with the
+same regression, and off $A$ a Borel argmax selector of $b\mapsto\pm\langle\tilde
+a(x),b\rangle$ over $S(x,t)$ attains $U_{\rm out}$ or $L_{\rm out}$. For a single cell,
+$\max_{b\in S(x,t)}x_rb_{rc}=\min\{x_r,t_c\}$ and the minimum is
+$\max\{0,x_r+t_c-1\}$ (Fréchet--Hoeffding). For a combined target, $h_S$ of a sum is at
+most the sum of the $h_S$, so summing per-cell terms is valid but can be wider.
+\end{proofof}
+
+\subsection{Refutability and undetectable violations}
+
+\begin{proofof}{Proposition~\ref{P-prop:nonempty}}
+$K_0\in\ThI$ by definition, and $\ThI\subseteq\ThO$. So
+$B^*_{rc}=\varphi(K_0)\in[\varphi_L,\varphi_U]$ by Lemma~\ref{P-lem:estimand} and
+Corollary~\ref{P-cor:sharp}. For the Duncan--Davis part, write $n_{rc}=X_r\beta_{rc}$;
+then $\sum_cn_{rc}=X_r$, $\sum_rn_{rc}=T_c$ and $n\ge0$, so $n_{rc}\le\min\{X_r,T_c\}$
+and $n_{rc}=X_r-\sum_{c'\ne c}n_{rc'}\ge X_r-\sum_{c'\ne c}T_{c'}=X_r+T_c-1$. Multiply
+by $N\ge0$, take expectations and divide by $\mu_r$.
+\end{proofof}
+
+\begin{proofof}{Proposition~\ref{P-prop:undetectable}}
+$T=\beta^\top X=M_H(X)^\top X+\nu(X)^\top X=\tau(X)$ by (i) and
+Lemma~\ref{P-lem:decomp}(a), and likewise $T'=\tau(X)$; with the same law of $(N,X)$,
+both structures give the same law of the data. Both are valid by (ii)--(iii) and the
+unit row sums of $M_H$. The difference in $B^*$ follows from the computation of
+Lemma~\ref{P-lem:estimand}. If $\nu=M_G$ is linear, (i) gives $x^\top G_cx=0$ on
+the support, so $\sym G_c=0$ by A5; (ii) gives $(\sum_cG_c)x=0$ on the
+support, which by A5 lies in no hyperplane (proof of Lemma~\ref{P-lem:outer}) and so
+spans $\R^R$; hence $\sum_cG_c=0$ and $G\in\Kspace$. Conversely every
+$M_{K'}$ with $K'\in\Kspace$ satisfies (i)--(ii).
+\end{proofof}

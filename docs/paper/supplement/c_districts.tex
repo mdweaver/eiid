@@ -1,0 +1,194 @@
+% S3 proofs for Section 4
+\section{Proofs for Section 4: districts and the rung ladder}\label{sec:proofs-districts}
+
+Conditioning on an atom $\{D=d\}$ of positive probability turns (S1) and the district
+versions of (S2)--(S3), restricted to $\{D=d\}$, into the pooled model of
+Section~\ref{sec:proofs-rxc} for the conditional law $P(\cdot\mid D=d)$, with
+$H=H^{(d)}$ and $A=A_d$. We use this without further comment.
+
+\begin{proofof}{Proposition~\ref{P-prop:D0}}
+Every law satisfying (S1) gives $B^*_{rc}\in\DD^*_{rc}$, by the argument of
+Proposition~\ref{P-prop:nonempty}. For attainment, fix $(x,t)$ and let
+$m=\min\{x_r,t_c\}$. Consider the transportation problem with row margins $x$, column
+margins $t$ and cell $(r,c)$ fixed at $m$. The residual margins $x-me_r$ and $t-me_c$
+are non-negative with equal totals; all edges of the residual problem are present,
+so Gale's condition reduces to equal totals, and the problem is feasible. Hence
+$\max_{b\in S(x,t)}x_rb_{rc}=m$. For the minimum, put $m'=\max\{0,x_r+t_c-1\}$ and
+forbid further mass in cell $(r,c)$. The residual row $r$ needs
+$x_r-m'\le\sum_{c'\ne c}t_{c'}=1-t_c$, which holds because $m'\ge x_r+t_c-1$; column
+$c$ symmetrically needs $t_c-m'\le1-x_r$. Any other set of rows is adjacent to every
+column, so Gale's condition holds, and $\min_{b\in S(x,t)}x_rb_{rc}=m'$. A Borel
+selection attaining the maximum (or minimum) exists by the measurable maximum theorem
+and Lemma~\ref{P-lem:polytope}(c); integrating $N$ times it gives the endpoints of
+$\DD^*_{rc}$, attained by valid structures with $\beta$ a function of $W$. Neither the
+constraint $\beta\in S(X,T)$ nor the objective involves $D$, so the set does not
+depend on the law of $D$.
+
+The joint sharp set for the matrix $B^*$ is the set of
+$[\E[NX_r\xi_{rc}]/\mu_r]_{rc}$ over measurable selections $\xi$ of $S(X,T)$, which is
+convex and compact (as in the proof of Theorem~\ref{P-thm:sharp}) and free of $D$. For a
+linear target, the same selection argument applied to $b\mapsto\langle\tilde
+a(x),b\rangle$ gives the interval
+$[-\E[Nh_S(-\tilde a(X);X,T)],\E[Nh_S(\tilde a(X);X,T)]]$; because $h_S$ of a sum is at
+most the sum of the $h_S$, it can be strictly inside the sum of the cell intervals, so
+the joint set is in general not a product.
+\end{proofof}
+
+\begin{proofof}{Lemma~\ref{P-lem:D1}}
+(a) Apply Lemma~\ref{P-lem:decomp} to the conditional law given $D=d$, with A5 in
+district $d$.
+
+(b) Under M1, $H^{(d)}_c=H_c+\zeta_{c,d}\one^\top$. For a vector $\zeta$,
+$\sym(\zeta\one^\top)_{rs}=\tfrac12(\zeta_r+\zeta_s)$ and
+$\skw(\zeta\one^\top)_{rs}=\tfrac12(\zeta_r-\zeta_s)$. So
+$Q^{(d)}_c=Q_c+\sym(\zeta_{c,d}\one^\top)$ and $K^{(d)}_c=K_c+\skw(\zeta_{c,d}\one^\top)$,
+with $Q=Q^{(1)}$ and $K=K^{(1)}$ because $\zeta_{\cdot,1}=0$. The diagonals give
+$\diag(Q^{(d)}_c-Q^{(1)}_c)=\zeta_{c,d}$, identified by (a); the off-diagonal entries
+give the overidentifying restrictions. The only unidentified object left is $K$, and
+$\sum_c\zeta_{c,d}=0$ keeps $K^{(d)}\in\Kspace$.
+
+(c) Under L5, $H^{(d)}_c=\alpha_{c,d}\one^\top$, so $Q^{(d)}_c=\sym(\alpha_{c,d}\one^\top)$
+has diagonal $\alpha_{c,d}$, and $K^{(d)}_c=\skw(\alpha_{c,d}\one^\top)$ is a known
+function of identified quantities. The off-diagonal entries of $Q^{(d)}_c$ are testable
+restrictions.
+
+(d) Under M1, within district $d$,
+$\E[T_c\mid X=x,D=d]=x^\top Q_cx+x^\top(\zeta_{c,d}\one^\top)x=x^\top Q_cx+\zeta_{c,d}^\top x$
+on the district's support, using $\one^\top x=1$. If two parameter sets give the same
+regression in every district, their differences $(\Psi,z_d)$ satisfy
+$x^\top\Psi x+z_d^\top x=0$ on each district's support (with $z_1=0$), and the stacked
+rank condition forces them to coincide. Sufficiency of the stated condition: if A5
+holds in district 1, the equation there gives $x^\top\Psi x=0$, so $\Psi=0$. If A5
+holds in a district $d_0\neq1$, then
+$x^\top(\Psi+\sym(z_{d_0}\one^\top))x=0$ there gives $\Psi=-\sym(z_{d_0}\one^\top)$, and
+district 1's equation then forces $z_{d_0}^\top x=0$ on an affinely spanning set, so
+$z_{d_0}=0$ and $\Psi=0$. In either case $z_d^\top x=0$ on each district's affinely
+spanning support, which spans $\R^R$ linearly because it lies in $\{\one^\top x=1\}$; so
+$z_d=0$. Three distinct but collinear compositions in a district are affinely
+dependent and do not suffice. The formulas of (b) follow from the identified $Q$ and
+$\zeta$.
+\end{proofof}
+
+\begin{proofof}{Lemma~\ref{P-lem:D2}}
+$\E[NX_r\beta_{rc}]=\sum_d\E[NX_r\beta_{rc}\one\{D=d\}]$, and since $NX_r\one\{D=d\}$ is
+$V$-measurable, each term equals
+$\E[NX_r\one\{D=d\}e_r^\top H^{(d)}_cX]=\sum_sH^{(d)}_{c,rs}\mu^{(d)}_{rs}$. Split
+$H^{(d)}=Q^{(d)}+K^{(d)}$. Under M1, $K^{(d)}=K+\skw(\zeta\one^\top)$ and
+$\sum_d\mu^{(d)}_{rs}=\mu_{rs}$, which gives the sensitivity $\mu_{rs}/\mu_r$.
+\end{proofof}
+
+\begin{proofof}{Theorem~\ref{P-thm:affine}}
+Replace $M_H(X)$ by $m_\theta(V)$ in the proof of Theorem~\ref{P-thm:sharp}. (H4) leaves
+the selection set $\mathcal S$ and facts F1--F7 unchanged. The necessity proof uses
+only that $m_\theta(V)$ is bounded and $V$-measurable; the sufficiency proof uses the
+same two properties of $\eta$ (steps 4, 6 and 7) and (H1)--(H2) supply them; the
+convexity and closedness argument uses only that the mean is affine and continuous in
+the parameter, which is (H3). Each step therefore carries over. For the rungs of
+Theorem~\ref{P-thm:ladder}, $m_\theta(x,n,d)=M_{Q^{(d)}+K^{(d)}(\theta)}(x)$ is linear in
+$x$, so (H1)--(H2) hold on the compact $A_d$, and (H3) holds because $K^{(d)}(\theta)$ is
+linear in $\theta$. This argument is a step-by-step correspondence with the proof of
+Theorem~\ref{P-thm:sharp}; its measure-theoretic content rests on the same cited
+theorems.
+\end{proofof}
+
+\begin{proofof}{Theorem~\ref{P-thm:ladder}}
+(a) Each rung is an affine mean model in the sense of Theorem~\ref{P-thm:affine}, with
+$\theta=(k^{(d)})_d$ (and $\bar k$ for M1($\delta$)) restricted to the polyhedron
+defining the rung and $m_\theta(x,n,d)=M_{Q^{(d)}+K^{(d)}(\theta)}(x)$. The condition of
+Theorem~\ref{P-thm:affine} holds $P_V$-a.e.\ iff it holds a.e.\ given each atom $D=d$.
+
+(b) Within district $d$, sharp is contained in outer by Proposition~\ref{P-prop:nesting}
+applied to the conditional law, with vertex reduction by Lemma~\ref{P-lem:outer}(a).
+Intersecting over $d$ and with the rung's restriction preserves the inclusion. All
+constraints are linear in $\theta$, every rung's restriction is polyhedral (an
+$\ell_\infty$ ball is a polyhedron), and the target is affine in $\theta$ by
+Lemma~\ref{P-lem:D2}, so the bounds are LPs. For M1,
+$K^{(d)}(k)=K(k)+\skw(\zeta\one^\top)$ with $\zeta$ identified, so district $d$'s
+constraints involve only the common $k$.
+
+(c) M2 $\subseteq$ DD: the M2 model class lies in the class defined by (S1) alone,
+whose sharp set is $\DD^*$ (Proposition~\ref{P-prop:D0}); nested model classes give
+nested identified sets. M1($\delta$) $\subseteq$ M1($\delta'$) $\subseteq$ M2: the
+$\delta$-ball lies in the $\delta'$-ball, and M2 has no restriction. M1 $\subseteq$
+M1(0): under M1, $k^{(d)}=k(K)+c_d$ by Lemma~\ref{P-lem:D1}(b), so $\bar k=k(K)$
+satisfies the M1(0) condition. L4($r$) $\subseteq$ M1: L4 adds a restriction to M1.
+L5 $\subseteq$ L4($r$): under L5 every row is constant in $x$; writing
+$\alpha_{c,d}=\alpha_{c,1}+(\alpha_{c,d}-\alpha_{c,1})$ shows that L5 is M1 with
+$H_c=\alpha_{c,1}\one^\top$ and $\zeta_{c,d}=\alpha_{c,d}-\alpha_{c,1}$, where
+$\sum_c\zeta_{c,d}=\one-\one=0$, and row $r$ is constant. L6 $\subseteq$ L5: L6 is L5 with
+a common $\alpha$. For the outer versions, each step adds constraints to, or restricts
+the variables of, the same polyhedral system, so the feasible sets and the LP ranges
+are nested.
+\end{proofof}
+
+\begin{proofof}{Proposition~\ref{P-prop:D3}}
+Under M1, row 1 in district $d$ at $v=(t,1-t)$ requires
+$e_1^\top(H_c+\zeta_{c,d}\one^\top)v=Q_{c,11}t+(Q_{c,12}+\kappa_c)(1-t)+\zeta_{c,d,1}\ge0$,
+which, dividing by $1-t>0$, is $\kappa_c\ge\lambda_c(t)-\zeta_{c,d,1}/(1-t)$. Row 2
+requires $(Q_{c,12}-\kappa_c)t+Q_{c,22}(1-t)+\zeta_{c,d,2}\ge0$, i.e.\
+$\kappa_c\le\rho_c(t)+\zeta_{c,d,2}/t$. Intersecting over the vertices and districts
+gives $\ell_c$ and $h_c$ (Theorem~\ref{P-thm:ladder}(b)), and $\sum_c\kappa_c=0$ gives a
+box cut by a hyperplane, projected by Lemma~\ref{P-lem:box}. For a pure vertex, set
+$t=1$ (or $t=0$) before dividing: at $t=1$ the row-1 constraint reads
+$Q_{c,11}+\zeta_{c,d,1}\ge0$, which does not involve $\kappa_c$ (a testable restriction
+that adds no bound), while row 2 gives $\kappa_c\le Q_{c,12}+\zeta_{c,d,2}=\rho_c(1)+\zeta_{c,d,2}$;
+symmetrically at $t=0$, row 2 becomes the testable $Q_{c,22}+\zeta_{c,d,2}\ge0$ and row 1
+gives $\kappa_c\ge-Q_{c,12}-\zeta_{c,d,1}$.
+\end{proofof}
+
+\begin{proofof}{Proposition~\ref{P-prop:D4}}
+(a) With $\zeta\equiv0$, $Q^{(d)}=Q$ for all $d$, so the pooled regression is also
+$X^\top QX$, and the M1 constraints require $(Q_c+K_c)v\ge0$ for
+$v\in\bigcup_d\vertx(A_d)$, which by linearity is the pooled constraint on
+$\conv\bigcup_dA_d$.
+
+(b) By the tower property ($\sigma(X,N)\subseteq\sigma(V)$) and M1,
+$\E[\beta\mid X,N]=\E[M_H(X)+Z_D\mid X,N]=M_H(X)+\E[Z_D\mid X,N]$, using
+$(\zeta\one^\top)x=\zeta$ and that $M_H(X)$ is $\sigma(X,N)$-measurable. On the simplex an
+affine function of $x$ equals a homogeneous linear one, and every linear map
+$\R^R\to\R^{R\times C}$ is $x\mapsto M_G(x)$ for some $G$. If $\E[Z_D\mid X,N]=M_G(X)$,
+then $\E[\beta\mid X,N]=M_{H+G}(X)$, which is (S2) with $H'=H+G$. Conversely, if M0
+holds with $H'$, then $\E[Z_D\mid X,N]=M_{H'-H}(X)$, a function of $X$ only that is
+linear in $X$. If $D$ is independent of $(X,N)$, $\E[Z_D\mid X,N]$ is a constant. If
+(S1)--(S2) hold for M0 with $H'$, (S3) on $\conv\supp P_X$ follows from
+Lemma~\ref{P-lem:outer}(c).
+
+\emph{Independence of $D$ and $X$ is not enough.} Take two districts with the same
+distribution of $X$, larger units in district 2, and $\zeta_{\cdot,2}\ne0$. Then
+$\E[Z_D\mid X,N]=Z_2P(D=2\mid N)$ varies with $N$, so (S2) for M0 fails, although
+$\E[Z_D\mid X]=Z_2P(D=2)$ is constant and the $X$-only pooled model holds. The identity
+$\E[NX_r\beta_{rc}]=\E[NX_rM_{H'}(X)_{rc}]$ behind Lemma~\ref{P-lem:estimand} then fails,
+so pooled bounds on $B^*$ can be biased. The violation is generally visible: $\E[T\mid
+X,N]$ then depends on $N$ unless $x^\top Z_2=0$, which the inequality of
+Theorem~\ref{P-thm:sharp} rules out.
+\end{proofof}
+
+\begin{proofof}{Proposition~\ref{P-prop:D5}}
+Under M2 the feasible set is the product of the district sets, and
+$\varphi=\sum_d\varphi^{(d)}(k^{(d)})$ is separable by Lemma~\ref{P-lem:D2}. The minimum
+(maximum) of a separable sum over a product set is the sum of the minima (maxima).
+\end{proofof}
+
+\begin{proofof}{Proposition~\ref{P-prop:D6}}
+(a) is the M1($\delta$) step of Theorem~\ref{P-thm:ladder}(c). (b) Each district set
+$\Theta^{(d)}_O$ is bounded (Lemma~\ref{P-lem:outer}(b)), so $\bar\delta<\infty$; with
+$\bar k=0$, every point of the product of the district sets satisfies the
+$\delta$-condition when $\delta\ge\bar\delta$, so the restriction is slack. (c) $\delta$
+enters only the right-hand side of the LP, linearly, so the value is continuous and
+piecewise linear in $\delta$ where the LP is feasible. (d) At $\delta=0$ the rows become
+$k^{(d)}=\bar k+c_d$, the M1 equalities, and the objective is the same. M1(0) does not
+impose the testable restrictions of Lemma~\ref{P-lem:D1}(b), so it stays defined even
+when the data reject M1's symmetric part.
+\end{proofof}
+
+\begin{proofof}{Proposition~\ref{P-prop:D7}}
+(a) Under L5, $\E[\beta_{rc}\mid V]=\alpha_{c,D,r}$, so
+$B^*_{rc}=\sum_d\E[NX_r\one\{D=d\}]\alpha_{c,d,r}/\mu_r$; $\alpha_{c,d}=\diag Q^{(d)}_c$ by
+Lemma~\ref{P-lem:D1}(c); and within district $d$,
+$\E[T_c\mid X,d]=\sum_rX_r\alpha_{c,d,r}$, Goodman's regression without intercept. The
+point lies in every larger rung's bound by Theorem~\ref{P-thm:ladder}(c).
+
+(b) Under L4($r$), $H_{c,rs}=H_{c,rr}$, and $H_{c,rr}=Q_{c,rr}$ because $K_{c,rr}=0$.
+Since $H_{c,rs}=Q_{c,rs}+K_{c,rs}$, $K_{c,rs}=Q_{c,rr}-Q_{c,rs}$. The pairs containing $r$
+number $R-1$ in each of the $C-1$ free columns; for $R=2$ that is all $C-1$ coordinates.
+\end{proofof}

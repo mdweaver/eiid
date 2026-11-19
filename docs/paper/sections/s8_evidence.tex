@@ -146,20 +146,20 @@ of the pooling test says that M0 is wrong, not that its intervals are.
 
 \begin{table}[t]
 \centering\footnotesize
-\setlength{\tabcolsep}{3.5pt}
+\setlength{\tabcolsep}{3pt}
 \begin{tabular}{@{}llccccc@{}}
 \toprule
-Shifts & Fit & Plug-in cover / empty & CLR, $\Bt$ & Projection, $\Bt$ & Projection, $B$ & Pooling test \\
+Shifts & Fit & Plug-in & CLR, $\Bt$ & Projection, $\Bt$ & Projection, $B$ & Pooling test \\
 \midrule
 S0 none & M0 & 1 / 0.000 & 1 / 0.329 & 1 / 0.336 & 1 / 0.436 & \\
  & M1 & 0.999 / 0.000 & 1 / 0.468 & 1 / 0.704 & 1 / 0.808 & size 0.090 ($\chi^2$) \\
 S1 affine & M0 & 1 / 0.000 & 1 / 0.335 & 1 / 0.344 & 1 / 0.444 & \\
  & M1 & 0.938 / 0.000 & 1 / 0.437 & 1 / 0.672 & 1 / 0.773 & rejects 1.000 \\
-S2 non-affine & M0 & 0.002 / 0.987 & 0.009 (empty 0.963) & 0.013 (empty 0.950) & 0.206 (empty 0.478) & \\
+S2 non-affine & M0 & 0.002 / 0.987 & 0.009 (0.963) & 0.013 (0.950) & 0.206 (0.478) & \\
  & M1 & 0.997 / 0.002 & 1 / 0.328 & 1 / 0.509 & 1 / 0.611 & rejects 1.000 \\
 \bottomrule
 \end{tabular}
-\caption{District shocks, M0 against M1: $2\times2$, 20 districts $\times$ 50 units, 1000 replications. Coverage / median width, or coverage with the share of empty intervals. The pooling-test column gives the $\chi^2$ rejection rate at 5\%.}\label{tab:shocks}
+\caption{District shocks, M0 against M1: $2\times2$, 20 districts $\times$ 50 units, 1000 replications. Coverage / median width; for S2 under M0, coverage with the share of empty intervals in parentheses. The plug-in column gives coverage / share empty. The pooling-test column gives the $\chi^2$ rejection rate at 5\%.}\label{tab:shocks}
 \end{table}
 
 \paragraph{Calibration of the tests.} In design S0 the pooling test has 38

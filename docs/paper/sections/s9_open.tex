@@ -1,0 +1,84 @@
+% Section 9
+\section{Open questions}\label{sec:open}
+
+The proved results are stated in Sections~\ref{sec:rxc}--\ref{sec:inference}.
+This section collects what is not proved: the conjectures and algorithmic
+procedures that appear in the paper, and the open problems.
+
+\subsection{Conjectures and algorithmic procedures}
+
+\begin{itemize}
+\item \textbf{CLR as the default interval} (Conjecture~\ref{conj:clr}). The
+package's default confidence interval collects candidate endpoints by simulation
+and computes its selection threshold over the collected set. It is an algorithm.
+The reduction to the cited full-candidate CLR theorem is proved
+(Lemma~\ref{lem:reduction}); the recovery of rarely optimal vertices, the
+anti-conservative effect of computing the threshold over a subset, a growing
+number of candidates, and uniform validity are open. Its coverage was at least
+0.994 wherever Slater's condition held, and nominal at a point-identified design,
+but simulation cannot make it a theorem. The variance-adaptive allowance computed
+from a CLR interval, and the CLR branch union for contextual reinforcement,
+inherit this status. Proving the conjecture would make the default a theorem.
+\item \textbf{The sharp N2 set} (Conjecture~\ref{conj:N2}). Sufficiency of the
+selection-expectation characterisation on a finite support is shown; necessity in
+general is not.
+\item \textbf{The balance point} (Conjecture~\ref{conj:C1}). That $x^*$ lies in the
+composition hull in $2\times2$, which would complete the chain from signed slopes to
+the within sign.
+\item \textbf{Shared and district-specific effects in regime R3}: the asymptotic
+results with a high-dimensional Gaussian approximation, under a rate condition on
+the number of districts relative to their size.
+\item \textbf{The wild-bootstrap calibration} of the pooling and curvature tests
+is supported by simulation; its validity for a growing number of restrictions is
+not proved.
+\item \textbf{Spanning trees of pairwise beliefs}: that every spanning tree, not
+only a star, reaches all directions of $K$ (checked for chains), and a related
+conjecture that single-index contextual effects have dimension $C-1$.
+\end{itemize}
+
+\subsection{Open problems}
+
+\begin{itemize}
+\item \textbf{Sign rows under district rungs.} Sharpness and inference for the sign
+and reinforcement rows under M1, M1($\delta$), M2 and L4. The rows are valid linear
+rows, and the bound with them is an outer set, but neither its sharpness for the
+regression nor the coverage of its intervals is proved. Until then the grouped
+sign module is experimental and its intervals have no coverage theorem.
+\item \textbf{Integer unit tables.} The integer--continuous gap beyond the
+$2\times2$ case with margins only (Proposition~\ref{prop:integer}): with unit-level
+restrictions, several columns or three or more groups.
+\item \textbf{Inference on width gains.} Whether a belief tightens a target is
+decided exactly at the population (Proposition~\ref{prop:R2}) and estimated at the
+point estimate in samples. Inference on the width change needs joint treatment of
+the base and augmented endpoints and of any estimated threshold; an interval for
+either endpoint alone is not enough.
+\item \textbf{Informative finite-sample inference with many small groups.}
+Theorem~\ref{thm:finite} is valid in regime R2 but uninformative. Candidates are a
+direct bound on the endpoint rather than on every constraint, variance-adaptive
+(empirical-Bernstein) radii, a Bhatia--Davis version of the residual radius, and
+uneven splits of the error level. A hierarchical model for district shifts would
+change the model.
+\item \textbf{Uniform limit theory under changing active sets.}
+Proposition~\ref{prop:triangular} covers convergent localised slacks; a theory
+uniform in the design sequence, when candidates stay within $O(n^{-1/2})$ of binding
+without converging, is open. So are uniform validity near point identification for
+the CLR interval (a Stoye-type adaptation) and the rate and limit of the endpoint
+estimator when Slater's condition fails.
+\item \textbf{The hull error.} Its rate, and inference for the population-hull
+endpoint.
+\item \textbf{Other targets and assumptions.} Inference for the superpopulation
+target $B^*$; dependence within districts beyond the district effect; a joint
+relaxation of the closed-population assumption for turnover; coverage of the
+plug-in under misspecification; the characterisation of strict gains from joint
+fitting and from shared district effects when $R\ge3$; refutability of sign,
+ordering and local beliefs when $R\ge3$; an outer N2 LP with an estimated
+regression; and a consistent series bound that would tighten $\ThO$ towards $\ThX$,
+which conditions on $X$ only and so would not be sharp when size is informative.
+\end{itemize}
+
+\subsection{Future work}
+
+Taking election periods as districts turns the shared-effects rung into the
+assumption that contextual effects are unchanged between elections, which opens a
+route to bounds on changes in ecological rates and to difference-in-differences
+designs; that extension is left for future work.

@@ -1,0 +1,138 @@
+\begin{thebibliography}{23}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Abadie et~al.(2014)Abadie, Imbens, and Zheng]{aiz2014}
+Alberto Abadie, Guido~W. Imbens, and Fanyin Zheng.
+\newblock Inference for misspecified models with fixed regressors.
+\newblock \emph{Journal of the American Statistical Association}, 109\penalty0
+  (508):\penalty0 1601--1614, 2014.
+
+\bibitem[Abadie et~al.(2023)Abadie, Athey, Imbens, and Wooldridge]{aaiw2023}
+Alberto Abadie, Susan Athey, Guido~W. Imbens, and Jeffrey~M. Wooldridge.
+\newblock When should you adjust standard errors for clustering?
+\newblock \emph{Quarterly Journal of Economics}, 138\penalty0 (1):\penalty0
+  1--35, 2023.
+
+\bibitem[Beresteanu et~al.(2011)Beresteanu, Molchanov, and Molinari]{bmm2011}
+Arie Beresteanu, Ilya Molchanov, and Francesca Molinari.
+\newblock Sharp identification regions in models with convex moment
+  predictions.
+\newblock \emph{Econometrica}, 79\penalty0 (6):\penalty0 1785--1821, 2011.
+
+\bibitem[Bhatia and Davis(2000)]{bhatiadavis2000}
+Rajendra Bhatia and Chandler Davis.
+\newblock A better bound on the variance.
+\newblock \emph{American Mathematical Monthly}, 107\penalty0 (4):\penalty0
+  353--357, 2000.
+
+\bibitem[Bhattacharya and Rao(1976)]{bhattacharyarao1976}
+R.~N. Bhattacharya and R.~Ranga Rao.
+\newblock \emph{Normal Approximation and Asymptotic Expansions}.
+\newblock Wiley, 1976.
+
+\bibitem[Chernozhukov et~al.(2013)Chernozhukov, Lee, and Rosen]{clr2013}
+Victor Chernozhukov, Sokbae Lee, and Adam~M. Rosen.
+\newblock Intersection bounds: Estimation and inference.
+\newblock \emph{Econometrica}, 81\penalty0 (2):\penalty0 667--737, 2013.
+
+\bibitem[Chernozhukov et~al.(2017)Chernozhukov, Chetverikov, and Kato]{cck2017}
+Victor Chernozhukov, Denis Chetverikov, and Kengo Kato.
+\newblock Central limit theorems and bootstrap in high dimensions.
+\newblock \emph{Annals of Probability}, 45\penalty0 (4):\penalty0 2309--2352,
+  2017.
+
+\bibitem[Cross and Manski(2002)]{crossmanski2002}
+Philip~J. Cross and Charles~F. Manski.
+\newblock Regressions, short and long.
+\newblock \emph{Econometrica}, 70\penalty0 (1):\penalty0 357--368, 2002.
+
+\bibitem[Duncan and Davis(1953)]{duncan1953}
+Otis~Dudley Duncan and Beverly Davis.
+\newblock An alternative to ecological correlation.
+\newblock \emph{American Sociological Review}, 18\penalty0 (6):\penalty0
+  665--666, 1953.
+
+\bibitem[Elzayn et~al.(2025)Elzayn, Goldin, Guage, Ho, and Morton]{egghm2025}
+Hadi Elzayn, Jacob Goldin, Cameron Guage, Daniel~E. Ho, and Claire Morton.
+\newblock Monotone ecological inference.
+\newblock arXiv:2504.14752, version 1, 2025.
+
+\bibitem[Fang and Santos(2019)]{fangsantos2019}
+Zheng Fang and Andres Santos.
+\newblock Inference on directionally differentiable functions.
+\newblock \emph{Review of Economic Studies}, 86\penalty0 (1):\penalty0
+  377--412, 2019.
+
+\bibitem[Goodman(1953)]{goodman1953}
+Leo~A. Goodman.
+\newblock Ecological regressions and behavior of individuals.
+\newblock \emph{American Sociological Review}, 18\penalty0 (6):\penalty0
+  663--664, 1953.
+
+\bibitem[Greiner and Quinn(2009)]{greinerquinn2009}
+D.~James Greiner and Kevin~M. Quinn.
+\newblock {R}$\times${C} ecological inference: Bounds, correlations,
+  flexibility and transparency of assumptions.
+\newblock \emph{Journal of the Royal Statistical Society, Series A},
+  172\penalty0 (1):\penalty0 67--81, 2009.
+
+\bibitem[Hoeffding(1963)]{hoeffding1963}
+Wassily Hoeffding.
+\newblock Probability inequalities for sums of bounded random variables.
+\newblock \emph{Journal of the American Statistical Association}, 58\penalty0
+  (301):\penalty0 13--30, 1963.
+
+\bibitem[Imbens and Manski(2004)]{imbensmanski2004}
+Guido~W. Imbens and Charles~F. Manski.
+\newblock Confidence intervals for partially identified parameters.
+\newblock \emph{Econometrica}, 72\penalty0 (6):\penalty0 1845--1857, 2004.
+
+\bibitem[Jiang et~al.(2020)Jiang, King, Schmaltz, and Tanner]{jkst2019}
+Wenxin Jiang, Gary King, Allen Schmaltz, and Martin~A. Tanner.
+\newblock Ecological regression with partial identification.
+\newblock \emph{Political Analysis}, 28\penalty0 (1):\penalty0 65--86, 2020.
+
+\bibitem[King(1997)]{king1997}
+Gary King.
+\newblock \emph{A Solution to the Ecological Inference Problem: Reconstructing
+  Individual Behavior from Aggregate Data}.
+\newblock Princeton University Press, 1997.
+
+\bibitem[Manski(2003)]{manski2003}
+Charles~F. Manski.
+\newblock \emph{Partial Identification of Probability Distributions}.
+\newblock Springer, 2003.
+
+\bibitem[Molinari(2020)]{molinari2020}
+Francesca Molinari.
+\newblock Microeconometrics with partial identification.
+\newblock In \emph{Handbook of Econometrics}, volume~7A, pages 355--486.
+  Elsevier, 2020.
+
+\bibitem[Rosen et~al.(2001)Rosen, Jiang, King, and Tanner]{rjkt2001}
+Ori Rosen, Wenxin Jiang, Gary King, and Martin~A. Tanner.
+\newblock Bayesian and frequentist inference for ecological inference: The
+  {R}$\times${C} case.
+\newblock \emph{Statistica Neerlandica}, 55\penalty0 (2):\penalty0 134--156,
+  2001.
+
+\bibitem[Shapiro(1991)]{shapiro1991}
+Alexander Shapiro.
+\newblock Asymptotic analysis of stochastic programs.
+\newblock \emph{Annals of Operations Research}, 30:\penalty0 169--186, 1991.
+
+\bibitem[Stoye(2009)]{stoye2009}
+J{\"o}rg Stoye.
+\newblock More on confidence intervals for partially identified parameters.
+\newblock \emph{Econometrica}, 77\penalty0 (4):\penalty0 1299--1315, 2009.
+
+\bibitem[Tamer(2010)]{tamer2010}
+Elie Tamer.
+\newblock Partial identification in econometrics.
+\newblock \emph{Annual Review of Economics}, 2:\penalty0 167--195, 2010.
+
+\end{thebibliography}

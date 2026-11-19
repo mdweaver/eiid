@@ -1,0 +1,532 @@
+% Section 5
+\section{Signs, reinforcement and monotonicity}\label{sec:signs}
+
+Monotone ecological inference~\citep{egghm2025} replaces the functional form of
+LCE by beliefs about the direction of two associations: whether a group is more
+likely than others to choose an outcome within the same unit (the \emph{between}
+association), and whether its rate rises with its share across units (the
+\emph{within}, or contextual, association). This section states those beliefs in
+R$\times$C, shows how they bound the target on their own and on top of a linear
+rung, and adds a nonparametric monotone rung.
+
+Two settings are used. In the \emph{finite-population} setting the design is
+fixed, unit weights are $p_i=N_i/\sum_jN_j$, $\E_p[f]=\sum_ip_if_i$,
+$\mu_r=\E_p[X_r]>0$, and the realised rates satisfy $\beta_i\in S(X_i,T_i)$. The
+target is the actual rate $B_{rc}=\sum_iw_{ir}\beta_{irc}$, with
+$w_{ir}=p_iX_{ir}/\mu_r$ as before, and the rates are read as real numbers (cell
+masses need not be whole numbers of people). In the \emph{superpopulation}
+setting, $m(v)=\E[\beta\mid V=v]$, the target is $\Bt$, and a superscript $^*$ on
+an association means it is computed with $m$ in place of $\beta$. In this section
+$D$ without a unit index denotes a gap between two groups' rates, not a district.
+
+\subsection{The associations and their identities}
+
+Fix a column and drop it from the notation. Write $\Cov_w$ for a covariance under
+weights $w$, $w^r_i=w_{ir}$, and $w^{\neg r}_i=p_i(1-X_{ir})/(1-\mu_r)$.
+
+\begin{definition}[Associations]\label{def:assoc}
+\begin{enumerate}[label=(\roman*)]
+\item Between, pairwise: $\delta_B(r,s)=\E_p[X_rX_s(\beta_r-\beta_s)]$.
+\item Between, one-vs-rest: $\delta^r_B=\sum_{s\ne r}\delta_B(r,s)$.
+\item Within, pooled (W2): $\Delta=\sum_s\mu_s\Cov_{w^s}(X,\beta_s)\in\R^R$.
+\item Within, one-vs-rest (W1): with
+$\beta^{\neg r}_i=\sum_{s\ne r}X_{is}\beta_{is}/(1-X_{ir})$, the rate of everyone
+outside row $r$,
+$\delta^r_W=\mu_r\Cov_{w^r}(\beta_r,X_r)+(1-\mu_r)\Cov_{w^{\neg r}}(\beta^{\neg r},X_r)$.
+\end{enumerate}
+\end{definition}
+\begin{reading}
+The between association says that, on average within the same unit, group $r$
+is more likely than the others to choose the outcome. It is a weighted average
+with weights $p_iX_{ir}(1-X_{ir})$: pure units get no weight and a large mixed
+unit can dominate. It is not an ordering in every unit, nor against each rival.
+The within association says that rates rise, on average, with group $r$'s share.
+In W1 the predictor in both covariances is $X_r$, and the complement's rate is
+that of a changing mix of the other groups, so either covariance can be negative
+when their sum is positive. A sign on $\Delta_r$ signs one pooled sum of
+group-specific covariances, not each group. W1 and W2 can have opposite signs
+while every group's rate rises: with groups A, B, C, two units of equal size with
+shares $(.2,.7,.1)$ and $(.6,.05,.35)$, and rates $(.40,.80,.10)$ and
+$(.42,.82,.12)$, every rate rises by two points, yet $\delta^A_W=-0.02633$ and
+$\Delta_A=+0.00110$. Covariances also reflect sorting; a causal reading needs a
+separate design. W1 is the one-vs-rest collapse suggested by EGGHM; W2, the
+pairwise weighting and reinforcement with those pairings are extensions proved
+here.
+\end{reading}
+
+Four data-computable quantities appear: Goodman's no-intercept regression
+$g=M^{-1}\E_p[XT]$ with $M=\E_p[XX^\top]$; the neighbourhood model
+$\NM_r=\E_p[X_rT]/\mu_r$; the one-vs-rest regression slope
+$\ER^r=\Cov_p(T,X_r)/\Var_p(X_r)$; and $\NM_{\neg r}=\E_p[(1-X_r)T]/(1-\mu_r)$.
+Write $D^r=B_r-B_{\neg r}$ for the gap between group $r$ and the rest, where
+$B_{\neg r}=\sum_{s\ne r}\mu_sB_s/(1-\mu_r)$.
+
+\begin{lemma}[Accounting identities]\label{lem:M1}\status{proved}
+Assume A1. (a) $\one^\top\Delta=0$ and, if $M$ is invertible, $g-B=M^{-1}\Delta$.
+(b) $\NM_r-B_r=-\delta^r_B/\mu_r$. (c) If $\Var_p(X_r)>0$ and $0<\mu_r<1$, the
+collapsed population $(X_r,\beta_r,\beta^{\neg r})$ is a valid two-group
+population, so
+\[
+\ER^r-D^r=\frac{\delta^r_W}{\Var_p(X_r)},\qquad(\NM_r-\NM_{\neg r})-D^r=-\frac{\delta^r_B}{\mu_r(1-\mu_r)}.
+\]
+(d) $B$, $\delta_B(r,s)$, $\delta^r_B$, $\Delta$ and $\delta^r_W$ are affine in
+the unit rates, with coefficients that depend only on the design.
+\end{lemma}
+\begin{reading}
+These are accounting identities. The neighbourhood model misses the true gap
+exactly by the between association, and the aggregate regression slope misses it
+exactly by the within association. So a sign belief about either association is
+a one-sided bound relative to a number computed from the data. Signing $\Delta_r$
+does not in general sign the bias of row $r$'s Goodman coefficient, because of
+the matrix $M^{-1}$.
+\end{reading}
+
+\subsection{Sign restrictions on realised tables (N1)}
+
+\begin{definition}[N1 feasible set]
+A \emph{sign restriction} is $g_k(\beta)\ge-\varepsilon_k$, where $g_k$ is plus or
+minus one of the associations of Definition~\ref{def:assoc} (for any column) and
+$\varepsilon_k\ge0$ is a slack (default 0). Optional unit-level restrictions
+$\beta_i\in U_i$, with $U_i$ polyhedral, express unit-level orderings or
+structural zeros. The \emph{N1 feasible set} is
+$F=\{\beta:\beta_i\in S(X_i,T_i)\cap U_i\ \forall i;\ g_k(\beta)\ge-\varepsilon_k\ \forall k\}$.
+\emph{Contextual reinforcement} (CR) for a chosen pair $(g_B,g_W)$ of a between
+and a within association is $F_{CR}=F_+\cup F_-$ with
+$F_\pm=F\cap\{\pm g_B\ge0,\ \pm g_W\ge0\}$: the two associations have the same
+sign, whichever it is.
+\end{definition}
+
+\begin{proposition}[N1 is sharp for continuous unit tables]\label{prop:N1}\status{proved}
+Let $\varphi=\sum a_{rc}B_{rc}$ and read the unit tables as non-negative real cell
+masses. (a) The set of values of $\varphi$ attained by continuous unit tables that
+reproduce the margins and satisfy the restrictions is $\varphi(F)$; if
+$F\ne\emptyset$ it equals $[\min_F\varphi,\max_F\varphi]$. (b) $F=\emptyset$ iff
+the restrictions contradict the margins in this continuous problem. (c) Under CR
+the set is $\varphi(F_+)\cup\varphi(F_-)$, a union of at most two intervals.
+(d) $\varepsilon\mapsto\varphi(F(\varepsilon))$ is nested componentwise, with
+continuous piecewise-linear endpoints where $F(\varepsilon)\neq\emptyset$. With
+several slacks, the set of slack vectors that preserves a given conclusion is in
+general not a product of intervals; its boundary is the breakdown frontier. A
+scalar breakdown value needs a stated conclusion and a scalar path
+$\varepsilon=t\,v$, $t\ge0$.
+\end{proposition}
+\begin{reading}
+With sign beliefs alone and no regression, the bound is an LP over all unit tables
+that fit the margins, and it is exactly right for real-valued tables, conditional
+on the observed margins. With whole numbers of ballots it can differ.
+\end{reading}
+
+\begin{proposition}[Integer counts, two rows, margins only]\label{prop:integer}\status{proved}
+Let $R=C=2$ with no unit-level restrictions, let $N_1$ and $N_0$ be the two
+group totals, and $N=N_1+N_0$. The set of gaps $D=B_1-B_2$ attained by integer
+tables is the Duncan--Davis interval for $D$ intersected with a lattice of step
+$1/N_1+1/N_0=1/(N\mu(1-\mu))$, and both endpoints are attained. Under sign rows
+on one column, the integer set is the continuous set of
+Proposition~\ref{prop:tworowsign} intersected with that lattice, so the
+endpoints differ by less than one step.
+\end{proposition}
+\begin{reading}
+For $N=10^6$ people with $\mu=0.3$ the step is $4.8\times10^{-6}$, so whole
+ballots matter only for tiny tables or near-ties. In tiny tables they do matter:
+three units of four people with group-1 counts 1, 2, 3 and outcome counts 0, 1, 0
+admit the continuous CR set $\{0\}$, but no integer table satisfies CR. With
+unit-level restrictions, several columns or $R\ge3$, the integer--continuous gap is
+not bounded by this argument; that case is open.
+\end{reading}
+
+\begin{proposition}[Two rows]\label{prop:tworowsign}\status{proved}
+Let $R=2$, $X=X_1$, $D=B_1-B_2$, $\gamma=\Var_p(X)/(\mu(1-\mu))$, and let
+$[D^-,D^+]$ be the Duncan--Davis interval for $D$. Assume $\Var_p(X)>0$, continuous
+tables, no unit-level restrictions and no sign rows other than those named. Write
+$D_{\ER}$ and $D_{\NM}$ for the one-vs-rest regression slope and neighbourhood
+gap.
+(a) $\delta_W\ge0\iff D\le D_{\ER}$, and $\delta_B\ge0\iff D\ge D_{\NM}$.
+(b) $\{\delta_W\ge0\}$ gives $[D^-,\min\{D^+,D_{\ER}\}]$, empty iff $D_{\ER}<D^-$;
+symmetrically, $\{\delta_W\le0\}$ is empty iff $D_{\ER}>D^+$.
+(c) $D_{\NM}\in[D^-,D^+]$ always, so a sign on $\delta_B$ is never refuted in this
+problem.
+(d) $D_{\NM}=\gamma D_{\ER}$ with $\gamma\in(0,1]$. If $\gamma<1$ and
+$D_{\ER}\ne0$, exactly one CR branch is non-empty. If $\gamma=1$ (every unit with
+positive weight is pure), $D$ is point-identified and both branches are non-empty
+with the same gap image $\{D_{\ER}\}$; if $D_{\ER}=0$, both have gap image $\{0\}$.
+The CR set is $[D_{\NM},\min\{D^+,D_{\ER}\}]$ if $D_{\ER}\ge0$ and
+$[\max\{D^-,D_{\ER}\},D_{\NM}]$ otherwise; under CR,
+$\sgn D=\sgn D_{\ER}$ when $D_{\ER}\neq0$.
+\end{proposition}
+\begin{reading}
+In this base problem (two groups, real-valued tables, nothing else imposed) only a
+within sign can be contradicted by the margins. A between sign and CR are always
+feasible, because ``every group votes like its unit'', $\beta_{i1}=\beta_{i2}=T_i$,
+fits them. That non-refutability belongs to this base system only. Under a linear
+rung, CR can be rejected jointly with it even when the rung alone fits
+(Remark~\ref{rem:LCEexcludesCR}); with integer counts CR can be rejected outright
+(Proposition~\ref{prop:integer}); and known cells or unit orderings can remove the
+equal-rates witness. In R$\times$C the equal-rates table satisfies every weak
+between sign and the CR \emph{union}, but only the branch that matches its within
+association.
+\end{reading}
+\begin{sketch}
+By Lemma~\ref{lem:M1}(c) with two rows, $\delta_W=(D_{\ER}-D)\Var_p(X)$ and
+$\delta_B=(D-D_{\NM})\mu(1-\mu)$, so each sign is a half-line in $D$, and $D$ ranges
+over the whole interval $[D^-,D^+]$. The equal-rates table gives $D=D_{\NM}$. The
+identity $D_{\NM}=\gamma D_{\ER}$ with $\gamma\in(0,1]$ shows that the two
+same-sign branches of CR overlap only when $\gamma=1$ or $D_{\ER}=0$.
+\end{sketch}
+
+\begin{proposition}[Joint restrictions]\label{prop:joint}\status{proved}
+Imposing sign restrictions on several columns or rows jointly gives a subset of the
+feasible set of any single one of them.
+\end{proposition}
+\begin{reading}
+Joint beliefs are weakly tighter, and often strictly: in $2\times3$ simulations,
+signing the within association of two columns jointly narrowed column~1 strictly
+in 75 of 139 populations. With two complementary columns, the \emph{same} weak
+within sign on both forces both associations to zero and so $D=D_{\ER}$. This is
+why the package solves one LP rather than applying $2\times2$ closed forms column
+by column.
+\end{reading}
+
+\subsection{Signs under a linear rung}
+
+Under a linear rung the model means, for the fixed design, can be written
+$m_i=m_{\rm id}(V_i)+L_ik$, where $m_{\rm id}$ is identified, $L_i$ is fixed by the
+design, and $k$ stacks the rung's free coordinates: $K$ under M0, the
+$K^{(d)}$ under M2, and the common $K$ under M1, with the district shifts in the
+identified part.
+
+\begin{proposition}[Sign rows under linear rungs]\label{prop:Krows}\status{proved; (c) for M0 only}
+(a) Under every linear rung, $\delta^*_B(r,s)$, $\delta^{r*}_B$, $\Delta^*$ and
+$\delta^{r*}_W$ are affine in $k$, so each sign restriction is one linear row in
+the LP and CR is a union of two LPs.
+(b) If $m_{rc}(x,d)\ge m_{sc}(x,d)$ for every district $d$ and every $x$ in that
+district's support, then $\delta^*_B(r,s)\ge0$, pooled over districts.
+(c) For $R=2$ under M0, $\delta^*_W=a(w_1+d_1)+b\,w_1$ with $a,b\ge0$, where $w_1$
+and $w_1+d_1$ are the two groups' contextual slopes in JKST's notation, so
+non-negative slopes imply $\delta^*_W\ge0$. Under the district rungs this
+implication fails for the pooled association.
+\end{proposition}
+\begin{reading}
+Under a linear rung, sign beliefs become cheap extra constraints on the unknown
+$K$. But a pooled sign under district models is one restriction across all
+districts. Positive slopes in every district do not make the pooled within
+association positive, because district baselines can fall as composition rises:
+by the law of total covariance, the pooled association has a between-district term
+with no sign. Example: six equally weighted units with $X=.1,.2,.3$ in district~1
+and $.7,.8,.9$ in district~2, both rows' means $.8+.1x$ in district~1 and $.2+.1x$ in
+district~2. The slopes are positive, the within-district association is
+$+0.00064$, and the pooled one is $-0.04927$.
+\end{reading}
+
+\begin{remark}[Realised versus model-implied associations]\label{rem:whichdelta}
+N1 uses the realised associations, the linear rows use $\delta^*$. Under (S2),
+$\delta-\delta^*=\sum_i\sum_rc_{ir}e_{ir}$ is a design-weighted sum of unit
+residuals with mean zero given the design. Under A6 its standard deviation is at
+most $\tfrac12\{\sum_i(\sum_r|c_{ir}|)^2\}^{1/2}$; it is small only when no unit
+keeps a non-negligible coefficient. A mean condition alone gives no rate.
+Intersecting N1 with a linear rung therefore mixes two readings, and the package
+reports them separately.
+\end{remark}
+
+\subsection{The sign module under the pooled model}\label{sec:msign}
+
+The results of this subsection are proved for the pooled model M0 only. The sign
+and CR rows are valid linear rows under the district rungs
+(Proposition~\ref{prop:Krows}(a)), but sharpness and inference for them under the
+district rungs are open (Section~\ref{sec:open}). The package therefore labels
+the module \emph{experimental}.
+
+View $\ThI$ and $\ThO$ in the free coordinates $k$. The target is a model-implied
+linear $\varphi(k)=\varphi_0+\omega^\top k$, for example $\Bt_{rc}$ or the gap
+$\tilde D=\Bt_1-\Bt_2$. An \emph{admissible restriction} is a set
+$C=C(P)\subseteq\R^d$ that is (C1) closed and convex and (C2) depends on $P$ only
+through the design and $Q(P)$. Every sign on $\delta^*_B(r,s)$, $\delta^{r*}_B$,
+$\Delta^*_r$ or $\delta^{r*}_W$, mean-level ordering on $A$, and the local rows of
+Proposition~\ref{prop:sandwich} are admissible and polyhedral. A \emph{union
+restriction} is $C_+\cup C_-$ with admissible $C_\pm$; CR for a pair $(g_B,g_W)$
+of affine functions of $k$ is $C_\pm=\{\pm g_B\ge0,\pm g_W\ge0\}$.
+
+\begin{theorem}[Sharpness with added restrictions]\label{thm:R3}\status{proved, pooled M0}
+Assume A1--A5, $P(X\in A)=1$ and $\affdim(A)=R-1$.
+\begin{enumerate}[label=(\alph*)]
+\item For admissible $C$, the sharp identified set for $\varphi$ under LCE and $C$
+is $[\min_{\ThI\cap C}\varphi,\max_{\ThI\cap C}\varphi]$, or empty.
+\item $\ThO\cap C=\bigcup_{P'\in\mathcal P(P)}(\ThI(P')\cap C(P'))$. So the
+interval $\varphi(\ThO\cap C)$ is sharp for the regression and the design. It is a
+finite LP when $C$ is polyhedral, it equals (a) when $\ThI=\ThO$, and it is weakly
+outer otherwise.
+\item For a union, the identified set is $\varphi(\Theta\cap C_+)\cup\varphi(\Theta\cap C_-)$
+for $\Theta\in\{\ThI,\ThO\}$: at most two intervals. The hull is sharp iff they
+intersect, and a common point of $\Theta\cap C_+\cap C_-$ certifies that they do
+(sufficient only).
+\item For one-vs-rest CR, with $\Var_p(X_r)>0$,
+$\gamma_r=\Var_p(X_r)/(\mu_r(1-\mu_r))$, $\ER^{r*}=\Cov_p(X_r,\tau(X))/\Var_p(X_r)$ and
+$D^{r*}=\Bt_r-\Bt_{\neg r}$,
+\[
+C_+\cup C_-=\{k:\ D^{r*}(k)\in\hull\{\gamma_r\ER^{r*},\ \ER^{r*}\}\},
+\]
+which is two linear rows. For $R=2$ this is the only CR, so in $2\times2$ CR is a
+single LP, and under it $\sgn\tilde D=\sgn\ER^*$.
+\item Refutation is joint: if $P$ is generated by a model in LCE $\cap\,C$, the
+true $k_0\in\ThI\cap C\subseteq\ThO\cap C$; so an empty population LP rejects the
+conjunction, not either part alone.
+\end{enumerate}
+\end{theorem}
+\begin{reading}
+Adding a sign or ordering belief to the pooled linear rung keeps the bound as
+tight as the regression allows: nothing narrower can be learned from the
+regression and the design. The full law of the data could rule out more. For the
+default one-vs-rest comparison, reinforcement becomes a single band in the gap,
+so no union is needed. If the bound is empty, it is the combination that is
+contradicted, not the belief on its own. A belief that also has a model-free
+meaning can sometimes be tested on its own, and conversely a linear rung can
+exclude a belief that is never refutable model-free.
+\end{reading}
+\begin{sketch}
+(a) The identified set is the image of the compact convex set $\ThI\cap C$ under an
+affine map; (C2) makes $C$ the same for every law consistent with the data.
+(b) Apply the construction of Proposition~\ref{prop:sharpreg} to each point of
+$\ThO\cap C$. (d) Apply Lemma~\ref{lem:M1}(c) to the model means:
+$\delta^{r*}_W=\Var_p(X_r)(\ER^{r*}-D^{r*})$ and
+$\delta^{r*}_B=\mu_r(1-\mu_r)(D^{r*}-\gamma_r\ER^{r*})$; the union of the two
+same-sign cases is the hull.
+\end{sketch}
+
+\begin{remark}[Full law versus regression]\label{rem:fullreg}
+Let $X\in\{1/4,1/2,3/4\}$ with equal probability and equal sizes, and $T$ a fair
+binary total at every composition. The full law forces both rows' rates to equal
+$T$ in every unit, so $k=0$. The regression alone admits $m_1=.5+k(1-x)$,
+$m_0=.5-kx$. For $C=\{k\in[.2,.4]\}$ the full-law set of (a) is empty, while the
+regression-only gap set of (b) is $[1/6,1/3]$.
+\end{remark}
+
+\begin{remark}[A linear rung can exclude CR although it fits]\label{rem:LCEexcludesCR}
+Let $X\in\{0,1/4,1\}$ with equal probability, $A=[0,1]$, $m_0=1-x$,
+$m_1=(49/55)x$ and deterministic $T$. The vertex rows force $k=0$, so LCE fits at a
+single point, where $\ER=0$ and $\tilde D=-261/1925$. CR requires
+$\tilde D\in\{0\}$, so both branches are empty, although LCE alone is not
+rejected. In the model-free continuous problem CR is still feasible. Any statement
+that a belief ``cannot be refuted'' must name its base system.
+\end{remark}
+
+For CR pairings other than W1, part (d) fails: the two sign conditions are on
+different affine functions of $k$, so both branches can be non-empty with
+disjoint images. An adversarial search found gaps of up to about 31\% of the hull
+width. For the pairwise version only $\delta^*_B(r,s)$ is pairwise; $\Delta^*_r$
+pools all groups, including those outside the pair.
+
+\begin{proposition}[When does a restriction tighten the bound?]\label{prop:R2}\status{proved}
+Let $F$ be the current non-empty compact feasible set, $U=\max_F\varphi$,
+$L=\min_F\varphi$, $F^*_U$ and $F^*_L$ the optimal faces, and $N$ an admissible
+restriction with $F\cap N\neq\emptyset$ and new endpoints $U_N,L_N$.
+\begin{enumerate}[label=(\alph*)]
+\item $U_N<U$ iff $F^*_U\cap N=\emptyset$, and $L_N>L$ iff $F^*_L\cap N=\emptyset$.
+For polyhedral $N$ each is one feasibility LP, which must carry the target
+intercept: $\{Gk\le g,\ \omega^\top k\ge U-\varphi_0,\ k\in N\}$.
+\item For one row $a^\top k\le b$: $U_N<U$ iff $\min_{F^*_U}a^\top k>b$, iff every
+optimal dual multiplier of the row is positive. A positive multiplier at one
+solver optimum does not certify tightening.
+\item $N$ is implied ($F\subseteq N$) iff it tightens no linear target.
+\item In $2\times2$ under LCE with $\Var_p(X)>0$ and $\gamma<1$, each of the four sign
+rows is either implied or tightens every target that is non-constant in the
+unknown slope; the closed forms are those of Proposition~\ref{prop:G2}.
+\item For a stack of rows, a row's contribution depends on what is already
+imposed. Zero gain when added last means zero incremental gain for this target,
+not that the row is implied.
+\end{enumerate}
+\end{proposition}
+\begin{reading}
+A belief narrows a quantity only if it removes every table that attains that end
+of the bound. The package tests this with one feasibility LP per end and never
+trusts solver dual values: a row duplicated at an optimal vertex can carry a
+positive multiplier without moving anything. A belief can narrow the set of
+possible tables without narrowing the quantity of interest; with three groups this
+happened in 28\% of simulated cases, against 8\% implied and 64\% tightening.
+\end{reading}
+\begin{sketch}
+Adding a restriction can only lower the maximum. If some maximiser survives, the
+maximum is unchanged; if none does, the restricted problem is compact and
+non-empty and attains a strictly smaller value. For one row, concavity of the LP
+perturbation function ties this to every optimal multiplier being positive. A
+hyperplane separating a point of $F\setminus N$ from $N$ gives a target that
+tightens, which proves (c).
+\end{sketch}
+
+\begin{proposition}[JKST plus signs in $2\times2$]\label{prop:G2}\status{proved}
+Under LCE in $2\times2$ with $\Var_p(X)>0$ and $\gamma<1$, let $[L_J,U_J]$ be the
+JKST interval for the gap $\tilde D$. Then $\delta^*_W\ge0$ gives
+$[L_J,\min(U_J,\ER^*)]$; $\delta^*_W\le0$ gives $[\max(L_J,\ER^*),U_J]$;
+$\delta^*_B\ge0$ gives $[\max(L_J,\NM^*),U_J]$; $\delta^*_B\le0$ gives
+$[L_J,\min(U_J,\NM^*)]$; and CR gives $[L_J,U_J]\cap\hull\{\NM^*,\ER^*\}$.
+Reversed endpoints mean the set is empty.
+\end{proposition}
+\begin{reading}
+Adding a sign belief to JKST cuts its interval at one of two data-computed
+numbers. In 2000 random LCE designs with true signs, the within sign tightened the
+JKST interval in 83\% of designs (median width ratio 0.70), the between sign in
+89\% (0.67), and CR in 80\% of the designs where CR holds (0.69). A sign is
+redundant exactly when the rung alone already implies it, that is, when the
+interval for that association implied by the rung lies on the believed side of
+zero. Under LCE, in $2\times2$ the pair
+$(\delta_W,\delta_B)$ lies on a line segment, so re-imposing the rung's own
+implications on the associations adds nothing.
+\end{reading}
+
+\paragraph{Orderings and local beliefs.} For one column and any $R$, write
+$q_{rs}(x)=(Qx)_r-(Qx)_s$, which is identified, and $g_{rs}(x;k)=(Kx)_r-(Kx)_s$,
+linear in $k$. The between-group gap at $x$ is $O_{rs}(x)=(Hx)_r-(Hx)_s$, and the
+composition-weighted contextual derivative when a member of group $s$ is replaced
+by one of group $r$ is $L_{rs}(x)=(x^\top H)_r-(x^\top H)_s$.
+
+\begin{proposition}[Sandwich]\label{prop:sandwich}\status{proved}
+(a) $O_{rs}(x)+L_{rs}(x)=2q_{rs}(x)=\partial_{e_r-e_s}\tau(x)$. (b)
+$O_{rs}=q_{rs}+g_{rs}$ and $L_{rs}=q_{rs}-g_{rs}$. (c) $O_{rs}\ge0$ and
+$L_{rs}\ge0$ at $x$ iff $|g_{rs}(x;k)|\le q_{rs}(x)$, which is possible only if
+$q_{rs}(x)\ge0$, a data test.
+\end{proposition}
+\begin{reading}
+An ordering belief (``group $r$ is at least as supportive as group $s$'') and a
+local contextual belief restrict the same unknown from opposite sides, so together
+they confine it to an interval whose half-width is an identified slope.
+\end{reading}
+
+\begin{proposition}[Which directions a pairwise belief can reach]\label{prop:rank}\status{proved}
+(a) One pair $(r,s)$ restricts an $(R-1)$-dimensional subspace of the column's
+$K$. (b) Pairs forming a star $\{(1,s):s\ne1\}$ reach all $R(R-1)/2$ directions.
+(c) Ordering and local rows (Proposition~\ref{prop:sandwich}) on a star bound the
+column's $K$ without Duncan--Davis rows.
+\end{proposition}
+\begin{reading}
+With three or more groups, each pairwise comparison can restrict only $R-1$ of
+the unknown directions. Enough well-chosen pairs reach all of them; whether any
+is actually cut depends on the beliefs and the data. This is the precise sense in
+which more groups give more room for beliefs to bind. That every spanning tree of
+pairs, not only a star, reaches all directions has been checked numerically for
+chains with $R=3,4,5$ but is not proved.
+\end{reading}
+
+\begin{proposition}[Nesting of beliefs in $2\times2$ under M0]\label{prop:PN}\status{(a), (b) proved}
+Let $a=\mu\Var_{w^1}(X)$, $b=(1-\mu)\Var_{w^2}(X)$ and $x^*=a/(a+b)$. (a) Signed
+slopes ($w_1\ge0$, $w_1+d_1\ge0$) imply the weighted-local belief $w_1+d_1x\ge0$ on
+the hull. (b) $\delta^*_W=(a+b)(w_1+d_1x^*)$, so the weighted-local belief implies
+$\delta^*_W\ge0$ whenever $x^*$ lies in the composition hull.
+\end{proposition}
+
+\begin{conjecture}[The balance point lies in the hull]\label{conj:C1}
+In $2\times2$, $x^*$ always lies in the composition hull.
+\end{conjecture}
+\begin{reading}
+In the pooled $2\times2$ model the weighted-local belief (``replacing a member of
+one group by one of the other does not lower the composition-weighted rates, at
+every composition'') sits between signed slopes and a sign on the within
+association. The second step needs $x^*$ to lie in the observed range.
+Conjecture~\ref{conj:C1} says it always does: there was no violation in 2000
+random designs and an adversarial search over 50{,}000 discrete designs, but there
+is no proof. The chain fails for pooled M1 (Proposition~\ref{prop:Krows}).
+\end{reading}
+
+\subsection{Monotone nonparametric contextual effects (N2)}\label{sec:N2}
+
+N2 drops linearity and keeps only direction. It is defined for two rows on the
+finite empirical design law: the support of $X$ (the row-1 share) is the set of
+distinct observed compositions $x_1<\dots<x_{J_X}$, each with positive mass. Model
+N2($\sigma$) assumes (S1), $\E[\beta\mid V]=m(X)$ for a Borel
+$m:[0,1]\to\Bset$, and, for designated cells $(r,c)$ with directions
+$\sigma_{rc}\in\{+1,-1\}$, that $\sigma_{rc}m_{rc}$ is non-decreasing on the
+support. The regression $\tau(x)=\E[T\mid X=x]$ is identified at each support
+point.
+
+\begin{lemma}[Means lie in the mean polytope]\label{lem:N21}\status{proved}
+$m(x)\in S(x,\tau(x))$ at every support point.
+\end{lemma}
+
+Let $\mathcal M_O$ be the set of support-point means with $m(x_j)\in S(x_j,\tau(x_j))$
+for all $j$ and
+$\sigma_{rc}(m_{rc}(x_{j+1})-m_{rc}(x_j))\ge0$ for all adjacent pairs and designated
+cells. Bounds on $\Bt_{rc}=\sum_iw_{ir}m_{rc}(X_i)$ are an LP over $\mathcal M_O$.
+
+\begin{proposition}[The N2 outer set]\label{prop:N2}\status{proved, finite support}
+(a) Every $m$ allowed by N2($\sigma$) restricts to a point of $\mathcal M_O$, so the
+LP bounds are an outer set for $\Bt$; they are not claimed sharp.
+(b) Every point of $\mathcal M_O$ extends to a monotone Borel $m$ on $[0,1]$, so on
+the complete finite support nothing is lost by restricting to support points. On a
+coarser grid this fails, and the grid LP is only a relaxation.
+(c) If $\tau$ is quadratic, M0 with signed slopes lies inside N2, for the outer sets.
+(d) If $m_{1c}$ and $m_{2c}$ are both non-decreasing, $\delta^*_W\ge0$ for column $c$.
+(e) For $R\ge3$ a direction ``in $x_1$'' needs a chart saying which share adjusts,
+and (d) has no general analogue.
+\end{proposition}
+\begin{reading}
+N2 assumes only ``no reversals'': each designated group's mean rate moves in one
+direction as its share grows, in any shape. It is weaker than straight lines with
+signed slopes, so its bound contains theirs, and the two-row shape restriction is
+stronger than a pooled covariance sign, which permits reversals. If a designated
+mean reverses direction somewhere (a U-shape or a tipping point), the order rows
+exclude the true mean function, and the bound can be narrow, non-empty and wrong;
+an empty set is the only warning, and plotting the fitted regression for
+reversals is a partial check. N2 is not in the package.
+\end{reading}
+
+\begin{conjecture}[The sharp N2 set]\label{conj:N2}
+The sharp N2 set is the set of $m$ with $m(X)\in\E[S(X,T)\mid V]$ $P_V$-almost
+surely, plus the shape restrictions, where the expectation is the conditional
+selection expectation given $V=(X,N)$.
+\end{conjecture}
+\begin{reading}
+When unit size carries information, conditioning on composition alone admits mean
+rates that the full model excludes. Fix $X=1/2$ and two equally likely sizes; at
+the first size $T$ is 0 or 1 with equal probability, at the second $T=1/2$ surely.
+At the first size both rows' rates must equal $T$, so the model forces
+$m(1/2)=(.5,.5)$; the polytope LP, which conditions on $X$ only, admits
+$(.75,.25)$. Under the selection-expectation reading the characterisation is
+sufficient on a finite support: for each design atom take a selection whose
+conditional mean is the common candidate and glue the selections across atoms.
+Necessity in general is not written, so the statement stays a conjecture. A
+procedure that uses only $\E[T\mid X]$ does not attain the set when size is
+informative.
+\end{reading}
+
+\begin{proposition}[Local identity]\label{prop:N23}\status{proved, as a calculus identity}
+Let $m_{1c},m_{2c}$ be differentiable at $x$, and let
+$\tau_{m,c}(z)=z\,m_{1c}(z)+(1-z)m_{2c}(z)$ be the structural aggregate,
+$D_c(x)=m_{1c}(x)-m_{2c}(x)$ and $\delta_{W,c}(x)=x\,m'_{1c}(x)+(1-x)m'_{2c}(x)$.
+(a) $\tau'_{m,c}(x)=D_c(x)+\delta_{W,c}(x)$. (b) $\delta_{W,c}(x)\ge0\iff
+D_c(x)\le\tau'_{m,c}(x)$. (c) Local CR, $D_c(x)\delta_{W,c}(x)\ge0$, holds iff
+$D_c(x)$ lies between 0 and $\tau'_{m,c}(x)$. (d) If both rows are non-decreasing on
+a neighbourhood of $x$, the local sign at $x$ is non-negative; monotonicity on the
+finite support is not enough, and the local sign everywhere neither implies nor is
+implied by the sign of $\delta^*_W$.
+\end{proposition}
+\begin{reading}
+EGGHM's local results are statements about smooth functions, but on a finite
+support the data never identify a derivative: adding
+$\prod_j(x-x_j)$ to both rows leaves the law unchanged and moves the derivative at
+every node. So local sign beliefs cannot be imposed from aggregates without an
+identified regression family, and they are not an observable rung here.
+\end{reading}
+
+\begin{lemma}[Person-weighted bins]\label{lem:bins}\status{proved}
+Let $b=1,\dots,K$ be ordered non-overlapping bins of compositions with
+person-weighted masses $P(b)>0$ and within-bin expectations $\E_b$. Put
+$\bar x_b=\E_bX$, $\bar m_{1b}=\E_b[Xm_1(X)]/\bar x_b$,
+$\bar m_{2b}=\E_b[(1-X)m_2(X)]/(1-\bar x_b)$ and $\bar\tau_b=\E_b[\tau(X)]$, the
+model-implied bin mean. Under N2($\sigma$): (i) $\bar m_b\in S(\bar x_b,\bar\tau_b)$;
+(ii) the targets are linear in the bin rates with known weights; (iii) monotonicity
+is preserved across the ordered bins. The binned LP is an outer relaxation of the
+N2 bounds.
+\end{lemma}
+\begin{reading}
+With many compositions, group them into bins, but average rates by weighting the
+people in each group, not the units: the ordinary bin average breaks the
+accounting identity (it gives 0.25 against the correct 0.3125 in a two-point
+example). In samples the observed person-weighted bin mean of $T$ estimates
+$\bar\tau_b$ with error, which inference must account for.
+\end{reading}
+
+\paragraph{What inference for N2 needs.} The regression at the support points
+must be estimated. A weighted polynomial of \emph{prespecified} degree $q$ makes
+the constraints linear in its coefficients, and the confidence intervals of
+Section~\ref{sec:inference} then apply conditional on the degree. The degree must
+not be chosen by cross-validation and then treated as fixed: in a balanced
+two-level design with true slope zero, choosing between an intercept-only and a
+linear fit by leave-one-out error and then using the nominal 95\% slope interval
+gives conditional coverage of about 0.68.

@@ -1,0 +1,284 @@
+% Section 4
+\section{Districts and the rung ladder}\label{sec:districts}
+
+``District'' means any partition of the units into groups: ridings, counties
+within states, schools within boards. Nothing below uses the nesting being
+geographic. Let $D\in\{1,\dots,D^\star\}$ with $P(D=d)>0$, $V=(X,N,D)$, and let
+$A_d$ be a compact convex set with $P(X\in A_d\mid D=d)=1$; the default is the
+district's own composition hull. Write
+$\mu^{(d)}_{rs}=\E[NX_rX_s\one\{D=d\}]$ and $\mu^{(d)}_r=\E[NX_r\one\{D=d\}]$, so
+that $\mu_r=\sum_d\mu^{(d)}_r$. For a vector $\zeta\in\R^R$, $\zeta\one^\top$ is the
+matrix whose row $r$ is constant and equal to $\zeta_r$; since $\one^\top x=1$,
+$(\zeta\one^\top)x=\zeta$, so this is an additive shift written in homogeneous form.
+
+The district model replaces (S2) by $\E[\beta\mid V]=M_{H^{(D)}}(X)$ and (S3) by
+validity on each $A_d$, with one set of coefficients
+$H^{(d)}=(H^{(d)}_1,\dots,H^{(d)}_C)$ per district. Write $Q^{(d)}$ and $K^{(d)}$
+for the symmetric and skew parts and $k^{(d)}$ for the free coordinates of
+$K^{(d)}$. The rungs are restrictions on $(H^{(1)},\dots,H^{(D^\star)})$, listed in
+decreasing order of plausibility:
+
+\begin{center}\small
+\begin{tabularx}{\linewidth}{@{}L{0.14\linewidth}Y@{}}
+\toprule
+Rung & Restriction \\
+\midrule
+M2 & none: each district has its own linear contextual effects \\
+M1($\delta$) & there is $\bar k$ with $\|k^{(d)}-\bar k-c_d\|_\infty\le\delta$ for all $d$, where $c_d$ are the coordinates of $\skw(\zeta_{\cdot,d}\one^\top)$ and $\zeta_{c,d}=\diag(Q^{(d)}_c-Q^{(1)}_c)$ \\
+M1 & $H^{(d)}_c=H_c+\zeta_{c,d}\one^\top$ with $\sum_c\zeta_{c,d}=0$ and $\zeta_{c,1}=0$: shared contextual effects, district baselines \\
+L4($r$) & M1, and row $r$ has no contextual effect: $H_{c,rs}=H_{c,rr}$ for all $s,c$ \\
+L5 & $H^{(d)}_c=\alpha_{c,d}\one^\top$: constancy within each district (Goodman by district) \\
+L6 & L5 with $\alpha_{c,d}$ common to all districts (Goodman) \\
+M0 & one $H$ for all units on $\conv\bigcup_dA_d$: the pooled model of Section~\ref{sec:rxc}, not nested with the others \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+The parameter $\delta$ is in probability units. Entries of $K$ are half-gaps
+between two hypothetical rates, so $\delta=0.05$ lets the gap between
+``$r$-members in pure-$s$ units'' and ``$s$-members in pure-$r$ units'' differ
+across districts by up to 10 points.
+
+\subsection{Grouping alone adds nothing}
+
+\begin{proposition}[No model, no gain]\label{prop:D0}\status{proved}
+Under (S1) alone, the sharp identified set for $B^*_{rc}$ is the Duncan--Davis
+interval $\DD^*_{rc}$ of Proposition~\ref{prop:nonempty}, whatever the law of $D$
+or of any other covariate. The joint sharp set for the matrix $B^*$ is convex and
+compact but in general not the product of the cell intervals; for a linear
+target the sharp interval is
+$\big[-\E[N\,h_S(-\tilde a(X);X,T)],\ \E[N\,h_S(\tilde a(X);X,T)]\big]$.
+\end{proposition}
+\begin{reading}
+District dummies cannot narrow the model-free bound, which is already computed
+unit by unit. Every gain from districts comes from an assumption that links
+them. The accounting identity links the cells within each unit, so the per-cell
+extremes cannot in general be attained together, and a combined target can be
+strictly narrower than the sum of its cells' intervals.
+\end{reading}
+
+\subsection{What each rung identifies}
+
+\begin{lemma}[Identification under the district rungs]\label{lem:D1}\status{proved}
+Assume A5 within each district.
+(a) Under every rung, $Q^{(d)}$ is identified from $\E[T\mid X,D=d]=X^\top Q^{(d)}X$,
+$\sum_cH^{(d)}_c=\one\one^\top$, and each $K^{(d)}\in\Kspace$ is unidentified.
+(b) Under M1, $\zeta_{c,d}=\diag(Q^{(d)}_c-Q^{(1)}_c)$ is identified; the
+off-diagonal entries satisfy the overidentifying restrictions
+$(Q^{(d)}_c-Q^{(1)}_c)_{rs}=\tfrac12(\zeta_{c,d,r}+\zeta_{c,d,s})$ for $r\neq s$;
+$K^{(d)}=K+\skw(\zeta_{\cdot,d}\one^\top)$ with $K=K^{(1)}$ common, and the
+unidentified dimension equals that of the pooled model.
+(c) Under L5, $\alpha_{c,d}=\diag Q^{(d)}_c$, $K^{(d)}=\skw(\alpha_{\cdot,d}\one^\top)$
+is identified, and the structure $Q^{(d)}_c=\sym(\alpha_{c,d}\one^\top)$ is testable.
+(d) Under M1, A5 within every district can be replaced by a stacked rank
+condition: the design made of the pooled quadratic monomials and the district
+shifts $\one\{D=d\}X_r$ ($d\ge2$) has full column rank in the population. A
+sufficient condition is A5 in one district and $R$ affinely independent
+compositions in every other district; $R$ distinct but affinely dependent
+compositions are not enough.
+\end{lemma}
+\begin{reading}
+District baselines are identified from each district's own regression. Under
+shared effects the curvature of the regression must be the same in every
+district: that is the testable part, with $(D^\star-1)(C-1)R(R-1)/2$
+restrictions. The shared contextual split $K$ is not testable. Given the common
+$Q$, a district's regression is linear in its shift, so a district needs only a
+few compositions to fix its baseline, for example two distinct units in
+$2\times2$; but with three groups they must not lie on a line. This is
+identification, not precision: with about ten units per district the shifts are
+identified but noisy.
+\end{reading}
+
+\begin{lemma}[The estimand under districts]\label{lem:D2}\status{proved}
+Under (S1) and the district version of (S2), with $P(X\in A_D)=1$,
+\[
+B^*_{rc}=\frac1{\mu_r}\sum_d\Big[\sum_sQ^{(d)}_{c,rs}\mu^{(d)}_{rs}+\sum_{s\ne r}K^{(d)}_{c,rs}\mu^{(d)}_{rs}\Big].
+\]
+Under M1 its sensitivity to the common $K_{c,rs}$ is $\mu_{rs}/\mu_r$, as in the
+pooled model.
+\end{lemma}
+\begin{reading}
+The electorate-wide rate is a weighted sum of district rates. Under shared
+effects the unknown enters exactly as in the pooled model, so the district
+baselines change the known part of the target, not how much the unknown matters.
+\end{reading}
+
+\subsection{Sharp and outer sets for each rung}
+
+\begin{theorem}[Sharpness for affine mean models]\label{thm:affine}\status{proved}
+Let a parameter $\theta$ range over a closed set, and let $\mathcal V_A=\{v=(x,n,d):x\in A_d\}$.
+Suppose (H1) $v\mapsto m_\theta(v)\in\R^{R\times C}$ is Borel on $\mathcal V_A$;
+(H2) $\sup_{v\in\mathcal V_A}\|m_\theta(v)\|<\infty$; (H3) $\theta\mapsto m_\theta(v)$
+is affine, and continuous uniformly in $v$ on bounded sets of $\theta$; (H4) the
+unit polytopes are not affected by $\theta$. Define the model by (S1),
+$\E[\beta\mid V]=m_\theta(V)$ on $\{V\in\mathcal V_A\}$, and $m_\theta(v)\in\Bset$ on
+$\mathcal V_A$. Then $\theta$ is in the sharp set iff the validity condition holds
+and $\langle u,m_\theta(v)\rangle\le\psi(u;v)$ for $P_V$-almost every $v$ and all $u$.
+\end{theorem}
+\begin{reading}
+The sharpness argument of Theorem~\ref{thm:sharp} carries over to any model in
+which the mean is affine in the unknowns, including every district rung.
+\end{reading}
+
+\begin{theorem}[The rungs and the ladder]\label{thm:ladder}\status{proved}
+Assume A1, A5 within districts and $P(X\in A_D)=1$.
+(a) For each rung, the sharp set is the rung's restriction intersected with each
+district's own sharp condition (Theorem~\ref{thm:sharp} within district $d$).
+(b) The outer set is
+$\{\theta\in\text{rung}:(Q^{(d)}_c+K^{(d)}_c(\theta))v\ge0\ \forall d,c,\ v\in\vertx(A_d)\}$.
+It is a polyhedron, and every target bound is an LP. For M1 the variables are the
+common $k$ and $\Theta^{M1}_O=\bigcap_d\Theta^{(d)}_O$, where $\Theta^{(d)}_O$
+imposes district $d$'s rows with its identified shift.
+(c) Write $\mathcal B^\rho$ for the set of values of a linear target under rung
+$\rho$. For $0\le\delta\le\delta'$,
+\[
+\mathcal B^{L6}\subseteq\mathcal B^{L5}\subseteq\mathcal B^{L4(r)}\subseteq\mathcal B^{M1}\subseteq\mathcal B^{M1(0)}\subseteq\mathcal B^{M1(\delta)}\subseteq\mathcal B^{M1(\delta')}\subseteq\mathcal B^{M2}\subseteq\DD^*,
+\]
+for both the sharp and the outer versions, whenever the smaller rung's model is
+non-empty.
+\end{theorem}
+\begin{reading}
+Each stronger assumption gives a bound inside the weaker one's, so the ladder can
+be reported as a table and readers can see what each assumption buys. The pooled
+model M0 is not on this chain. M1(0) keeps the common skew part but drops the
+testable symmetric restrictions of Lemma~\ref{lem:D1}(b); it is a sensitivity
+benchmark that separates a failure of M1's testable implications from
+uncertainty about the unidentified effects, not a substantive rung.
+\end{reading}
+\begin{sketch}
+Each rung is an affine mean model, so Theorem~\ref{thm:affine} applies district
+by district. The outer version replaces the sharp condition by non-negativity at
+the vertices of each district hull. The nesting holds because each step restricts
+the same polyhedral system further; L5 is M1 with constant rows.
+\end{sketch}
+
+\subsection{Closed forms and properties}
+
+\begin{proposition}[Shared effects with two rows]\label{prop:D3}\status{proved}
+Let $R=2$ and $\vertx(A_d)=\{(t,1-t):t\in\{l_d,u_d\}\}$ with $0<l_d\le u_d<1$, and
+let $\lambda_c,\rho_c$ be as in Proposition~\ref{prop:tworows} with $Q=Q^{(1)}$.
+Under M1,
+\[
+\ell_c=\max_d\max_{t\in\{l_d,u_d\}}\Big[\lambda_c(t)-\frac{\zeta_{c,d,1}}{1-t}\Big],\qquad
+h_c=\min_d\min_{t\in\{l_d,u_d\}}\Big[\rho_c(t)+\frac{\zeta_{c,d,2}}{t}\Big],
+\]
+and $\Theta^{M1}_O=\{\kappa:\ell\le\kappa\le h,\ \sum_c\kappa_c=0\}$, projected by
+Lemma~\ref{lem:box}. If a district has a pure vertex ($u_d=1$ or $l_d=0$), the
+corresponding row at that vertex does not involve $\kappa_c$: it is a testable
+restriction and is dropped from the maximum (or minimum), while the other row at
+that vertex enters as the formula gives.
+\end{proposition}
+\begin{reading}
+A district raises the lower bound when its baseline for group 1 is low and it has
+units that are almost all group 1: there, group 1's rate is nearly observed, and
+the shared contextual effect carries that information to every district. One
+district with lopsided units and an extreme baseline can tighten the bound for
+the whole electorate. The upper bound behaves symmetrically through group 2.
+\end{reading}
+\begin{sketch}
+Under M1, district $d$'s mean for row 1 at vertex $t$ is
+$Q_{c,11}t+(Q_{c,12}+\kappa_c)(1-t)+\zeta_{c,d,1}$. Requiring it to be non-negative
+and dividing by $1-t>0$ gives a lower limit on $\kappa_c$; row 2 gives an upper
+limit after dividing by $t$. The shared $\kappa_c$ must satisfy every district's
+limits at every vertex, and the sum-to-zero constraint across columns then gives
+a box cut by a hyperplane.
+\end{sketch}
+
+\begin{proposition}[When district baselines matter]\label{prop:D4}\status{proved}
+(a) If every shift is zero, M1's outer set equals the pooled outer set on
+$\conv\bigcup_dA_d$. (b) Under M1 with $P(X\in A_D)=1$, write $Z_d=[\zeta_{c,d,r}]_{rc}$.
+Then $\E[\beta\mid X,N]=M_H(X)+\E[Z_D\mid X,N]$, and the pooled model M0 holds
+(for some coefficients) iff $\E[Z_D\mid X,N]$ is almost surely a function of $X$
+alone that is affine on $\supp P_X$. Independence of $D$ and $(X,N)$ suffices;
+independence of $D$ and $X$ alone does not.
+\end{proposition}
+\begin{reading}
+The pooled model is safe when district baselines, given composition and unit
+size, vary at most linearly with composition. When strongholds also have
+different baselines (a popular local candidate in the strongest districts), or
+when district baselines correlate with unit size, the pooled fit mistakes
+baseline differences for contextual effects and can miss the truth: an ecological
+omitted-variable bias. If two districts have the same distribution of
+compositions but one has larger units and a non-zero shift, $\E[Z_D\mid X,N]$
+varies with $N$ and the size-weighted pooled target is biased, although the
+$X$-only pooled model still holds. Section~\ref{sec:tests} tests the stronger,
+design-conditional condition that all shifts vanish.
+\end{reading}
+
+\begin{proposition}[District-specific effects]\label{prop:D5}\status{proved}
+Under M2 the outer bound is the Minkowski sum of the district bounds,
+$\mathcal B^{M2}_O=\sum_d[\varphi^{(d)}_L,\varphi^{(d)}_U]$, where $\varphi^{(d)}$ is
+district $d$'s term in Lemma~\ref{lem:D2}. The same holds for the sharp version.
+\end{proposition}
+\begin{reading}
+District-specific lines are safe but rarely much tighter than Duncan--Davis,
+because widths add across districts.
+\end{reading}
+
+\begin{proposition}[Bounded heterogeneity]\label{prop:D6}\status{proved}
+(a) $\delta\mapsto\mathcal B^{M1(\delta)}_O$ is nested. (b) For
+$\delta\ge\bar\delta:=\max_d\max_{k\in\Theta^{(d)}_O}\|k-c_d\|_\infty$, which is
+finite, it equals $\mathcal B^{M2}_O$. (c) Its endpoints are continuous and
+piecewise linear in $\delta$ wherever it is non-empty. (d) At $\delta=0$ it equals
+the M1 outer bound computed with the same $Q^{(d)}$ and shifts.
+\end{proposition}
+\begin{reading}
+The dial $\delta$ traces a continuous path between district-specific and shared
+effects, so a reader can see how much the shared-effects assumption is doing.
+\end{reading}
+
+\begin{proposition}[The most restrictive rungs]\label{prop:D7}\status{proved}
+(a) L5 point-identifies the target:
+$B^*_{rc}=\sum_d(\mu^{(d)}_r/\mu_r)\,\alpha_{c,d,r}$ with $\alpha_{c,d}=\diag Q^{(d)}_c$,
+Goodman's regression within each district. If L5 holds, this point lies in every
+larger rung's bound. (b) L4($r$) pins $K_{c,rs}=Q_{c,rr}-Q_{c,rs}$ (reference
+district) for all $s\ne r$ and all $c$, which is $(C-1)(R-1)$ of the free
+coordinates; for $R=2$ the target is point-identified.
+\end{proposition}
+\begin{reading}
+The constancy rungs give single numbers. Reported beside the bounds, they show
+what ``no contextual effects'' implies. If row $r$ does have a contextual effect,
+L4($r$) attributes it to the other rows, and the point ($R=2$) or the bound is
+misspecified and can exclude the truth, with no warning except an empty set.
+With non-voters as row $r$ this is a real risk, because mobilisation often
+depends on local campaign intensity. If some district's contextual split differs
+from the shared one by more than $\delta$, M1($\delta$) fails in the same way as
+M1, but less sharply: the larger $\delta$, the more protection and the less
+narrowing.
+\end{reading}
+
+\subsection{Worked examples}\label{sec:ladder-examples}
+
+The examples are noise-free, so they concern identification only.
+
+\paragraph{Two groups, two districts.} For in-party loyalty with truth 0.819:
+Duncan--Davis gives $[0.453,0.879]$; the pooled model is empty, because the
+districts have different baselines; M2 gives $[0.563,0.870]$; and M1 gives
+$[0.618,0.866]$. The L5 point is 0.858, which is misspecified, since the true
+contextual slopes are 0.10.
+
+\paragraph{Three groups, six districts.} The districts have different
+composition ranges and baselines, with a common $H$:
+
+\begin{center}\small
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+Target & Truth & DD & M2 & M1(.05) & M1 & L5 \\
+\midrule
+Loyalty P$\to$P & 0.836 & [0.167, 0.953] & [0.391, 0.916] & [0.397, 0.914] & [0.430, 0.880] & 0.870 \\
+Defection P$\to$O & 0.095 & [0.000, 0.610] & [0.024, 0.404] & [0.024, 0.390] & [0.042, 0.339] & 0.061 \\
+Demobilisation P$\to$N & 0.068 & [0.000, 0.551] & [0.024, 0.350] & [0.024, 0.323] & [0.044, 0.295] & 0.069 \\
+Mobilisation N$\to$P & 0.135 & [0.001, 0.685] & [0.045, 0.470] & [0.051, 0.444] & [0.089, 0.413] & 0.122 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The ladder shrinks monotonically and contains the truth at every rung. Moving
+from M2 to M1 narrows the loyalty bound from width 0.525 to 0.450, and
+M1($\delta$) at $\delta=0.10,0.05,0.02$ traces a continuous path between them. The
+baseline shifts here are small (standard deviation 0.04); the gain grows with more
+heterogeneous baselines and more lopsided units. The L5 point for loyalty is
+0.870 against a truth of 0.836: inside the M1 bound, but wrong. The pooled model
+is misspecified here, because the baselines vary with composition; it happens to
+cover the truth, but Proposition~\ref{prop:D4} gives no guarantee that it will.

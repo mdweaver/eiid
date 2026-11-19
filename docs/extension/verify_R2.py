@@ -274,10 +274,10 @@ def T4b():
 
 if __name__ == "__main__":
     rows, old_ok, new_ok = T1c()
-    print("T1c target intercept (phi = 2 + x on [0,1]^2): " +
+    print("T1c [F] target intercept (phi = 2 + x on [0,1]^2): " +
           "; ".join(f"row x+y<={r}: brute {'moves' if bm else 'keeps'}, old face LP {'moves' if om else 'keeps'}, "
                     f"corrected face LP {'moves' if nm else 'keeps'}" for r, bm, om, nm in rows) +
           f"; old step 4 agrees with brute force: {old_ok}  {'PASS' if new_ok and not old_ok else 'FAIL'}")
     gx, gxy, imp, oc, nc = T4b()
-    print(f"T4b target-specific redundancy: last-added gain for x {gx:.3f}, for x+y {gxy:.3f}; implied by the others: {imp}; "
+    print(f"T4b [F] target-specific redundancy: last-added gain for x {gx:.3f}, for x+y {gxy:.3f}; implied by the others: {imp}; "
           f"old 'redundant given the others' holds: {oc}  {'PASS' if nc and not oc else 'FAIL'}")

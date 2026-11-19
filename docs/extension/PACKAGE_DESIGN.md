@@ -41,7 +41,7 @@ Notation follows PHASE2a/2c.
 4. **Two ladders.**
    * The assumption ladder (§3) has a common data-only base and three non-nested tracks: direction, smoothness and scale/dispersion.
    * The build ladder (§6) orders the work by proof readiness and gives each step a rigor checklist.
-5. **Proof register** (§8): fourteen claims, with status, strategy and what each blocks.
+5. **Proof register** (§8): eighteen claims (R1–R18), with status, strategy and what each blocks.
 
 ---
 
@@ -175,7 +175,7 @@ Plausibility tier: 0 data only · 1 direction · 2 shape · 3 parametric · 4 co
 |---|---|---|---|---|---|---|---|---|
 | **M-DATA** zeros, E4/E5/E6 | ID + Ext | Known cells or tables are correct / equality rows on cells or on $\varphi(K)$ | unit / mean | both | 0 | ✓ (inconsistent tables) | rows | sharp given the table |
 | **M-SHARP** (F) | P | none (a computational improvement) | unit | actual | 0 | — | series LP | sharp (goal) |
-| **M-SIGN** | ID (model-free) or Q (on LCE) | One group is more supportive on average within units ($\delta_B$); rates rise with own-group share on average ($\delta_W$); CR = same sign / $\delta\gtrless0$ | mean (K-rows) or realised (N1) | model / actual | 1 | $\delta_W$ ✓; $\delta_B$, CR never (model-free), jointly with LCE ✓ | rows; CR = union | sharp (M2) |
+| **M-SIGN** | ID (model-free) or Q (on LCE) | One group is more supportive on average within units ($\delta_B$); rates rise with own-group share on average ($\delta_W$); CR = same sign / $\delta\gtrless0$ | mean (K-rows) or realised (N1) | model / actual | 1 | $\delta_W$ ✓; $\delta_B$, CR never (model-free), jointly with LCE ✓ | rows; CR = union | sharp for continuous tables, pooled M0 (M2, R3); grouped rungs R16 |
 | **M-ORD** | Q (mean) or ID (unit) | Group $r$ at least as supportive as $s$ at every composition / every unit / $m_r\ge m_s$ on the hull, $\beta_{ir}\ge\beta_{is}$ | mean or unit | model / actual | 1 | ✓ | rows | sharp |
 | **M-LOC** (new) | Q | At every composition, moving residents from $s$ to $r$ does not lower the composition-weighted group rates / $(x^\top H)_r-(x^\top H)_s\ge0$ on the hull | mean | model | 1–2 | ✓, and jointly with M-ORD it is a test of the sign of the slope (§5.1) | rows | sharp under LCE |
 | **M-N2** | Q + P | Each group's mean is monotone in chosen composition directions, any shape | mean on a grid | model | 2 | ✓ | grid LP | outer |

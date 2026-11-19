@@ -276,7 +276,7 @@ Also available as a LaTeX `tabular` in `docs/extension/notation.tex`.
 | $W_i=(N_i,X_i,T_i,Z_i,D_i)$ | observables of unit $i$ |
 | $P$ | law of $W$ (observable); $\mathbb Q$: law of $(W,\beta)$ |
 | $(\Omega,\mathcal F)$ | underlying measurable space |
-| $\mathcal G=\sigma(X,N,Z)$ (or $\sigma(X,N,Z,D)$) | conditioning σ-algebra of the contextual model |
+| $\mathcal G=\sigma(X,N)$ (or $\sigma(X,N,D)$; covariates $Z$ were removed after review, R-15) | conditioning σ-algebra of the contextual model |
 | $\mathcal O_p=\sigma(W_1,\dots,W_p)$ | σ-algebra of the sample |
 | $B_{rc}(\mathcal S)$ | finite-population transition rate over units $\mathcal S$ (1.2) |
 | $B^*_{rc}$ | superpopulation analogue (1.3) |

@@ -192,7 +192,7 @@ Pinned in `ASSUMPTION_MENU.md` and not yet derived: structural zeros (a party no
 
 ## 8. What Phase 2 established for the new tools (`PHASE2c_monotone.md`, `PHASE2d_did.md`)
 
-* **Which monotone-EI assumptions the data can contradict.** With two groups, only the "within" (contextual) sign can be contradicted by aggregate data. The "between" sign and contextual reinforcement never produce an empty bound. Their credibility rests entirely on substantive argument, or on individual-level data for a subsample [2c Prop. M3].
+* **Which monotone-EI assumptions the data can contradict.** With two groups, only the "within" (contextual) sign can be contradicted by aggregate data. The "between" sign and contextual reinforcement cannot be contradicted by aggregate data alone when the table is continuous and nothing else is assumed; combined with a rung (such as the linear contextual model), known cells or whole-number counts, they can produce an empty bound (§9). Their credibility rests entirely on substantive argument, or on individual-level data for a subsample [2c Prop. M3].
 * **Imposing signs on several outcomes at once helps.** Signing the contextual effect for two outcome columns jointly narrowed bounds in about half of random test cases [2c Prop. M4].
 * **No straight lines, but no reversals (N2).** This rung is weaker than "straight lines with signed slopes". Its bound always contains the straight-line one [2c Prop. N2.2].
 * **DiD: the rules R1, R2 and R4.** R4 (Goodman's regression on changes) always gives an answer between R1's and R2's [2d Prop. FD2]. None of them needs straight lines in *levels*: each township may keep its own persistent political culture. Only the *changes* must follow straight lines.

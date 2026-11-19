@@ -8,10 +8,10 @@
 |---|---|---|
 | P1, 2a, 2b, P3 | external (two reports); corrections applied (WS1–WS4) | yes (core) |
 | **New results added in the response** (listed in batch A) | none | yes |
-| `PHASE5a_sign_module.md` §§1–3 (R3, R2, R10) | fresh-session adversarial review only (5a §4) | **yes** (M-SIGN, exported) |
-| `PHASE2c_monotone.md` (M1–M5, N2.1–N2.3) | none | **yes** (the sign rows rest on M5) |
+| `PHASE5a_sign_module.md` §§1–3 (R3, R2, R10) | external, Batch B (two referees, two rounds; see below) | **yes** (M-SIGN, exported) |
+| `PHASE2c_monotone.md` (M1–M5, N2.1–N2.3) | external, Batch B (two rounds) | **yes** (the sign rows rest on M5) |
 | `PHASE1b_monotone_did.md` (proposal), `PHASE2d_did.md` (DiD derivations) | none | not yet (DiD wrappers planned) |
-| `PACKAGE_DESIGN.md` (architecture, module rules, proof register R1–R14) | none | governs what is built next |
+| `PACKAGE_DESIGN.md` (architecture, module rules, proof register R1–R18) | none | governs what is built next |
 | `NEW_AVENUES.md` | none (research agenda) | only through results quoted elsewhere |
 | Package code: `rxc_sign.R`, `rxc_modules.R`, M-SIGN and WS5 changes to `rxc_core.R`/`rxc_infer.R`/`rxc_api.R` | none (tests only: 439 pass) | — |
 
@@ -80,7 +80,7 @@ Each batch is sent as a frozen commit (a git tag, e.g. `review-B-2026-12`). It i
   * Module combination rules (§1.2, §4.2 layering matrix).
   * The lemmas P-S (sandwich), P-R (rank) and P-N (nesting), with conjecture C1.
   * G2 (§2.2) and DiD-S.
-  * Whether each proof-register status (R1–R14) is justified.
+  * Whether each proof-register status (R1–R18) is justified.
   * Re-derive the two cluster-based figures in `NEW_AVENUES.md` (M-15).
 * **Verify scripts:** `verify_package_design.py`, `new_avenues/*.py`.
 * **Order:** after batch B, since several statuses depend on it.

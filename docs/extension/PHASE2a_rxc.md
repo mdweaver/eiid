@@ -94,7 +94,7 @@ Status:
 | [dDM] (P3) | delta method for Hadamard directionally differentiable maps | Fang & Santos (2019), *Rev. Econ. Stud.* 86:377–412, Thm 2.1; Shapiro (1991), *Ann. Oper. Res.* 30:169–186 | checked (text): arXiv:1404.3763v2 (2016), Thm 2.1 |
 | Fang–Santos bootstrap (P3) | standard bootstrap consistent iff the map is fully differentiable tangentially to the support of the Gaussian limit; non-Gaussian limit ⇒ inconsistent | Fang & Santos (2019), Thm 3.1 and Cor. 3.1 | checked (text): arXiv v2, Thm 3.1, Cor. 3.1; confirm in the published version |
 | [CLR] (P3) | analytic/simulation intersection-bound inference with a parametrically estimated bounding function over a compact (here finite) index set | Chernozhukov, Lee & Rosen (2013), *Econometrica* 81:667–737: Condition P, Lemma 4, **Thm 4** (via Thms 1–2); finite index set: Example 1 | **to replace**: P3 cited "Thm 2"; the finite-index parametric case is Thm 4. Checked (text): arXiv:0907.3503v5 (2013) |
-| [Lyap] (P3) | Lyapunov CLT for independent, non-identically distributed summands | Billingsley (1995), *Probability and Measure*, 3rd ed., Thm 27.3 | standard |
+| [Lyap] (P3) | Lindeberg–Feller CLT for independent, non-identically distributed summands, applied relative to the actual standard deviation (the tag name is historical; see P3 §0.3) | Billingsley (1995), *Probability and Measure*, 3rd ed., §27 (Thm 27.2) | standard |
 | [BD] (P3) | Bhatia–Davis variance bound | Bhatia & Davis (2000), *Amer. Math. Monthly* 107:353–357 | standard |
 | Stoye (P3) | uniform coverage of the parameter near point identification | Stoye (2009), *Econometrica* 77:1299–1315 | standard |
 

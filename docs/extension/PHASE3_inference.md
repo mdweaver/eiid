@@ -447,10 +447,10 @@ Conventions:
 | A: 2×2, M1, 10 districts × 93 | 21 | 0.574 | 0.982 (0.004) / 0.000 / 0.287 | 1 / 0.696 | 1 / 0.538 | 1 / 0.662 | 1 / 0.596 | 1 / 0.432 | 1 / 0.554 |
 | A: 2×2, M1, 93 × 30 | 187 | 0.567 | 0.656 (0.015) / 0.002 / 0.160 | 1 / 0.694 | 1 / 0.477 | 1 / 0.964 | 1 / 0.633 | 1 / 0.414 | 1 / 0.932 |
 | C: 2×2 pooled, truth near the boundary | 3 | 0.325 | 0.661 (0.015) / 0.076 / 0.031 | 1 / 0.087 | 0.999 (0.001) / 0.057 | 1 / 0.059 | 0.996 (0.002) / 0.041 | 0.994 (0.002) / 0.039 | 0.999 (0.001) / 0.041 |
-| **E: 2×2 pooled, Slater fails** | 3 | 0.271 | **0.267 (0.014) / 0.503** / 0.038 | 1 / 0.249 | 0.998 (0.001) / 0.207 | 1 / 0.249 | 0.990 (0.003) / 0.179 | **0.944 (0.007)** / 0.143 | 0.995 (0.002) / 0.194 |
+| **E: 2×2 pooled, Slater fails** | 3 | 0.271 | **0.267 (0.014) / 0.503** / 0.038 | 1 / 0.249 | 0.998 (0.001) / 0.207 | 1 / 0.251 | 0.990 (0.003) / 0.179 | **0.944 (0.007)** / 0.143 | 0.995 (0.002) / 0.194 |
 | B: 3×3 pooled, loyalty P→P | 12 | 0.835 | 1 / 0.000 / 0.533 | 1 / 0.675 | 1 / 0.659 | 1 / 0.679 | 1 / 0.592 | 1 / 0.557 | 1 / 0.581 |
 | B: 3×3 pooled, defection P→O | 12 | 0.635 | 1 / 0.000 / 0.348 | 1 / 0.447 | 1 / 0.431 | 1 / 0.445 | 1 / 0.399 | 1 / 0.369 | 1 / 0.395 |
-| B: 3×3 pooled, demobilisation | 12 | 0.533 | 1 / 0.000 / 0.283 | 1 / 0.381 | 1 / 0.363 | 1 / 0.377 | 1 / 0.333 | 1 / 0.304 | 1 / 0.329 |
+| B: 3×3 pooled, demobilisation | 12 | 0.533 | 1 / 0.000 / 0.283 | 1 / 0.381 | 1 / 0.363 | 1 / 0.378 | 1 / 0.333 | 1 / 0.304 | 1 / 0.329 |
 | B: 3×3 pooled, mobilisation N→P | 12 | 0.884 | 1 / 0.000 / 0.528 | 1 / 0.683 | 1 / 0.646 | 1 / 0.661 | 1 / 0.619 | 1 / 0.559 | 1 / 0.595 |
 
 Design E puts the truth on the boundary so that Slater fails. Compositions span $[0.02,0.98]$ with both ends observed. The mean rate of group $b$ is exactly 0 at the right vertex and that of group $w$ is exactly 0 at the left vertex. The lower and upper constraints on $k$ then meet at the truth, so the identified set of the model-implied rate is a single point, and no $k$ satisfies every constraint strictly. Design C is the earlier boundary design: the rate is close to 0 at one vertex, so Slater holds, but only just. The CLR interval for $B$ with the Popoviciu allowance covered in all 1000 replications of every row. Its widths are 0.530, 0.472, 0.086, 0.221 and 0.651/0.428/0.363/0.641 (rows in order); full output in `phase3_montecarlo_output.txt`.
@@ -509,7 +509,7 @@ The district shifts are added to both groups' rates, and depend on the district'
 9. **Bhatia–Davis versus Popoviciu.** In the boundary design C, Bhatia–Davis narrows CLR for $B$ from 0.086 to 0.057. In the Slater design E it narrows it from 0.221 to 0.207. Elsewhere the plausible range of rates includes 0.5, the allowance equals Popoviciu's, and the interval is up to 0.015 wider (the α share spent on the variance bound). It remains the package default.
 10. **Real data** (NZ benchmark, `benchmarks/results/ei_datasets_nz_summary.md`; run with eiPartialID 0.2.0 during WS6, before the 0.3.x changes to the tests and the `proj_actual` variance bound, which can move those columns slightly).
     * Per electorate, with about 64 polling places each: M0's CLR and projection intervals covered all 4302 cells, at about DD width.
-    * Pooling each election's 62–69 electorates and fitting M1 with electorates as groups: M1 is rejected by the data. The estimate is empty in all seven elections, and the M1 test (against M2) and the pooling test both have $p\approx0$.
+    * Pooling each election's 62–69 electorates and fitting M1 with electorates as groups: the M1 test (against M2) rejects M1 in all seven elections ($p\approx0$), and the pooling test rejects M0 against M1 ($p\approx0$). The plug-in M1 estimate is empty in all seven elections, but that is a sample diagnostic: the emptiness test does not reject M1 in any election (it rejects pooled M0 in 2002 and 2020 only).
     * There, CLR intervals are rejected (ends crossing) in 21% of cells and miss the truth in 8%. The projection interval never misses, but it is as wide as DD.
     * So where the model is wrong, the tests flag it, and a non-empty CLR interval is not reassurance.
 

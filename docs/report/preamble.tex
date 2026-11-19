@@ -1,0 +1,108 @@
+% Preamble for the eiPartialID technical report (pdflatex).
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=2.4cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{longtable,booktabs,array,calc,tabularx}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{newunicodechar}
+\usepackage{etoolbox}
+\usepackage{footnote}
+\makesavenoteenv{longtable}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[hidelinks]{hyperref}
+\usepackage{bookmark}
+\usepackage{microtype}
+\setlength{\emergencystretch}{3em}
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\providecommand{\real}[1]{#1}
+\def\LTcaptype{none}
+% pandoc's longtables: allow page breaks and avoid overfull boxes
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+
+% ---------- unicode characters used in the repository's Markdown ----------
+\newunicodechar{Δ}{\ensuremath{\Delta}}
+\newunicodechar{Θ}{\ensuremath{\Theta}}
+\newunicodechar{α}{\ensuremath{\alpha}}
+\newunicodechar{β}{\ensuremath{\beta}}
+\newunicodechar{γ}{\ensuremath{\gamma}}
+\newunicodechar{δ}{\ensuremath{\delta}}
+\newunicodechar{ε}{\ensuremath{\varepsilon}}
+\newunicodechar{η}{\ensuremath{\eta}}
+\newunicodechar{κ}{\ensuremath{\kappa}}
+\newunicodechar{π}{\ensuremath{\pi}}
+\newunicodechar{σ}{\ensuremath{\sigma}}
+\newunicodechar{τ}{\ensuremath{\tau}}
+\newunicodechar{χ}{\ensuremath{\chi}}
+\newunicodechar{ᵃ}{\textsuperscript{a}}
+\newunicodechar{ᵇ}{\textsuperscript{b}}
+\newunicodechar{ᶜ}{\textsuperscript{c}}
+\newunicodechar{ᵈ}{\textsuperscript{d}}
+\newunicodechar{ᵉ}{\textsuperscript{e}}
+\newunicodechar{ᶠ}{\textsuperscript{f}}
+\newunicodechar{′}{\ensuremath{'}}
+\newunicodechar{₁}{\ensuremath{_1}}
+\newunicodechar{↑}{\ensuremath{\uparrow}}
+\newunicodechar{→}{\ensuremath{\rightarrow}}
+\newunicodechar{⇐}{\ensuremath{\Leftarrow}}
+\newunicodechar{⇒}{\ensuremath{\Rightarrow}}
+\newunicodechar{⇔}{\ensuremath{\Leftrightarrow}}
+\newunicodechar{∈}{\ensuremath{\in}}
+\newunicodechar{∎}{\ensuremath{\blacksquare}}
+\newunicodechar{−}{\ensuremath{-}}
+\newunicodechar{∩}{\ensuremath{\cap}}
+\newunicodechar{∪}{\ensuremath{\cup}}
+\newunicodechar{≈}{\ensuremath{\approx}}
+\newunicodechar{≠}{\ensuremath{\neq}}
+\newunicodechar{≤}{\ensuremath{\le}}
+\newunicodechar{≥}{\ensuremath{\ge}}
+\newunicodechar{≲}{\ensuremath{\lesssim}}
+\newunicodechar{⊂}{\ensuremath{\subset}}
+\newunicodechar{⊃}{\ensuremath{\supset}}
+\newunicodechar{⊆}{\ensuremath{\subseteq}}
+\newunicodechar{⊇}{\ensuremath{\supseteq}}
+\newunicodechar{⊕}{\ensuremath{\oplus}}
+\newunicodechar{⚠}{\textbf{(!)}}
+\newunicodechar{✓}{\ensuremath{\checkmark}}
+\newunicodechar{²}{\ensuremath{^2}}
+\newunicodechar{½}{\ensuremath{\tfrac12}}
+\newunicodechar{·}{\ensuremath{\cdot}}
+\newunicodechar{×}{\ensuremath{\times}}
+\newunicodechar{±}{\ensuremath{\pm}}
+\newunicodechar{†}{\textsuperscript{\dag}}
+\newunicodechar{…}{\ldots}
+\newunicodechar{≡}{\ensuremath{\equiv}}
+
+% ---------- notation (docs/extension/notation.tex) ----------
+\newcommand{\Simplex}{\Delta}
+\newcommand{\Bset}{\mathfrak B}
+\newcommand{\Kspace}{\mathcal K}
+\newcommand{\ThI}{\Theta_I}
+\newcommand{\ThX}{\Theta_X}
+\newcommand{\ThO}{\Theta_O}
+\newcommand{\E}{\mathbb E}
+\newcommand{\vertA}{\operatorname{vert}(A)}
+\newcommand{\conv}{\operatorname{conv}}
+\newcommand{\supp}{\operatorname{supp}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\sym}{\operatorname{sym}}
+\newcommand{\skw}{\operatorname{skew}}
+
+% ---------- theorem environments ----------
+\theoremstyle{plain}
+\newtheorem{result}{Result}[section]
+\theoremstyle{definition}
+\newtheorem{assumption}{Assumption}
+\newtheorem{definitionx}[result]{Definition}
+\newenvironment{plain}{\par\smallskip\noindent\textbf{In plain terms.}\ }{\par\smallskip}
+\newenvironment{sketch}{\par\smallskip\noindent\textit{Sketch.}\ }{\par\smallskip}
+\newenvironment{revnote}{\par\smallskip\noindent\begin{minipage}{\linewidth}\color{black!75}\small\textbf{Revision note.}\ }{\end{minipage}\par\smallskip}
+\newcommand{\src}[1]{\textup{[\emph{#1}]}}
+\newcommand{\status}[1]{\textsf{\small #1}}
+\newcommand{\proofref}[1]{\par\noindent\textit{Proof:} #1.\par\smallskip}

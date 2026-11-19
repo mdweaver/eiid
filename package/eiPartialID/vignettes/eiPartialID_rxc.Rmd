@@ -72,7 +72,9 @@ groups, `eiBounds()` also reports a pooling test of M0 against M1 (all group
 shifts zero) and the test of M1's testable part against M2. The pooling test's
 p-value comes from a restricted wild bootstrap: the chi-squared version
 over-rejects when there are many groups (9% at a nominal 5% with 38
-restrictions in the Phase 3 Monte Carlo).
+restrictions in the Phase 3 Monte Carlo). The pooling test checks group mean shifts
+only. It does not test the independence assumption: shocks shared within a
+group can make residuals dependent without shifting the group's mean (P3 §0.4).
 
 ## Two-by-two: the original method
 

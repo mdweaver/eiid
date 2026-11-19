@@ -1,0 +1,3 @@
+Theorem R3	pF-res-theorem-R3
+Proposition R2	pF-res-proposition-R2
+Theorem R10	pF-res-theorem-R10

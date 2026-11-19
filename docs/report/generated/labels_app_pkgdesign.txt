@@ -1,0 +1,2 @@
+Proposition P-S	pG-res-proposition-P-S
+Proposition P-R	pG-res-proposition-P-R

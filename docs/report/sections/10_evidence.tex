@@ -1,0 +1,165 @@
+% Section 10: numerical evidence
+\section{Numerical evidence}\label{sec:evidence}
+
+The results below are \emph{evidence, not proof}. They check that the theory
+behaves as stated in designs where the truth is known, and they show where the
+proved intervals are informative. A coverage of ``1'' means every replication
+covered; with 1000 replications the exact one-sided 95\% lower bound is then
+0.997. Figures in parentheses are Monte Carlo standard errors.
+
+\subsection{Verification scripts}
+
+Every phase has a script that checks its closed forms, inclusions and
+counterexamples numerically or symbolically. The committed outputs report:
+
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}L{0.36\linewidth}L{0.17\linewidth}>{\raggedright\arraybackslash}X@{}}
+\toprule
+Script & Result & Covers \\
+\midrule
+\path{check_2x2_equivalence.py} & agreement to $10^{-16}$ & JKST Prop.~2 in homogeneous form \\
+\path{verify_phase2a.py} & 32/32 PASS & PHASE2a (incl.\ [supp], Rems 5.1--5.2, $V=\mu Q$) \\
+\path{verify_phase2b.py} & 22/22 PASS & PHASE2b (incl.\ D4(b), D8b, M1 df) \\
+\path{verify_phase2c.py} & 29/29 PASS & PHASE2c (C1--C16, tagged [F]/[V]/[I]) \\
+\path{verify_phase3.py} & 17/17 PASS & PHASE3 (incl.\ P3.4$'$, P3.5(b2) null direction, P3.5(c)) \\
+\path{verify_R3.py} & S1--S7 & Theorem R3 \\
+\path{verify_R2.py} & T1--T4, T1b, T1c, T4b & Proposition R2 \\
+\path{verify_R10.py} & V9--V13 & Theorem R10 \\
+\path{verify_package_design.py} & [V1]--[V7] & G2, P-S, P-R, P-N \\
+\path{verify_phase2d.py}; \path{verify_phase1_mei_did.py} & 15/15, 10/10 PASS & DiD proposals (not reviewed) \\
+\bottomrule
+\end{tabularx}
+\end{center}
+Not machine-checked: the measure-theoretic steps of PHASE2a Theorem~1 and PHASE2b
+Theorem~1$'$, which rest on cited theorems, and PHASE2a Remark~4.2(2), a sketch.
+
+\subsection{The Phase 3 Monte Carlo (PHASE3 \S8; 1000 replications)}
+
+Unit rates are Beta/Dirichlet draws whose conditional means are exactly linear in
+composition given the district, so M1 always holds and M0 holds only without
+district shifts. All intervals are nominal 95\%. Cells are coverage / median
+width (clipped to $[0,1]$).
+
+\paragraph{Model holds (PHASE3 \S8.1, selected rows).}
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X ccccc@{}}
+\toprule
+Design & DD & \shortstack{Plug-in\\cover / empty} & \shortstack{CLR,\\$\tilde B$} & \shortstack{Projection,\\$\tilde B$} & \shortstack{Conservative,\\$B$} \\
+\midrule
+A: $2\times2$, M1, $10\times93$ & 0.574 & 0.982 / 0.000 & 1 / 0.432 & 1 / 0.554 & 1 / 0.696 \\
+A: $2\times2$, M1, $93\times30$ & 0.567 & 0.656 / 0.002 & 1 / 0.414 & 1 / 0.932 & 1 / 0.694 \\
+C: pooled, truth near boundary & 0.325 & 0.661 / 0.076 & 0.994 / 0.039 & 0.999 / 0.041 & 1 / 0.087 \\
+E: pooled, Slater fails & 0.271 & 0.267 / 0.503 & \textbf{0.944} (0.007) / 0.143 & 0.995 / 0.194 & 1 / 0.249 \\
+B: $3\times3$ pooled, loyalty & 0.835 & 1 / 0.000 & 1 / 0.557 & 1 / 0.581 & 1 / 0.675 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\paragraph{Many small districts, R2 (PHASE3 \S8.2): M1, $2\times2$, 10 polls per district.}
+\begin{center}\small
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+Districts & $q$ & DD & Plug-in cover / empty & CLR, $\tilde B$ & Projection, $\tilde B$ & Thm P3.8, $\tilde B$ \\
+\midrule
+30 & 61 & 0.571 & 0.305 / 0.241 & 0.999 / 0.557 & 1 / 0.967 & 1 / 1.000 \\
+93 & 187 & 0.566 & 0.042 / 0.463 & 0.995 / 0.467 & 1 / 1.000 & 1 / 1.000 \\
+200 & 401 & 0.566 & 0.005 / 0.717 & 0.996 / 0.416 & 1 / 1.000 & 1 / 1.000 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Riding shocks (PHASE3 \S8.3): $2\times2$, 20 districts $\times$ 50 polls.}
+With no shifts (S0) every interval covers and the $\chi^2$ pooling test rejects
+0.090 (SE 0.009) at nominal 5\% in this 1000-replication Monte Carlo. A separate
+2000-replication run (\path{benchmarks/pooling_test_size.R}, $B=399$) gives 0.078 for
+$\chi^2$, 0.072 for the F form and 0.043 for the restricted wild bootstrap that the
+package uses (Section~\ref{sec:inference}, calibration); the two $\chi^2$ figures come
+from different runs. With shifts affine in
+the district's mean composition (S1) the pooling test rejects every time, but M0's
+intervals still cover. With a common non-affine shock (S2), every M0 interval fails
+(CLR for $\tilde B$ covers 0.009 and is empty 96\% of the time; projection for $B$
+0.206), while M1 covers in every replication and the pooling test always rejects.
+
+\paragraph{What the Monte Carlo shows (PHASE3 \S8.4).}
+\begin{enumerate}[nosep]
+\item No proved interval under-covers where its theorem applies: projection at least
+0.995, conservative at least 0.990, Theorem~P3.8 always 1.
+\item CLR (a simulation finding) covers at least 0.994 wherever Slater holds,
+including R2 with 200 districts. At the Slater failure (design E) CLR for
+$\tilde B$ covers 0.944 (SE 0.007), at the nominal level, as expected when the
+identified set is a point.
+\item The plug-in fails as Theorem~P3.4 (and P3.4$'$ for near-ties) predicts: in R2
+its coverage falls to 0.305, 0.042 and 0.005.
+\item The projection interval is informative only when $q$ is small (critical value
+2.8 at $q=3$, 21.2 at $q=401$). In grouped designs with many districts CLR is the
+only informative interval, on simulation support only.
+\item Theorem~P3.8 is valid but uninformative: clipped width 1.000 in every M1 design.
+\item The residual term is a large part of the width: targeting $\tilde B$ rather than
+$B$ narrows CLR by 0.06--0.19.
+\end{enumerate}
+
+\paragraph{Round-2 rerun of the projection column for $B$.} With the Bhatia--Davis
+bound taken from a projection interval on the rung alone (P3.5(c1)), coverage is
+unchanged in every design and widths move by at most 0.002 (e.g.\ design~E: 0.251
+against 0.249). The rank of $\hat\Sigma$ equals $\dim\beta$ in every replication of
+every $2\times2$ design ($\dim\beta$ from 3 to 401); the $3\times3$ fit on all three
+columns has rank 12 of 18 by the exact adding-up identity.
+
+\subsection{New Zealand benchmark (ground truth)}
+
+\path{benchmarks/run_ei_datasets_benchmark.R}; summary in
+\path{benchmarks/results/ei_datasets_nz_summary.md}. The benchmark was run with
+eiPartialID 0.2.0 during WS6, before the 0.3.x changes to the tests and to the
+\texttt{proj\_actual} variance bound, which can move the projection and test
+columns slightly (PHASE3 \S8.4 item~10). Units are polling places;
+rows the party vote (Labour, National, other); columns the electorate vote; the
+truth is the official party $\times$ candidate cross-tabulation, 2002--2020.
+\begin{itemize}[nosep]
+\item \emph{Per electorate} (492 tables, about 64 polling places each; 4302 cells):
+M0's CLR and projection intervals for the actual rate covered every cell, at about
+DD width (median width ratio 1.00). Goodman (L6) covered 0.939, with 2.2\% of
+non-empty intervals missing.
+\item \emph{Pooling each election's 62--69 electorates} and fitting M1 with
+electorates as groups: M1 is rejected (empty estimate in all seven elections; M1
+test and pooling test $p\approx0$). There the CLR intervals were rejected (ends
+crossing) in 21\% of cells and missed the truth in 8\%; the projection interval
+never missed but was as wide as DD.
+\end{itemize}
+Reading: where the model is wrong the tests flag it, and a non-empty CLR interval is
+not reassurance.
+
+\subsection{Key simulation tables for M-SIGN (PHASE5a, PACKAGE\_DESIGN)}
+
+\paragraph{How often signs add information (PACKAGE\_DESIGN \S2.2, [V2]; 2000 random
+LCE designs with true signs).} The within sign strictly tightens JKST in 83\% of
+designs (median width ratio 0.70); the between sign in 89\% (0.67); CR with
+unknown sign in 80\% of the 1060 designs where CR holds (0.69).
+
+\paragraph{CR at the edge (PHASE5a \S3.4; $2\times2$, $n=150$, 600 replications,
+conservative intervals for $\tilde D$).}
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X cccc@{}}
+\toprule
+Design & JKST & CR slab & \shortstack{CR union\\(occupied length)} & \shortstack{CR naive\\(plug-in bracket)} \\
+\midrule
+Truth on the CR edge, $ER^*=0.15$ & 1.000 / 1.106 & \textbf{0.992} / 0.359 & 0.992 / 0.357 & \textbf{0.917} / 0.256 \\
+Truth on the edge, $ER^*=0.005$ & 1.000 / 1.223 & 1.000 / 0.242 & 1.000 / 0.242 & 1.000 / 0.147 \\
+Interior truth & 1.000 / 1.232 & 1.000 / 0.480 & 1.000 / 0.480 & 1.000 / 0.388 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+The literal intersection of the fitted bracket with a finished JKST interval
+covered 304/600 in the edge design (V13), in line with the at-most-one-half limit;
+the analytic limit for CR-naive in the three-point design is at most 0.9335
+(R10(e)). The package's gated run of the default CLR branch union in the edge
+design gave coverage 0.990 with median width 0.230 (200 replications).
+
+\paragraph{A false CR (EI referee's experiment, V12).} Same generator, with
+$m_0=.40-sx$, $m_1=.50+s-sx$, so the aggregate regression is unchanged and CR is
+false for $s>0$. At 600 precincts the CR slab covered 398, 110 and 0 of 400 at
+$s=0,.08,.25$, and was never empty; JKST alone covered 400 every time. Precision
+makes a wrong answer more reproducible, not more credible.
+
+\paragraph{Redundancy (PHASE5a \S2.4, T4).} In $3\times2$ with true-sign rows, a
+row was implied in 8\% of cases, cut the set but not the target in 28\%, and
+tightened the target in 64\%.

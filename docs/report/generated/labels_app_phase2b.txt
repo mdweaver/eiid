@@ -1,0 +1,17 @@
+Proposition D0	pC-res-proposition-D0
+Lemma D1	pC-res-lemma-D1
+Remark D1.1	pC-res-remark-D1.1
+Lemma D2	pC-res-lemma-D2
+Theorem 1′	pC-res-theorem-1p
+Theorem 2	pC-res-theorem-2
+Proposition D3	pC-res-proposition-D3
+Proposition D4	pC-res-proposition-D4
+Remark D4.1	pC-res-remark-D4.1
+Proposition D5	pC-res-proposition-D5
+Proposition D6	pC-res-proposition-D6
+Proposition D7	pC-res-proposition-D7
+Remark D7.1	pC-res-remark-D7.1
+Remark 6.1	pC-res-remark-6.1
+Remark 6.2	pC-res-remark-6.2
+Proposition D8	pC-res-proposition-D8
+Remark 6.3	pC-res-remark-6.3

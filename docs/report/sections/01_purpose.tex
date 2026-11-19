@@ -1,0 +1,166 @@
+% Section 1: purpose and scope
+\section{Purpose and scope}\label{sec:purpose}
+
+\subsection{The problem}
+
+Ecological inference (EI) asks how groups behaved when only group shares and
+outcome shares are observed for each unit. A unit is a polling place, a
+precinct, a county or a riding. For unit $i$ we see the row shares
+$X_i\in\Delta^{R-1}$ (for example, how its electorate voted in election~1, or
+its racial composition) and the column shares $T_i\in\Delta^{C-1}$ (for
+example, how it voted in election~2). Here $\Delta^{k-1}$ is the probability
+simplex in $\mathbb R^k$. We want the latent $R\times C$ table of rates
+$\beta_i=[\beta_{irc}]$, where $\beta_{irc}$ is the share of row-$r$ members
+of unit $i$ who chose column $c$, and above all its electorate-wide average,
+the transition rate $B_{rc}$ (Section~\ref{sec:setting}).
+
+The data link rows and columns only through the accounting identity
+$T_i=\beta_i^\top X_i$. In each unit there are $RC$ unknown rates and only
+$C-1$ free equations. Without further structure the rates are not
+point-identified.
+
+\subsection{Why partial identification}
+
+The classical answers either assume enough to obtain a point (Goodman's
+constancy~\citep{goodman1953}; King's truncated normal~\citep{king1997}; hierarchical R$\times$C models) or give the
+widest possible range (the Duncan--Davis ``method of bounds''). The first
+kind of answer can be confidently wrong when its assumption fails. The second
+is always valid but often too wide to be useful.
+
+Partial identification takes the middle road. It states an assumption, derives
+the set of values of the target that are consistent with the data and that
+assumption (the \emph{identified set}), and reports that set. When the
+assumption is weak, the set is wide but credible. When it is strong, the set is
+narrow but rests on more. The researcher can see exactly what each assumption
+buys. Jiang, King, Schmaltz and Tanner~\citep{jkst2019} (JKST below) did this
+for $2\times2$ tables, in the tradition of partial identification~\citep{molinari2020}, under \emph{linear contextual effects} (LCE): each
+group's mean rate may depend linearly on the composition of the unit. The
+present work extends that programme to general R$\times$C tables, to units
+nested in districts, to sign and monotonicity beliefs from Monotone EI
+\citep{egghm2025}, and to valid inference for all of these.
+
+\subsection{The plan of the work: a ladder of assumptions}
+
+The work organises assumptions as a ladder. Each rung adds an assumption, and
+under the conditions stated in each result, its identified set lies inside the
+one before it. The rungs are not all on one line: some are non-nested and are
+reported side by side. Table~\ref{tab:ladder} lists them with what each adds.
+
+\begin{longtable}{@{}L{0.17\linewidth}L{0.42\linewidth}L{0.33\linewidth}@{}}
+\caption{The rungs and what each adds.}\label{tab:ladder}\\
+\toprule
+Rung & Assumption added (plain) & What it buys \\
+\midrule\endfirsthead
+\toprule Rung & Assumption added (plain) & What it buys \\ \midrule\endhead
+DD (Duncan--Davis) & None beyond the accounting identity (A1). & The model-free range; the baseline everyone can accept. Districts add nothing here (Prop.~D0). \\
+M2 & Each district has its own linear contextual effects. & Usually little: district bounds add up (Prop.~D5). \\
+M1($\delta$) & District contextual effects differ from a shared set by at most $\delta$. & A sensitivity dial from M2 ($\delta$ large) to M1 ($\delta=0$) (Prop.~D6). \\
+M1 & Shared contextual effects, district baselines (``riding dummies''). & One district with lopsided units and an extreme baseline tightens the bound for all (Prop.~D3). \\
+L4($r$) & Row $r$ has no contextual effect. & Pins $(C-1)(R-1)$ unknown directions; point identification when $R=2$ (Prop.~D7(b)). \\
+L5 & Constancy within each district (Goodman by district). & A point (Prop.~D7(a)); best used as a diagnostic. \\
+L6 & Constancy everywhere (Goodman). & A point; historical reference. \\
+M0 (pooled, beside the ladder) & One set of linear contextual effects for all units, no districts. & JKST's model in R$\times$C; non-nested with M1 (Prop.~D4). \\
+M-SIGN (any linear rung) & The sign of the between or within association, or that the two reinforce each other (CR). & Large gains in simulation; a false belief gives narrow, wrong intervals (PHASE5a~\S3.4). \\
+N1 & The same sign beliefs on realised unit tables, no linear model. & Bounds sharp for continuous unit tables (Prop.~M2). Not in the package. \\
+N2 & Each group's mean rate is monotone in composition, any shape. & An outer LP that contains LCE with signed slopes (Prop.~N2.2). Not in the package. \\
+\bottomrule
+\end{longtable}
+
+What each rung adds, in one sentence each:
+\begin{itemize}[nosep]
+\item \textbf{LCE (M0) over DD.} The regression of $T$ on $X$ is quadratic under
+LCE and identifies the symmetric part $Q$ of the coefficient matrices. Only the
+skew part $K$, of dimension $(C-1)R(R-1)/2$, is left unknown, and requiring the
+implied rates to be probabilities at the extreme units bounds it.
+\item \textbf{Districts (M1 and relatives) over M0.} District baselines protect
+against between-district aggregation bias, and shared contextual effects carry
+the information of the most informative district to all districts.
+\item \textbf{Signs and reinforcement (M-SIGN) over a linear rung.} One or two
+extra linear rows in $K$ can cut the bound substantially; the price is a
+belief that the data cannot always check.
+\item \textbf{Inference.} Every bound is computed from an estimated regression.
+The plug-in bound is too narrow, so confidence intervals that treat each end
+as an intersection of many estimated candidates are needed (Phase~3).
+\end{itemize}
+
+\subsection{Method map: where each method is identified and where its inference is proved}
+
+Table~\ref{tab:methodmap} lists, for each method, the results that identify its
+bound, the results that cover its confidence intervals, its status, and where the
+proofs are. Appendix key: \ref{app:phase1} = PHASE1, \ref{app:phase2a} = PHASE2a,
+\ref{app:phase2b} = PHASE2b, \ref{app:phase2c} = PHASE2c, \ref{app:phase3} = PHASE3,
+\ref{app:phase5a} = PHASE5a, \ref{app:pkgdesign} = PACKAGE\_DESIGN.
+
+{\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{@{}L{0.13\linewidth}L{0.24\linewidth}L{0.29\linewidth}L{0.22\linewidth}L{0.07\linewidth}@{}}
+\caption{Method map.}\label{tab:methodmap}\\
+\toprule Method & Identification & Inference & Status & App. \\ \midrule\endfirsthead
+\toprule Method & Identification & Inference & Status & App. \\ \midrule\endhead
+DD & 2b Prop.~D0; 2a Prop.~8 (cell bounds) & none needed: no estimated quantity; CIs for $B$ are intersected with DD & Proved & \ref{app:phase2b}, \ref{app:phase2a} \\
+JKST ($2\times2$ M0) & 2a Prop.~4 (equivalence), Props~1--2 & P3.5 (JKST's $\mathrm{CI}_x$ is (b) with one candidate); P3.4 under tie-breaking & Proved & \ref{app:phase2a}, \ref{app:phase3} \\
+M0 (pooled LCE) & 2a Lemmas~1--3, Thm~1, Props~1--2, 7, 7$'$; Cor.~1 & P3.1, P3.2, P3.4/P3.4$'$; P3.5(a), (b2), (c1); P3.6(a); P3.8. CLR = Conjecture P3.5(b3) & Identification and (a), (b2), (c1) proved in every regime; CLR algorithmic & \ref{app:phase2a}, \ref{app:phase3} \\
+M2 & 2b Thm~1$'$, Thm~2, Prop.~D5 & P3.5(a), (b2) in regime R1; P3.8 in any regime; P3.6(a) & Proved (R1); R3 conjecture; R2: P3.8 only & \ref{app:phase2b}, \ref{app:phase3} \\
+M1($\delta$) & 2b Thm~2(c), Prop.~D6 & as M2 & as M2 & \ref{app:phase2b}, \ref{app:phase3} \\
+M1 & 2b Lemmas~D1--D2, Thm~2, Props~D3--D4 & as M2; plus P3.6(b) (M1 vs M2) and P3.6(c) (pooling), wild bootstrap; P3.7. CLR in R2: simulation finding & Proved (R1); bootstrap simulation-supported & \ref{app:phase2b}, \ref{app:phase3} \\
+L4($r$), L5, L6 & 2b Prop.~D7, Thm~2(c) & P3.5 (near point identification: two-sided split; P3 \S4) & Proved & \ref{app:phase2b}, \ref{app:phase3} \\
+Change across periods (M1) & 2b Prop.~D8 & via the M1 interval for the change & Proved (identification) & \ref{app:phase2b} \\
+N1 (signs on realised tables) & 2c Lemma~M1, Props~M2--M4, Rem.~M2.1 & none needed (no estimated quantity) & Proved for continuous tables; integer R15 open & \ref{app:phase2c} \\
+N2 (monotone means) & 2c Lemma~N2.1, Prop.~N2.2, Lemma~N2.4; Conj.~N2.2$'$ & P3.5 conditional on a prespecified degree (2c \S6); R7 open & Outer set proved; sharp set conjecture & \ref{app:phase2c} \\
+M-SIGN rows & 2c Prop.~M5; 5a Thm~R3, Prop.~R2 & 5a Thm~R10(a), by interval version & Proved for pooled M0; grouped rungs R16 open & \ref{app:phase2c}, \ref{app:phase5a} \\
+CR & 2c Prop.~M3; 5a Thm~R3(c)--(d) & 5a Thm~R10(b) (slab, conservative), (c) (branch union); CLR union algorithmic; R10(e) (plug-in bracket invalid) & Proved for pooled M0 & \ref{app:phase2c}, \ref{app:phase5a} \\
+Ordering / M-LOC & PD Props~P-S, P-R, P-N; 2c M5(b) & 5a Thm~R10(a) as added rows (pooled M0) & P-S proved; C1 conjecture; M-LOC not built & \ref{app:pkgdesign}, \ref{app:phase2c} \\
+Sensitivity $\eta$, $\delta$ & P3 Prop.~S1; 2b Prop.~D6 & CI version of the bound (P3 \S7) & Outer bound proved & \ref{app:phase3}, \ref{app:phase2b} \\
+\bottomrule
+\end{longtable}
+}
+
+\subsection{What this report contains and how to read it}
+
+This report collects the theory, the package mapping and two rounds of
+external referee review into one document. It is pinned to commit
+\texttt{ec3644f} of branch \texttt{claude/wizardly-volta-lbh4bm} of the
+repository \texttt{mdweaver/eiid}.
+
+\begin{itemize}[nosep]
+\item Sections~\ref{sec:setting}--\ref{sec:did} state each result, give its
+source label in the repository (for example ``Proposition P3.4$'$ (PHASE3
+\S4)''), explain it in plain terms, sketch the argument and point to the full
+proof in the appendices. Where a referee changed a result, a \emph{revision
+note} follows it.
+\item Section~\ref{sec:evidence} collects the numerical evidence. It is
+evidence, not proof.
+\item Section~\ref{sec:package} maps results to the R package
+\texttt{eiPartialID} 0.3.1.
+\item Section~\ref{sec:status} is the status table of every result.
+Section~\ref{sec:open} lists what is open.
+\item Appendix~\ref{app:revisions} is the consolidated table of every referee
+point, the result it changed and the change made.
+\item Appendices~\ref{app:phase1}--\ref{app:pkgdesign} reproduce the
+repository's theory documents verbatim (converted mechanically from Markdown).
+They contain every detailed proof, with the justification tag on each step.
+\end{itemize}
+
+\paragraph{Status labels.} The referees insisted that established results,
+conjectures and algorithmic procedures be kept apart. Every result carries one
+of these labels:
+\begin{description}[nosep,font=\normalfont\sffamily]
+\item[Proved] A proof is written in the repository, in numbered steps with
+justification tags, and checked numerically where possible.
+\item[Proved under conditions] Proved, but only under a stated scope (for
+example, the pooled model M0 only, or a fixed number of districts).
+\item[Cited] The result applies a published theorem whose conditions are
+checked here but whose proof is not repeated.
+\item[Sketch] Only an outline of a proof exists in the repository.
+\item[Conjecture] Stated precisely, supported by checks or simulation, not
+proved.
+\item[Algorithm] A procedure whose validity is not proved (for example, the
+CLR interval as implemented). Simulation evidence cannot promote it.
+\item[Open] Not settled.
+\item[Proposal] Written in a Phase-1 or Phase-2 proposal document that has not
+been through the review rounds (PHASE1b, PHASE2d).
+\end{description}
+Verification checks are tagged as in the repository: \textbf{[F]} fails on an
+earlier statement and passes on the corrected one; \textbf{[V]} verifies a
+corrected or new statement; \textbf{[I]} illustrates or strengthens a
+statement that was already true.

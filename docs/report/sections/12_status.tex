@@ -1,0 +1,133 @@
+% Section 12: status table
+\section{Status of every result}\label{sec:status}
+
+Status labels are those of Section~\ref{sec:purpose}. ``Check'' names the
+verification script and, where the repository gives one, the check label with its
+class [F] (fails on the earlier statement), [V] (verifies a corrected or new
+statement) or [I] (illustration). ``---'' means no numerical check (for example, a
+purely measure-theoretic step). Section numbers refer to the source document;
+``Report'' gives the result's place in this report. PACKAGE\_DESIGN \S8's proof
+register (R1--R18) is mapped in Table~\ref{tab:register}.
+
+{\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{@{}L{0.27\linewidth}L{0.14\linewidth}L{0.17\linewidth}L{0.30\linewidth}L{0.07\linewidth}@{}}
+\caption{Every numbered result, with status and verification.}\label{tab:status}\\
+\toprule Result & Source & Status & Check & Report \\ \midrule\endfirsthead
+\toprule Result & Source & Status & Check & Report \\ \midrule\endhead
+\multicolumn{5}{@{}l}{\textbf{PHASE1 (foundations; its ``to prove'' items are proved in 2a--2b)}}\\
+Lemma 1 (identification decomposition) & P1 \S1.3 & Proved as 2a L1 & 2a & \S\ref{sec:rxc} \\
+Prop.\ 2-RC (outer set) & P1 \S1.4 & Proved as 2a L3, P4, P5, P7 & 2a & \S\ref{sec:rxc} \\
+Closed form $R=2$; joint vs collapsed corollary & P1 \S1.4 & Proved as 2a P6; corollary corrected (2a Cor.~6.1) & 2a & \S\ref{sec:rxc} \\
+Theorem 1 (random-set characterisation) & P1 \S1.5 & Proved as 2a T1 & --- & \S\ref{sec:rxc} \\
+Nesting (1.13); equality conjecture & P1 \S1.5 & Nesting proved (2a P1); equality: sufficient condition only (2a P3) & 2a (46/400 strict) & \S\ref{sec:rxc} \\
+(D0)--(D5) structural facts & P1 \S1.6 & Proved as 2b D0--D5; (D2) count and (D4) conditioning corrected & 2b & \S\ref{sec:districts} \\
+Assumptions A1--A10 & P1 \S2 & Assumptions (A1 turnover open) & --- & \S\ref{sec:assumptions} \\
+\multicolumn{5}{@{}l}{\textbf{PHASE2a (R$\times$C under LCE)}}\\
+Lemma 0 & 2a \S1 & Proved & --- & \ref{res:p2a-l0} \\
+Lemma 1 (a)--(c) & 2a \S2 & Proved & \path{verify_phase2a.py} (rank, symbolic); [supp] [F] & \ref{res:p2a-l1} \\
+Remarks 1.0--1.2 & 2a \S2 & Proved (1.1, 1.2); remark (1.0) & 2a (five points never identify $Q$) & \S\ref{sec:rxc} \\
+Lemma 2; Remark 2.1 & 2a \S3 & Proved & 2a & \ref{res:p2a-l2} \\
+Theorem 1 & 2a \S4 & Proved (cited measure theory) & ``$\Rightarrow$'' 227/227 & \ref{res:p2a-t1} \\
+Remark 4.1 & 2a \S4 & Proved & --- & \S\ref{sec:rxc} \\
+Remark 4.2 (1) / (2) & 2a \S4 & (1) proved (standard); (2) sketch, not used & 2a (200 integer cases) & \S\ref{sec:rxc} \\
+Corollary 1 & 2a \S4 & Proved & --- & \S\ref{sec:rxc} \\
+Lemma 3 (a)--(c); Remarks 5.1, 5.2 & 2a \S5 & Proved & 2a (singleton, unbounded LP) [F] & \ref{res:p2a-l3} \\
+Proposition 1 (nesting) & 2a \S5 & Proved & 2a (400 designs) & \ref{res:p2a-p1} \\
+Proposition 2 (sharp for the regression) & 2a \S5 & Proved & P1 script & \ref{res:p2a-p2} \\
+Corollary 2; Proposition 3; Remark 3.1 & 2a \S5 & Proved (P3 sufficient only) & 2a & \S\ref{sec:rxc} \\
+Proposition 4 (JKST equivalence) & 2a \S6.1 & Proved & 2a symbolic; $10^{-16}$ & \ref{res:p2a-p4} \\
+Proposition 5 ($A=\Delta^{R-1}$) & 2a \S6.2 & Proved & 2a (200 LPs; negative $Q$) & \S\ref{sec:rxc} \\
+Lemma 4 & 2a \S6.3 & Proved & 2a (via P6) & \S\ref{sec:rxc} \\
+Proposition 6 & 2a \S6.4 & Proved & 2a (300 LPs) & \S\ref{sec:rxc} \\
+Corollary 6.1; $R\ge3$ characterisation & 2a \S6.4 & Proved; $R\ge3$ open & 2a (strict cases) & \S\ref{sec:rxc} \\
+Proposition 7; value-function regularity & 2a \S6.5 & Proved & 2a ($\gamma$, 100 targets; $V=\mu Q$ [F]) & \ref{res:p2a-p7} \\
+Proposition 7$'$ & 2a \S6.6 & Proved & 2a & \S\ref{sec:rxc} \\
+Proposition 8 & 2a \S7 & Proved & --- & \S\ref{sec:rxc} \\
+Proposition 9 & 2a \S7 & Proved & --- & \ref{res:p2a-p9} \\
+\multicolumn{5}{@{}l}{\textbf{PHASE2b (districts)}}\\
+Proposition D0; joint DD set & 2b \S1 & Proved & 2b (300 tables) & \ref{res:d0} \\
+Lemma D1 (a)--(d); Remark D1.1 & 2b \S2 & Proved & 2b (recovery; stacked rank) & \ref{res:d1} \\
+Lemma D2 & 2b \S2 & Proved & --- & \S\ref{sec:districts} \\
+Theorem 1$'$ & 2b \S3 & Proved (by reduction to 2a T1) & --- & \ref{res:t1prime} \\
+Theorem 2 (a)--(c) & 2b \S3 & Proved & 2b (ladder nesting) & \ref{res:t2} \\
+Proposition D3 (+ pure vertices) & 2b \S4 & Proved & 2b (126, 195 LPs) & \ref{res:d3} \\
+Proposition D4 (a), (b); Remark D4.1 & 2b \S4 & Proved & 2b D4(b) [F] & \ref{res:d4} \\
+Propositions D5, D6, D7; Remark D7.1 & 2b \S4 & Proved & 2b & \S\ref{sec:districts} \\
+Proposition D8 (a), (b) & 2b \S5 & Proved & 2b D8b [F] & \ref{res:d8} \\
+Remarks 6.1--6.3 & 2b \S5 & Remarks & --- & \S\ref{sec:districts} \\
+Strict-gain characterisation $R\ge3$; M1$'$ & 2b \S8 & Open & --- & \S\ref{sec:open} \\
+\multicolumn{5}{@{}l}{\textbf{PHASE2c (monotone EI)}}\\
+Lemma M1 (a)--(d) & 2c \S1 & Proved & C1 & \ref{res:m1} \\
+Proposition M2 (a)--(d) & 2c \S2 & Proved (continuous tables) & C7 [F], C7b [V] & \ref{res:m2} \\
+Remark M2.1 ($2\times2$ lattice proposition) & 2c \S2 & Proved ($2\times2$ margins only); otherwise open (R15) & C7 [F], C7a [V] & \ref{res:m21} \\
+Proposition M3 (a)--(d); Reading & 2c \S2 & Proved & C2; C8 [F]; C8b [F]; C15 [F] & \ref{res:m3} \\
+Proposition M4 & 2c \S2 & Proved & C3; C3b [F] & \S\ref{sec:monotone} \\
+Proposition M5 (a), (b); (c) & 2c \S3 & Proved; (c) M0 only & C4 [V] (rebuilt); C9 [F] & \ref{res:m5} \\
+Remark M5.1 & 2c \S3 & Proved (bound under P3-S1a) & --- & \S\ref{sec:monotone} \\
+Lemma N2.1 & 2c \S4 & Proved & --- & \ref{res:n22} \\
+Proposition N2.2 (a)--(e) & 2c \S4 & Proved (finite support) & C5, C5(c$'$) [V], C10 [F], C10b [F] & \ref{res:n22} \\
+Conjecture N2.2$'$ & 2c \S4 & Conjecture (sufficiency remark) & C10b & \ref{res:n22prime} \\
+Proposition N2.3 (a)--(d) & 2c \S4 & Proved (structural identity); not observable & C6; C11 [F]; C13 [I]; C16 [F] & \ref{res:n23} \\
+Lemma N2.4 & 2c \S4 & Proved & C12 [F] & \ref{res:n24} \\
+Degree selection (\S6) & 2c \S6 & Prespecify (counterexample proved by simulation) & C12b [F] & \S\ref{sec:monotone} \\
+\multicolumn{5}{@{}l}{\textbf{PHASE3 (inference)}}\\
+Lemma P3.1 & P3 \S2 & Proved (fixed system) & \path{verify_phase3.py} & \ref{res:p31} \\
+Proposition P3.2 (a)--(c) & P3 \S3 & Proved (Slater for (a)) & 3 & \ref{res:p32} \\
+Theorem P3.4 (i)--(iii); Remark P3.4.1 & P3 \S4 & Cited structure (fixed system) & 3 (tied constraints; null direction) & \ref{res:p34} \\
+Proposition P3.4$'$ & P3 \S4 & Proved & ``P3.4$'$ [F]'' & \ref{res:p34prime} \\
+Theorem P3.5(a) & P3 \S5 & Proved & MC & \ref{res:p35} \\
+P3.5(b1) & P3 \S5 & Cited (CLR Thm 4, Condition P) & --- & \ref{res:p35} \\
+P3.5(b2)(i), (ii) & P3 \S5 & Proved & weak duality (500); null direction [F] & \ref{res:p35} \\
+Conjecture P3.5(b3) & P3 \S5 & Conjecture / algorithm; reduction proved & MC (simulation only) & \ref{res:p35} \\
+P3.5(c1) / (c2) & P3 \S5 & (c1) proved; (c2) inherits (b3) & ``P3.5(c)'' [V] & \ref{res:p35} \\
+Proposition P3.6 (a), (c); (b) & P3 \S5 & Proved; (b) fixed dimension & 2b M1 df & \ref{res:p36} \\
+Wild-bootstrap calibration & P3 \S5 & Simulation-supported & \texttt{benchmarks/*\_size.R} & \S\ref{sec:inference} \\
+Theorem P3.8 (a)--(d) & P3 \S5.1 & Proved & 3; MC & \ref{res:p38} \\
+Proposition P3.7 (a), (b) & P3 \S6 & Proved & --- & \S\ref{sec:inference} \\
+Proposition S1; breakdown value & P3 \S7 & Proved (outer bound) & 3 ($\eta=0.02$) & \ref{res:s1} \\
+M1/M2 in R3; CLR in R2 & P3 \S0.5 & Conjecture; simulation finding & MC & Table~\ref{tab:regimes} \\
+\multicolumn{5}{@{}l}{\textbf{PHASE5a (M-SIGN; pooled M0)}}\\
+Theorem R3 (a)--(e); Remarks R3.1, R3.2 & 5a \S1 & Proved (pooled M0) & S1--S5; S6 [V]; S7 [F] & \ref{res:r3} \\
+Proposition R2 (a)--(e) & 5a \S2 & Proved & T1--T4; T1b; T1c [F]; T4b [F] & \ref{res:r2} \\
+Theorem R10 (a)--(d) & 5a \S3 & By version (Table~\ref{tab:r10}); pooled M0 & V11 [V]; V12 [I]; V13 [V] & \ref{res:r10} \\
+Theorem R10(e) & 5a \S3 & Proved (analytic) & V9 [V]; V10 [F] & \ref{res:r10} \\
+\multicolumn{5}{@{}l}{\textbf{PACKAGE\_DESIGN}}\\
+G2 (JKST + signs) & PD \S2.2 & Proved & [V1], [V2] & \ref{res:g2} \\
+P-S (sandwich) & PD \S5.1 & Proved & [V4] & \ref{res:ps} \\
+P-R (a), (b), (d); (c) & PD \S5.2 & Proved; (c) checked & [V5], [V7] & \ref{res:pr} \\
+P-N (a), (b); Conjecture C1 & PD \S5.3 & Proved (M0); C1 conjecture & [V3] & \ref{res:pn} \\
+DiD-S & PD \S7 (App.~\ref{app:pkgdesign}) & Proved (validity; not reviewed) & --- & \S\ref{sec:did} \\
+\multicolumn{5}{@{}l}{\textbf{PHASE1b and PHASE2d (proposals; not reviewed)}}\\
+1b \S\S A1--A5, B1--B5 (proposed objects, rungs, DiD restrictions) & 1b & Proposal; superseded by 2c, 2d & \path{verify_phase1_mei_did.py} (10/10 PASS) & \S\ref{sec:did} \\
+Lemma G; Props $\Delta0$, FD1--FD4, $\Delta4$, $\Delta6$, C1, C2, CL, P2, P3; Remark C3 & 2d & Proposal (proofs written, not reviewed) & \path{verify_phase2d.py} (15/15 PASS) & \S\ref{sec:did} \\
+\bottomrule
+\end{longtable}
+}
+
+{\footnotesize
+\begin{longtable}{@{}L{0.06\linewidth}L{0.44\linewidth}L{0.22\linewidth}L{0.20\linewidth}@{}}
+\caption{The proof register of PACKAGE\_DESIGN \S8 (R1--R18).}\label{tab:register}\\
+\toprule ID & Claim & Status & Where in this report \\ \midrule\endfirsthead
+\toprule ID & Claim & Status & Where in this report \\ \midrule\endhead
+R1 & C1: $x^*\in$ hull ($2\times2$), so weighted-local $\Rightarrow\delta_W\ge0$ & Conjecture (checked [V3]) & Result~\ref{res:pn} \\
+R2 & Face criterion for tightening; implied $\Leftrightarrow$ tightens nothing; G2 closed form & Proved (5a \S2; \path{verify_R2.py}) & Result~\ref{res:r2} \\
+R3 & Pooled LCE $\cap$ closed convex restriction is sharp for the model-implied target; CR union and slab & Proved for pooled M0 (grouped: R16) & Result~\ref{res:r3} \\
+R4 & Refutability classification for $R\ge3$ & Open & \S\ref{sec:open} \\
+R5 & P-R(c): any spanning tree reaches all directions & Proved (star); checked (chain) & Result~\ref{res:pr} \\
+R6 & When joint column restrictions in $2\times C$ are strictly tighter & Checked [V6] & \S\ref{sec:open} \\
+R7 & Global N2 LP with estimated $\tau$ & Open (Lemma N2.4 proved; N2.2$'$ conjecture) & Results~\ref{res:n22prime}, \ref{res:n24} \\
+R8 & B1(M), $\kappa$, CAR-$\delta$ valid and monotone in their dials & Partly (NEW\_AVENUES) & \S\ref{sec:open} \\
+R9 & M-SHARP series bound: consistency; never wider than $\ThO$ & Open & \S\ref{sec:open} \\
+R10 & Inference with added rows, unions, near-emptiness & By version: (a), (b2) proved; (b1) cited; (b3) algorithm; (e) proved & Result~\ref{res:r10} \\
+R11 & DiD: DiD-S sharp within FD; FD4 $\cap\,\Delta4$; levels $\cap$ sign-$\Delta$; union inference & DiD-S validity proved; rest open & \S\ref{sec:did} \\
+R12 & P-S (sandwich) & Proved [V4] & Result~\ref{res:ps} \\
+R13 & G2 table & Proved [V1, V2] & Result~\ref{res:g2} \\
+R14 & Single-index dimension $C-1$ & Conjecture & \S\ref{sec:open} \\
+R15 & Integer unit tables (N1, $\Delta4$) & Open ($2\times2$ margins-only proved) & Result~\ref{res:m21} \\
+R16 & Grouped rungs: R3$'$, R10$'$ & Open & Results~\ref{res:m5}, \ref{res:r3} \\
+R17 & P3.4$'$ triangular-array limit & Proved & Result~\ref{res:p34prime} \\
+R18 & P3.5(c): (c1) valid; (c2) with CLR & (c1) proved; (c2) inherits (b3) & Result~\ref{res:p35} \\
+\bottomrule
+\end{longtable}
+}

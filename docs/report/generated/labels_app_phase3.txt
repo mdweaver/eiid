@@ -1,0 +1,12 @@
+Lemma P3.1	pE-res-lemma-P3.1
+Proposition P3.2	pE-res-proposition-P3.2
+Theorem P3.4	pE-res-theorem-P3.4
+Remark P3.4.1	pE-res-remark-P3.4.1
+Proposition P3.4′	pE-res-proposition-P3.4p
+Theorem P3.5	pE-res-theorem-P3.5
+Conjecture P3.5(b3)	pE-res-conjecture-P3.5-b3
+Proposition P3.5(c)	pE-res-proposition-P3.5-c
+Proposition P3.6	pE-res-proposition-P3.6
+Theorem P3.8	pE-res-theorem-P3.8
+Proposition P3.7	pE-res-proposition-P3.7
+Proposition S1	pE-res-proposition-S1

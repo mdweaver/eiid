@@ -1,0 +1,389 @@
+% Section 6: monotone EI, N1, N2 (PHASE2c) and PACKAGE_DESIGN section 5
+\section{Monotone ecological inference: signs, N1 and N2}\label{sec:monotone}
+
+Source: PHASE2c (Appendix~\ref{app:phase2c}), following Elzayn, Goldin, Guage,
+Ho and Morton~\citep{egghm2025} (EGGHM, arXiv v1 numbering), and PACKAGE\_DESIGN
+\S\S2.2 and 5 (Appendix~\ref{app:pkgdesign}). Checks: \path{verify_phase2c.py},
+29/29 PASS, each Batch~B correction tagged [F], [V] or [I]. Two settings are used:
+\begin{itemize}[nosep]
+\item \textbf{Finite population (N1).} The design is fixed; unit weights
+$p_i=N_i/\sum_jN_j$; the realised rates satisfy $\beta_i\in S(X_i,T_i)$; the
+target is the actual rate $B$. All N1 results read the unit tables as
+\emph{continuous} (real cell masses).
+\item \textbf{Superpopulation (K-rows and N2).} $m(v)=\E[\beta\mid V=v]$; the
+target is $\tilde B$; a superscript $^*$ marks an association computed with $m$.
+\end{itemize}
+
+\subsection{The associations}
+
+Fix a column and write $w^r_i=p_iX_{ir}/\mu_r$.
+\begin{itemize}[nosep]
+\item \emph{Between, pairwise:} $\delta_B(r,s)=E_p[X_rX_s(\beta_r-\beta_s)]$;
+\emph{one-vs-rest:} $\delta^r_B=\sum_{s\ne r}\delta_B(r,s)$.
+\item \emph{Within, W2 (pooled):} $\Delta=\sum_s\mu_s\Cov_{w^s}(X,\beta_s)$, one
+sum of row-specific covariances.
+\item \emph{Within, W1 (one-vs-rest):}
+$\delta^r_W=\mu_r\Cov_{w^r}(\beta_r,X_r)+(1-\mu_r)\Cov_{w^{\neg r}}(\beta^{\neg r},X_r)$,
+with A's share as the predictor in both terms.
+\end{itemize}
+\begin{plain}
+The \emph{between} association says that, on average within the same unit, group
+A is more likely than the others to choose the outcome. It is a weighted average
+with weights $p_iX_{ir}(1-X_{ir})$: pure units get no weight and a large mixed
+unit can dominate. It is not an ordering in every unit or against each rival. The
+\emph{within} association says that rates rise, on average, with A's share. W1 and
+W2 can have opposite signs while every group's rate rises (EI referee's example:
+$\delta^A_W=-0.02633$, $\Delta_A=+0.00110$, check C14). A sign on W2 signs one
+pooled sum, not each group. Covariances also reflect sorting; a causal reading
+needs a separate design.
+\end{plain}
+\begin{revnote}
+(P-E1--P-E5, P-E8, P-B28.) W2 was earlier described as ``each group
+separately''; the weighting of $\delta_B$, the predictor in W1, sorting, the
+Goodman-bias relation and the status of W2, pair and CR as extensions of EGGHM
+were added as remarks on Definition~1.
+Round~2 (E2-1): the W1 sign is a nonnegative weighted sum of two within
+associations, either of which may be negative (two equal precincts at 25\% and
+75\% A: A's rate .40$\to$.60, everyone else's .55$\to$.45, sum $+0.0047$); with
+\texttt{version = "pair"} only the between term is pairwise.
+\end{revnote}
+
+\begin{result}[Lemma M1, identities --- PHASE2c \S1]\label{res:m1}
+\status{Proved.} Under A1 only (with the stated per-part conditions):
+(a) $\mathbf 1^\top\Delta=0$ and Goodman's $g$ satisfies $g-B_{\cdot c}=M^{-1}\Delta$;
+(b) $NM_r-B_r=-\delta^r_B/\mu_r$;
+(c) the one-vs-rest collapse is a valid two-group population, so
+$ER^r-D^r=\delta^r_W/\Var_p(X_r)$ and $(NM_r-NM_{\neg r})-D^r=-\delta^r_B/(\mu_r(1-\mu_r))$;
+(d) $B$, every $\delta_B$, $\Delta$ and $\delta^r_W$ are affine in the unit rates.
+\end{result}
+\begin{plain}
+These are accounting identities. The neighbourhood model (NM) misses the true
+gap exactly by the between association; the aggregate regression slope (ER) misses
+it exactly by the within association. So a sign belief about either association
+is a one-sided bound relative to a number computed from the data.
+\end{plain}
+\proofref[pD-res-lemma-M1]{Appendix~\ref{app:phase2c}, \S1, proofs of (a)--(d); check C1}
+\begin{revnote}(P-B28.) The invertibility of $M$ is needed for (a) only.\end{revnote}
+
+\subsection{N1: sign restrictions on realised tables}
+
+\begin{result}[Proposition M2, N1 is sharp for continuous unit tables --- PHASE2c \S2]\label{res:m2}
+\status{Proved} (continuous reading). For the N1 feasible set of Definition~2 (PHASE2c \S2), $F=\{\beta:\beta_i\in S(X_i,T_i)\cap
+U_i,\ g_k(\beta)\ge-\varepsilon_k\}$: (a) the values of $\varphi$ attained by
+continuous unit tables are $\varphi(F)=[\min_F\varphi,\max_F\varphi]$, sharp
+given the margins; (b) $F=\emptyset$ iff the restrictions contradict the margins
+in the continuous problem; (c) under CR the set is a union of at most two
+intervals; (d) the sets are nested componentwise in $\varepsilon$ with continuous
+piecewise-linear endpoints; the preserving set of slacks is in general not a
+product of intervals, and its boundary is the breakdown frontier; a scalar
+breakdown value needs a stated path.
+\end{result}
+\begin{plain}
+With sign beliefs alone and no regression, the bound is an LP over all unit
+tables that fit the margins, and it is exactly right for real-valued tables.
+With whole-number ballots it can differ (Remark~M2.1).
+\end{plain}
+\proofref[pD-res-proposition-M2]{Appendix~\ref{app:phase2c}, \S2, Proposition~M2 steps 1--6}
+\begin{revnote}
+(P-B1, P-B2, I.10.) ``Sharp in the finite-population sense'' became ``sharp for
+continuous unit tables, conditional on the margins''; ``the breakdown value'' for
+vector slacks became the breakdown frontier with a scalar value along a path; in
+round~2, the set and its frontier were distinguished. Checks C7 [F], C7b [V].
+\end{revnote}
+
+\begin{result}[Remark M2.1, integer counts --- PHASE2c \S2]\label{res:m21}
+\status{Proved} for $2\times2$ with margins only; \status{open} otherwise (R15).
+In $2\times2$ with margins only and sign rows on one column, the integer gap set
+is the DD interval intersected with a lattice of step $1/N_1+1/N_0=1/(N\mu(1-\mu))$;
+endpoints differ from the continuous ones by less than one step (e.g.\
+$4.8\times10^{-6}$ for $N=10^6$, $\mu=0.3$). With unit restrictions, joint
+columns or $R\ge3$, the integer--continuous gap is not bounded by this argument.
+\end{result}
+\begin{plain}
+Counting whole ballots matters only for tiny tables or near-ties, at least in
+$2\times2$; the referees' four-voter examples show that CR can then be empty and
+an endpoint can move.
+\end{plain}
+\proofref[pD-res-remark-M2.1]{Appendix~\ref{app:phase2c}, \S2, Remark~M2.1 (proposition and proof); checks C7, C7a}
+\begin{revnote}(P-B1, P-E11, I.5.) Added after review; the lattice step quoted with both group totals in round~2.\end{revnote}
+
+\begin{result}[Proposition M3, two rows --- PHASE2c \S2]\label{res:m3}
+\status{Proved.} For $R=2$, $\Var_p(X)>0$, continuous tables, no unit
+restrictions and no other sign rows: (a) $\delta_W\ge0\iff D\le D_{ER}$ and
+$\delta_B\ge0\iff D\ge D_{NM}$; (b) $\{\delta_W\ge0\}$ gives
+$[D^-,\min\{D^+,D_{ER}\}]$, empty iff $D_{ER}<D^-$; (c) $D_{NM}\in[D^-,D^+]$
+always, so between signs are never refuted in this problem; (d)
+$D_{NM}=\gamma D_{ER}$, $\gamma\in(0,1]$, and CR has exactly one non-empty branch
+when $\gamma<1$ and $D_{ER}\ne0$; at $\gamma=1$ or $D_{ER}=0$ both branches are
+non-empty with the same gap image. The CR set is $[D_{NM},\min\{D^+,D_{ER}\}]$
+if $D_{ER}\ge0$ and $[\max\{D^-,D_{ER}\},D_{NM}]$ otherwise; under it
+$\operatorname{sign}D=\operatorname{sign}D_{ER}$.
+\end{result}
+\begin{plain}
+In this base problem (two groups, real-valued tables, nothing else imposed) only a
+within sign can be contradicted by the margins; a between sign and contextual
+reinforcement are always feasible, because ``every group votes like its unit''
+fits them. That non-refutability belongs to this base system only: under the
+linear rung CR can be rejected jointly (Remark~R3.2); with integer counts CR can be
+rejected outright; known cells or unit orderings remove the witness. The
+equal-rates table satisfies the CR \emph{union}, in R$\times$C too, but only the
+branch matching its within sign.
+\end{plain}
+\begin{sketch}
+By Lemma~M1(c) with two rows, $\delta_W=(D_{ER}-D)\Var_p(X)$ and
+$\delta_B=(D-D_{NM})\mu(1-\mu)$, so each sign is a half-line in the gap $D$, and
+$D$ ranges over the whole DD interval $[D^-,D^+]$. The equal-rates table
+($\beta_{i1}=\beta_{i2}=T_i$) gives $D=D_{NM}$, so $D_{NM}$ is always feasible and
+between signs are never refuted in this base problem. EGGHM's identity
+$D_{NM}=\gamma D_{ER}$ with $\gamma\in(0,1]$ shows that the two same-sign branches
+of CR overlap only when $\gamma=1$ or $D_{ER}=0$.
+\end{sketch}
+\proofref[pD-res-proposition-M3]{Appendix~\ref{app:phase2c}, \S2, Proposition~M3 steps 1--8 and ``Reading''; checks C2, C8, C8b, C15}
+\begin{revnote}
+(P-B3--P-B5, P-E12, P-E13; round~2 I.1, I.9.) The hypotheses ``no unit-level
+restrictions, no other sign rows'' were missing; (d) failed at $\gamma=1$;
+``CR is never refuted'' now names its base system; branches and their gap images
+are distinguished; in round~2 the equal-rates witness was corrected to give the
+CR union, not both branches (three-row example, C15 [F]).
+\end{revnote}
+
+\begin{result}[Proposition M4, joint restrictions --- PHASE2c \S2]
+\status{Proved.} Imposing signs on several columns or rows jointly gives a subset
+of each single restriction's feasible set.
+\end{result}
+\begin{plain}
+Joint beliefs are weakly tighter. In $2\times3$ simulations, signing two columns
+jointly narrowed column 1 strictly in 75 of 139 populations. With two
+complementary columns, the \emph{same} weak within sign on both forces $D=ER$.
+\end{plain}
+\proofref[pD-res-proposition-M4]{Appendix~\ref{app:phase2c}, \S2, Proposition~M4; checks C3, C3b}
+\begin{revnote}(I.8.) The round-1 text said ``opposite within signs''; it is the same sign on complementary columns.\end{revnote}
+
+\subsection{Signs under linear contextual effects (K-rows)}
+
+\begin{result}[Proposition M5 --- PHASE2c \S3]\label{res:m5}
+\status{Proved}; (c) \status{for M0 only}. Write the rung's means as
+$m_i=m_{\rm id}(V_i)+L_ik$. (a) Every association $\delta^*$ is affine in $k$ under
+every rung, so each sign is one LP row and CR is a union of two LPs. (b) Mean-level
+ordering in every district on its support implies $\delta^*_B(r,s)\ge0$, pooled.
+(c) For $R=2$ under M0, $\delta^*_W=a(w_1+d_1)+bw_1$ with $a,b\ge0$, so both
+slopes $\ge0$ imply $\delta^*_W\ge0$. Under district rungs the pooled
+$\delta^*_W$ contains a between-district term with no sign, and the implication
+fails (six-unit example: within districts $+0.00064$, pooled $-0.04927$).
+\end{result}
+\begin{plain}
+Under a linear rung the sign beliefs become cheap extra constraints on the
+unknown $K$. But a pooled sign under district models is one restriction across
+all districts: positive slopes in every district do not make the pooled within
+association positive, because district baselines can fall as composition rises.
+\end{plain}
+\begin{sketch}
+Under any linear rung the model means are an identified part plus a design-fixed
+linear map of the unknowns $k$, and every association is linear in the means
+with design weights, so each sign is one linear row in $k$. For (c) under M0,
+$\Cov_{w^1}(b_0+b_1X,X)=b_1\Var_{w^1}(X)$, so the within association is a
+nonnegative combination of the two contextual slopes. Under district rungs the
+law of total covariance adds a between-district term, the covariance of district
+intercepts with composition, which has no sign.
+\end{sketch}
+\proofref[pD-res-proposition-M5]{Appendix~\ref{app:phase2c}, \S3, Proposition~M5 steps 1--5; checks C4 (rebuilt), C9}
+\begin{revnote}
+(P-B7; E2-4.) M5 was stated for every rung with the pooled formula. Now (a) uses
+the stacked parameterisation of each rung, (b) needs district-specific ordering,
+(c) holds for M0 only. Sharpness and inference for M-SIGN under district rungs
+became proof item R16 (open). A district rung with sign rows has no coverage
+theorem yet.
+\end{revnote}
+
+\paragraph{Remark M5.1 (which $\delta$).} N1 uses the realised associations;
+K-rows use $\delta^*$. Their difference is a design-weighted sum of unit residuals
+with mean zero; under P3-S1a its standard deviation is at most
+$\tfrac12\{\sum_i(\sum_r|c_{ir}|)^2\}^{1/2}$. The earlier ``order $p^{-1/2}$''
+claim needed conditions (P-B8).
+
+\subsection{N2: monotone nonparametric contextual effects (two rows)}
+
+N2 is defined on the finite empirical design law (support points
+$x_1<\dots<x_{J_X}$). Model N2($\sigma$): (S1), $\E[\beta\mid V]=m(X)$, and for
+designated $(r,c)$, $\sigma_{rc}m_{rc}$ is nondecreasing on the support.
+
+\begin{result}[Lemma N2.1 and Proposition N2.2 --- PHASE2c \S4]\label{res:n22}
+\status{Proved} (on the finite support). N2.1: $m(x)\in S(x,\tau(x))$ at every
+support point. N2.2: (a) the LP over $\mathcal M_O$ (support-point means in
+$S(x_j,\tau(x_j))$ plus adjacent order rows) is an \emph{outer} set for $\tilde
+B$, not claimed sharp; (b) every point of $\mathcal M_O$ extends to a monotone
+Borel $m$, so on the complete finite support nothing is lost (on a coarser grid
+it is only a relaxation); (c) with quadratic $\tau$, M0 with signed slopes lies
+inside N2; (d) both rows nondecreasing imply $\delta^*_W\ge0$; (e) for $R\ge3$ a
+direction needs a simplex chart, and (d) has no general analogue.
+\end{result}
+\begin{plain}
+N2 assumes only ``no reversals'': each group's average rate moves in one
+direction as its share grows, in any shape. It is weaker than straight lines with
+signed slopes, so its bound contains theirs. It is not in the package.
+\end{plain}
+\paragraph{What fails if N2 is false.} If a designated group's mean rate reverses
+direction somewhere (a U-shape or a tipping point), the order rows exclude the
+true mean function, and the bound can exclude the truth. As with a false sign,
+the bound can be narrow, non-empty and wrong; an empty set is the only warning,
+and plotting the fitted regression for reversals is a partial check.
+
+\proofref[pD-res-lemma-N2.1]{Appendix~\ref{app:phase2c}, \S4, Lemma~N2.1 steps 1--2; Proposition~N2.2 steps 1--5; checks C5, C10, C10b}
+\begin{revnote}
+(P-B9, P-B10, P-B29.) The support convention was added; (b) is false on a grid
+(Remark~N2.2.2, C10 [F]); the proposed sharp version was not sharp when size is
+informative (Remark~N2.2.1, C10b [F]); (e) gained a chart and weighted
+covariances.
+\end{revnote}
+
+\begin{result}[Conjecture N2.2$'$ --- PHASE2c \S4, Remark N2.2.1]\label{res:n22prime}
+\status{Conjecture.} The sharp N2 set is
+$\{m:\ m(X)\in\E[S(X,T)\mid V]\ P_V\text{-a.s.}\}$ plus the shape restrictions.
+A sufficiency argument under the selection-expectation reading (due to the
+partial-identification referee, round~2) is recorded as a remark; necessity in
+general is not written, and a procedure that uses only $\E[T\mid X]$ does not
+attain the set when size is informative. The conjecture stays open.
+\end{result}
+\begin{plain}
+When unit size carries information, conditioning on composition alone can admit
+mean rates that the full model excludes (example: $(0.75,0.25)$ admitted,
+$(0.5,0.5)$ forced). The same caution applies to the planned M-SHARP series
+bound (R9): it is ``tighter than $\ThO$'', not sharp.
+\end{plain}
+\begin{revnote}(P-B10; I.11.) Added as a conjecture in round~1; the referee's sufficiency remark added in round~2, conjecture kept open by decision.\end{revnote}
+
+\begin{result}[Proposition N2.3, structural local identity --- PHASE2c \S4]\label{res:n23}
+\status{Proved} (as a calculus identity). For differentiable $m_{1c},m_{2c}$ and the
+structural aggregate $\tau_m(z)=zm_1(z)+(1-z)m_2(z)$: (a)
+$\tau'_m=D(x)+\delta_W(x)$; (b)--(c) local signs and local CR in terms of
+$\tau'_m$; (d) if both rows are nondecreasing on a neighbourhood of $x$, the
+local sign is $\ge0$; monotonicity on the finite support is not enough, and the
+local sign everywhere neither implies nor is implied by the aggregate $\delta^*_W$
+sign. On a finite support $\tau'$ is not identified, so N2.3 is \emph{not} an
+observable restriction; the N2-local rows were dropped (decision U4(a)).
+\end{result}
+\begin{plain}
+EGGHM's local results are a statement about smooth functions, but the data never
+identify a derivative at isolated compositions. So ``local'' sign beliefs cannot be
+imposed from aggregates without an identified regression family.
+\end{plain}
+\proofref[pD-res-proposition-N2.3]{Appendix~\ref{app:phase2c}, \S4, Proposition~N2.3 steps 1--3; checks C6, C11, C13, C16}
+\begin{revnote}
+(P-B11, P-B12, P-B34; I.4.) N2.3 was stated as an observable LP row with an
+estimated $\tau'$ (C11 [F]); the smooth witness replaced a kinked one (C13 [I]);
+in round~2 (d)'s premise became monotonicity on a neighbourhood (C16 [F]).
+\end{revnote}
+
+\begin{result}[Lemma N2.4, person-weighted bins --- PHASE2c \S4]\label{res:n24}
+\status{Proved.} With person-weighted bin rates
+$\bar m_{1b}=E_b[Xm_1]/\bar x_b$, $\bar m_{2b}=E_b[(1-X)m_2]/(1-\bar x_b)$ and the
+model-implied bin mean $\bar\tau_b=E_b\tau$: (i) $\bar m_b\in S(\bar x_b,\bar\tau_b)$;
+(ii) the targets are linear in the bin rates; (iii) monotonicity is preserved
+across ordered bins. The binned LP is an outer relaxation of global N2.
+\end{result}
+\begin{plain}
+With many compositions, group them into bins, but average rates weighting by
+people in each group, not by units; the ordinary bin average breaks the
+accounting identity (0.3125 against 0.25 in the referee's example). In samples the
+observed bin mean of $T$ estimates $\bar\tau_b$ with error.
+\end{plain}
+\proofref[pD-res-lemma-N2.4]{Appendix~\ref{app:phase2c}, \S4, Lemma~N2.4 proof; check C12}
+\begin{revnote}(P-B13; I.6.) Replaces an invalid [CE-cvx] argument; round~2 distinguished the model-implied bin mean from the observed one.\end{revnote}
+
+\paragraph{What Phase~3 must supply for N2 (PHASE2c \S6).} A weighted polynomial of
+\emph{prespecified} degree $q$ (not chosen by cross-validation: post-selection
+coverage is about 0.68 in the referee's design, check C12b), conditional on the
+specification; then P3.5 applies to the coefficients. (P-B14, I.6.)
+
+\subsection{Results from the package design (PACKAGE\_DESIGN \S\S2.2, 5)}
+
+These results are in Appendix~\ref{app:pkgdesign}. Write
+$q_{rs}(x)=(Qx)_r-(Qx)_s$ (identified) and $g_{rs}(x;k)=(Kx)_r-(Kx)_s$.
+
+\paragraph{The audit of combining JKST with Monotone EI (PACKAGE\_DESIGN \S2.1).}
+PACKAGE\_DESIGN \S2 audits a proposal (from an outside conversation) to combine
+JKST bounds with Monotone-EI beliefs. Its verdicts, with their basis:
+
+{\small
+\begin{longtable}{@{}L{0.05\linewidth}L{0.33\linewidth}L{0.40\linewidth}L{0.14\linewidth}@{}}
+\toprule \# & Claim & Verdict & Basis \\ \midrule\endfirsthead
+\toprule \# & Claim & Verdict & Basis \\ \midrule\endhead
+G1 & JKST bounds on $w_1$ map to bounds on $(\delta_W,\delta_B)$; re-imposing them adds nothing & Correct: in $2\times2$ the pair lies on a line segment, $\delta_W/\Var(X_N)+\delta_B/\Var(X)=D_{ER}-D_{NM}$; re-imposing changes the $D$ interval by $<10^{-15}$ & M5(a); [V1] \\
+G2 & Signs and CR give closed-form cuts of $[L_J,U_J]$ & Correct (proved; Result~\ref{res:g2}) & EGGHM Props 4, 6; [V1] \\
+G3 & ``Incompatible $\Rightarrow$ evidence against the assumptions'' & Correct only jointly with LCE. Model-free, the $\delta_B$ sign and CR are never refutable (M3). Under LCE a wrong $\delta_B$ sign gave an empty set in 223 of 2000 designs, but in 1777 a non-empty interval that excludes the truth. Emptiness is a one-sided test with low power & M3; [V2] \\
+G4 & Pointwise ordering on the hull & Already implemented as \texttt{order} & PHASE4; M5(b) \\
+G5 & Pointwise contextual monotonicity $w_1+d_1x\ge0$ & Correct algebra; new as a module (M-LOC); weaker than signed slopes and, given C1, stronger than $\delta_W\ge0$ & P-N; [V3] \\
+G6 & Unidentified dimension $(C-1)\binom R2$ & Correct & 2a Lemma~1 \\
+G7 & R$\times$C gives ``more opportunity'' & Correct in a precise sense (P-R, P-S); caveats: W1 vs W2 for $R\ge3$; N2 no longer implies $\delta_W$ for $R\ge3$; a known table pins only $(R-1)(C-1)$ directions & \S5; [V5], [V7] \\
+G8 & $2\times3$: adding-up gives $\sum_ct_c=0$ & Correct but built into $K$; the gain comes from joint restrictions across columns, strictly tighter than the best single-column restriction in 18\% of designs & M4; [V6] \\
+G9 & Joint sampling uncertainty & Correct concern; handled if all rows enter one inference stack: proved for the conservative and projection intervals in fixed dimension; the CLR interval as implemented is algorithmic & P3.5(a), (b2); (b3) \\
+\bottomrule
+\end{longtable}
+}
+
+\begin{result}[G2, JKST plus signs in $2\times2$ --- PACKAGE\_DESIGN \S2.2; register R13]\label{res:g2}
+\status{Proved.} Under LCE in $2\times2$ with $\gamma<1$: $\delta_W\ge0$ gives
+$[L_J,\min(U_J,D_{ER})]$; $\delta_B\ge0$ gives $[\max(L_J,D_{NM}),U_J]$; CR gives
+$[L_J,U_J]\cap[\min,\max](D_{ER},D_{NM})$, where $[L_J,U_J]$ is the JKST interval
+for the gap.
+\end{result}
+\begin{plain}
+Adding a sign belief to JKST cuts its interval at one of two data-computed
+numbers. In 2000 random LCE designs with true signs, the within sign tightened
+JKST in 83\% of designs (median width ratio 0.70), the between sign in 89\%
+(0.67). A sign is redundant exactly when the JKST-implied interval for that
+association already excludes zero.
+\end{plain}
+\proofref[pG-proof-of-g2-22-any-mean-level-model]{Appendix~\ref{app:pkgdesign}, \S2.2, steps 1--3; [V1], [V2]}
+
+\begin{result}[Proposition P-S, sandwich lemma --- PACKAGE\_DESIGN \S5.1; register R12]\label{res:ps}
+\status{Proved.} For any $R$ and one column, with the between-group gap
+$O_{rs}(x)=(Hx)_r-(Hx)_s$ and the weighted contextual derivative
+$L_{rs}(x)=(x^\top H)_r-(x^\top H)_s$: (a) $O_{rs}+L_{rs}=2q_{rs}=\partial_{e_r-e_s}\tau$;
+(b) $O_{rs}=q_{rs}+g_{rs}$, $L_{rs}=q_{rs}-g_{rs}$; (c) $O_{rs}\ge0$ and
+$L_{rs}\ge0$ at $x$ iff $|g_{rs}(x;k)|\le q_{rs}(x)$, possible only if
+$q_{rs}(x)\ge0$ (a data test).
+\end{result}
+\begin{plain}
+An ordering belief (``group $r$ at least as supportive as $s$'') and a local
+contextual belief restrict the same unknown from opposite sides, so together
+they confine it to an interval whose half-width is an identified slope.
+\end{plain}
+\proofref[pG-res-proposition-P-S]{Appendix~\ref{app:pkgdesign}, \S5.1, steps 1--4; [V4]}
+
+\begin{result}[Proposition P-R, rank lemma --- PACKAGE\_DESIGN \S5.2; register R5]\label{res:pr}
+(a) One pair restricts an $(R-1)$-dimensional subspace of $\Kspace_c$: \status{proved}.
+(b) A star tree of pairs reaches all $\binom R2$ directions: \status{proved}.
+(c) Any spanning tree does: \status{checked} for chains, $R=3,4,5$ [V7];
+general proof open (R5). (d) M-ORD $\cap$ M-LOC on a star tree bounds $K_c$ without
+DD rows: follows from (b) and P-S.
+\end{result}
+\begin{plain}
+With three or more groups, each pairwise comparison (``group $r$ against group
+$s$'') can only restrict $R-1$ of the unknown directions of $K$. Enough well-chosen
+pairs (a star, ``group 0 against each other group'') reach all of them; whether
+any is actually cut depends on the beliefs and the data. This is the precise
+sense in which more groups give ``more opportunity'' for beliefs to bind.
+\end{plain}
+\proofref[pG-res-proposition-P-R]{Appendix~\ref{app:pkgdesign}, \S5.2}
+
+\begin{result}[Proposition P-N and Conjecture C1, nesting in $2\times2$ under M0 --- PACKAGE\_DESIGN \S5.3; register R1]\label{res:pn}
+\status{Proved} for (a)--(b); (c) \status{conjecture}. Under pooled M0: (a) signed
+slopes imply weighted-local on the hull; (b) $\delta_W=(a+b)(w_1+d_1x^*)$, so
+weighted-local implies $\delta_W\ge0$ whenever $x^*=a/(a+b)$ lies in the
+composition hull; (c) Conjecture C1: $x^*$ always lies in the hull (no violation
+in 2000 random designs and an adversarial search of 50{,}000).
+\end{result}
+\begin{plain}
+In the pooled $2\times2$ model, the weighted-local belief (``replacing a member of
+one group by one of the other does not lower the composition-weighted rates'',
+at every composition) sits between signed contextual slopes and a sign on the
+average within association. The second step needs one particular composition,
+$x^*$, to lie in the observed range; Conjecture C1 says it always does, and no
+counterexample has been found, but it is not proved.
+\end{plain}
+\proofref[pG-nesting-in-22-under-lce-p-n]{Appendix~\ref{app:pkgdesign}, \S5.3 (a)--(b); [V3]}
+\begin{revnote}
+(P-B7.) The chain ``signed slopes $\subset$ weighted-local $\subset\delta_W\ge0$''
+is scoped to M0; it fails for pooled M1 (check I2 of the plan).
+\end{revnote}

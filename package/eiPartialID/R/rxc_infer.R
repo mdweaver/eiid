@@ -253,11 +253,10 @@
 }
 
 # Projection interval (P3.5(b2)(ii)) from collected candidates: upper end min_j(theta_j + k se_j),
-# lower end max_j(theta_j - k se_j), k = sqrt(qchisq(1 - alpha, q)), q = rank of V.
-# Rank guard (referee report B, P-B40): the Scheffe-type event covers gradients in the range of
-# V-hat only, so the interval works in the reduced (full-rank) parameterisation given by that
-# range. Candidates whose gradients use a numerically null direction of V-hat are dropped
-# (valid, wider); an end with no candidate left is -Inf / +Inf, i.e. the logical range after
+# lower end max_j(theta_j - k se_j), k = sqrt(qchisq(1 - alpha, q)), q = dim(beta) = ncol(V)
+# (0.3.1; a numerical rank does not establish an exact reduction, P3 section 5, remark after
+# (b2)(ii)). Rank guard (P-B40), a safeguard only: candidates whose gradients use a numerically
+# null direction of V-hat are dropped (this can only widen the interval); an end with no candidate left is -Inf / +Inf, i.e. the logical range after
 # clipping. Attribute "dropped": number of candidates dropped. With a nonsingular V-hat (every
 # full-rank design in practice; P3 section 8) nothing changes.
 # Critical value (0.3.1, theory decision on round-2 review): q = dim(beta), not the numerical rank

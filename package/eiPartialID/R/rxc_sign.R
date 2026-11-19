@@ -278,7 +278,8 @@
   pr <- switch(cr$version,
                W1 = sprintf("delta_B(%s vs rest), delta_W(%s vs rest)", rl[cr$row], rl[cr$row]),
                W2 = sprintf("delta_B(%s vs rest), Delta_W(%s) [W2]", rl[cr$row], rl[cr$row]),
-               pair = sprintf("delta_B(%s, %s), Delta_W(%s) [W2]", rl[cr$row], rl[cr$other], rl[cr$row]))
+               pair = sprintf("delta_B(%s, %s) [pair] and Delta_W(%s) [W2, pooled over all groups]",
+                              rl[cr$row], rl[cr$other], rl[cr$row]))
   sl <- if (is.null(cr$slack) || cr$slack == 0) "" else sprintf(" (slack %g)", cr$slack)
   sprintf("CR for '%s': same sign of %s%s", cl[cr$col], pr, sl)
 }

@@ -1,3 +1,40 @@
+# eiPartialID 0.3.1
+
+Package side of the second-round referee reports (Batch B ecological-inference
+report; Phases 1-3 report, item 3). Plan: `docs/extension/reviews/ROUND2_PACKAGE_PLAN.md`.
+
+* `proj_actual`: the Bhatia-Davis variance bound now comes from a projection
+  interval for the rung alone (no optional rows), so the projection column
+  rests only on P3.5(b2)(ii) and a union bound, whatever restrictions are
+  added. `ci_actual` (CLR) keeps its CLR-based bound, now labelled as such.
+  `fpc = "popoviciu"` gives the bound 1/4 in every column.
+* Projection critical value: `sqrt(qchisq(1 - alpha, p))` with
+  `p = dim(beta)`, not the numerical rank of the estimated covariance matrix.
+  The rank is printed as a diagnostic, and the rank guard stays as a labelled
+  safeguard. Unchanged in every full-rank design.
+* `print()` states, for each fit, which result covers its intervals: pooled M0
+  (P3.5(b2)(ii), or P3.5(a) for the conservative interval; with sign/CR rows
+  PHASE5a R10); grouped models only with few, large groups (regime R1); and
+  no coverage theorem for sign/CR restrictions under grouped rungs (R16 open).
+  The grouped M-SIGN note says the same.
+* A note when the Bhatia-Davis allowance's interval for the weighted mean rate
+  lies within [0, .05] or [.95, 1]: the allowance relies on that rate being
+  bounded away from 0 and 1 (P3.5(c1)), and `fpc = "popoviciu"` is the safe
+  choice. An automatic fallback is planned.
+* With several optional restrictions, the rung-only block is labelled as
+  their joint effect, with a pointer to the added-last gains in
+  `eiRedundancy()`.
+* The pairwise CR label names both sides: `delta_B(A, B) [pair] and
+  Delta_W(A) [W2, pooled over all groups]`.
+* Vignette and plain-language guide: the W1 sign is a weighted sum of two
+  within associations (either part can be negative; two-precinct example);
+  pairwise CR changes only the between side; each coverage figure names its
+  procedure (the literal bracket-and-CI intersection covered 304 of 600, the
+  reference procedure that widens afterwards 550 of 600); both false-belief
+  results (398, 110 and 0 of 400 at s = 0, .08, .25); the projection proof is
+  scoped to pooled M0; open items listed.
+* No estimate or interval in the package's reference examples changed.
+
 # eiPartialID 0.3.0
 
 ## New: signs on associations and contextual reinforcement (M-SIGN), experimental

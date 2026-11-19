@@ -102,7 +102,11 @@ rejected).}
 \item{ci}{\code{"clr"} (default; reported with the projection interval
 alongside), \code{"conservative"} or \code{"none"}.}
 
-\item{fpc}{unit-level allowance for \code{ci_actual}: \code{"bhatia-davis"} (default) or \code{"popoviciu"}.}
+\item{fpc}{unit-level allowance for \code{ci_actual} and \code{proj_actual}:
+\code{"bhatia-davis"} (default; the variance bound comes from a CLR
+interval for \code{ci_actual}, from a projection interval for the rung
+alone for \code{proj_actual}, and from a conservative interval with
+\code{ci = "conservative"}) or \code{"popoviciu"} (the bound 1/4).}
 
 \item{jkst}{also report Jiang et al. CI_x intervals.}
 
@@ -178,15 +182,25 @@ intervals built from the same candidate endpoints.
 Status of the intervals (PHASE3_inference.md, sections 0.5 and 5): the CLR
 interval as implemented collects candidate endpoints by simulation and is
 \emph{algorithmic} (its coverage is a conjecture supported by simulation);
-the projection interval and the conservative interval have an asymptotic
-guarantee for a fixed-dimensional regression with a nonsingular covariance
-matrix \eqn{\hat V} (M0 in any full-rank design; grouped models with few,
-large groups). If \eqn{\hat V} is numerically singular, candidate endpoints
-whose gradients use its null directions are dropped from the projection and
-CLR intervals (a valid, wider interval) and a note says so. The
-\code{proj_actual} allowance for unit-level deviations uses a variance bound
-taken from a projection interval, so the projection columns rest only on
-P3.5(b2). Inference is conditional on the design and on the
+the projection interval (P3.5(b2)(ii), critical value
+\eqn{\sqrt{\chi^2_{p,1-\alpha}}} with \eqn{p = \dim\beta}) and the
+conservative interval (P3.5(a)) have an asymptotic guarantee for the pooled
+model M0 in a full-rank design, and for grouped models only with few, large
+groups (regime R1; with many small groups their coverage is a simulation
+finding). With sign or CR restrictions the guarantee (PHASE5a R10) is for
+pooled M0 only; under grouped rungs no interval with these restrictions is
+covered by a theorem (R16 open). \code{print()} states the status for each
+fit, with the numerical rank of \eqn{\hat V} as a diagnostic. As a
+safeguard (rank guard), candidate endpoints whose gradients use a numerically
+null direction of \eqn{\hat V} are dropped from the projection and CLR
+intervals (a valid, wider interval) and a note says so. The
+\code{proj_actual} allowance for unit-level deviations uses a Bhatia-Davis
+variance bound taken from a projection interval for the rung alone, so the
+projection columns rest only on P3.5(b2)(ii) and a union bound;
+\code{ci_actual} with CLR takes that bound from a CLR interval. The
+Bhatia-Davis allowance needs the weighted mean rate bounded away from 0 and 1
+(P3.5(c1)); a note suggests \code{fpc = "popoviciu"} when its interval lies
+within [0, .05] or [.95, 1]. Inference is conditional on the design and on the
 group effects; units are assumed independent given them, and no clustered
 variance is used (group-level shocks belong in the mean: use M1 or M2).
 
@@ -194,7 +208,8 @@ Sign and contextual-reinforcement restrictions (\code{assoc}, \code{cr};
 the M-SIGN module) are \strong{experimental} in this release: both referee
 reports of review batch B are being answered. Under grouped rungs (M1,
 M1delta, M2, L4 with groups) each sign is one pooled restriction across
-groups, and sharpness (PHASE5a R3(b)) is proved only for the pooled model M0.
+groups, and sharpness (PHASE5a R3(b)) and inference (R10) are proved only
+for the pooled model M0.
 }
 \examples{
 if (requireNamespace("eco", quietly = TRUE)) {

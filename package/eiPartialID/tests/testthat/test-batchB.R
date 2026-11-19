@@ -121,7 +121,7 @@ test_that("projection rank guard: candidates using a null direction of V-hat are
   Zs <- list(V = V)
   cu <- list(G = rbind(c(1, 0), c(0, 1)), ic = c(1, 0.5))   # second candidate: sigma = 0, nonzero gradient
   cl <- list(G = rbind(c(1, 0)), ic = -1)
-  k <- sqrt(stats::qchisq(0.95, 1))
+  k <- sqrt(stats::qchisq(0.95, 2))                          # q = dim(beta) = 2 (0.3.1), not rank 1
   pr <- eiPartialID:::.rxc_projection(st, cu, cl, Zs, 0.05)
   expect_equal(as.numeric(pr), c(-1 - k, 1 + k))             # old code: upper end 0.5 (sigma 0 taken as exact)
   expect_equal(attr(pr, "dropped"), 1)
@@ -195,7 +195,7 @@ test_that("proj_actual takes its Bhatia-Davis bound from a projection interval (
   set.seed(6); ci <- eiPartialID:::.rxc_ci_clr(st, cons, tg, 0.0025, 0.0025, Zs, 50, proj_alpha = 0.005)
   bd <- function(iv) { lo <- max(0, min(1, iv[1])); hi <- max(0, min(1, iv[2]))
     sqrt(sum(wr^2) * (if (lo <= 0.5 && hi >= 0.5) 0.25 else max(lo * (1 - lo), hi * (1 - hi)))) }
-  expect_equal(sd2, c(bd(ci[1:2]), bd(attr(ci, "projection"))))
+  expect_equal(as.numeric(sd2), c(bd(ci[1:2]), bd(attr(ci, "projection"))))
   expect_equal(eiPartialID:::.rxc_fpc_sd(st, cons, 1, 1, "popoviciu", 0.005, Zs, 50), rep(0.5 * sqrt(sum(wr^2)), 2))
   tb <- f$table
   expect_true(tb$proj_actual_lower <= tb$proj_model_lower && tb$proj_actual_upper >= tb$proj_model_upper)
@@ -210,7 +210,7 @@ test_that("CR fits print 'algorithmic' on the CLR lines and the projection besid
   out <- capture.output(print(f))
   expect_true(any(grepl("proj_model", out)))
   expect_true(any(grepl("ci_model: .*", out)) && any(grepl("CLR: algorithmic", out)))
-  expect_true(any(grepl("ci_actual: .*CLR, algorithmic", out)))
+  expect_true(any(grepl("CLR \\(algorithmic\\); its Bhatia-Davis bound also uses a CLR interval", out)))
   expect_true(any(grepl("union of the CLR branch intervals \\(algorithmic\\)", out)))
   expect_false(is.na(f$table$proj_model_lower))
 })
@@ -240,7 +240,7 @@ test_that("base column: the rung-only result is reported beside the restricted o
   expect_equal(tb$base_estimate_lower, g$table$estimate_lower)
   expect_equal(tb$base_ci_model_lower, g$table$ci_model_lower)        # same draws as a separate fit
   expect_equal(tb$base_ci_actual_upper, g$table$ci_actual_upper)
-  expect_output(print(f), "The rung alone \\(M0, without the optional restrictions\\)")
+  expect_output(print(f), "The rung alone \\(M0, without the optional restriction\\)")
   expect_false("base_estimate_lower" %in% names(g$table))
   expect_false("base_estimate_lower" %in% names(eiBounds(x = s$x, t = s$t, n = s$n, targets = Dg, ci = "none",
                                                           tests = FALSE, restrictions = cr1, base = FALSE)$table))
@@ -272,7 +272,7 @@ test_that("conservative ci_actual takes its Bhatia-Davis bound from the conserva
   tg <- eiPartialID:::.rxc_target(st, matrix(c(1, 0, 0, 0), 2), w = wpi)
   cc <- eiPartialID:::.rxc_ci_conservative(st, cons, tg, 0.005, Zs)$ci
   lo <- max(0, min(1, cc[1])); hi <- max(0, min(1, cc[2]))
-  expect_equal(sdc, rep(sqrt(sum(wr^2) * (if (lo <= 0.5 && hi >= 0.5) 0.25 else max(lo * (1 - lo), hi * (1 - hi)))), 2))
+  expect_equal(as.numeric(sdc), rep(sqrt(sum(wr^2) * (if (lo <= 0.5 && hi >= 0.5) 0.25 else max(lo * (1 - lo), hi * (1 - hi)))), 2))
   fc <- eiBounds(x = s$x, t = s$t, n = s$n, targets = list(a = c(1, 1)), seed = 1, tests = FALSE, ci = "conservative")
   expect_true(fc$table$ci_actual_lower <= fc$table$ci_model_lower + 1e-9)
   expect_true(fc$table$ci_actual_lower >= fc$table$dd_lower - 1e-9 && fc$table$ci_actual_upper <= fc$table$dd_upper + 1e-9)

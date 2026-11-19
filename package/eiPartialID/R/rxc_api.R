@@ -112,15 +112,25 @@
 #' Status of the intervals (PHASE3_inference.md, sections 0.5 and 5): the CLR
 #' interval as implemented collects candidate endpoints by simulation and is
 #' \emph{algorithmic} (its coverage is a conjecture supported by simulation);
-#' the projection interval and the conservative interval have an asymptotic
-#' guarantee for a fixed-dimensional regression with a nonsingular covariance
-#' matrix \eqn{\hat V} (M0 in any full-rank design; grouped models with few,
-#' large groups). If \eqn{\hat V} is numerically singular, candidate endpoints
-#' whose gradients use its null directions are dropped from the projection and
-#' CLR intervals (a valid, wider interval) and a note says so. The
-#' \code{proj_actual} allowance for unit-level deviations uses a variance bound
-#' taken from a projection interval, so the projection columns rest only on
-#' P3.5(b2). Inference is conditional on the design and on the
+#' the projection interval (P3.5(b2)(ii), critical value
+#' \eqn{\sqrt{\chi^2_{p,1-\alpha}}} with \eqn{p = \dim\beta}) and the
+#' conservative interval (P3.5(a)) have an asymptotic guarantee for the pooled
+#' model M0 in a full-rank design, and for grouped models only with few, large
+#' groups (regime R1; with many small groups their coverage is a simulation
+#' finding). With sign or CR restrictions the guarantee (PHASE5a R10) is for
+#' pooled M0 only; under grouped rungs no interval with these restrictions is
+#' covered by a theorem (R16 open). \code{print()} states the status for each
+#' fit, with the numerical rank of \eqn{\hat V} as a diagnostic. As a
+#' safeguard (rank guard), candidate endpoints whose gradients use a numerically
+#' null direction of \eqn{\hat V} are dropped from the projection and CLR
+#' intervals (a valid, wider interval) and a note says so. The
+#' \code{proj_actual} allowance for unit-level deviations uses a Bhatia-Davis
+#' variance bound taken from a projection interval for the rung alone, so the
+#' projection columns rest only on P3.5(b2)(ii) and a union bound;
+#' \code{ci_actual} with CLR takes that bound from a CLR interval. The
+#' Bhatia-Davis allowance needs the weighted mean rate bounded away from 0 and 1
+#' (P3.5(c1)); a note suggests \code{fpc = "popoviciu"} when its interval lies
+#' within [0, .05] or [.95, 1]. Inference is conditional on the design and on the
 #' group effects; units are assumed independent given them, and no clustered
 #' variance is used (group-level shocks belong in the mean: use M1 or M2).
 #'
@@ -128,7 +138,8 @@
 #' the M-SIGN module) are \strong{experimental} in this release: both referee
 #' reports of review batch B are being answered. Under grouped rungs (M1,
 #' M1delta, M2, L4 with groups) each sign is one pooled restriction across
-#' groups, and sharpness (PHASE5a R3(b)) is proved only for the pooled model M0.
+#' groups, and sharpness (PHASE5a R3(b)) and inference (R10) are proved only
+#' for the pooled model M0.
 #'
 #' @param formula optional formula \code{cbind(column counts) ~ cbind(row counts)}.
 #' @param data data frame with counts (and the grouping variable).
@@ -174,7 +185,11 @@
 #' @param alpha 1 - confidence level.
 #' @param ci \code{"clr"} (default; reported with the projection interval
 #'   alongside), \code{"conservative"} or \code{"none"}.
-#' @param fpc unit-level allowance for \code{ci_actual}: \code{"bhatia-davis"} (default) or \code{"popoviciu"}.
+#' @param fpc unit-level allowance for \code{ci_actual} and \code{proj_actual}:
+#'   \code{"bhatia-davis"} (default; the variance bound comes from a CLR
+#'   interval for \code{ci_actual}, from a projection interval for the rung
+#'   alone for \code{proj_actual}, and from a conservative interval with
+#'   \code{ci = "conservative"}) or \code{"popoviciu"} (the bound 1/4).
 #' @param jkst also report Jiang et al. CI_x intervals.
 #' @param jkst_x values of x for CI_x.
 #' @param eta sensitivity: allowed undetectable nonlinearity (probability units).
@@ -281,7 +296,9 @@ eiBounds <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL,
     if (st$G > 1 && model %in% c("M1", "M2", "M1delta", "L4"))
       notes <- c(notes, paste0("sign/CR restrictions under a grouped rung (", model, ") are experimental: ",
                                "each sign is one pooled restriction across groups, not one per group, and ",
-                               "sharpness (PHASE5a R3(b)) is proved only for the pooled model M0"))
+                               "sharpness (PHASE5a R3(b)) is proved only for the pooled model M0; nor are its ",
+                               "confidence intervals, the projection and conservative ones included (R10 covers ",
+                               "pooled M0; R16 open)"))
     if (any(vapply(c(extra$assoc, extra$cr), function(a) identical(a$version, "W2"), TRUE)))
       notes <- c(notes, paste0("W2 signs one pooled sum over the original groups; it does not sign each ",
                                "group's association (a per-group version is planned)"))
@@ -299,9 +316,13 @@ eiBounds <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL,
   if (any(is.na(est$table$estimate_lower) & !est$table$empty))
     notes <- c(notes, "unbounded estimate: some composition range is not full-dimensional in the simplex (2a Lemma 3(b)); add units with more varied compositions or restrict the targets")
   if (ci == "clr")
-    notes <- c(notes, "CLR intervals are algorithmic (candidate endpoints collected by simulation; coverage supported by simulation, not proved). proj_* columns: projection intervals from the same candidates, with an asymptotic guarantee for a nonsingular V-hat in a fixed-dimension design (P3 Prop. P3.5(b2))")
+    notes <- c(notes, "CLR intervals are algorithmic (candidate endpoints collected by simulation; coverage supported by simulation, not proved). proj_* columns: projection intervals from the same candidates (P3 Prop. P3.5(b2)(ii)); the status line above says which result covers this fit")
   if (isTRUE(est$proj_dropped > 0))
-    notes <- c(notes, sprintf("the estimated covariance matrix of the regression is numerically singular in directions that %d candidate endpoint(s) use; they were dropped from the CLR and projection intervals (valid, wider; P3.5(b2)(ii) covers only the range of V-hat)", est$proj_dropped))
+    notes <- c(notes, sprintf("rank guard: the estimated covariance matrix of the regression is numerically singular in directions that %d candidate endpoint(s) use; they were dropped from the CLR and projection intervals (a safeguard: valid, wider)", est$proj_dropped))
+  if (isTRUE(est$bd_boundary) && fpc == "bhatia-davis")
+    notes <- c(notes, paste0("the Bhatia-Davis unit-level allowance relies on the weighted mean rate being bounded away ",
+                             "from 0 and 1 (P3.5(c1)); here its interval lies within [0, .05] or [.95, 1], so ",
+                             "fpc = \"popoviciu\" is the safe choice"))
   if (st$vcov_type != vcov) notes <- c(notes, paste0("variance estimator fell back from ", vcov, " to ", st$vcov_type))
   if (any(!st$keep)) notes <- c(notes, sprintf("%d units trimmed; their contribution to the actual rate is bounded by Duncan-Davis, and the model-implied rate refers to the kept units", sum(!st$keep)))
   if (any(est$table$ci_rejected))
@@ -314,6 +335,8 @@ eiBounds <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL,
                  vcov_type = st$vcov_type, alpha = alpha, ci = ci, fpc = fpc,
                  table = est$table, jkst = est$jkst, tests = tst, notes = notes,
                  n_vertices = sum(sapply(st$vertices, nrow)), eta = eta, slack = est$slack,
+                 inference = list(v_rank = est$v_rank, p = est$p, proj_dropped = est$proj_dropped,
+                                  bd_boundary = est$bd_boundary),
                  setup = st, targets = tl, pieces = est$pieces,
                  modules = .rxc_module_table(extra, rl, cll),
                  settings = list(ndraw = ndraw, nz_draw = nz_draw, range = range,
@@ -353,6 +376,25 @@ eiBounds <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL,
          L6 = "L6: Goodman constancy")
 }
 
+# One line on which result covers this fit's intervals (round-2 review; R10 is pooled M0 only)
+.rxc_ci_status <- function(x) {
+  inf <- x$inference
+  ex <- x$setup$extra
+  msign <- length(ex$assoc) > 0 || length(ex$cr) > 0
+  pooled <- identical(x$setup$type, "pooled")
+  if (x$setup$nz == 0 || identical(x$ci, "none")) return(NULL)
+  rk <- if (!is.null(inf$v_rank)) sprintf("; V-hat rank %d of %d (diagnostic)", inf$v_rank, inf$p) else ""
+  gd <- if (isTRUE(inf$proj_dropped > 0)) sprintf("; rank guard dropped %d candidates", inf$proj_dropped) else ""
+  what <- if (identical(x$ci, "clr")) "proj_*" else "ci_* (conservative)"
+  if (!pooled && msign)
+    return(paste0("proj_* and ci_*: no coverage theorem for sign/CR restrictions under grouped rungs (R16 open)", gd))
+  if (pooled)
+    return(paste0(what, ": asymptotic guarantee (", if (identical(x$ci, "clr")) "P3.5(b2)(ii)" else "P3.5(a)",
+                  if (msign) "; with sign/CR rows PHASE5a R10, pooled M0" else "", "), pooled model", rk, gd))
+  paste0(what, ": asymptotic guarantee only with few, large groups (P3 regime R1); with many small ",
+         "groups a simulation finding", rk, gd)
+}
+
 #' @export
 print.eiRxC <- function(x, digits = 3, ...) {
   cat("R x C ecological inference bounds\n")
@@ -389,7 +431,11 @@ print.eiRxC <- function(x, digits = 3, ...) {
   print(out, row.names = FALSE, right = FALSE)
   has_base <- "base_estimate_lower" %in% names(tb)
   if (has_base) {
-    cat("\nThe rung alone (", x$model, ", without the optional restrictions), for comparison:\n", sep = "")
+    nmod <- if (is.null(x$modules)) 0L else nrow(x$modules)
+    if (nmod > 1)
+      cat("\nThe rung alone (", x$model, ", all ", nmod, " optional restrictions removed: their joint effect;\n",
+          "for one restriction's own increment see the added-last gains in eiRedundancy()), for comparison:\n", sep = "")
+    else cat("\nThe rung alone (", x$model, ", without the optional restriction), for comparison:\n", sep = "")
     print(data.frame(target = tb$target,
                      estimate = ifelse(tb$base_empty, "empty", f(tb$base_estimate_lower, tb$base_estimate_upper)),
                      ci_model = f(tb$base_ci_model_lower, tb$base_ci_model_upper),
@@ -418,11 +464,20 @@ print.eiRxC <- function(x, digits = 3, ...) {
   cat("  ci_model:  CI for the rate implied by the model at the observed compositions",
       if (clr) "\n             (CLR: algorithmic, coverage supported by simulation, not proved)" else "", "\n", sep = "")
   cat(sprintf("  ci_actual: CI for the actual rate in these units (unit-level allowance: %s)%s\n", x$fpc,
-              if (clr) "; CLR, algorithmic" else ""))
+              if (clr && identical(x$fpc, "bhatia-davis"))
+                "\n             (CLR (algorithmic); its Bhatia-Davis bound also uses a CLR interval)" else
+                if (clr) "; CLR, algorithmic" else ""))
   if (has_cr && clr) cat("  with CR, ci_* are the union of the CLR branch intervals (algorithmic); proj_* are the\n",
                          "  union of the projection branch intervals\n", sep = "")
-  if (has_proj) cat("  proj_*:    projection intervals (asymptotic guarantee for a nonsingular V-hat in a\n",
-                    "             fixed-dimension design: M0, or few large groups; P3.5(b2))\n", sep = "")
+  if (has_proj) {
+    cat("  proj_model: projection interval for the model-implied rate (same candidates as CLR)\n")
+    cat("  proj_actual: projection interval + unit-level allowance",
+        if (identical(x$fpc, "bhatia-davis"))
+          " (Bhatia-Davis, variance bound from a\n             projection interval for the rung alone; P3.5(b2)(ii) and a union bound;\n             fpc = \"popoviciu\" uses the bound 1/4)\n"
+        else " (Popoviciu bound 1/4)\n", sep = "")
+  }
+  st_line <- .rxc_ci_status(x)
+  if (!is.null(st_line)) cat("  status:    ", st_line, "\n", sep = "")
   cat("  duncan_davis: model-free bounds for the actual rate\n")
   if (!is.null(x$tests)) {
     if (isTRUE(x$tests$empty_rejected)) cat("\n  Emptiness test: the model is REJECTED at level", x$alpha, "\n")

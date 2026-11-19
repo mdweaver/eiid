@@ -260,9 +260,10 @@
 # (valid, wider); an end with no candidate left is -Inf / +Inf, i.e. the logical range after
 # clipping. Attribute "dropped": number of candidates dropped. With a nonsingular V-hat (every
 # full-rank design in practice; P3 section 8) nothing changes.
+# Critical value (0.3.1, theory decision on round-2 review): q = dim(beta), not the numerical rank
+# of V-hat; the rank is reported only as a diagnostic (.rxc_vrank).
 .rxc_projection <- function(st, cu, cl, Zs, alpha) {
-  ev <- eigen((Zs$V + t(Zs$V)) / 2, symmetric = TRUE, only.values = TRUE)$values
-  q <- max(1L, sum(ev > 1e-10 * max(ev)))
+  q <- ncol(Zs$V)
   k <- sqrt(stats::qchisq(1 - alpha, q))
   bu <- .rxc_null_use(cu$G, Zs$V); bl <- .rxc_null_use(cl$G, Zs$V)
   seU <- sqrt(pmax(rowSums((cu$G %*% Zs$V) * cu$G), 0))
@@ -299,13 +300,33 @@
   list(ci = c(pl$lower - k * se[last], pl$upper + k * se[last]), empty = FALSE, k = k)
 }
 
+# numerical rank of V-hat (diagnostic only: eigenvalues above 1e-10 times the largest)
+.rxc_vrank <- function(V) {
+  ev <- eigen((V + t(V)) / 2, symmetric = TRUE, only.values = TRUE)$values
+  if (!is.finite(max(ev)) || max(ev) <= 0) return(0L)
+  sum(ev > 1e-10 * max(ev))
+}
+
+# Bhatia-Davis needs the weighted mean rate bounded away from 0 and 1 for the residual step
+# (P3.5(c1)); flag when the interval used for it lies within [0, .05] or [.95, 1]
+.rxc_bd_boundary <- function(iv) {
+  if (is.null(iv) || any(is.na(iv[1:2]))) return(FALSE)
+  lo <- max(0, min(1, iv[1])); hi <- max(0, min(1, iv[2]))
+  lo <= hi && (hi <= 0.05 || lo >= 0.95)
+}
+
 # finite-population allowance: sd bound for E = sum_i w_i e_i (one cell)
 # Returns c(main, projection). With ci = "clr": the Bhatia-Davis bound with mbar bounded by the
 # CLR interval (used by ci_actual) and by the projection interval from the same candidates (used
 # by proj_actual, so that the projection column rests only on P3.5(b2)). With ci =
 # "conservative": mbar bounded by the conservative interval, so that ci_actual rests only on
 # P3.5(a) (decision 3(a), Nov 2026). Popoviciu where the interval is missing.
-.rxc_fpc_sd <- function(st, cons, r, c, method, alpha_v, Zs, ndraw, ci = "clr") {
+# 'cons_rung' (0.3.1, round-2 review): the rung alone. The projection column's mbar interval is
+# computed on it, so that proj_actual needs only P3.5(b2)(ii) for the rung, whatever optional
+# rows are added. The extra call restores the random-number stream, so ci_actual is unchanged.
+# Attribute "boundary": the interval behind the projection (or conservative) column lies within
+# [0, .05] or [.95, 1] (see .rxc_bd_boundary).
+.rxc_fpc_sd <- function(st, cons, r, c, method, alpha_v, Zs, ndraw, ci = "clr", cons_rung = NULL) {
   wr <- st$w[, r]
   sw2 <- sum(wr^2)
   if (method == "popoviciu") return(rep(0.5 * sqrt(sw2), 2))
@@ -323,10 +344,20 @@
   }
   if (identical(ci, "conservative")) {
     cc <- .rxc_ci_conservative(st, cons, tg, alpha_v, Zs)$ci
-    return(rep(bd(cc), 2))
+    out <- rep(bd(cc), 2); attr(out, "boundary") <- .rxc_bd_boundary(cc)
+    return(out)
   }
   iv <- .rxc_ci_clr(st, cons, tg, alpha_v / 2, alpha_v / 2, Zs, ndraw, proj_alpha = alpha_v)
-  c(bd(iv[1:2]), bd(attr(iv, "projection")))
+  pv <- attr(iv, "projection")
+  if (!is.null(cons_rung)) {
+    had <- exists(".Random.seed", envir = globalenv(), inherits = FALSE)
+    if (had) old <- get(".Random.seed", envir = globalenv())
+    pv <- attr(.rxc_ci_clr(st, cons_rung, tg, alpha_v / 2, alpha_v / 2, Zs, ndraw, proj_alpha = alpha_v),
+               "projection")
+    if (had) assign(".Random.seed", old, envir = globalenv())
+  }
+  out <- c(bd(iv[1:2]), bd(pv)); attr(out, "boundary") <- .rxc_bd_boundary(pv)
+  out
 }
 
 # JKST CI_x for a target: plug-in candidates at beta-hat, S = S1 (Popoviciu) + se
@@ -379,7 +410,11 @@
   if (fpc == "popoviciu") { a_est <- a_est + a_v; a_v <- 0 }      # no variance-bound CI needed
   zE <- stats::qnorm(1 - a_E / 2)
   point <- st$nz == 0
-  fpc_cache <- list(); proj_dropped <- 0
+  fpc_cache <- list(); proj_dropped <- 0; bd_boundary <- FALSE
+  # rung alone, for the projection column's variance bound (needed only if optional linear rows)
+  cons_rung <- if (any(!is.na(base$module))) {
+    st0 <- st; st0$extra <- NULL; .rxc_constraints(st0, eta = eta)
+  } else NULL
   out <- list(); jk <- list(); pieces <- list()
   usum <- function(u) {
     sm <- .rxc_union_summary(u)
@@ -429,9 +464,10 @@
               lo <- max(0, min(1, m - stats::qnorm(1 - a_v / 2) * sem))
               hi <- max(0, min(1, m + stats::qnorm(1 - a_v / 2) * sem))
               vmax <- if (lo <= 0.5 && hi >= 0.5) 0.25 else max(lo * (1 - lo), hi * (1 - hi))
-              rep(sqrt(sum(st$w[, r]^2) * vmax), 2)
+              structure(rep(sqrt(sum(st$w[, r]^2) * vmax), 2), boundary = .rxc_bd_boundary(c(lo, hi)))
             }
-          } else .rxc_fpc_sd(st, base, r, c, fpc, a_v, Zs, ndraw, ci = ci)   # rung + linear rows: valid
+          } else .rxc_fpc_sd(st, base, r, c, fpc, a_v, Zs, ndraw, ci = ci, cons_rung = cons_rung)
+          bd_boundary <- bd_boundary || isTRUE(attr(fpc_cache[[key]], "boundary"))
         }
         sdE <- sdE + abs(a2[r, c]) * fpc_cache[[key]][1]
         sdEp <- sdEp + abs(a2[r, c]) * fpc_cache[[key]][2]
@@ -498,7 +534,8 @@
   }
   res <- do.call(rbind, out); rownames(res) <- NULL
   list(table = res, jkst = if (jkst) jk else NULL, cons = cons, pieces = pieces,
-       slack = if (point) NA_real_ else .rxc_slack(base, st$beta), proj_dropped = proj_dropped)
+       slack = if (point) NA_real_ else .rxc_slack(base, st$beta), proj_dropped = proj_dropped,
+       bd_boundary = bd_boundary, v_rank = .rxc_vrank(st$V), p = ncol(st$V))
 }
 
 # Emptiness test (Proposition P3.6(a), conservative version): reject iff the inflated set is

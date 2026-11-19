@@ -7,7 +7,9 @@
 * **Rungs:** DD, M0, M2, M1(δ), M1, L4, L5, L6 (Phases 2a–2b), plus restriction rows and M-SIGN sign/CR restrictions with the redundancy diagnostic (PHASE5a).
 * **Inference:** CLR-type intervals by default (algorithmic), with projection intervals alongside (proved), and the conservative interval as an option. Tests: emptiness, M1's testable part, pooling (M0 vs M1). Sensitivity (η, slack) and breakdown.
 * **Verification:** full test suite passes (0 failures); `R CMD check` has no notes, and only a container locale warning.
-* **Version:** **0.3.0** with `NEWS.md` (Batch B response, Nov 2026). M-SIGN is flagged experimental. Ready for a pull request to `master` once the referee responses (items 2 and 2b) are written.
+* **Version:** **0.3.1**, merged to `master` (Nov 2026; mdweaver/eiid#3). 0.3.0 was the Batch B response; 0.3.1 the round-2 response (per-fit inference status in `print()`, $q=\dim\beta$, `proj_actual` per P3.5(c1)). M-SIGN is flagged experimental.
+* **Review:** both rounds answered for all three referees (`REVIEW_RESPONSE.md`, `REVIEW_RESPONSE_ROUND2.md`, `reviews/`). Round-2 verdicts: favourable (Phases 1–3), minor revision (both Batch B referees).
+* **Technical report:** `docs/report/eiPartialID_report.pdf` (150 pp.), with a completeness check against the repo.
 
 ## Recommended order
 
@@ -20,9 +22,12 @@
 2. **WS7, response letter — done** (`REVIEW_RESPONSE.md`), to go with batch A of `EXTERNAL_REVIEW_PLAN.md`. It now includes three core corrections found by the Batch B referee (2a support of the restricted measure; projection under a singular covariance; residual CLT).
 2c. **Round 2 (Nov 2026), theory side — done** (`reviews/ROUND2_THEORY_PLAN.md`): P3.4 restated for a fixed constraint system and new Proposition P3.4′ (triangular arrays); new Proposition P3.5(c) for the Bhatia–Davis allowance ((c1) valid with a projection or conservative interval for $\bar m$ on the rung alone; (c2) with CLR, algorithmic); the projection theorem is claimed with $q=\dim\beta$ (numerical rank cutoff = safeguard); 2b Prop. D8 split into cancellation and given-the-set identification; P3 §0.4 independence as a substantive assumption; 2c/5a round-2 wording. P3 §8's projection column for $B$ rerun with the P3.5(c1) bound. **Package (0.3.x), for the package session:** $q=\dim\beta$; $\bar m$ projection interval on the rung alone for `proj_actual`, with a note near 0 or 1 (Popoviciu fallback later); per-fit CI status in `print()`.
 2b. **WS-B8, responses to the two Batch B referees — done** (`reviews/B_partial_identification_response.md`, `reviews/B_ecological_inference_response.md`). The corrections themselves are done (WS-B0 to WS-B3, Nov 2026).
-3. **Release hygiene — done (0.3.0):** version and `NEWS.md`; M-SIGN flagged `experimental`; `MASS` removed and `eco` moved to Suggests (the NOTE is gone). Remaining: pull request to `master` and a version tag, after items 2 and 2b.
+3. **Release hygiene — done (0.3.0):** version and `NEWS.md`; M-SIGN flagged `experimental`; `MASS` removed and `eco` moved to Suggests (the NOTE is gone). Pull request to `master` merged (0.3.1); version tag `v0.3.1` to follow.
 
-### Next: the first new module
+### Next: a process-free paper version
+3b. **Paper version of the technical report** (on hold until the owner starts it): a journal-style methods paper, 35–50 pp., with a rewritten proof appendix; covers the core bounds and inference, the monotone results and M-SIGN (experimental), the package and the evidence; no DiD; no reference to the review process; conjectures and open items labelled and collected in a closing section.
+
+### Then: the first new module
 4. **M-SHARP, the series-based sharper bound** (PACKAGE_DESIGN step 1b; also first on PHASE4's agreed second-release list).
    * It estimates the tighter set $\Theta_X$ by series regression of the unit-level Duncan–Davis limits, for pooled designs. It conditions on composition only, so when precinct size is informative it is "tighter than the outer set", not sharp (2c Remark N2.2.1; Conjecture N2.2′ is left open by decision, pending another reviewer's work on the rungs).
    * It tightens every rung with **no new assumption**. It also answers the reviewer's point (2a §4.3) that the sharp set needs smoothing or pooling to be estimable.

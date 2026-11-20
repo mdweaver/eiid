@@ -14,4 +14,4 @@
 
 Process material (revision notes, Appendix A) can be switched off with `\revisionsfalse` in `eiPartialID_report.tex` (see `preamble.tex`).
 
-Pinned to commit `ec3644f` of `claude/wizardly-volta-lbh4bm`. Requires TeX Live (latex-extra) and pandoc ≥ 3.
+Pinned to commit `44db8f1` of `claude/wizardly-volta-lbh4bm`. Requires TeX Live (latex-extra) and pandoc ≥ 3.

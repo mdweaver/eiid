@@ -21,3 +21,12 @@ Found while compiling the report against `b270285`, recorded here (the report's 
 * No new inconsistency in the source documents was found while making the second-round report changes.
 
 These items were noticed while compiling the report; this was not an independent re-derivation of every proof step.
+
+## Found while writing the methods paper (`docs/paper/ISSUES.md`), fixed at `44db8f1`
+
+| # | Location | Problem | Fix |
+|---|---|---|---|
+| 11 | `PHASE3_inference.md` §8.1 table, "Projection, $B$" | Designs E and B (demobilisation) still showed the CLR-based values 0.249 and 0.377 | Now 0.251 and 0.378, as in the P3.5(c1) rerun |
+| 12 | P3 §8.4 item 10; report §10.3; `NEWS.md`; `PHASE4_implementation.md`; `NEXT_BUILD.md` | "M1 is rejected … estimate empty in all seven elections" counted the empty plug-in as a rejection | The M1 test rejects M1 and the pooling test rejects M0 ($p\approx0$); the emptiness test rejects pooled M0 in 2002 and 2020 and M1 in none |
+| 13 | `PHASE2a_rxc.md` §0.4 citation table, tag [Lyap] | Cited as the Lyapunov CLT (Billingsley Thm 27.3); the arguments use Lindeberg–Feller relative to the actual s.d. | Now Lindeberg–Feller, Billingsley §27 (Thm 27.2) |
+| 14 | `R/rxc_modules.R` l.16–17 | The printed M-SIGN status mentioned the referee reports and a response plan | Now "experimental (sharpness and inference proved for the pooled model M0 only; …)" |

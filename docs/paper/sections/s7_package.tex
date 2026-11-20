@@ -46,8 +46,9 @@ Proposition~\ref{prop:simplex});
 \code{estimate}, the plug-in estimate of the outer identified set for the
 model-implied rate (not a confidence interval); \code{ci\_model}, the CLR (or
 conservative) interval for $\Bt$; \code{ci\_actual}, the same for $B$ with the
-residual allowance; \code{proj\_model} and \code{proj\_actual}, the projection
-intervals of Theorem~\ref{thm:ci}(b2)(ii) computed from the same candidates, with
+residual allowance; \code{proj\_model} and \code{proj\_actual} (computed only with
+\code{ci = "clr"}, and \code{NA} with \code{ci = "conservative"}), the projection
+intervals of Theorem~\ref{thm:ci}(b2)(ii) computed from the CLR candidates, with
 $q=\dim\beta$ and, for $B$, the Bhatia--Davis allowance taken from a projection
 interval for $\bar m$ on the rung alone (Proposition~\ref{prop:bd}); and the
 Duncan--Davis interval. Intervals for $B$ are intersected with Duncan--Davis. The

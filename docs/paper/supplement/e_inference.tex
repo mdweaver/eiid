@@ -269,59 +269,59 @@ $w_{i1}+w_{i0}$, so $\tfrac12\{\sum_i(w_{i1}+w_{i0})^2\}^{1/2}$ is a valid stand
 envelope under conditional independence; the sum of the per-cell envelopes is also
 valid, by Minkowski's inequality, and more conservative.
 
-(b) (5) Let $l^*$ be a piece that holds at the truth, $s_{l^*}(\beta_0)+a^\top k_0\ge0$.
-(6) On $\mathcal E$, which now includes every piece,
+(b) (1) Let $l^*$ be a piece that holds at the truth, $s_{l^*}(\beta_0)+a^\top k_0\ge0$.
+(2) On $\mathcal E$, which now includes every piece,
 $s_{l^*}(\beta_0)\le s_{l^*}(\hat\beta)+\hat c\hat\sigma_{l^*}$, so
-$\max_l(s_l(\hat\beta)+\hat c\hat\sigma_l)+a^\top k_0\ge0$. (7) For given data this is one
-linear row in $k$, which $k_0$ satisfies on $\mathcal E$; proceed as in (3). The argument
+$\max_l(s_l(\hat\beta)+\hat c\hat\sigma_l)+a^\top k_0\ge0$. (3) For given data this is one
+linear row in $k$, which $k_0$ satisfies on $\mathcal E$; proceed as in step (3) of part (a). The argument
 uses one simultaneous event and no strict feasibility. At a tie, inflating all pieces
 and then maximising still dominates the true piece. The row is not linear in $\beta$
 (an endpoint becomes a maximum of minima), so Lemma~\ref{P-lem:minlin} fails and CLR does
-not apply; for CLR the branch union of (c) is used. (8) For one-vs-rest and $2\times2$
+not apply; for CLR the branch union of (c) is used. (4) For one-vs-rest and $2\times2$
 CR, Theorem~\ref{P-thm:R3}(d) gives
 $D^{r*}\ge\min(\ER^*,\gamma_r\ER^*)\iff\max(D^{r*}-\ER^*,D^{r*}-\gamma_r\ER^*)\ge0$, and
 similarly for the upper side; each piece is linear in $\beta$ apart from the common
 term in $k$.
 
-(c) (9) Fix a branch $j^*$ with $k_0\in C_{j^*}$; it is non-random, because $k_0$ is a
-population quantity. (10) The model ``rung $\cap\,C_{j^*}$'' holds, so by (a),
-$\liminf P(\theta_0\in\CI(C_{j^*}))\ge1-\alpha$. (11)
-$\CI(C_{j^*})\subseteq\CI(C_+)\cup\CI(C_-)\subseteq$ its hull. (12) The other branch's
+(c) (1) Fix a branch $j^*$ with $k_0\in C_{j^*}$; it is non-random, because $k_0$ is a
+population quantity. (2) The model ``rung $\cap\,C_{j^*}$'' holds, so by (a),
+$\liminf P(\theta_0\in\CI(C_{j^*}))\ge1-\alpha$. (3)
+$\CI(C_{j^*})\subseteq\CI(C_+)\cup\CI(C_-)\subseteq$ its hull. (4) The other branch's
 interval is never used for coverage, so its level is irrelevant, and no split is
-needed. (13) Both sets empty implies the $j^*$ set is empty, which has limiting
+needed. (5) Both sets empty implies the $j^*$ set is empty, which has limiting
 probability at most $\alpha_U+\alpha_L$ (Proposition~\ref{P-prop:tests}(a) for version (a),
 the crossing argument of (d) for version (b)). If the true branch switches along a
 triangular array of designs, branch validity is needed along each subsequence on which
 a branch is true; there are only two labels.
 
-(d) (14) For version (a), $\CI=\emptyset$ requires $\hat\Theta^+=\emptyset$, which requires
-$\mathcal E^c$. (15) For version (b) with $\theta_0=\Bt$, a crossing $\hat L>\hat U$ requires
+(d) (1) For version (a), $\CI=\emptyset$ requires $\hat\Theta^+=\emptyset$, which requires
+$\mathcal E^c$. (2) For version (b) with $\theta_0=\Bt$, a crossing $\hat L>\hat U$ requires
 $\hat U<\theta_0$ or $\hat L>\theta_0$, with limiting probabilities at most $\alpha_U$ and
 $\alpha_L$ by one-sided validity, whatever the width of the identified set. For the
 target $B$, the residual allowance only widens the interval, so a crossing of the
-$B$-interval implies a crossing of the $\Bt$-interval. (16) In both cases the empty event
-lies inside a non-coverage event of bounded probability. (17) Since
+$B$-interval implies a crossing of the $\Bt$-interval. (3) In both cases the empty event
+lies inside a non-coverage event of bounded probability. (4) Since
 $\{\theta_0\in\CI\}\subseteq\{\CI\ne\emptyset\}$,
 $P(\text{cover}\mid\CI\ne\emptyset)=P(\text{cover})/P(\CI\ne\emptyset)\ge P(\text{cover})$. If the
-restrictions are false, step (1) fails and nothing is claimed.
+restrictions are false, step (1) of part (a) fails and nothing is claimed.
 
-(e) (18) Repeat each of $X=1/4,1/2,3/4$ equally often with equal sizes. Take $m_0=.4$
+(e) (1) Repeat each of $X=1/4,1/2,3/4$ equally often with equal sizes. Take $m_0=.4$
 and $m_1=.55$ constant, with group rates drawn independently across units and groups
 from bounded laws with these means and positive variance (for example, beta draws of
 fixed concentration). Every base row has strict slack, OLS has a full-rank fixed design
 and a positive definite limiting covariance, and HC3 is consistent. The positive CR
-branch has $\tilde D_0=\ER=.15$ on its upper edge. (19) In the basis
+branch has $\tilde D_0=\ER=.15$ on its upper edge. (2) In the basis
 $((1-x)^2,2x(1-x),x^2)$, for any coefficient vector $q$, $\ER(q)=q_{11}-q_{00}$ and the
 target constant is $c_D(q)=\tfrac7{12}(q_{11}-q_{00})$, because $\E[X^2]/\E[X]=7/12$ and the
 middle coefficient cancels by symmetry; so the ratio of their standard errors is
-exactly $7/12$. (20) With probability tending to one the plug-in sign is positive and
+exactly $7/12$. (3) With probability tending to one the plug-in sign is positive and
 the base rows allow the $k$ attaining the plug-in upper edge (strict slack and
 continuity), so the naive upper endpoint is $\widehat\ER+k_{\rm crit}\operatorname{se}(c_D)$.
-(21) Its critical value is calibrated on eight one-sided base rows and two target tails,
+(4) Its critical value is calibrated on eight one-sided base rows and two target tails,
 so by the union bound $k_{\rm crit}\le z_{.995}$ at level .95, whatever the correlations.
-(22) Non-coverage is the event $\{\widehat\ER-\ER<-k_{\rm crit}\operatorname{se}(c_D)\}$, so
+(5) Non-coverage is the event $\{\widehat\ER-\ER<-k_{\rm crit}\operatorname{se}(c_D)\}$, so
 $\limsup_nP(\tilde D_0\in\CI_{\rm naive})\le\Phi(\tfrac7{12}z_{.995})=0.933525<0.95$.
-(23) With a simulated critical value from 4000 draws, each draw exceeds $z_{.996}$ with
+(6) With a simulated critical value from 4000 draws, each draw exceeds $z_{.996}$ with
 probability at most .04 by the same union bound, and an empirical .95 quantile above that
 threshold needs at least 200 exceedances; so the limiting coverage is at most
 $\Phi(\tfrac7{12}z_{.996})+P\{\mathrm{Bin}(4000,.04)\ge200\}=0.940092$.

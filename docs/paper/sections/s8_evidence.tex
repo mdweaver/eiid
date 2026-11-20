@@ -63,7 +63,7 @@ B, demobilisation & 12 & 0.533 & 1 / 0.333 & 1 / 0.304 & 1 / 0.329 & 1 / 0.381 &
 B, mobilisation & 12 & 0.884 & 1 / 0.619 & 1 / 0.559 & 1 / 0.595 & 1 / 0.683 & 1 / 0.646 & 1 / 0.661 \\
 \bottomrule
 \end{tabular}
-\caption{Monte Carlo, model holds: coverage / median width (1000 replications). $q=\dim\beta$; DD is the median Duncan--Davis width. Design E, CLR for $\Bt$: Monte Carlo standard error 0.007.}\label{tab:mc1}
+\caption{Monte Carlo, model holds: coverage / median width (1000 replications). $q$ is the degrees of freedom of the projection critical value: $q=\dim\beta$ in the $2\times2$ designs; in design B the Monte Carlo fitted all three columns (18 coefficients) and used $q=\operatorname{rank}\hat\Sigma=12$, the exact adding-up reduction, which equals the number of coefficients on the $C-1$ free columns that the package fits. DD is the median Duncan--Davis width. Design E, CLR for $\Bt$: Monte Carlo standard error 0.007.}\label{tab:mc1}
 \end{table}
 
 \begin{table}[t]
@@ -191,10 +191,10 @@ This gives a benchmark in which the truth is known. Units are polling places; ro
 are the party vote (Labour, National, other); columns are the electorate vote
 (Labour candidate, National candidate, other); seven general elections, 2002--2020.
 Intervals are for the actual rate, use the Bhatia--Davis allowance, and are
-intersected with Duncan--Davis. The benchmark was run with version 0.2.0 of the
-package, before the later changes to the tests and to the variance bound of the
-projection interval for $B$ (Proposition~\ref{prop:bd}); those changes can move the
-projection and test columns slightly.
+intersected with Duncan--Davis. The benchmark was computed with version 0.2.0 of the
+package. Version 0.3.1 calibrates the tests by a wild bootstrap and takes the variance
+bound of the projection interval for $B$ from Proposition~\ref{prop:bd}; these
+differences can move the projection and test columns slightly.
 
 \paragraph{One table per electorate.} There are 492 electorate tables with a median
 of 64 polling places each, and 4302 cells. The pooled model's CLR and projection
@@ -208,11 +208,12 @@ empty in 48\% of cells. With about 64 units per table, the valid intervals are a
 as wide as Duncan--Davis.
 
 \paragraph{Electorates as districts.} Pooling each election's 62--69 electorates
-(3398--6550 polling places) and fitting M1 with electorates as districts, the data
-reject the model: the M1 plug-in estimate is empty in all seven elections, and the
-curvature and pooling tests have $p\approx0$ (the pooling test has 366--408
-restrictions). The emptiness test itself rejects the pooled model in two elections
-and M1 in none. Over the 63 cells (seven elections, nine cells), the M1 CLR
+(3398--6550 polling places) and fitting M1 with electorates as districts, the
+curvature test (M1 against M2) rejects M1 and the pooling test rejects M0 in all seven
+elections ($p\approx0$; the pooling test has 366--408 restrictions). The M1 plug-in
+estimate is empty in all seven elections, but that is a sample diagnostic only: the
+emptiness test rejects the pooled model in two elections (2002 and 2020) and M1 in
+none. Over the 63 cells (seven elections, nine cells), the M1 CLR
 intervals had crossing ends (or ends outside the logical range) in 21\% of cells and missed the truth with a non-empty
 interval in 8\% (5 of 63); the projection interval never missed, but it was as wide
 as Duncan--Davis. Where the model is wrong, the tests flag it, and a non-empty CLR
@@ -249,7 +250,7 @@ Interior truth & 1.000 / 1.232 & 1.000 / 0.480 & 1.000 / 0.480 & 1.000 / 0.388 \
 
 The slab cuts the median length from 1.106 to 0.359 at the edge and keeps coverage.
 The plug-in bracket, which imposes $\hull\{\gamma\widehat\ER,\widehat\ER\}$ and then
-adds the target's own inflation, covers 0.917, consistent with the limit of
+adds the target's own inflation, covers 0.917 (550 of 600), consistent with the limit of
 Theorem~\ref{thm:R10}(e) (at most 0.9335 in the three-point design). The literal
 intersection of the fitted bracket with a finished JKST interval covered 304 of 600
 (51\%), in line with its limit of at most one half. The package's default CLR branch
@@ -286,18 +287,24 @@ We illustrate the package on the \code{voter\_vax} data distributed with the
 MonotoneEI package of EGGHM (and included in \pkg{eiPartialID}'s tests): 2059 US
 counties, with $X$ the Republican share of the presidential vote, $T$ the share
 vaccinated against COVID-19, and $N$ the total votes cast. Rows are Republican and
-other voters; the column is ``vaccinated''; the target is the gap $D$ between the two
-groups' vaccination rates. The example illustrates the mechanics. It is not a
+other voters; the column is ``vaccinated''; the target is the gap $D=B_1-B_2$ between the two
+groups' vaccination rates (in this subsection $D$ denotes this gap, not a district). The example illustrates the mechanics. It is not a
 substantive finding: the vaccination share refers to the county population and the
 group shares to voters, so the closed-population assumption A1 holds only
 approximately.
 
-Fitting the pooled rung with size weights,
-\begin{center}
-\code{eiBounds(x = prop\_republican, t = prop\_covid\_vax, n = total\_votes, weights = "n",}\\
-\code{targets = list(D = matrix(c(1, -1, 0, 0), 2, 2)), ci = "clr")}
-\end{center}
-gives the results in Table~\ref{tab:vv} (seed 1). The estimated identified set for
+The code
+\begin{quote}\small
+\code{v <- read.csv("voter\_vax\_MonotoneEI.csv")}\\
+\code{tg <- list(D = matrix(c(1, -1, 0, 0), 2, 2), Rep = matrix(c(1, 0, 0, 0), 2, 2))}\\
+\code{cr <- list(cr = list(list(row = 1, col = 1)))}\\
+\code{fit <- function(ci, res = NULL)}\\
+\code{\ \ eiBounds(x = v\$prop\_republican, t = v\$prop\_covid\_vax, n = v\$total\_votes,}\\
+\code{\ \ \ \ \ \ \ \ \ \ \ weights = "n", targets = tg, ci = ci, seed = 1, restrictions = res)}\\
+\code{fit("clr"); fit("clr", cr); fit("conservative"); fit("conservative", cr)}
+\end{quote}
+fits the pooled rung with size weights, without and with contextual reinforcement,
+and gives the results in Table~\ref{tab:vv}. The estimated identified set for
 the gap under LCE alone is $[-0.486,-0.001]$: Republican voters' vaccination rate is
 lower, by between 0 and 49 points. The projection interval, which carries the
 asymptotic guarantee for the pooled model, is $[-0.607,0.080]$, and the CLR interval

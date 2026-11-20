@@ -1,7 +1,9 @@
 # Source map (internal; not part of the paper)
 
 Links every numbered result of `eiPartialID_paper.tex` to its label in the repository at
-tag `v0.3.1` (commit `c02954e`). The supplement (`eiPartialID_supplement.tex`) proves the results
+commit `44db8f1` (branch `claude/wizardly-volta-lbh4bm`; tag `v0.3.1`/`c02954e` plus fixes to P3 §8.1,
+the NZ wording, the [Lyap] citation and the M-SIGN status string). Numbers in the paper were checked
+against `44db8f1`. The supplement (`eiPartialID_supplement.tex`) proves the results
 under the same numbers. Abbreviations: **2a** = `docs/extension/PHASE2a_rxc.md`, **2b** =
 `PHASE2b_districts.md`, **2c** = `PHASE2c_monotone.md`, **P3** = `PHASE3_inference.md`, **5a** =
 `PHASE5a_sign_module.md`, **PD** = `PACKAGE_DESIGN.md`, **P1** = `PHASE1_foundations.md`. Paper
@@ -110,7 +112,7 @@ remarks have separate counters.
 | §8.3 test calibration table | calibration table | P3 §5; `benchmarks/results/*_size_output.txt` |
 | §8.4 NZ benchmark | benchmark summary | `benchmarks/results/ei_datasets_nz_summary.md` (run with 0.2.0) |
 | §8.5 sign-module simulations (Table 7, false CR) | §3.4 (V11--V13), PD §2.2 [V2], 5a §2.4 T4, 5a §5 gated run | 5a; `verify_R10_output.txt` |
-| §8.6 worked example | computed with eiPartialID 0.3.1 on `tests/testthat/voter_vax_MonotoneEI.csv` (seed 1); matches `test-msign.R` ("about [-0.470, -0.050]") | this paper |
+| §8.6 worked example | computed with eiPartialID 0.3.1 on `tests/testthat/voter_vax_MonotoneEI.csv` (seed 1); matches `test-msign.R` ("about [-0.470, -0.050]"); the code shown in §8.6 reproduces Table 8 exactly | this paper |
 
 ## Coverage of the technical report's status table (§12), DiD items excluded
 

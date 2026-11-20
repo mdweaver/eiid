@@ -1,5 +1,5 @@
 % Section 3
-\section{Identification in R$\times$C under linear contextual effects}\label{sec:rxc}
+\section{Identification in \texorpdfstring{R$\times$C}{RxC} under linear contextual effects}\label{sec:rxc}
 
 This section concerns the pooled model M0 and the superpopulation target $B^*$.
 Throughout, assume $\E[N]<\infty$ and $\mu_r>0$ for every $r$.
@@ -210,7 +210,8 @@ the full law.
 \end{reading}
 
 \begin{proposition}[The whole simplex]\label{prop:simplex}\status{proved}
-With $A=\Delta^{R-1}$, $\ThO=\{K\in\Kspace:\ |K_{c,rs}|\le Q_{c,rs}\ \forall c,\ r<s\}$.
+With $A=\Delta^{R-1}$, $\ThO=\{K\in\Kspace:\ |K_{c,rs}|\le Q_{c,rs}\ \forall c,\ r<s\}$,
+which also requires $Q_{c,rr}\ge0$ for all $c,r$ (a testable condition not involving $K$).
 It is non-empty iff every $Q_{c,rs}\ge0$; then each $K_{c,rs}$ ranges over
 $[-m_{c,rs},m_{c,rs}]$ with $m_{c,rs}=\min\{Q_{c,rs},1-Q_{c,rs}\}\le\tfrac12$, and
 \[
@@ -350,7 +351,7 @@ Let $\nu:\Delta^{R-1}\to\R^{R\times C}$ be Borel with, at every $x\in\supp P_X$,
 (i) $x^\top\nu(x)=0$, (ii) $\nu(x)\one=0$, and (iii) $M_H(x)+\nu(x)\in\Bset$. Then
 the structures $\beta=M_H(X)+\nu(X)$ and $\beta'=M_H(X)$ generate the same law of
 the data, but
-$B^*_{rc}(\beta)-B^*_{rc}(\beta')=\E[NX_r\nu_{rc}(X)]/\mu_r$. Under A5, the linear
+$B^*_{rc}(\beta)-B^*_{rc}(\beta')=\E[NX_r\nu_{rc}(X)]/\mu_r$. Under A5 on $\supp_AP_X$, with $A\supseteq\supp P_X$, the linear
 such $\nu$ are exactly $M_{K'}$ with $K'\in\Kspace$.
 \end{proposition}
 \begin{reading}

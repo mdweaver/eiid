@@ -189,8 +189,12 @@ a box cut by a hyperplane.
 $\conv\bigcup_dA_d$. (b) Under M1 with $P(X\in A_D)=1$, write $Z_d=[\zeta_{c,d,r}]_{rc}$.
 Then $\E[\beta\mid X,N]=M_H(X)+\E[Z_D\mid X,N]$, and the pooled model M0 holds
 (for some coefficients) iff $\E[Z_D\mid X,N]$ is almost surely a function of $X$
-alone that is affine on $\supp P_X$. Independence of $D$ and $(X,N)$ suffices;
-independence of $D$ and $X$ alone does not.
+alone that is affine on $\supp P_X$. Independence of $D$ and $(X,N)$ suffices, and
+so does conditional independence of $D$ and $N$ given $X$ together with
+$\E[Z_D\mid X]$ affine in $X$; independence of $D$ and $X$ alone does not. When M0
+holds in this way, its validity condition (S3) is automatic on the population hull
+$\conv\supp P_X$ (Lemma~\ref{lem:outer}(c)); on any other pooled region it remains a
+separate condition.
 \end{proposition}
 \begin{reading}
 The pooled model is safe when district baselines, given composition and unit

@@ -4,8 +4,8 @@ Working title: *Partial Identification for R×C Ecological Inference: Identified
 
 Files: `eiPartialID_paper.tex` (main text), `eiPartialID_supplement.tex` (supplementary appendix with the proofs),
 `references.bib`. Notation follows `docs/extension/notation.tex` (V = (X, N, D)). Results are numbered
-consecutively in the main text (Lemma 1, Theorem 1, Proposition 1, ... share one counter); the supplement
-proves them under the same numbers. `SOURCE_MAP.md` links each number to its repo label.
+with a separate counter for each kind (Theorems 1–8, Propositions 1–34, Lemmas 1–12, Corollaries 1–2,
+Conjectures 1–3, Remarks 1–5); the supplement proves them under the same numbers. `SOURCE_MAP.md` links each number to its repo label.
 
 Target: main text about 42 pages (11pt, 1in margins, 1.15 spacing), supplement about 25 pages.
 

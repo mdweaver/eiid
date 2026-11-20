@@ -418,7 +418,8 @@ This interval needs no Gaussian approximation, no fixed dimension, no Slater
 condition and no regime, so it is the only formal guarantee for shared effects with
 many small districts. In every design tried it is as wide as the logical range
 $[0,1]$. Two costs combine: Hoeffding's inequality uses the worst-case variance
-for each outcome share (about 0.01 was the truth, against $\tfrac14$), and the
+for each outcome share (the true variance was about 0.01, against the worst case
+$\tfrac14$), and the
 constraint-by-constraint union bound inflates each radius, which is then divided
 by the distance from the vertex to a pure composition. An oracle Gaussian union
 bound with the true variances still gave widths of 0.76--0.87, so most of the cost

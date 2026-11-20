@@ -85,3 +85,37 @@ print(f"\nratio Theta_X/Theta_O over {len(r)} cells: median {np.median(r):.2f}, 
       f"share of cells with ratio < 0.9: {np.mean(r < .9):.2f}")
 print("phi is the Beta concentration of precinct-level group rates around their mean: phi = 4 means\n"
       "very heterogeneous precincts (sd up to .22), phi = 100 nearly homogeneous (sd up to .05).")
+
+# --- High-kink-mass designs (added after consultation with the PACKAGE_DESIGN author):
+# bimodal precinct rates (Beta concentration phi < 2 gives U-shaped laws) and small precincts
+# (binomial voting with n voters per precinct), so returns at a fixed composition straddle the
+# Duncan-Davis kinks.  Same oracle construction; DD limits use the realised share T = votes/n.
+def study_small(m0f, m1f, xs, phi, n, ndraw=20000):
+    X = np.array(xs)
+    tau = X * m1f(X) + (1 - X) * m0f(X)
+    c = np.linalg.lstsq(np.vstack([np.ones_like(X), X, X ** 2]).T, tau, rcond=None)[0]
+    extra = []
+    for x in xs:
+        p1 = rng.beta(m1f(x) * phi, (1 - m1f(x)) * phi, ndraw)
+        p0 = rng.beta(m0f(x) * phi, (1 - m0f(x)) * phi, ndraw)
+        n1 = int(round(x * n)); n0 = n - n1
+        T = (rng.binomial(n1, p1) + rng.binomial(n0, p0)) / n
+        xe = n1 / n
+        L = np.maximum(0, (T - (1 - xe)) / xe); U = np.minimum(1, T / xe)
+        extra.append((L.mean(), U.mean()))
+    w = X / X.sum(); slope = np.sum(w * (X - 1))
+    loO, hiO, _ = bounds_k(xs, w, c); loX, hiX, _ = bounds_k(xs, w, c, extra)
+    return abs(slope) * (hiO - loO), abs(slope) * (hiX - loX)
+
+print("\nhigh-kink-mass designs: bimodal precinct rates (phi < 2) and/or small precincts (n voters)")
+print(f"{'design':22s} {'truth':14s} {'phi':>5s} {'n':>5s} {'Theta_O':>8s} {'Theta_X':>8s} {'ratio':>6s}")
+r2 = []
+xs10 = np.linspace(.1, .9, 9)   # compositions that are exact multiples of 1/n for n = 10, 20, 50
+for tn, (m0f, m1f) in truths.items():
+    for phi in [0.5, 1.0, 4]:
+        for n in [10, 20, 50, 1000]:
+            wO, wX = study_small(m0f, m1f, xs10, phi, n)
+            r2.append(wX / wO)
+            print(f"{'grid [.1,.9]':22s} {tn:14s} {phi:5.1f} {n:5d} {wO:8.3f} {wX:8.3f} {wX/wO:6.2f}")
+r2 = np.array(r2)
+print(f"\nhigh-kink-mass cells: median ratio {np.median(r2):.2f}, min {r2.min():.2f}, share < 0.9: {np.mean(r2 < .9):.2f}")

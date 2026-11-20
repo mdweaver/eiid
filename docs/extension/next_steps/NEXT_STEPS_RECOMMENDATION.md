@@ -584,7 +584,7 @@ There is one complication. If a published total links the precincts, the gains s
 
 *Numbers marked [NA] come from NEW_AVENUES' own scripts in `new_avenues/`.*
 * *Re-run here and **reproduced byte for byte**:*
-  * `check_structural_claims`, `check_review_items`, `check_car_sensitivity`, `check_single_index_dim`, `check_nesting`, `check_nesting_lce`;
+  * `check_structural_claims`, `check_review_items` (parts (i)–(iii); part (iv), the Wisconsin covariance, needs data not in the repository), `check_car_sensitivity`, `check_single_index_dim`, `check_nesting`, `check_nesting_lce`;
   * `sim_second_moments`, `sim_two_scale_context`;
   * `sim_local_near_constancy` and `sim_size_grid` (log in `new_avenues_rerun_log.txt`).
 * *Taken on trust (the input data are not in the repository):*
@@ -970,7 +970,7 @@ So the data cannot sign the correlation. Without the module, A2 must *assume* it
 
 The size channel (N4) is the main way a larger gain could appear. Step 7's diagnostic should look for it in NZ.
 
-**NEW_AVENUES re-runs** (`new_avenues_rerun_log.txt`). Eleven of its scripts re-run under `python3 -I` reproduce their committed outputs byte for byte: `check_structural_claims`, `check_review_items`, `check_car_sensitivity`, `check_single_index_dim`, `check_nesting`, `check_nesting_lce`, `sim_second_moments`, `sim_two_scale_context`, `sim_local_near_constancy`, `sim_size_grid`. **Not re-run** (input data not in the repository; taken on trust): `apply_B_suffrage`, `apply_kappa_suffrage`, the §13.5 Wisconsin covariance figures, and `nz_diagnostics`. **M-15** (clustered SEs for the NZ slope; cluster-bootstrap interval for Wisconsin 1865): not re-derived (no R, no unit-level data here); no verdict in Part 4 depends on them.
+**NEW_AVENUES re-runs** (`new_avenues_rerun_log.txt`). Ten of its scripts were re-run under `python3 -I`: `check_structural_claims`, `check_review_items`, `check_car_sensitivity`, `check_single_index_dim`, `check_nesting`, `check_nesting_lce`, `sim_second_moments`, `sim_two_scale_context`, `sim_local_near_constancy`, `sim_size_grid`. All reproduce their committed outputs byte for byte. The one exception is `check_review_items`: parts (i)–(iii) are identical, and part (iv) (the Wisconsin covariance) is skipped because its data are not in the repository. That script also rewrites its own output file when run. My re-run overwrote it and dropped part (iv); I restored the committed file. **Not re-run** (input data not in the repository; taken on trust): `apply_B_suffrage`, `apply_kappa_suffrage`, the §13.5 Wisconsin covariance figures (`check_review_items` part (iv)), and `nz_diagnostics`. **M-15** (clustered SEs for the NZ slope; cluster-bootstrap interval for Wisconsin 1865): not re-derived (no R, no unit-level data here); no verdict in Part 4 depends on them.
 
 **Proved here (sketch, for review):** R24, the subset identity, via submodular base polytopes (Part 3.7).
 

@@ -23,5 +23,7 @@ PASS N12b contrast worked example: average group gap: accounting only [-0.600,0.
 PASS N13 exception-mass example: lower end of veteran yes-rate by exception share pi: {0: 0.45, 0.5: 0.2, 1: 0.125} (pi = .5: either precinct may be the exception; the worst is P2)
 PASS N14 misclassification example: recorded labels: [0.167,0.833]; up to 2 mislabelled: [0.138,0.862]
 PASS N15 E4 transfer worked example: electorate B veteran rate (model-implied, truth 0.656): LCE alone [0.529,0.751]; with A's table, same pattern exactly: [0.656,0.656]; pattern may differ (A's rate +/- .02): [0.650,0.662]
+PASS N16 polynomial ladder widens: group-1 rate (truth 0.632): straight lines [0.436,0.779]; quadratic [0.419,0.796]; cubic [0.359,0.820]; Duncan-Davis (no model) [0.324,0.834]
+PASS N17 odds-ratio dial example: P2 veteran yes rate: DD [0.167,0.833]; OR >= 1 (ordering) [0.500,0.833]; 1 <= OR <= 4 [0.500,0.633]
 
-25/25 PASS
+27/27 PASS

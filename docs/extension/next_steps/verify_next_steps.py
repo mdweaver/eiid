@@ -467,4 +467,52 @@ report("N15 E4 transfer worked example", abs(lo1 - tB) < 1e-4 and abs(hi1 - tB) 
        f"electorate B veteran rate (model-implied, truth {tB:.3f}): LCE alone [{lo0:.3f},{hi0:.3f}]; "
        f"with A's table, same pattern exactly: [{lo1:.3f},{hi1:.3f}]; pattern may differ (A's rate +/- .02): [{lo2:.3f},{hi2:.3f}]")
 
+# N16: Avenue D (polynomial ladder) worked example. 2x2; truth m0 = .3 + .1x, m1 = .5 + .2x
+# (so the straight line is true); precinct types at x = .1, .3, .5, .7, .9.  Contextual effects of
+# degree <= J: m_r(x) = sum_j a_rj x^j.  The accounting identity tau(x) = x m1 + (1-x) m0 is imposed as
+# a polynomial identity (tau identified, degree J+1), leaving J free directions. Outer version: rates
+# valid at the support types and on a fine grid of the hull. Target: group-1 rate, group-1 weighted.
+def poly_bounds(J, grid):
+    xs = np.array([.1, .3, .5, .7, .9])
+    tau = lambda x: x * (.5 + .2 * x) + (1 - x) * (.3 + .1 * x)   # .3 + .3x + .1x^2
+    tc = np.array([.3, .3, .1] + [0.0] * (J - 1))                    # coefficients up to degree J+1
+    nv = 2 * (J + 1)                                                  # a1_0..a1_J, a0_0..a0_J
+    A_eq = np.zeros((J + 2, nv)); b_eq = tc[:J + 2]
+    for j in range(J + 1):
+        A_eq[j + 1, j] += 1                  # x * a1_j x^j -> degree j+1
+        A_eq[j, J + 1 + j] += 1              # a0_j x^j -> degree j
+        A_eq[j + 1, J + 1 + j] -= 1          # -x a0_j x^j -> degree j+1
+    pts = np.unique(np.concatenate([xs, grid]))
+    A_ub, b_ub = [], []
+    for x in pts:
+        p = x ** np.arange(J + 1)
+        for off in (0, J + 1):
+            row = np.zeros(nv); row[off:off + J + 1] = p
+            A_ub.append(row); b_ub.append(1); A_ub.append(-row); b_ub.append(0)
+    w = xs / xs.sum()
+    c = np.zeros(nv); c[:J + 1] = (w[:, None] * xs[:, None] ** np.arange(J + 1)).sum(0)
+    kw = dict(A_ub=np.array(A_ub), b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bounds=[(None, None)] * nv)
+    return -lp_max(-c, **kw)[0], lp_max(c, **kw)[0]
+grid = np.linspace(.1, .9, 81)
+l1, u1 = poly_bounds(1, grid); l2, u2 = poly_bounds(2, grid); l3, u3 = poly_bounds(3, grid)
+truth = float(np.sum((np.array([.1,.3,.5,.7,.9]) / 2.5) * (.5 + .2 * np.array([.1,.3,.5,.7,.9]))))
+dd = [dd_rate_2x2(x, .3 + .3 * x + .1 * x * x) for x in [.1, .3, .5, .7, .9]]
+wv = np.array([.1, .3, .5, .7, .9]) / 2.5
+ddl, ddu = float(wv @ [a for a, b in dd]), float(wv @ [b for a, b in dd])
+report("N16 polynomial ladder widens", l1 >= l2 - 1e-9 and u1 <= u2 + 1e-9 and l2 >= l3 - 1e-9 and u2 <= u3 + 1e-9,
+       f"group-1 rate (truth {truth:.3f}): straight lines [{l1:.3f},{u1:.3f}]; quadratic [{l2:.3f},{u2:.3f}]; "
+       f"cubic [{l3:.3f},{u3:.3f}]; Duncan-Davis (no model) [{ddl:.3f},{ddu:.3f}]")
+
+# N17: odds-ratio dial (NEW_AVENUES 12.3(c)) on precinct P2 (100 men, 60 veterans, 50 yes).
+# Cell y = veteran yes; OR(y) = y (y - 10) / ((60 - y)(50 - y)), increasing in y on [10, 50].
+def or_range(lo_or, hi_or):
+    ys = np.linspace(10, 50, 400001)[1:-1]
+    orr = ys * (ys - 10) / ((60 - ys) * (50 - ys))
+    ok = (orr >= lo_or) & (orr <= hi_or)
+    return ys[ok].min() / 60, ys[ok].max() / 60
+o1 = or_range(1, np.inf); o2 = or_range(1, 4)
+report("N17 odds-ratio dial example", abs(o1[0] - .5) < 1e-3 and o2[1] < 50 / 60,
+       f"P2 veteran yes rate: DD [{10/60:.3f},{50/60:.3f}]; OR >= 1 (ordering) [{o1[0]:.3f},{o1[1]:.3f}]; "
+       f"1 <= OR <= 4 [{o2[0]:.3f},{o2[1]:.3f}]")
+
 print(f"\n{sum(results)}/{len(results)} PASS")

@@ -1,0 +1,602 @@
+% Section 6
+\section{Inference}\label{sec:inference}
+
+\subsection{Sampling, estimators and regimes}
+
+\paragraph{Where the randomness comes from.} \citet{aaiw2023} distinguish
+sampling-based uncertainty (the units are a sample from a larger population) from
+design-based uncertainty (some assignment is random). EI has neither: every unit
+of the electorate is observed, and nothing is assigned. In a purely design-based
+view nothing is random, $B$ is a fixed unknown, and the only valid bound is
+Duncan--Davis. LCE, however, is a statement about a conditional expectation,
+which has content only if unit rates are random given the unit's
+characteristics. The uncertainty here is therefore \emph{model-based, conditional
+on the design}, as in the fixed-regressor framework of \citet{aiz2014}:
+\begin{itemize}
+\item[(I1)] Given the design and the district effects, the unit rates $\beta_i$ are
+independent with $\E[\beta_i\mid\text{design}]=m(V_i)$ (Assumption A6).
+\item[(I2)] Inference is conditional on $\{(N_i,X_i,D_i)\}$, so the vertices of
+the sample hulls are fixed.
+\end{itemize}
+District shocks are fixed features of this electorate. Under M1 and M2 they are
+district effects, part of the mean. Under M0 a district shock is not a variance
+problem but a misspecification: conditional on the design, M0's mean model holds
+for the observed units only if the district shifts are zero
+(Proposition~\ref{prop:tests}(c)), and clustered standard errors would not
+repair it. No clustered variance is used. Independence given the district
+effects is a substantive assumption, to be argued in each application: within-district
+shocks can correlate residuals with no district mean shift, which violates (I1)
+without violating the mean model. Residual correlation within districts and
+between neighbours is a diagnostic, not a test that can confirm (I1). Under
+dependence, the variance and residual-allowance statements below are not
+covered.
+
+\paragraph{Estimators.} Fit each of the $C-1$ free columns by OLS on the
+homogeneous quadratic monomials $X_rX_s$ ($r\le s$). For M1 add the district shifts
+$\one\{D=d\}X_r$ ($d\ge2$), which imposes the overidentifying restrictions of
+Lemma~\ref{lem:D1}(b); for M2 fit one regression per district. Column $C$ follows
+by adding up. Write $\hat\beta$ for the stacked coefficients, $\beta_0$ for their
+true value and $\hat\Sigma$ for an HC3 covariance estimate. Each LP constraint is
+$s_j(\beta)+a_j^\top k\ge0$, with $s_j$ linear in $\beta$ and $a_j$ fixed by the
+design (Proposition~\ref{prop:lp}, Theorem~\ref{thm:ladder}(b)). The target is
+$\Bt(k)=\varphi_0(\beta)+\omega^\top k$, with $\varphi_0$ linear in $\beta$ and
+$\omega$ computed from the sample weights $w_{ir}$, so population moments are
+never estimated. The \emph{plug-in bound} is
+$\varphi_0(\hat\beta)+[\min,\max]\{\omega^\top k:\ s(\hat\beta)+Ak\ge0\}$. It is an
+estimate of the identified set, not a confidence interval.
+
+\begin{table}[t]
+\centering\small
+\begin{tabularx}{\linewidth}{@{}L{0.12\linewidth}L{0.15\linewidth}Y L{0.25\linewidth}@{}}
+\toprule
+Model & Regime & Result & Status \\
+\midrule
+any rung & any, any $n$ & Theorem~\ref{thm:finite} (finite-sample interval and emptiness test) & theorem; uninformative in width so far \\
+M0 & any & Propositions~\ref{prop:consistency}, \ref{prop:triangular}, Theorems~\ref{thm:limit}, \ref{thm:ci} & theorem (asymptotic) \\
+M1, M2 & R1 ($D^\star$ fixed) & the same & theorem (asymptotic) \\
+M1, M2 & R3 & the same, with a high-dimensional Gaussian approximation~\citep{cck2017} under a rate condition & conjecture \\
+M1 & R2 & coverage of the CLR interval & simulation finding \\
+any & any & the CLR interval with simulated candidates & Conjecture~\ref{conj:clr} \\
+\bottomrule
+\end{tabularx}
+\caption{Which inference result holds in which regime.}\label{tab:regimes}
+\end{table}
+
+Under M0 the number of constraints grows with the number of hull vertices, but
+the regression has fixed dimension. Every constraint term is a linear functional
+of one asymptotically normal vector, the events $\{\max_j(\cdot)\le c\}$ are convex
+sets, and the multivariate central limit theorem holds uniformly over convex sets
+\citep[Theorem~17.5]{bhattacharyarao1976}. So the growth in constraints does not
+matter. Under M1 and M2 in R2 or R3, $\dim\beta$ grows with $D^\star$ and this
+argument no longer applies.
+
+\subsection{The structure of the bound and its plug-in estimator}
+
+\begin{lemma}[An endpoint is a minimum of linear functions]\label{lem:minlin}\status{proved, fixed constraint system}
+If the LP is feasible with bounded value at $\beta$, then
+\[
+\varphi_U(\beta)=\varphi_0(\beta)+\min_{\lambda\in\Lambda}\lambda^\top s(\beta),\qquad
+\Lambda=\vertx\{\lambda\ge0:A^\top\lambda=-\omega\},
+\]
+a finite set. So $\varphi_U$ is concave and piecewise linear in $\beta$; likewise
+$\varphi_L(\beta)=\varphi_0(\beta)-\min_{\lambda\in\Lambda'}\lambda^\top s(\beta)$ with
+$\Lambda'=\vertx\{\lambda\ge0:A^\top\lambda=\omega\}$.
+\end{lemma}
+\begin{reading}
+Each end of the bound is the tightest of finitely many candidate limits, each
+linear in the regression coefficients; write $\theta_\lambda(\beta)=g_\lambda^\top\beta$
+for the candidate with gradient $g_\lambda$. JKST's case has four candidates and
+assumes one wins clearly. In R$\times$C with districts there are many candidates,
+and near-ties are the norm. The lemma concerns a fixed constraint matrix and
+objective, which conditioning on the design provides.
+\end{reading}
+
+\begin{proposition}[Consistency and rate]\label{prop:consistency}\status{proved}
+Assume (I1)--(I2), A1--A5 for the rung used, $\sqrt n(\hat\beta-\beta_0)=O_p(1)$,
+and Slater's condition: some $\tilde k$ and $\varepsilon>0$ satisfy
+$s_j(\beta_0)+a_j^\top\tilde k\ge\varepsilon$ for every constraint defined by the
+population hulls. Then (a) $\hat\varphi_U-\varphi_U(\beta_0;\hat A)=O_p(n^{-1/2})$,
+and likewise for $\varphi_L$; (b) $\varphi_U(\beta_0;\hat A)\to\varphi_U(\beta_0;A)$
+when $\hat A\to A$ in Hausdorff distance along a nested sequence, or along any
+sequence whose feasible sets eventually lie in a common bounded set; (c) since
+$\hat A_d\subseteq A_d$, $\varphi_U(\beta_0;\hat A)\ge\varphi_U(\beta_0;A)$ and
+$\varphi_L(\beta_0;\hat A)\le\varphi_L(\beta_0;A)$.
+\end{proposition}
+\begin{reading}
+The plug-in bound converges at the usual rate to the bound for the sample hull,
+which is weakly wider than the population bound; estimating the hull only ever
+widens it. The hull error is one-sided and tends to zero, but no rate is shown, so
+the limit theory below concerns the sample-hull endpoint. Coverage of the true
+parameter never depends on the hull, because the true parameter satisfies the
+constraints at every observed composition. Slater's condition fails when every
+feasible $k$ makes some implied rate exactly 0 at some vertex, a structural zero,
+which is not exotic in EI; the rate result is then open, but the coverage results
+below do not use Slater. Bounds do not shrink to a point: their width converges to
+the population width.
+\end{reading}
+
+\begin{theorem}[Limit of the plug-in endpoint, fixed constraint system]\label{thm:limit}\status{cited structure}
+Under the assumptions of Proposition~\ref{prop:consistency} and
+$\sqrt n(\hat\beta-\beta_0)\Rightarrow\mathcal Z\sim N(0,\Sigma)$, suppose the
+constraint system is fixed along the sequence, so that $A$, $\omega$, $\Lambda$ and
+the gradients $g_\lambda$ do not depend on $n$. Let $\Lambda^*$ be the set of optimal
+dual vertices at $\beta_0$. Then
+\[
+\sqrt n\big(\hat\varphi_U-\varphi_U(\beta_0)\big)\Rightarrow\min_{\lambda\in\Lambda^*}g_\lambda^\top\mathcal Z .
+\]
+(i) If $\Lambda^*$ is a singleton, the limit is normal. (ii) If two active
+gradients differ in a direction in which the estimator varies,
+$(g_\lambda-g_{\lambda'})^\top\Sigma(g_\lambda-g_{\lambda'})>0$, the limit has
+strictly negative mean: the plug-in upper endpoint is biased downward, the lower
+endpoint upward, and the plug-in bound is too narrow. If all active gradients
+agree on the support of $\mathcal Z$, the limit is normal. (iii) In case (ii) the
+standard bootstrap is inconsistent.
+\end{theorem}
+\begin{reading}
+When several candidate limits are nearly tied, the plug-in end picks the one that
+looks tightest by chance, so the estimated bound is biased inward. This is why the
+plug-in is not a confidence interval. The proof applies the delta method for
+directionally differentiable maps \citep{shapiro1991,fangsantos2019} and the
+bootstrap characterisation of \citet{fangsantos2019}. With two tied candidates and
+unit noise, the mean plug-in error is $-1/\sqrt\pi\approx-0.564$.
+\end{reading}
+
+\begin{remark}[Use $C-1$ columns]\label{rem:Cminus1}
+The column shares sum to one, so the coefficients of the $C$ column regressions
+sum to a known constant and the joint covariance of all $C$ columns is singular.
+Stating $\hat\beta$, $\Sigma$ and the gradients for the first $C-1$ columns, and
+recovering column $C$ by adding up, lets $\Sigma$ be non-singular. When it is
+positive definite, the condition in (ii) reduces to $g_\lambda\ne g_{\lambda'}$.
+\end{remark}
+
+\begin{proposition}[Changing constraint systems]\label{prop:triangular}\status{proved}
+Let the design, and hence the constraint system, change with $n$, with dual vertex
+sets $\Lambda_n$, $|\Lambda_n|\le\bar L$, bounded gradients $g_{\lambda,n}$, and
+localised slacks $c_{\lambda,n}=\sqrt n(\theta_{\lambda,n}(\beta_0)-\varphi_{U,n}(\beta_0))\ge0$.
+Suppose that, after relabelling, $g_{\lambda,n}\to g_\lambda$ and
+$c_{\lambda,n}\to c_\lambda\in[0,\infty]$. Then
+\[
+\sqrt n\big(\hat\varphi_{U,n}-\varphi_{U,n}(\beta_0)\big)\Rightarrow\min_{\lambda:\,c_\lambda<\infty}\big(g_\lambda^\top\mathcal Z+c_\lambda\big).
+\]
+The limit of Theorem~\ref{thm:limit} obtains when every $c_\lambda\in\{0,\infty\}$.
+\end{proposition}
+\begin{reading}
+As the sample hull grows, candidates can move in and out of contention. A
+candidate that is inactive only by a gap of order $n^{-1/2}$ still shapes the
+limit. For example, $f_n(\theta)=\min\{\theta,-\theta+n^{-1/2}\}$ at $\theta_0=0$ has a
+uniquely active first piece for every $n$, yet
+$\sqrt n(f_n(\hat\theta)-f_n(\theta_0))\Rightarrow\min\{Z,1-Z\}$, which is not normal.
+The result describes the sample-hull endpoint and says nothing about the
+population-hull error. Uniform limit theory without convergent localised slacks is
+open.
+\end{reading}
+\begin{sketch}
+By Lemma~\ref{lem:minlin} the scaled error equals, exactly,
+$\min_\lambda\big(g_{\lambda,n}^\top\sqrt n(\hat\beta-\beta_0)+c_{\lambda,n}\big)$.
+Candidates with $c_{\lambda,n}\to\infty$ drop out with probability tending to one,
+and the continuous mapping theorem gives the limit.
+\end{sketch}
+
+\subsection{Confidence intervals}\label{sec:ci}
+
+Fix levels $\alpha_U,\alpha_L,\alpha_E\in(0,1)$. Let $\hat\sigma_\lambda$ be the
+standard error of $\hat\theta_\lambda=\theta_\lambda(\hat\beta)$ computed from
+$\hat\Sigma$, $\hat\sigma_s$ the vector of standard errors of the constraint terms
+$s_j(\hat\beta)$, and $\hat\sigma_{\varphi_0}$ that of $\varphi_0(\hat\beta)$. For a cell
+$(r,c)$ write $w_i=w_{ir}$, $S_1=\tfrac12(\sum_iw_i^2)^{1/2}$ (Popoviciu's bound
+on the standard deviation of the residual term) and $z_{\alpha_E}=\Phi^{-1}(1-\alpha_E/2)$,
+where $\Phi$ is the standard normal distribution function.
+
+\begin{theorem}[Confidence intervals]\label{thm:ci}
+\begin{enumerate}[label=(\alph*)]
+\item \status{proved} \emph{Conservative interval.} Let $\hat c$ be the
+$(1-\alpha_U-\alpha_L)$-quantile of the maximum of the standardised Gaussian errors of
+all constraint terms (one-sided) and of the target constant (two-sided). Put
+$\hat\Theta^+=\{k:s(\hat\beta)+\hat c\hat\sigma_s+Ak\ge0\}$ and
+\[
+\CI=\Big[\varphi_0(\hat\beta)-\hat c\hat\sigma_{\varphi_0}+\min_{\hat\Theta^+}\omega^\top k-z_{\alpha_E}S_1,\ \
+\varphi_0(\hat\beta)+\hat c\hat\sigma_{\varphi_0}+\max_{\hat\Theta^+}\omega^\top k+z_{\alpha_E}S_1\Big].
+\]
+If $\max_iw_i^2/\sum_iw_i^2\to0$, then
+$\liminf_nP(B_{rc}\in\CI)\ge1-\alpha_U-\alpha_L-\alpha_E$. Without the $S_1$ terms
+the interval covers $\Bt_{rc}$ with probability at least $1-\alpha_U-\alpha_L$.
+\item[(b1)] \status{cited} \emph{CLR with the full candidate set.} Let $\Lambda$ be
+the full set of dual vertices of Lemma~\ref{lem:minlin}, finite for a fixed
+design, and assume Condition~P of \citet{clr2013}: $\Sigma$ positive definite
+(using $C-1$ columns and a full-rank design) and $g_\lambda\ne0$ for every
+$\lambda$. For the upper end, select
+$\hat V=\{\lambda:\hat\theta_\lambda\le\min_\mu(\hat\theta_\mu+\hat c_p\hat\sigma_\mu)+2\hat c_p\hat\sigma_\lambda\}$,
+where $\hat c_p$ is the $1-0.1/\log n$ quantile of $\max_\lambda Z_\lambda$ and $Z$ is
+the standardised Gaussian vector with correlations from $\hat\Sigma$; set
+$\hat U=\min_{\lambda\in\hat V}(\hat\theta_\lambda+\hat c\hat\sigma_\lambda)$ with $\hat c$
+the $(1-\alpha_U)$-quantile of $\max_{\lambda\in\hat V}Z_\lambda$; treat the lower end
+alike; and add $z_{\alpha_E}S_1$ on each side. The coverage bound of (a) holds
+\citep[Theorem~4]{clr2013}.
+\item[(b2)] \status{proved} \emph{Any candidate set with a simultaneous critical
+value.} Let $\hat\Lambda$ be any data-dependent set of dual-feasible points, and
+$\hat U=\min_{\lambda\in\hat\Lambda}(\hat\theta_\lambda+\hat c\hat\sigma_\lambda)$, with
+$\hat U=+\infty$ if $\hat\Lambda$ is empty. Then
+$\liminf_nP(\varphi_U(\beta_0)\le\hat U)\ge1-\alpha_U$ in either of two cases:
+(i) $\hat c$ is the $(1-\alpha_U)$-quantile of $\max_{\lambda\in\bar\Lambda}Z_\lambda$
+for a fixed finite set $\bar\Lambda\supseteq\hat\Lambda$, with $\sigma_\lambda>0$ on
+$\bar\Lambda$; (ii) \emph{projection}: $\hat c=(\chi^2_{q,1-\alpha})^{1/2}$ and
+$\hat\sigma_\lambda=(g_\lambda^\top\hat\Sigma g_\lambda/n)^{1/2}$, where either
+$\Sigma$ is positive definite and $q=\dim\beta$, or there is an exact reduced
+full-rank parameterisation $\beta=L\eta+b$, $\hat\beta=L\hat\eta+b$, with $q=\dim\eta$,
+$\Sigma_\eta$ positive definite and $\hat\Sigma=L\hat\Sigma_\eta L^\top$. In case
+(ii) one event covers both ends, for any candidate sets, at total level $\alpha$.
+\end{enumerate}
+\end{theorem}
+\begin{reading}
+The intervals widen each candidate limit by its own uncertainty before taking the
+tightest, so noisy candidates (for example, districts with few units) rarely set
+the limit. Three versions carry proofs. The conservative interval widens all
+constraints at once. The projection interval uses one ellipsoid for the whole
+coefficient vector; it is valid for any collection of candidates, however chosen,
+but it is wide when there are many coefficients, because its critical value grows
+like $\sqrt q$. The fixed-superset version is sharper but needs a fixed superset.
+For the actual rate $B$, an extra allowance covers each unit's local luck. JKST's
+interval $\CI_x$ is version (b) with a single candidate per side and no selection
+step, with the two error sources combined by adding standard deviations.
+
+An exact reduction means documented identities, such as the adding-up identity
+that removes column $C$, or coordinates fixed by the design. A rank read off
+$\hat\Sigma$ with a numerical cutoff is not one. A singular limit does not control
+errors of smaller order in its null directions: with
+$\hat\beta-\beta_0=(Z/\sqrt n,-1/n)$, the second coordinate has standard error zero
+and the bound $\hat\beta_2+0$ misses $\beta_{0,2}$ in every sample. So the projection
+interval is stated with $q=\dim\beta$ unless an exact reduction is documented.
+Dropping candidates that load on numerically null directions is then only a
+safeguard: it can only widen the interval.
+\end{reading}
+\begin{sketch}
+(a) On one simultaneous event, every true constraint term is at most its inflated
+estimate and the target constant is within its allowance, so the true $k_0$ lies in
+$\hat\Theta^+$ and $\Bt$ lies in the inflated LP range. The residual term $E$ has
+conditional variance at most $S_1^2$ by Popoviciu's inequality; along
+subsequences, Chebyshev's inequality handles the case where its actual standard
+deviation is negligible relative to $S_1$, and the Lindeberg central limit theorem
+the rest. A union bound finishes. (b2) By weak duality every dual-feasible
+candidate is an upper bound for the true endpoint, so it suffices that all
+candidates are simultaneously covered: by the fixed-superset maximum in (i), and by
+Cauchy--Schwarz in the metric of $\hat\Sigma_\eta$ in (ii).
+\end{sketch}
+
+\begin{conjecture}[CLR with simulated candidates; the package default]\label{conj:clr}
+Collect $\hat\Lambda$ as the optimal dual vertices of the LP at $\hat\beta$ and at
+$n_{\rm draw}$ Gaussian draws around it, and compute both $\hat c_p$ and $\hat c$
+over $\hat\Lambda$ in the rule of Theorem~\ref{thm:ci}(b1). Under the conditions
+of (b1), the resulting interval has asymptotic coverage at least $1-\alpha_U$ for
+the upper end (and likewise for the lower end) as $n_{\rm draw}\to\infty$.
+\end{conjecture}
+
+The procedure is an \emph{algorithm}: its validity is not proved. What is proved
+is a reduction.
+
+\begin{lemma}[Reduction to the full-candidate rule]\label{lem:reduction}\status{proved}
+Suppose $\hat c_p$ is computed over the full set $\Lambda$, and $\hat\Lambda$
+contains every vertex selected by the rule of Theorem~\ref{thm:ci}(b1) over
+$\Lambda$ and a minimiser of $\hat\theta_\mu+\hat c_p\hat\sigma_\mu$ over $\Lambda$.
+Then the threshold, the selected set, $\hat c$ and $\hat U$ coincide with those of
+(b1), so its coverage carries over.
+\end{lemma}
+\begin{reading}
+Three steps remain open: recovery of vertices that are optimal only for rare
+Gaussian directions (and degenerate optimal faces); the fact that computing
+$\hat c_p$ over a subset of $\Lambda$ can only lower it, an error in the
+anti-conservative direction; and the growth of $|\Lambda|$ with the number of
+districts, outside CLR's fixed-index setting. Until these are settled, the CLR
+interval as implemented is an algorithm with simulation support
+(Section~\ref{sec:evidence}), and the intervals of Theorem~\ref{thm:ci}(a) and
+(b2) carry the formal guarantee.
+\end{reading}
+
+\paragraph{A variance-adaptive residual allowance.} Popoviciu's bound uses the
+worst-case variance $\tfrac14$ for every unit. The Bhatia--Davis inequality
+\citep{bhatiadavis2000} gives $\Var(e_{irc}\mid V_i)\le m_i(1-m_i)$ with
+$m_i=m_{rc}(V_i)$. Put $\pi_i=w_i^2/\sum_jw_j^2$ and $\bar m=\sum_i\pi_im_i$, the
+$\pi$-weighted model-implied rate, which is itself a linear target. By concavity of
+$m(1-m)$,
+\[
+s_n^2:=\Var(E_{rc}\mid\text{design})\le\sum_iw_i^2m_i(1-m_i)\le\Big(\sum_iw_i^2\Big)\bar m(1-\bar m)=:\bar s^2 .
+\]
+Let $\CI_v$ be a confidence interval for $\bar m$ at level $1-\alpha_v$, and
+$\hat S_{BD}=\big(\sum_iw_i^2\max_{m\in\CI_v\cap[0,1]}m(1-m)\big)^{1/2}$.
+
+\begin{proposition}[Variance-adaptive allowance]\label{prop:bd}\status{proved}
+Suppose $\CI_v$ is an interval of Theorem~\ref{thm:ci}(a) or a projection interval
+of Theorem~\ref{thm:ci}(b2)(ii), computed on the rung's own constraint system
+(without added sign rows), and $\max_iw_i^2/\bar s^2\to0$. Replacing $z_{\alpha_E}S_1$
+by $z_{\alpha_E}\hat S_{BD}$ in the conservative interval, or in the projection
+interval for $B$, gives
+$\liminf_nP(B_{rc}\in\CI)\ge1-\alpha_{\rm est}-\alpha_E-\alpha_v$, where
+$\alpha_{\rm est}$ is the level spent on the estimation part.
+\end{proposition}
+\begin{reading}
+The allowance for local luck can be made smaller when the plausible rates are far
+from one half, provided the input interval for $\bar m$ comes from a proved
+method. The condition on the weights holds, for instance, when $\bar m$ stays
+bounded away from 0 and 1. If $\CI_v$ fails, the allowance is not conservative:
+with true $\bar m=.5$, a wrong interval inside $[0,.1]$ gives a variance bound of at
+most $.09$ against the true $.25$. If $\CI_v$ is instead the CLR interval, the
+same bound holds conditional on $\CI_v$ covering $\bar m$, and the result inherits
+the status of Conjecture~\ref{conj:clr}. An optional, stronger assumption (the
+unit-level deviations of different groups are not negatively correlated) would
+make the residual variance estimable from the outcome shares and remove most of
+the allowance; it is not in the default.
+\end{reading}
+\begin{sketch}
+On the event that $\CI_v$ covers $\bar m$, $\hat S_{BD}\ge\bar s\ge s_n$. So a
+miss of the residual allowance requires either that $\CI_v$ fails or that
+$|E|>z_{\alpha_E}\bar s$, whose limiting probability is at most $\alpha_E$ by the
+Chebyshev--Lindeberg argument with $\bar s$ in place of $S_1$. A union bound with
+the estimation event finishes.
+\end{sketch}
+
+\paragraph{Boundary cases.} When the true $K$ is on the boundary of the identified
+set, the side of the interval that touches it carries the full error probability,
+and coverage is close to nominal. When the true $K$ is interior, coverage tends to
+one: this is the distinction between covering the parameter and covering the
+set~\citep{imbensmanski2004}. When the bound's width is near zero (L4 in
+$2\times2$, L5), one-sided intervals per endpoint under-cover unless the critical
+value adapts~\citep{stoye2009}. The two-sided split used here is uniformly valid
+at some cost in width.
+
+\subsection{Tests of the model}\label{sec:tests}
+
+\begin{proposition}[Tests]\label{prop:tests}
+(a) \status{proved} \emph{Emptiness test.} Rejecting the rung when $\hat\Theta^+$ is
+empty has asymptotic level at most $\alpha_U+\alpha_L$.
+(b) \status{proved for fixed dimension} \emph{Shared against district-specific
+effects.} A Wald test of the M1 regression against M2 tests the
+$(D^\star-1)(C-1)R(R-1)/2$ overidentifying restrictions of Lemma~\ref{lem:D1}(b);
+its $\chi^2$ calibration holds for fixed dimension (regime R1).
+(c) \status{proved} \emph{Pooling.} Conditional on the design, suppose each
+district's observed compositions contain $R$ affinely independent points. Under
+M1, M0's mean model holds for the observed units iff all district shifts vanish.
+Pooling is therefore tested by a Wald test of $\zeta=0$ in the M1 regression, with
+$(D^\star-1)(C-1)R$ restrictions.
+\end{proposition}
+\begin{reading}
+An empty confidence set is a real rejection at the stated level. The curvature
+test checks the testable part of shared effects. The pooling test says whether the
+pooled model is wrong for this design; a rejection does not mean that its
+intervals fail (Section~\ref{sec:evidence}), and the test has no power against
+within-district dependence without mean shifts. Proposition~\ref{prop:D4}(b) gives a
+weaker condition for pooling, but it averages over district labels and so
+describes a superpopulation of re-drawn districts, which is not the target here;
+conditional on the observed labels only $\zeta=0$ makes M0 correct.
+\end{reading}
+\begin{sketch}
+(a) On the simultaneous event of Theorem~\ref{thm:ci}(a), the true $k_0$ lies in
+$\hat\Theta^+$, so emptiness requires that event to fail. (c) If M0 held for the
+observed units with coefficients $H'$, then in each district
+$(G_c-\zeta_{c,d}\one^\top)X_i=0$ for all its units, with $G=H'-H$. The district's
+$R$ affinely independent compositions lie in $\{\one^\top x=1\}$ and are therefore
+linearly independent, so $G_c=\zeta_{c,d}\one^\top$ in every district. With
+$\zeta_{c,1}=0$, $G_c=0$ and every shift vanishes.
+\end{sketch}
+
+\paragraph{Calibration by a restricted wild bootstrap.} In moderate dimension the
+HC3 Wald statistic compared with $\chi^2$ over-rejects. The package calibrates
+both tests by a restricted wild bootstrap: fit the null model (M0 for the pooling
+test, M1 for the curvature test); draw $Y^*=\hat Y_0+\hat e_0v$ with Rademacher
+$v_i$, one per unit, shared across the $C-1$ equations; refit the larger model and
+recompute the same Wald statistic; and report
+$p=(1+\#\{W^*\ge W\})/(B+1)$ with $B=399$ by default. The $\chi^2$ and F p-values are
+reported as well. This calibration is supported by simulation
+(Section~\ref{sec:evidence}); its validity as the number of restrictions grows is
+not proved.
+
+\subsection{A finite-sample interval valid in every regime}
+
+Fix a rung and condition on the design. Let $Z$ be the rung's regression design,
+with full column rank, and $\hat\beta_c=(Z^\top Z)^{-1}Z^\top T_{\cdot c}$ for
+$c<C$. Every linear functional $f(\beta)=f_0+\sum_{c<C}b_c^\top\beta_c$ satisfies
+$f(\hat\beta)=f_0+\sum_i\sum_{c<C}w_{ic}(f)T_{ic}$ with
+$w_{ic}(f)=b_c^\top(Z^\top Z)^{-1}z_i$. Put $w_{iC}(f)=0$,
+$\rho_i(f)=\max_cw_{ic}(f)-\min_cw_{ic}(f)$, and the Hoeffding radius
+$h(f;\delta)=\big(\tfrac12\log(1/\delta)\sum_i\rho_i(f)^2\big)^{1/2}$. With $J$
+constraint rows and $\delta=\alpha_s/(J+2)$, put $h_j=h(s_j;\delta)$,
+$h_0=h(\varphi_0;\delta)$, $t_E=\big(\tfrac12\log(2/\alpha_E)\sum_iw_{ir}^2\big)^{1/2}$,
+$\hat\Theta^{\rm fin}=\{k:s_j(\hat\beta)+h_j+a_j^\top k\ge0\ \forall j\}$, and
+\[
+\CI^{\rm fin}=\Big[\varphi_0(\hat\beta)-h_0+\min_{\hat\Theta^{\rm fin}}\omega^\top k-t_E,\ \
+\varphi_0(\hat\beta)+h_0+\max_{\hat\Theta^{\rm fin}}\omega^\top k+t_E\Big].
+\]
+
+\begin{theorem}[Finite-sample interval and emptiness test]\label{thm:finite}\status{proved}
+Assume (I1), that the rung's mean model holds and that $Z$ has full column rank.
+Then for every $n$ and in every regime: (a)
+$P(B_{rc}\in\CI^{\rm fin}\mid\text{design})\ge1-\alpha_s-\alpha_E$; (b) without $t_E$
+the interval covers $\Bt_{rc}$ with probability at least $1-\alpha_s$; (c)
+rejecting the rung when $\hat\Theta^{\rm fin}$ is empty is a test of exact level at
+most $\alpha_s$; (d) intersecting with Duncan--Davis keeps (a).
+\end{theorem}
+\begin{reading}
+This interval needs no Gaussian approximation, no fixed dimension, no Slater
+condition and no regime, so it is the only formal guarantee for shared effects with
+many small districts. In every design tried it is as wide as the logical range
+$[0,1]$. Two costs combine: Hoeffding's inequality uses the worst-case variance
+for each outcome share (the true variance was about 0.01, against the worst case
+$\tfrac14$), and the
+constraint-by-constraint union bound inflates each radius, which is then divided
+by the distance from the vertex to a pure composition. An oracle Gaussian union
+bound with the true variances still gave widths of 0.76--0.87, so most of the cost
+is the union bound, which the conservative asymptotic interval shares. The theorem
+settles validity in regime R2, but not usefulness; it is not in the package.
+\end{reading}
+\begin{sketch}
+Every constraint term and the target constant are linear functionals of the OLS
+fit, and each is a sum over units of independent terms whose range is known from
+the design, because the outcome shares lie in the simplex. OLS is conditionally
+unbiased under the mean model, so Hoeffding's inequality~\citep{hoeffding1963}
+gives a finite-sample radius for each. A union bound over the $J+2$ one-sided
+events puts the true $k_0$ in the widened set, and the residual term gets its own
+Hoeffding radius.
+\end{sketch}
+
+\subsection{Many districts with few units}
+
+\begin{proposition}[Dropping and selecting districts]\label{prop:select}\status{proved}
+(a) For any subset $\mathcal D'$ of districts, the M1 outer set computed from the
+constraints of $\mathcal D'$ contains the full M1 outer set. (b) If $\mathcal D'$ is
+chosen from the design only, any procedure with (finite-sample or asymptotic)
+coverage for a fixed set of districts keeps that coverage conditionally on the
+selected $\mathcal D'$; in particular Theorem~\ref{thm:finite} holds. The asymptotic
+results transfer only if their own regime conditions hold for the retained
+districts.
+\end{proposition}
+\begin{reading}
+With many small districts, ignoring some districts' constraints can only widen the
+bound, so it never costs validity of the identified set. If the retained districts
+are chosen from the design alone (for example, those with at least 30 units or
+enough spread in composition), not from the outcomes, any interval that is valid
+for a fixed set of districts stays valid. Selection does not by itself move the
+problem into a regime where the asymptotic theory applies: retained districts with
+few units are still in R2. Other practical options are M1($\delta$) with $\delta>0$,
+which bounds how far one district can pull the shared parameter, coarser groups,
+and targeting $\Bt$ to drop the residual term. A hierarchical model for the district
+shifts would change the model and is not pursued.
+\end{reading}
+
+\subsection{Sensitivity to nonlinearity}\label{sec:sensitivity}
+
+\begin{proposition}[Bounded nonlinearity]\label{prop:S1}\status{proved; an outer bound}
+Replace (S2) by $\E[\beta\mid V]=M_H(X)+\nu(X)$ with $\nu$ in the undetectable class
+of Proposition~\ref{prop:undetectable} ($x^\top\nu(x)=0$, $\nu(x)\one=0$) and
+$\|\nu(x)\|_\infty\le\eta$. Then $Q$ is identified as before, and every value of
+$\Bt_{rc}$ consistent with the data lies in
+\[
+\Big[\min_{\ThO(\eta)}\varphi-\eta,\ \max_{\ThO(\eta)}\varphi+\eta\Big],\qquad
+\ThO(\eta)=\{k:s+Ak\ge-\eta\one\}.
+\]
+For a general target $\sum a_{rc}B_{rc}$, widen by $\eta\sum|a_{rc}|$ instead.
+\end{proposition}
+\begin{reading}
+If rates may depart from straight lines, invisibly, by up to $\eta$, the bound
+widens in a controlled way. The bound is valid, but it is not claimed to be the
+sharp set of the relaxed model. The \emph{breakdown value} $\eta^*$ of a
+conclusion, such as ``loyalty exceeds 0.30'', is the largest departure under which
+it survives; the bounds are nested in $\eta$, so it can be found by bisection. In
+the $3\times3$ illustration of Section~\ref{sec:rxc}, $\eta^*(\text{loyalty}>0.30)=0.060$:
+the conclusion survives any undetectable nonlinearity of up to six percentage
+points. Applying the confidence-interval version of the bound accounts for
+sampling error. The dial $\delta$ of Proposition~\ref{prop:D6} works the same way
+for heterogeneity across districts.
+\end{reading}
+
+\subsection{Inference with sign rows, unions and near-empty sets}\label{sec:R10}
+
+The sign rows of Section~\ref{sec:msign} enter the same machinery. A row
+$s_j(\beta)+a_j^\top k\ge0$ with $s_j$ linear in $\beta$ and $a_j$ fixed by the design
+is \emph{linear in $\beta$}; every sign, ordering and local row has this form,
+because the associations, the targets and $\ER^*$ are linear in the model means
+with design weights, and $Q$ is linear in $\beta$. A \emph{parallel disjunction} is
+a row $\max_{l\le L}s_l(\beta)+a^\top k\ge0$, whose pieces share the normal $a$. A
+\emph{general union} is $C_+\cup C_-$, each branch a finite set of rows linear in
+$\beta$. $\CI(\mathcal R)$ denotes an interval of Theorem~\ref{thm:ci} computed with the
+base rows plus the rows $\mathcal R$. For version (a), $\CI=\emptyset$ iff
+$\hat\Theta^+=\emptyset$; for version (b), iff the computed ends cross.
+
+\begin{theorem}[Inference with added rows]\label{thm:R10}\status{proved for pooled M0, by interval version}
+Assume the conditions of Theorem~\ref{thm:ci} for the augmented row system, the
+pooled model M0, and that the restrictions hold at the truth.
+\begin{enumerate}[label=(\alph*)]
+\item \emph{Added rows.} For finitely many rows linear in $\beta$,
+Theorem~\ref{thm:ci} and Proposition~\ref{prop:tests}(a) hold for the augmented
+system, version by version (Table~\ref{tab:R10}). For an actual target that is a
+contrast, such as $B_1-B_0$, the residual allowance must cover the contrast:
+$\tfrac12\{\sum_i(w_{i1}+w_{i0})^2\}^{1/2}$ is a valid standard-deviation envelope,
+and so is the sum of the per-cell envelopes.
+\item \emph{Parallel disjunction} (conservative version only). Inflate each piece
+separately and then take the maximum,
+$\max_l\big(s_l(\hat\beta)+\hat c\hat\sigma_l\big)+a^\top k\ge0$, with all pieces in the
+critical-value maximum. This covers at the nominal level. One-vs-rest and
+$2\times2$ CR are of this form (the \emph{slab}), and no branch is selected from
+$\widehat{\ER}$.
+\item \emph{General union.} $\CI(C_+)\cup\CI(C_-)$, each branch at the full level
+$\alpha$, covers the true target with asymptotic probability at least $1-\alpha$. No
+Bonferroni split is needed. This is point coverage; it gives no simultaneous
+coverage of both branch images.
+\item \emph{Near-empty sets.} Under the model,
+$\limsup_nP(\CI=\emptyset)\le\alpha_U+\alpha_L$, including point-identified cases,
+and conditioning on non-emptiness can only raise coverage. If the restrictions are
+false, no coverage statement holds.
+\item \emph{Plug-in brackets are not valid.} Imposing the estimated bracket
+$\hull\{\gamma_r\widehat{\ER},\widehat{\ER}\}$ without inflating it can under-cover,
+and more data do not cure it: in a repeated three-point design,
+$\limsup_nP(\tilde D_0\in\CI_{\rm naive})\le\Phi(\tfrac7{12}z_{.995})=0.9335<0.95$.
+\end{enumerate}
+\end{theorem}
+
+\begin{table}[t]
+\centering\small
+\begin{tabularx}{\linewidth}{@{}L{0.32\linewidth}Y L{0.17\linewidth}@{}}
+\toprule
+Interval version & What Theorem~\ref{thm:R10} claims & Status \\
+\midrule
+(a) conservative & (a)--(d), including the slab (b) & proved \\
+(b1) CLR over all dual vertices & (a), (c), (d), under CLR's conditions for the full augmented system & cited \\
+(b2)(i) fixed superset & the branch-union and crossing arguments & proved \\
+(b2)(ii) projection & both ends, any candidates; $\Sigma$ positive definite or an exact reduction & proved \\
+CLR with simulated candidates (package default for CR) & the inclusion and crossing steps are deterministic; their probabilities are conjectural & algorithm (Conjecture~\ref{conj:clr}) \\
+\bottomrule
+\end{tabularx}
+\caption{Status of Theorem~\ref{thm:R10} by interval version.}\label{tab:R10}
+\end{table}
+
+\begin{reading}
+Sign beliefs enter the same interval machinery as the rung's own constraints.
+Reinforcement uses a band whose two pieces are each widened by their own
+uncertainty before the larger is taken; this is valid without knowing which branch
+is true. The tempting shortcut, plugging the estimated neighbourhood and regression
+numbers into the bracket, is not a confidence interval. Intersecting the fitted
+bracket with a finished JKST interval is worse: its limiting coverage of a truth on
+the bracket's edge is at most one half. When the belief is false, the interval stays
+narrow and can be reproducibly wrong (Section~\ref{sec:evidence}); a narrow,
+non-empty interval is no evidence that the restrictions are true. Conditioning on
+other data events, or selecting a belief because it gives an attractive result, is
+not covered.
+\end{reading}
+\begin{sketch}
+(a) The added rows are linear in the regression coefficients, so they join the same
+simultaneous Gaussian event, on which the true $k_0$ satisfies every inflated row.
+(b) The piece that holds at the truth is dominated on the same event, so no branch
+is ever chosen from the data. (c) The true branch is a fixed population fact; the
+interval for that branch alone has the full level and lies inside the union.
+(d) An empty interval requires the coverage event to fail. (e) In the three-point
+design, with the basis $((1-x)^2,2x(1-x),x^2)$, the target constant's standard error
+is exactly $\tfrac7{12}$ of the regression slope's, and the critical value is at
+most $z_{.995}$ by the union bound over the eight base rows and the two target
+tails.
+\end{sketch}
+
+The statements are pointwise in the data-generating process. Uniform validity near
+point identification is open. Statements of the type of
+Proposition~\ref{prop:consistency} and Theorem~\ref{thm:limit} need Slater's
+condition, which rows that bind at the truth (such as the edge of the CR band) can
+break; the conservative version does not.
+
+\subsection{A practical recipe}
+
+\begin{enumerate}
+\item Fit the rung's regression on $C-1$ columns with HC3 covariance, and compute
+the sample hulls.
+\item Build the LP and report the plug-in bound, labelled as an estimate of the
+identified set.
+\item Report the CLR interval for $\Bt$ and for $B$, labelled as algorithmic, and
+beside it the projection interval as the interval with an asymptotic guarantee;
+for $B$, take $\bar m$ from the projection interval on the rung alone, or use
+Popoviciu's bound. Intersect both with Duncan--Davis, which always contains $B$.
+\item With many small districts, say that the CLR interval's coverage rests on
+simulation. Theorem~\ref{thm:finite} gives a finite-sample guarantee, but so far
+only at the width of the logical range.
+\item Report the emptiness test and, for M1, the curvature and pooling tests with
+wild-bootstrap p-values. A rejection of pooling says that M0 is wrong for this
+design, not that its intervals fail.
+\item Report sensitivity curves in $\eta$ and $\delta$, with the breakdown value of
+the headline conclusion.
+\item With few units per district, select districts by design, or prefer
+M1($\delta$) or coarser groups, and say so.
+\end{enumerate}

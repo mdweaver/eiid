@@ -11,10 +11,11 @@
 # eiBounds() parses restrictions through the registry, .rxc_extra_rows() builds the rows,
 # and fit$modules / eiModules() report the meta.
 
-# Proof status of M-SIGN (assoc, cr): experimental until both batch-B referee reports are
-# resolved; print() shows an EXPERIMENTAL line for every module whose status is not "proved".
-.rxc_msign_status <- paste("experimental (referee reports B under revision; see",
-                           "docs/extension/reviews/B_PI_RESPONSE_PLAN.md)")
+# Proof status of M-SIGN (assoc, cr): experimental while grouped-rung results (R16) and integer
+# tables (R15) are open; print() shows an EXPERIMENTAL line for every module whose status is
+# not "proved".
+.rxc_msign_status <- paste("experimental (sharpness and inference proved for the pooled model M0",
+                           "only; see docs/extension/PHASE5a_sign_module.md)")
 
 .rxc_meta <- function(source, object, target, refutable, form, sharp, dial, proof_status)
   list(source = source, object = object, target = target, refutable = refutable, form = form,

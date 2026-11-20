@@ -1,0 +1,58 @@
+\documentclass[11pt]{article}
+\input{preamble}
+\externaldocument[S-]{eiPartialID_supplement}
+
+\title{Partial Identification for R$\times$C Ecological Inference:\\
+Identified Sets, Inference and Software}
+\author{[Author]}
+\date{November 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent Ecological inference asks how groups behaved when only group shares
+and outcome shares are observed for each unit. Point estimates require strong
+assumptions that the data cannot check. This paper develops the alternative:
+state an assumption, derive the set of values of the target that are consistent
+with the data and that assumption, and report that set with honest sampling
+uncertainty. We extend the $2\times2$ bounds of Jiang, King, Schmaltz and Tanner
+under linear contextual effects to general R$\times$C tables. The data identify
+the symmetric part of the contextual-effect matrices and leave a skew part of
+dimension $(C-1)R(R-1)/2$ unidentified. We characterise the sharp identified
+set, show that the computable linear-programming bound is sharp for the
+regression function, and give closed forms for two rows. For units nested in
+districts we derive a ladder of nested assumptions, from Duncan--Davis bounds
+through district-specific and shared contextual effects to Goodman constancy.
+We add sign and contextual-reinforcement beliefs from monotone ecological
+inference as linear restrictions, and give exact sharpness and redundancy
+results for the pooled model. Because each endpoint of the bound is the minimum
+of many estimated candidate limits, the plug-in bound is biased inward; we give
+confidence intervals with proved asymptotic coverage, a finite-sample interval
+valid in every regime, tests of the model, and a sensitivity analysis. The
+default interval of the accompanying R package, a CLR-type procedure with
+simulated candidates, is stated as an algorithm whose validity is conjectured.
+Simulations and a benchmark with known truth from New Zealand elections show
+where each interval is informative.
+\end{abstract}
+
+\noindent\textbf{Keywords:} ecological inference; partial identification;
+intersection bounds; linear programming; contextual effects; monotonicity.
+
+\tableofcontents
+\clearpage
+
+\input{sections/s1_intro}
+\input{sections/s2_setting}
+\input{sections/s3_rxc}
+\input{sections/s4_districts}
+\input{sections/s5_signs}
+\input{sections/s6_inference}
+\input{sections/s7_package}
+\input{sections/s8_evidence}
+\input{sections/s9_open}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}

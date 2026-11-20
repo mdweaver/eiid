@@ -125,8 +125,8 @@ report; Phases 1-3 report, item 3). Plan: `docs/extension/reviews/ROUND2_PACKAGE
 * With many small groups (regime R2 of the Phase 3 Monte Carlo) the plug-in
   estimate under-covers, and the CLR interval's coverage rests on simulation.
 * New Zealand elections pooled by electorate (`eiDatasetsTables()`,
-  `benchmarks/`): the data reject both M0 and M1 (empty estimates; pooling and
-  M1 tests with p near 0), and non-empty M1 CLR intervals missed the truth in 5
+  `benchmarks/`): the pooling test rejects M0 and the M1 test rejects M1 (p near
+  0; the plug-in estimates are empty, but the emptiness test does not reject M1), and non-empty M1 CLR intervals missed the truth in 5
   of 63 cells. Grouped M-SIGN fits sit on top of these rungs, which is one more
   reason the module is labelled experimental.
 * Not yet available: the drop-one display (each belief removed in turn), a

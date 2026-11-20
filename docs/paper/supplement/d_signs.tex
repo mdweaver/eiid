@@ -1,0 +1,370 @@
+% S4 proofs for Section 5
+\section{Proofs for Section 5: signs, reinforcement and monotonicity}\label{sec:proofs-signs}
+
+Finite-population notation: $p_i=N_i/\sum_jN_j$, $\E_p$, $\mu_r=\E_p[X_r]$,
+$w^r_i=p_iX_{ir}/\mu_r$, $w^{\neg r}_i=p_i(1-X_{ir})/(1-\mu_r)$, $B_s=\E_{w^s}\beta_s$.
+Where $X_{ir}=1$, the absent ``rest'' group is given any bounded value; its weight is
+zero. A column is fixed and dropped from the notation.
+
+\subsection{Identities}
+
+\begin{proofof}{Lemma~\ref{P-lem:M1}}
+(a) By A1, $T_i=\sum_sX_{is}\beta_{is}$, so $\E_p[XT]=\sum_s\E_p[XX_s\beta_s]$. For each
+$s$, $\E_p[XX_s\beta_s]=\mu_s\E_{w^s}[X\beta_s]=\mu_s(\E_{w^s}[X]B_s+\Cov_{w^s}(X,\beta_s))$,
+and $\mu_s\E_{w^s}[X]=\E_p[XX_s]=Me_s$. Hence $\E_p[XT]=MB+\Delta$, and if $M$ is
+invertible $g=B+M^{-1}\Delta$. Also
+$\one^\top\Delta=\sum_s\mu_s\Cov_{w^s}(\one^\top X,\beta_s)=0$ because $\one^\top X=1$ is
+constant.
+
+(b) $\mu_r\NM_r=\E_p[X_rT]=\E_p[X_r^2\beta_r]+\sum_{s\ne r}\E_p[X_rX_s\beta_s]$, and,
+using $X_r=1-\sum_{s\ne r}X_s$,
+$\mu_rB_r=\E_p[X_r\beta_r]=\E_p[X_r^2\beta_r]+\sum_{s\ne r}\E_p[X_rX_s\beta_r]$.
+Subtracting, $\mu_r(\NM_r-B_r)=\sum_{s\ne r}\E_p[X_rX_s(\beta_s-\beta_r)]=-\delta^r_B$.
+
+(c) $\beta^{\neg r}_i$ is a convex combination of the $\beta_{is}\in[0,1]$, $s\ne r$, so it
+lies in $[0,1]$, and $T_i=X_{ir}\beta_{ir}+(1-X_{ir})\beta^{\neg r}_i$. Its group mean is
+$\E_p[(1-X_r)\beta^{\neg r}]/(1-\mu_r)=\sum_{s\ne r}\mu_sB_s/(1-\mu_r)=B_{\neg r}$. So
+$(X_r,\beta_r,\beta^{\neg r})$ is a two-group population with group means $B_r$ and
+$B_{\neg r}$. Its between association is
+$\E_p[X_r(1-X_r)(\beta_r-\beta^{\neg r})]=\E_p[X_r((1-X_r)\beta_r-\sum_{s\ne r}X_s\beta_s)]=\delta^r_B$,
+and its within association is $\delta^r_W$ by definition. EGGHM's two-group identities
+(their Propositions~4 and~6), with individual-level variance $\mu_r(1-\mu_r)$ and
+between-unit variance $\Var_p(X_r)$, give the two formulas.
+
+(d) $B$ and $\delta_B$ are linear in $\beta$ with design weights.
+$\Cov_w(\beta_s,X_r)=\sum_iw_i\beta_{is}(X_{ir}-\E_wX_r)$ is linear in $\beta$. In
+$\delta^r_W$, $(1-\mu_r)w^{\neg r}_i\beta^{\neg r}_i=p_i\sum_{s\ne r}X_{is}\beta_{is}$, so the
+division by $1-X_{ir}$ cancels.
+\end{proofof}
+
+\subsection{Sign restrictions on realised tables}
+
+\begin{proofof}{Proposition~\ref{P-prop:N1}}
+A table of non-negative real masses $n_{irc}=N_iX_{ir}\beta_{irc}$ reproduces the
+margins iff $\beta_i\in S(X_i,T_i)$, and it satisfies the restrictions iff $\beta\in F$
+(Lemma~\ref{P-lem:M1}(d)). $F$ is a bounded polyhedron, because each $S(X_i,T_i)$ is
+compact and the restrictions are linear, and $\varphi$ is affine in $\beta$. So
+$\varphi(F)$ is a compact interval with both endpoints attained, which is (a); (b) is the
+definition; (c) applies (a) to $F_+$ and $F_-$. (d) $\varepsilon$ enters only the
+right-hand side, so the sets are nested componentwise, and right-hand-side LP duality
+gives continuous piecewise-linear endpoints where $F(\varepsilon)\ne\emptyset$. A
+conclusion such as ``upper endpoint $\le c$'' holds on a sublevel set of such a
+function, which need not be a product set.
+\end{proofof}
+
+\begin{proofof}{Proposition~\ref{P-prop:integer}}
+Let $Y_1$ be the number of group-1 members with the outcome and $Y$ the total number
+with the outcome. Then $D=Y_1/N_1-(Y-Y_1)/N_0=Y_1(1/N_1+1/N_0)-Y/N_0$. Each unit's
+group-1 count with the outcome ranges over an integer interval, so their sum takes
+every integer between its extremes, and those extremes give the Duncan--Davis
+extremes. Hence the integer gap set is the lattice $\{-Y/N_0+j(1/N_1+1/N_0)\}$ inside
+$[D^-,D^+]$, with both endpoints attained, and $1/N_1+1/N_0=1/(N\mu(1-\mu))$. Each sign
+row of Proposition~\ref{P-prop:tworowsign} is a half-line in $D$, so the integer set
+under sign rows is the continuous set intersected with the lattice; the endpoints
+differ by less than one step, and integer emptiness can occur only when the continuous
+set is shorter than one step.
+\end{proofof}
+
+\emph{The four-person example.} Three units of size 4 with group-1 counts 1, 2, 3 and
+outcome counts 0, 1, 0. Each group has six members, so the integer gaps are exactly
+$\{-1/6,1/6\}$. By symmetry $D_{\ER}=D_{\NM}=0$, so the continuous CR set is $\{0\}$ and
+no integer table satisfies CR.
+
+\begin{proofof}{Proposition~\ref{P-prop:tworowsign}}
+By Lemma~\ref{P-lem:M1}(c) with $R=2$, $\delta_W=(D_{\ER}-D)\Var_p(X)$ and
+$\delta_B=(D-D_{\NM})\mu(1-\mu)$, which gives (a) because $\Var_p(X)>0$. $D$ is affine in
+$\beta$ over the product of the unit polytopes, so its range is $[D^-,D^+]$ with every
+value attained (Proposition~\ref{P-prop:N1}(a)). (b) $F=\{D\le D_{\ER}\}$, whose image is
+$[D^-,D^+]\cap(-\infty,D_{\ER}]$, empty iff $D_{\ER}<D^-$. (c) Put
+$\beta_{i1}=\beta_{i2}=T_i$ in every unit. This lies in $S(X_i,T_i)$ (and in the unit
+restriction set, because that is the whole simplex by hypothesis), gives $\delta_B=0$,
+and hence $D=D_{\NM}$.
+
+(d) $D_{\NM}=\gamma D_{\ER}$ is EGGHM's Lemma~1; directly,
+$D_{\NM}=\Cov_p(X,T)/(\mu(1-\mu))$ and $D_{\ER}=\Cov_p(X,T)/\Var_p(X)$. $\gamma>0$ since
+$\Var_p(X)>0$, and $\gamma\le1$ because $\mu(1-\mu)-\Var_p(X)=\E_p[X(1-X)]\ge0$, with
+equality iff every unit with $p_i>0$ is pure. Suppose $D_{\ER}>0$. The negative branch
+requires $D\ge D_{\ER}$ and $D\le D_{\NM}=\gamma D_{\ER}\le D_{\ER}$, so
+$D=D_{\ER}=D_{\NM}$, which forces $\gamma=1$; so it is empty when $\gamma<1$. When
+$\gamma=1$, every positive-weight unit is pure, each unit's rate for its only group
+equals $T_i$, $D$ is point-identified and equals $D_{\ER}=D_{\NM}$, and both branches are
+non-empty with gap image $\{D_{\ER}\}$. The positive branch is
+$\{D_{\NM}\le D\le D_{\ER}\}\cap[D^-,D^+]=[D_{\NM},\min\{D^+,D_{\ER}\}]$, non-empty because
+$D^-\le D_{\NM}\le D_{\ER}$ and $D_{\NM}\le D^+$; on it $D\ge D_{\NM}>0$. The case
+$D_{\ER}<0$ is symmetric, and $D_{\ER}=0$ gives $D_{\NM}=0=D$ on both branches.
+\end{proofof}
+
+\emph{The equal-rates witness in R$\times$C.} Setting $\beta_{ir}=T_i$ for every row
+makes every pairwise between association zero, so it satisfies every weak between
+sign and, for each pairing, the CR union. Which branch contains it depends on its
+within association. Example: equal weights on $(.2,.5,.3)$, $(.5,.2,.3)$, $(.8,.1,.1)$
+with every group's rate equal to $X_1$, so $T=X_1$. For group 1 against the rest,
+$\ER=1$, $\gamma=.24$, and the witness has $D=\NM=.24$, $\delta_B=0$ and
+$\delta_W=\Var_p(X_1)(\ER-D)=.0456>0$: it lies in the positive branch only.
+
+\begin{proofof}{Proposition~\ref{P-prop:joint}}
+Adding constraints shrinks the feasible set. For the two-column example: two
+$2\times2$ units at $x=.25$ and $.75$ with complementary columns have
+$\delta_{W,2}=-\delta_{W,1}$, so the same weak within sign on both columns forces both to
+zero, hence $D=D_{\ER}$; opposite signs on complementary columns duplicate one
+restriction.
+\end{proofof}
+
+\begin{proofof}{Proposition~\ref{P-prop:Krows}}
+(a) For each rung, $m_i=m_{\rm id}(V_i)+L_ik$ with $L_i$ fixed by the design
+(Lemmas~\ref{P-lem:decomp} and~\ref{P-lem:D1}). Each association is linear in
+$(m_i)_i$ with design coefficients (Lemma~\ref{P-lem:M1}(d) with $m$ in place of
+$\beta$), so it is affine in $k$.
+
+(b) $\delta^*_B(r,s)=\sum_ip_iX_{ir}X_{is}(m_r(X_i,D_i)-m_s(X_i,D_i))$, and every term is
+non-negative by hypothesis.
+
+(c) Under M0 with $R=2$, row 1's mean is $b_0+b_1X$ with $b_1=w_1+d_1$ and row 2's is
+$w_0+w_1X$. Then $\Cov_{w^1}(b_0+b_1X,X)=b_1\Var_{w^1}(X)$ and likewise for row 2, so
+$\delta^*_W=\mu b_1\Var_{w^1}(X)+(1-\mu)w_1\Var_{w^2}(X)$, which is the stated form with
+$a=\mu\Var_{w^1}(X)\ge0$ and $b=(1-\mu)\Var_{w^2}(X)\ge0$. Under a district rung, the law
+of total covariance under each row weight, conditioning on $D$, gives
+\[
+\delta^*_W=\sum_s\mu_s\Big(\E_{w^s}\big[\Cov_{w^s}(X,m_s\mid D)\big]+\Cov_{w^s}\big(\E_{w^s}[X\mid D],\E_{w^s}[m_s\mid D]\big)\Big).
+\]
+Within district $d$, $m_s(\cdot,d)$ is linear with slope $b_{s,d}$, so the conditional
+covariance is $b_{s,d}\Var_{w^s}(X\mid D=d)\ge0$ when $b_{s,d}\ge0$. The between-district
+term has no sign; under M1 it contains the covariance of the district shifts with
+composition. In the six-unit example of the main text the within-district term is
+$+0.00064$ and the pooled association $-0.04927$.
+\end{proofof}
+
+\emph{Remark~\ref{P-rem:whichdelta}.} Each unit's term
+$\sum_rc_{ir}e_{ir}$ has range at most $\sum_r|c_{ir}|$, because each $e_{ir}$ lies in an
+interval of length one; by Popoviciu and independence across units, the variance of
+$\delta-\delta^*$ is at most $\tfrac14\sum_i(\sum_r|c_{ir}|)^2$.
+
+\subsection{The sign module under the pooled model}
+
+\begin{proofof}{Theorem~\ref{P-thm:R3}}
+(a) A value $t$ is in the identified set iff some $\mathbb Q\in\mathcal M(Q(P)+K;A)$ with
+$W$-marginal $P$ has $k\in C$ and $\varphi(k)=t$. By (C2), $C$ is evaluated at the true
+$P$ for every such $\mathbb Q$, so the condition is $k\in\ThI\cap C$, and the identified
+set is $\varphi(\ThI\cap C)$. $\ThI$ is convex and compact (Theorem~\ref{P-thm:sharp},
+with $\affdim(A)=R-1$) and $C$ is closed and convex, so $\ThI\cap C$ is convex and
+compact or empty, and its image under the affine $\varphi$ is a compact interval or
+empty.
+
+(b) ($\supseteq$) For $P'\in\mathcal P(P)$, $Q(P')=Q(P)$ and the design is the same, so
+$C(P')=C(P)$ by (C2), and $\ThI(P')\subseteq\ThO(P')=\ThO(P)$. ($\subseteq$) For
+$k\in\ThO\cap C$, the construction in the proof of Proposition~\ref{P-prop:sharpreg} gives
+$P'\in\mathcal P(P)$ with $k\in\ThI(P')$, and $k\in C(P)=C(P')$. The interval statements
+follow from (a) applied to each $P'$ and from Proposition~\ref{P-prop:IequalsO}.
+
+(c) $\varphi(\Theta\cap(C_+\cup C_-))=\varphi(\Theta\cap C_+)\cup\varphi(\Theta\cap C_-)$, and
+each piece is a closed interval or empty by (a) or (b). If one piece is empty the
+union is the other. A union of two non-empty closed intervals is an interval iff they
+intersect, and a point $k_0\in\Theta\cap C_+\cap C_-$ gives $\varphi(k_0)$ in both.
+
+(d) Apply Lemma~\ref{P-lem:M1}(c) with $M_H(X_i)$ in place of $\beta_i$ and $\tau(X_i)$ in
+place of $T_i$; the identities use only $T=\sum_sX_s\beta_s$ and the simplex, and
+$x^\top M_H(x)=\tau(x)$ holds. This gives
+$\delta^{r*}_W=\Var_p(X_r)(\ER^{r*}-D^{r*})$ and
+$\delta^{r*}_B=\mu_r(1-\mu_r)(D^{r*}-\NM^{r*})$, where $\NM^{r*}$ is the neighbourhood gap
+computed from $\tau$, and $\NM^{r*}=\Cov_p(X_r,\tau)/(\mu_r(1-\mu_r))=\gamma_r\ER^{r*}$. So
+both are non-negative iff $\gamma_r\ER^{r*}\le D^{r*}\le\ER^{r*}$, both non-positive iff
+$\ER^{r*}\le D^{r*}\le\gamma_r\ER^{r*}$, and the union is
+$D^{r*}\in\hull\{\gamma_r\ER^{r*},\ER^{r*}\}$. $D^{r*}$ is affine in $k$ and
+$\ER^{r*},\gamma_r$ depend only on the design and $Q$, so this is two rows of an
+admissible set. The sign statement follows because $\gamma_r>0$.
+
+(e) $K_0\in\ThI$ by definition and $k_0\in C$ by hypothesis; then apply
+Proposition~\ref{P-prop:nesting}.
+\end{proofof}
+
+\emph{Remarks~\ref{P-rem:fullreg} and~\ref{P-rem:LCEexcludesCR}.} In
+Remark~\ref{P-rem:fullreg}, the full law forces both rows' rates to equal $T$ in every
+unit (at each composition $T$ is 0 or 1, so both rates equal $T$), hence both means are
+$.5$ and $k=0\notin[.2,.4]$; the regression $\tau=.5$ admits $m_1=.5+k(1-x)$,
+$m_0=.5-kx$, valid for $k$ in a range containing $[.2,.4]$; with the target weights
+$\E_{w^1}[1-X]=\E_{w^0}[X]=5/12$, so the gap is $\tilde D=5k/6$, which maps $[.2,.4]$
+onto $[1/6,1/3]$. In Remark~\ref{P-rem:LCEexcludesCR}, the regression is
+$(1-x)^2+(49/55)x^2$, whose cross coefficient in the basis
+$((1-x)^2,2x(1-x),x^2)$ is $Q_{12}=0$; with $A=[0,1]$, Proposition~\ref{P-prop:simplex}
+gives $|k|\le Q_{12}=0$, so the vertex rows force $k=0$, and
+at $k=0$ the computation gives $\ER=0$ and $\tilde D=-261/1925\ne0$, so neither CR branch
+contains it.
+
+\emph{A belief can be refutable without the rung.} On $x=1/4,1/2,3/4$ let both rows'
+means be $1.5-2x$ and the aggregate equal this function. LCE holds on $[1/4,3/4]$,
+$\ER=-2$, and every feasible gap is at least $-1$, so a positive within association is
+impossible even in the model-free continuous problem.
+
+\emph{The certificate is only sufficient.} On $[-1,1]^2$ with $g_B=u+.5$ and
+$g_W=u-.5$, the branches are the disjoint strips $u\ge.5$ and $u\le-.5$. For the target
+$u$ the images are $[.5,1]$ and $[-1,-.5]$; for the target $v$ both images are $[-1,1]$,
+although the certificate LP $\{g_B=g_W=0\}$ is infeasible.
+
+\begin{proofof}{Proposition~\ref{P-prop:R2}}
+(a) $F\cap N\subseteq F$, so $U_N\le U$. If some $k\in F^*_U\cap N$, then
+$U_N\ge\varphi(k)=U$. If $F^*_U\cap N=\emptyset$, then $F\cap N$ is non-empty and compact,
+so $\varphi$ attains $U_N$ at some $k'\in F\cap N$, and $k'\notin F^*_U$ gives
+$\varphi(k')<U$. The lower end is the same argument for $-\varphi$. For $N=\{Mk\le m\}$,
+$F^*_U\cap N=\{Gk\le g,\ \omega^\top k\ge U-\varphi_0,\ Mk\le m\}$, a feasibility LP; the
+intercept must be subtracted, or the row $\omega^\top k\ge U$ would reject the optimal face
+whenever $\varphi_0\ne0$.
+
+(b) $F^*_U$ is a non-empty compact face, so $\beta^*=\min_{F^*_U}a^\top k$ is attained, and
+$F^*_U\cap\{a^\top k\le b\}=\emptyset$ iff $\beta^*>b$; the first claim follows from (a).
+Let $v(\beta)=\max\{\varphi(k):k\in F,a^\top k\le\beta\}$ be the perturbation function.
+By (a) at $\beta$, $v(\beta)=U$ for $\beta\ge\beta^*$ and $v(\beta)<U$ for $\beta<\beta^*$.
+If $b\ge\beta^*$, $v$ is constant on $[b,\infty)$, so $v'_+(b)=0$ and $0$ is an optimal
+multiplier. If $b<\beta^*$, concavity gives $v'_+(b)\ge(v(\beta^*)-v(b))/(\beta^*-b)>0$,
+so every optimal multiplier, which lies in $[v'_+(b),v'_-(b)]$, is positive (at the left
+end of the domain the set is $[v'_+(b),\infty)$). A solver returns one multiplier from
+the superdifferential, and when that is $[0,\lambda]$ with $\lambda>0$ it may return a
+positive one although the row does not tighten: maximise $x$ on $[0,1]$ with the row
+$x\le1$ duplicated, where every split of the unit dual cost is optimal. If the row is
+slack at an optimum $k$ of the augmented LP, then near $k$ the augmented set coincides
+with $F$, so $k$ is a local, hence global, maximiser of the linear $\varphi$ on $F$, and
+$k\in F^*_U\cap N$: the row does not tighten.
+
+(c) If $F\subseteq N$, nothing changes. If a row $a^\top k\le b$ is not implied,
+$\max_Fa^\top k>b$, and for the target $a^\top k$, $U_N\le b<U$. For general closed convex
+$N$ with $F\not\subseteq N$, take $k_1\in F\setminus N$ and separate it strictly from $N$
+by $(a,b)$ with $a^\top k\le b$ on $N$ and $a^\top k_1>b$; for the target $a^\top k$,
+$U_N\le b<a^\top k_1\le U$.
+
+(d) With $R=2$, Theorem~\ref{P-thm:R3}(d) gives
+$\delta^*_W=\Var_p(X)(\ER^*-\tilde D)$ and $\delta^*_B=\mu(1-\mu)(\tilde D-\NM^*)$, and
+$\tilde D$ is affine in the scalar unknown with slope proportional to $-(1-\gamma)$, so
+non-constant iff $\gamma<1$. Each sign row is a half-line in $\tilde D$, and the feasible
+set maps bijectively onto $[L_J,U_J]$; cutting the set therefore means cutting the
+interval, so ``cuts the set only'' is impossible for $\tilde D$ and for any target
+non-constant in the unknown. Intersecting with the half-lines gives the closed forms.
+
+(e) This is (a) applied to the stack and to each sub-stack; the optimal face changes as
+rows are added, so contributions depend on order. Example: on $[0,1]^2$ with target $x$
+and rows $x+y\le.8$, $x\le.5$, adding $x+y\le.8$ last gives zero gain for $x$, yet it
+removes $(.5,1)$ and lowers the upper end of $x+y$ from 1.5 to .8.
+\end{proofof}
+
+\begin{proofof}{Proposition~\ref{P-prop:G2}}
+EGGHM's identities, $D_{\ER}-D=\delta_W/\Var_p(X)$ and $D_{\NM}-D=-\delta_B/(\mu(1-\mu))$,
+are accounting identities for any mean function (Lemma~\ref{P-lem:M1}), so they hold for
+the model-implied quantities. With $\Var_p(X)>0$ and $0<\mu<1$, $\delta^*_W\ge0\iff\tilde
+D\le\ER^*$ and $\delta^*_B\ge0\iff\tilde D\ge\NM^*$. Under LCE, $\tilde D$ is affine and
+non-constant in the unknown slope when $\gamma<1$, so the JKST set maps onto $[L_J,U_J]$.
+Intersecting with the half-lines gives the four cases, and CR is the union of the two
+same-sign cases, that is, $\tilde D$ between $\NM^*$ and $\ER^*$.
+\end{proofof}
+
+\begin{proofof}{Proposition~\ref{P-prop:sandwich}}
+$\tau(x)=x^\top Hx$, so $\nabla\tau=(H+H^\top)x=2Qx$ and
+$\partial_{e_r-e_s}\tau=2q_{rs}$. Also $x^\top H=(H^\top x)^\top$ with $H^\top=Q-K$. So
+$O_{rs}=(Qx)_r-(Qx)_s+(Kx)_r-(Kx)_s=q_{rs}+g_{rs}$ and $L_{rs}=q_{rs}-g_{rs}$, which is
+(b); adding gives (a); and (c) follows from (b).
+\end{proofof}
+
+\begin{proofof}{Proposition~\ref{P-prop:rank}}
+(a) $g_{rs}(x;k)=\sum_t(K_{rt}-K_{st})x_t$. As $x$ ranges over a full-dimensional subset of
+the simplex, the functionals reached are $K_{rs}$ and $K_{rt}-K_{st}$ for $t\ne r,s$:
+$R-1$ independent directions. (b) For a star $\{(1,s)\}$, $K_{1s}$ is reached directly,
+and then $K_{st}=K_{1t}-(K_{1t}-K_{st})$. (c) follows from (b) and
+Proposition~\ref{P-prop:sandwich}(c), which bounds each reached functional by an
+identified quantity. Rank is necessary, not sufficient, for tightening. For general
+spanning trees the source argument (induction on the leaves of the tree) is only
+outlined, and the claim has been checked numerically for chains only.
+\end{proofof}
+
+\begin{proofof}{Proposition~\ref{P-prop:PN}}
+(a) $w_1+d_1x=(1-x)w_1+x(w_1+d_1)$, a convex combination of the two slopes for
+$x\in[0,1]$. (b) From the proof of Proposition~\ref{P-prop:Krows}(c),
+$\delta^*_W=a(w_1+d_1)+bw_1=(a+b)(w_1+d_1x^*)$ with $x^*=a/(a+b)$. So if
+$w_1+d_1x\ge0$ on the hull and $x^*$ lies in the hull, $\delta^*_W\ge0$.
+\end{proofof}
+
+\emph{On Conjecture~\ref{P-conj:C1}.} Writing
+$\Var_w(X)=\tfrac12\sum_{i,j}w_iw_j(X_i-X_j)^2$ expresses $x^*$ as a weighted mean of
+pair ratios, but individual ratios can leave the hull, so a proof needs a cancellation
+argument that has not been found.
+
+\subsection{Monotone nonparametric contextual effects}
+
+\begin{proofof}{Lemma~\ref{P-lem:N21}}
+By the tower property with A3 and conditional Jensen for $\Bset$,
+$m(X)=\E[\beta\mid X]\in\Bset$ a.s. And $m(X)^\top X=\E[\beta^\top X\mid X]=\E[T\mid
+X]=\tau(X)$ by A1. On a finite support every point has positive mass, so these hold at
+every support point.
+\end{proofof}
+
+\begin{proofof}{Proposition~\ref{P-prop:N2}}
+(a) Every N2($\sigma$) mean satisfies Lemma~\ref{P-lem:N21} at each $x_j$ and the order
+rows on the support, and the target depends on $m$ only at the support points.
+(b) Extend the whole matrix $m$ as a step function, constant between support points.
+The extension is Borel, each row stays in the simplex, each designated entry stays
+monotone, and its values at the support points are unchanged. On a strict subset of
+the support this fails: with true support $\{1/4,1/2,3/4\}$, row-1 means $(.4,.4,.4)$,
+row-2 means $(8/15,.7,.8)$ and $\tau=(.5,.55,.5)$, a grid keeping only the extremes
+accepts both rows equal to $.5$ at both extremes, and any monotone extension then
+assigns $.5$ to both rows at the middle, which cannot give $.55$.
+(c) For $K\in\ThO$, $M_{Q+K}(x)\ge0$ on $A\supseteq\supp P_X$ and its rows sum to one, so it
+lies in $\Bset$; and $x^\top M_{Q+K}(x)=x^\top Qx=\tau(x)$, so it lies in $S(x,\tau(x))$ at
+each atom. A linear function with a slope of sign $\sigma$ is $\sigma$-monotone.
+(d) $\delta^*_W=\mu\Cov_{w^1}(m_1(X),X)+(1-\mu)\Cov_{w^2}(m_2(X),X)$, and both
+covariances are non-negative by Chebyshev's association inequality applied under $w^1$
+and under $w^2$.
+(e) With the chart $(x_1,x_3)$, so that $x_2$ adjusts, $m_{rc}(x)=x_3$ is constant, hence
+weakly non-decreasing, in $x_1$; under a symmetric Dirichlet design
+$\E[X_3\mid X_1]=(1-X_1)/2$, and tilting by $X_1$ or $1-X_1$ preserves that conditional
+mean, so the covariance with $X_1$ is negative under both W1 weights. A globally
+increasing univariate function of $X_1$ still obeys the covariance inequality.
+\end{proofof}
+
+\emph{On Conjecture~\ref{P-conj:N2}.} In the size example of the main text, at the
+first size $T\in\{0,1\}$, so both rows' rates equal $T$ and their conditional means are
+$(.5,.5)$; at the second size $T=1/2$ and a selection $(1,0)$ is in $S(1/2,1/2)$. The
+polytope LP, conditioning on $X$ only, therefore admits $(.75,.25)$, which the model
+excludes. \emph{Sufficiency on a finite support} (a sketch of the argument that exists):
+if $m(x)$ lies in the selection expectation of $S(x,T)$ given each positive-mass design
+atom $(x,n)$, take for each atom a measurable selection whose conditional mean is $m(x)$
+and glue the selections across the finitely many atoms; the accounting identity holds
+a.s.\ and the shape restrictions hold because they concern the common $m$. Necessity in
+general, through the selection construction of Theorem~\ref{P-thm:sharp} applied to each
+admissible $m$, is not written.
+
+\begin{proofof}{Proposition~\ref{P-prop:N23}}
+(a) Differentiate $\tau_{m,c}(z)=zm_{1c}(z)+(1-z)m_{2c}(z)$ by the product rule; (b) is
+a rearrangement. (c) If $\tau'\ge0$: $D\ge0$ and $\delta_W\ge0$ give
+$0\le D=\tau'-\delta_W\le\tau'$; $D\le0$ and $\delta_W\le0$ give
+$D=\tau'-\delta_W\ge\tau'\ge0\ge D$, so $D=0$; conversely $D\in[0,\tau']$ gives $D\ge0$ and
+$\delta_W=\tau'-D\ge0$. The case $\tau'\le0$ is symmetric. (d) If $m_{rc}$ is
+differentiable at $x$ and non-decreasing on a neighbourhood of $x$, its difference
+quotients at $x$ are non-negative, so $m'_{rc}(x)\ge0$; since $x,1-x\ge0$, the
+non-negative derivatives give $\delta_W(x)\ge0$. Both rows equal to $.5+h$ with
+$h=(x-\tfrac14)(x-\tfrac12)(x-\tfrac34)$ are constant on $\{1/4,1/2,3/4\}$ but have
+derivative $-1/16$ at $1/2$. With $X$ uniform on $[1/5,2/5]$, $m_1=x-x^2/2$ and
+$m_0=1-x^2/2$ are probabilities, $xm_1'+(1-x)m_0'=0$ everywhere, and
+$\delta^*_W=-1/47250$, so the local sign everywhere does not imply the aggregate sign.
+For the reverse, complement both functions, shrink them slightly into the interior and
+subtract a small positive multiple of $x$ from each: the aggregate within association
+stays positive by continuity and the local one becomes negative.
+
+\emph{Not identified on a finite support.} Adding $h(x)=\prod_j(x-x_j)$ to both rows
+leaves the law on the support unchanged and moves every nodal derivative. With support
+$\{1/4,1/2,3/4\}$, $m_1=.7$, $m_0=.3$ and $h$ as above, both versions are valid on $[0,1]$
+and induce the same law, but $\tau'(1/2)$ is $.4$ in one and $.3375$ in the other.
+\end{proofof}
+
+\begin{proofof}{Lemma~\ref{P-lem:bins}}
+(i) $\bar x_b\bar m_{1b}+(1-\bar x_b)\bar m_{2b}=\E_b[Xm_1+(1-X)m_2]=\E_b\tau=\bar\tau_b$ by
+Lemma~\ref{P-lem:N21}, and each $\bar m_{rb}$ is a weighted average of simplex points.
+(ii) $\E_p[Xm_1]=\sum_bP(b)\E_b[Xm_1]=\sum_bP(b)\bar x_b\bar m_{1b}$, and likewise for row 2.
+(iii) $\bar m_{1b}$ is an average of $m_1$ over bin $b$ under weights proportional to
+$pX$, so it lies in $[\min_bm_1,\max_bm_1]$; ordered non-overlapping bins and monotone
+$m_1$ give $\max_bm_1\le\min_{b+1}m_1$. Row 2 is the same with weights proportional to
+$p(1-X)$. A group absent from a bin is given any value that keeps the bin rates
+monotone. For the two-point example, equal bin weights at $x=.25,.75$ with $m_1=x$ and
+$m_2=0$ give $\E_bT=\E[X^2]=.3125$; the ordinary bin-average rates evaluated at
+$\E X=.5$ give $.25$, while the person-weighted rate is $.625$ and reproduces $.3125$.
+\end{proofof}
+
+\emph{Degree selection.} In a balanced two-level design with true slope zero, choosing
+the slope by leave-one-out error selects it when $Z^2>2$, where $Z$ is the slope's
+$t$-statistic; the nominal 95\% interval then covers with conditional probability
+$1-.05/P(|Z|>\sqrt2)\approx0.68$.

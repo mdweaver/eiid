@@ -1,0 +1,307 @@
+% Section 2
+\section{Setting, targets and assumptions}\label{sec:setting}
+
+\subsection{Data and the accounting identity}
+
+There are units $i=1,\dots,n$. Unit $i$ has size $N_i$ (its number of
+members), row shares $X_i\in\Delta^{R-1}$ and column shares
+$T_i\in\Delta^{C-1}$, where $\Delta^{k-1}=\{x\in\R^k:x\ge0,\ \one^\top x=1\}$
+is the probability simplex and $\one$ is the vector of ones. Rows are groups
+(or choices in an earlier election), indexed by $r,s=1,\dots,R$; columns are
+outcomes, indexed by $c=1,\dots,C$. When units are nested in districts,
+$D_i\in\{1,\dots,D^\star\}$ is the district of unit $i$, and $V_i=(X_i,N_i,D_i)$
+collects the design variables (without districts, $V_i=(X_i,N_i)$).
+
+The latent rate $\beta_{irc}$ is the share of the row-$r$ members of unit $i$ who
+fall in column $c$. Each row of the matrix $\beta_i=[\beta_{irc}]$ lies in the
+simplex, so $\beta_i\in\Bset:=(\Delta^{C-1})^R$. The accounting identity is
+\begin{equation}\label{eq:acc}
+T_{ic}=\sum_{r=1}^R X_{ir}\beta_{irc},\qquad\text{that is,}\qquad T_i=\beta_i^\top X_i .
+\end{equation}
+For given margins $(x,t)$, the \emph{unit Duncan--Davis polytope}
+\[
+S(x,t)=\{b\in\Bset:\ b^\top x=t\}
+\]
+is the set of rate matrices consistent with one unit's margins, and
+$h_S(u;x,t)=\max_{b\in S(x,t)}\langle u,b\rangle$ is its support function, where
+$\langle u,b\rangle=\sum_{rc}u_{rc}b_{rc}$. With cell masses $n_{rc}=x_rb_{rc}$
+the polytope is a transportation polytope, and its single-cell extremes are the
+Fréchet--Hoeffding bounds $\max\{0,x_r+t_c-1\}\le n_{rc}\le\min\{x_r,t_c\}$.
+
+\subsection{Three targets}\label{sec:targets}
+
+Three related targets appear. Each result says which one it concerns. Write
+$w_{ir}=N_iX_{ir}/\sum_jN_jX_{jr}$ for the share of row-$r$ members who live in
+unit $i$, and $m(v)=\E[\beta\mid V=v]$ for the conditional mean of the rates.
+\begin{itemize}
+\item The \emph{actual} rate $B_{rc}=\sum_iw_{ir}\beta_{irc}$: what the row-$r$
+members of this electorate did. It is JKST's target.
+\item The \emph{model-implied} rate $\Bt_{rc}=\sum_iw_{ir}m_{rc}(V_i)$: what the
+systematic pattern implies they did, at the observed design. It is the
+conditional mean of $B$ given the design.
+\item The \emph{superpopulation} rate $B^*_{rc}=\E[NX_r\beta_{rc}]/\E[NX_r]$,
+used in the population identification results.
+\end{itemize}
+The actual and model-implied rates differ by a residual term,
+$B_{rc}=\Bt_{rc}+E_{rc}$ with $E_{rc}=\sum_iw_{ir}e_{irc}$ and
+$e_i=\beta_i-m(V_i)$. A linear target is $\varphi=\sum_{rc}a_{rc}B_{rc}$ for
+fixed weights $a_{rc}$; loyalty, defection, demobilisation and the gap between
+two groups' rates are examples. All inference in this paper is conditional on
+the design and covers $B$ or $\Bt$; inference for $B^*$ would need the
+sampling variation of the design and is not pursued.
+
+\begin{reading}
+$B$ is what these voters actually did. $\Bt$ is what the systematic pattern
+implies they did; it ignores the local luck of each unit. A confidence interval
+for $B$ must allow for that luck, so it is wider.
+\end{reading}
+
+\subsection{Linear contextual effects in homogeneous form}
+
+Because $\one^\top x=1$ on the simplex, an affine function of $x$ can be written
+as a homogeneous linear one: $a+b^\top x=(a\one+b)^\top x$. The pooled LCE model,
+called M0, says that for each column $c$ there is a matrix $H_c\in\R^{R\times R}$
+with
+\begin{equation}\label{eq:lce}
+\E[\beta_{irc}\mid X_i,N_i]=e_r^\top H_cX_i\qquad\text{on }\{X_i\in A\},
+\end{equation}
+where $e_r$ is the $r$-th unit vector and $A\subseteq\Delta^{R-1}$ is the compact
+convex region on which the model is assumed. The default region is the
+population hull $A=\conv\supp P_X$. Write $H=(H_1,\dots,H_C)$ and
+$M_H(x)=[e_r^\top H_cx]_{rc}$ for the implied mean rate matrix at composition
+$x$. Split each matrix into its symmetric and skew parts,
+\[
+H_c=Q_c+K_c,\qquad Q_c=\tfrac12(H_c+H_c^\top),\qquad K_c=\tfrac12(H_c-H_c^\top).
+\]
+Taking conditional expectations of \eqref{eq:acc}, the regression function is
+\[
+\tau_c(x):=\E[T_c\mid X=x]=x^\top H_cx=x^\top Q_cx ,
+\]
+because $x^\top K_cx=0$ for a skew matrix. The regression therefore reveals $Q$
+and never sees $K$. The unknown $K=(K_1,\dots,K_C)$ lives in
+\[
+\Kspace=\Big\{(K_1,\dots,K_C):\ K_c^\top=-K_c,\ \textstyle\sum_cK_c=0\Big\},
+\qquad\dim\Kspace=(C-1)\,R(R-1)/2 ,
+\]
+which is one number in $2\times2$, two in $2\times3$ and six in $3\times3$. We
+write $k$ for the free coordinates $k_{c,rs}$ ($c<C$, $r<s$) of $K$, and, for
+$R=2$, $\kappa_c=K_{c,12}$.
+
+\paragraph{What $H$, $Q$ and $K$ mean.} $H_{c,rs}$ is the rate at which row-$r$
+members choose column $c$ in a hypothetical unit made up entirely of row-$s$
+members. $Q_{c,rs}$ is the average of ``$r$-members in pure-$s$ units'' and
+``$s$-members in pure-$r$ units''; the data identify it. $K_{c,rs}$ is half the
+gap between the two; the data never identify it. This is the R$\times$C version
+of JKST's question: is turnout low in a mixed area because group A turns out
+less, or because group B turns out less where A is numerous?
+
+\paragraph{Moments.} The superpopulation weights are $\mu_r=\E[NX_r]>0$ and
+$\mu_{rs}=\E[NX_rX_s]$. In finite-design statements the same symbols denote the
+sample analogues with weights $p_i=N_i/\sum_jN_j$ (Section~\ref{sec:signs}).
+
+\subsection{The model and three identified sets}
+
+Let $P$ be the law of the observables $W=(N,X,T)$ (with $D$ when there are
+districts), and $\mathbb Q$ a law of $(W,\beta)$. The model $\mathcal M(H;A)$ is the
+set of laws $\mathbb Q$ such that
+\begin{itemize}
+\item[(S1)] $\beta\in\Bset$ and $T=\beta^\top X$ almost surely (the accounting identity);
+\item[(S2)] $\E[\beta\mid V]=M_H(X)$ almost surely on $\{X\in A\}$ (linear contextual
+effects, with no dependence on size);
+\item[(S3)] $M_H(x)\in\Bset$ for every $x\in A$ (the linear model gives valid
+probabilities on all of $A$).
+\end{itemize}
+Let $Q(P)$ be the unique symmetric matrices with $\E_P[T_c\mid X=x]=x^\top Q_cx$
+(Lemma~\ref{lem:decomp} gives existence and uniqueness under the model). Three
+sets of values of $K$ are used.
+\begin{itemize}
+\item The \emph{sharp} identified set
+$\ThI(P;A)=\{K\in\Kspace:\ \exists\,\mathbb Q\in\mathcal M(Q(P)+K;A)$ whose
+$W$-marginal is $P\}$. It uses the whole law of the data and conditions on
+$(X,N)$.
+\item $\ThX(P;A)$: the same with (S2) replaced by the weaker
+$\E[\beta\mid X]=M_H(X)$. This is the set of JKST's Proposition~1.
+\item The \emph{outer} set
+$\ThO(P;A)=\{K\in\Kspace:\ (Q_c(P)+K_c)x\ge0$ elementwise for all $c$ and all
+$x\in A\}$. It uses only the regression function and the requirement that the
+implied rates be probabilities.
+\end{itemize}
+Proposition~\ref{prop:nesting} shows $\ThI\subseteq\ThX\subseteq\ThO$. Three
+hulls also appear: the population hull $\conv\supp P_X$ (the default $A$ in
+identification), the hull of the empirical law of the design (exact for
+finite-design identification), and the sample hull used as an estimate of $A$.
+The sample hull lies inside the population hull, so estimating it can only widen
+the outer bound (Proposition~\ref{prop:consistency}(c)). Two conventions hold
+throughout. First, $\ThO$ is called sharp only \emph{for the regression function}
+(Proposition~\ref{prop:sharpreg}). Second, every ``sharp'' statement is relative
+to continuous (real-valued) latent rates, not integer cell counts.
+
+\subsection{Assumptions and what each implies}\label{sec:assumptions}
+
+Each assumption is stated and then read in plain terms: what it rules in or
+out, when it is credible, and what goes wrong if it fails.
+Table~\ref{tab:assumption-use} shows which rungs use which assumption.
+
+\begin{assumption}[A1: closed population]\label{ass:A1}
+$T_i=\beta_i^\top X_i$ exactly, with the same $N_i$ people in both margins.
+\end{assumption}
+\begin{reading}
+Both margins describe the same people: the same electorate in both elections,
+or the same eligible population for group and outcome. A1 rules out turnover,
+moving, deaths, new registrants and boundary changes. It is credible when both
+margins come from one register and the categories include abstention and,
+where relevant, ``entered'' or ``left''. If it fails, the Duncan--Davis sets and
+the regression identity both shift, and every bound can exclude the truth.
+Bounded turnover changes both the unit polytopes and the regression identity,
+so it cannot be handled by widening the final interval; it is an open
+extension. Every rung, including Duncan--Davis, needs A1.
+\end{reading}
+
+\begin{assumption}[A2: linear contextual effects on $A$]\label{ass:A2}
+Each group's mean rate is linear in the unit's composition on $A$:
+equation~\eqref{eq:lce}.
+\end{assumption}
+\begin{reading}
+A group's behaviour may depend on its surroundings, but only along a straight
+line: for example, loyalty rises steadily as the in-party share of the unit
+rises. A2 rules out thresholds and tipping (a machine that mobilises only above
+50\%) and U-shapes (competitive units mobilising both sides). It is the
+\emph{only} identifying restriction of the linear rungs. If it fails, the
+quadratic regression is misspecified and the bound can miss the truth by an
+amount that does not shrink with more data. Some violations are invisible:
+nonlinear departures that cancel in the aggregate leave the data unchanged while
+moving the target (Proposition~\ref{prop:undetectable}). A cubic term or an empty
+bound can reveal some failures; goodness of fit can never validate A2.
+\end{reading}
+
+\begin{assumption}[A3: mean independence from size]\label{ass:A3}
+$\E[\beta\mid X,N]=\E[\beta\mid X]$, with $D$ added to both conditioning sets
+under the district rungs.
+\end{assumption}
+\begin{reading}
+Large and small units with the same mix behave alike. This matters because the
+target weights units by size. If large urban units differ in loyalty from small
+rural ones with the same mix, the size-weighted target is biased by
+$\Cov(NX_r,\beta_{rc}-m_{rc}(X))/\E[NX_r]$. District baselines help when size
+differs by district (Proposition~\ref{prop:D4}). A3 is partly testable through
+interactions of $X$ with $\log N$ in the regression.
+\end{reading}
+
+\begin{assumption}[A4: support and extrapolation]\label{ass:A4}
+$\supp(X)\subseteq A$, $A$ is compact, and A2 holds on all of $A$.
+\end{assumption}
+\begin{reading}
+The straight lines are trusted over the whole region $A$, whose corners (the
+most extreme units) set the constraints. A larger $A$ gives tighter bounds but
+assumes more: taking the whole simplex assumes that the lines extend to pure
+units that may not exist (Proposition~\ref{prop:simplex}). Outlying units at the
+corners of the hull can make constraints bind spuriously; trimming the hull is
+the check. Probability validity on $A$, condition (S3), is automatic for the
+population hull (Lemma~\ref{lem:outer}(c)).
+\end{reading}
+
+\begin{assumption}[A5: rank]\label{ass:A5}
+For every symmetric $R\times R$ matrix $\Psi$, $x^\top\Psi x=0$ for all
+$x\in\supp_AP_X$ implies $\Psi=0$. Here $\supp_AP_X$ is the support of the
+restriction of $P_X$ to $A$: the smallest closed set $F$ with $P(X\in A\setminus F)=0$.
+\end{assumption}
+\begin{reading}
+The compositions vary enough to fit the quadratic regression. For two groups it
+means at least three distinct compositions. For three groups it needs six
+compositions that do not lie on a common conic; any five do, so five are never
+enough (Remark~\ref{rem:A5}). A5 fails, or nearly fails, when shares barely vary.
+Then $Q$ is weakly identified and the bound is wide and unstable. The condition
+number of the design matrix is the check. The restricted support matters only
+when $A$ carries less than full mass: for $X$ uniform on $[0,1]$ and
+$A=\{1/2\}$, $\supp P_X\cap A=\{1/2\}$ but $\supp_AP_X=\emptyset$.
+\end{reading}
+
+\begin{assumption}[A6: source of randomness and independence]\label{ass:A6}
+Given the design $\{(N_i,X_i,D_i)\}$ and the district effects, the unit rates
+$\beta_i$ are random with mean $m(V_i)$, and the residuals $e_i=\beta_i-m(V_i)$ are
+independent across units.
+\end{assumption}
+\begin{reading}
+Every unit is observed, so the uncertainty does not come from sampling units. It
+is model-based: given its characteristics, each unit's behaviour has a random
+part. A shock common to a district is a fixed feature of this electorate: part
+of the mean under the district rungs, a misspecification under the pooled one.
+Independence is a substantive assumption. Neighbourhood spillovers within a
+district violate it, and then the variances and residual allowances are too
+small. Observing every unit does not remove dependence. The pooling test of
+Section~\ref{sec:inference} tests mean shifts, not dependence.
+\end{reading}
+
+\begin{assumption}[A7: regularity for the normal limit]\label{ass:A7}
+A unique active constraint at the optimum of the LP, $\mu_{rs}>0$, and $\ThO$ not
+a singleton.
+\end{assumption}
+\begin{reading}
+This is JKST's tie-breaking condition. With it the endpoint of the bound is a
+smooth function of the regression coefficients and the delta method applies.
+In R$\times$C, and especially with many districts, near-ties are the norm, so the
+inference of Section~\ref{sec:inference} does not need it. If it fails, the endpoint
+is only directionally differentiable, the delta method loses its justification
+and the standard bootstrap is inconsistent (Theorem~\ref{thm:limit}). This is a
+failure of the inference, not a bias in identification.
+\end{reading}
+
+\begin{assumption}[A8: shared contextual effects across districts]\label{ass:A8}
+The contextual effects are common to all districts; only the intercepts vary.
+\end{assumption}
+\begin{reading}
+The way composition shifts behaviour is the same in every district, while each
+district may be more or less loyal across the board (parallel lines). A8
+produces the intersection gain of the shared-effects rung. It fails if, say, a
+strong incumbent changes the contextual gradient in one district, or if floor
+and ceiling effects make an additive shift impossible near 0 or 1, which is most
+likely in the lopsided districts that tighten the bound most. The bound can then
+exclude the truth and still look narrow. The symmetric part of the restriction
+is testable (Lemma~\ref{lem:D1}(b)); the shared $K$ is not.
+\end{reading}
+
+\begin{assumption}[A9: within-district richness]\label{ass:A9}
+Under district-specific effects, A5 within each district. Under shared effects,
+each district's support contains $R$ affinely independent compositions and the
+stacked design has full column rank (Lemma~\ref{lem:D1}(d)).
+\end{assumption}
+\begin{reading}
+Districts with few, similar units identify almost nothing. Under shared effects
+the bar is lower: a district's baseline needs only $R$ affinely independent
+compositions. Weak identification per district, combined with a maximum or
+minimum over districts, biases plug-in bounds inward.
+\end{reading}
+
+\begin{assumption}[A10: asymptotic regime]\label{ass:A10}
+One of: (R1) $D^\star$ fixed and the number of units per district $n_d\to\infty$;
+(R2) $D^\star\to\infty$ with $n_d$ bounded; (R3) both grow.
+\end{assumption}
+\begin{reading}
+Which limit theory applies depends on the design. It is a modelling choice, not
+a fact. With ten polling places in each of ninety ridings (R2), the district
+intercepts are incidental parameters and the plug-in intersection is badly too
+narrow. Table~\ref{tab:regimes} in Section~\ref{sec:inference} says which result
+holds in which regime.
+\end{reading}
+
+\paragraph{Assumptions not made.} No distributional form for $\beta$ (unlike
+King's truncated normal), no independence between $\beta$ and $X$ (contextual
+effects are the point), no stationarity over time, and no point-identifying
+nonlinearity.
+
+\begin{table}[t]
+\centering\small
+\begin{tabularx}{\linewidth}{@{}L{0.33\linewidth}Y@{}}
+\toprule
+Rung & Assumptions used \\
+\midrule
+Duncan--Davis (DD) & A1 only. \\
+Sign rows on realised tables (N1) & A1; continuous unit tables; no regression, no sampling inference. \\
+Pooled LCE (M0) & A1--A5; inference adds A6, and A7 only for the normal limit. \\
+District rungs (M2, M1($\delta$), M1, L4, L5, L6) & A1--A4 within districts, A9 in place of A5, A8 for M1 and the rungs below it; inference adds A6 and the regime A10. \\
+Monotone means (N2) & A1, A3, and the finite-support convention of Section~\ref{sec:N2}. \\
+Sign rows under a linear rung & Those of the rung they are added to. \\
+\bottomrule
+\end{tabularx}
+\caption{Which rungs use which assumption. The rungs are defined in Sections~\ref{sec:districts} and~\ref{sec:signs}.}\label{tab:assumption-use}
+\end{table}

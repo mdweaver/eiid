@@ -1,0 +1,42 @@
+width of the population-average group-1 rate: Theta_O (regression only) vs Theta_X (full law)
+design                 truth            phi  Theta_O  Theta_X  ratio
+wide hull [.05,.95]    moderate gap       4    0.287    0.286   0.99
+wide hull [.05,.95]    moderate gap      10    0.287    0.273   0.95
+wide hull [.05,.95]    moderate gap      30    0.287    0.286   1.00
+wide hull [.05,.95]    moderate gap     100    0.287    0.286   0.99
+wide hull [.05,.95]    large gap          4    0.336    0.321   0.96
+wide hull [.05,.95]    large gap         10    0.336    0.330   0.98
+wide hull [.05,.95]    large gap         30    0.336    0.334   0.99
+wide hull [.05,.95]    large gap        100    0.336    0.336   1.00
+wide hull [.05,.95]    small gap          4    0.318    0.308   0.97
+wide hull [.05,.95]    small gap         10    0.318    0.318   1.00
+wide hull [.05,.95]    small gap         30    0.318    0.318   1.00
+wide hull [.05,.95]    small gap        100    0.318    0.318   1.00
+middle hull [.2,.6]    moderate gap       4    0.698    0.680   0.97
+middle hull [.2,.6]    moderate gap      10    0.698    0.696   1.00
+middle hull [.2,.6]    moderate gap      30    0.698    0.698   1.00
+middle hull [.2,.6]    moderate gap     100    0.698    0.698   1.00
+middle hull [.2,.6]    large gap          4    0.698    0.662   0.95
+middle hull [.2,.6]    large gap         10    0.698    0.684   0.98
+middle hull [.2,.6]    large gap         30    0.698    0.696   1.00
+middle hull [.2,.6]    large gap        100    0.698    0.698   1.00
+middle hull [.2,.6]    small gap          4    0.698    0.683   0.98
+middle hull [.2,.6]    small gap         10    0.698    0.697   1.00
+middle hull [.2,.6]    small gap         30    0.698    0.698   1.00
+middle hull [.2,.6]    small gap        100    0.698    0.698   1.00
+skewed [.02,.4]        moderate gap       4    0.733    0.732   1.00
+skewed [.02,.4]        moderate gap      10    0.733    0.733   1.00
+skewed [.02,.4]        moderate gap      30    0.733    0.733   1.00
+skewed [.02,.4]        moderate gap     100    0.733    0.733   1.00
+skewed [.02,.4]        large gap          4    0.733    0.704   0.96
+skewed [.02,.4]        large gap         10    0.733    0.730   1.00
+skewed [.02,.4]        large gap         30    0.733    0.733   1.00
+skewed [.02,.4]        large gap        100    0.733    0.733   1.00
+skewed [.02,.4]        small gap          4    0.733    0.733   1.00
+skewed [.02,.4]        small gap         10    0.733    0.733   1.00
+skewed [.02,.4]        small gap         30    0.733    0.733   1.00
+skewed [.02,.4]        small gap        100    0.733    0.733   1.00
+
+ratio Theta_X/Theta_O over 36 cells: median 1.00, min 0.95, share of cells with ratio < 0.9: 0.00
+phi is the Beta concentration of precinct-level group rates around their mean: phi = 4 means
+very heterogeneous precincts (sd up to .22), phi = 100 nearly homogeneous (sd up to .05).

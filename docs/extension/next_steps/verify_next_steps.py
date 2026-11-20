@@ -444,4 +444,27 @@ mlo, mhi = min(a for a, b in cands), max(b for a, b in cands)
 report("N14 misclassification example", abs(mlo - 8 / 58) < TOL and abs(mhi - 50 / 58) < TOL,
        f"recorded labels: [{10/60:.3f},{50/60:.3f}]; up to 2 mislabelled: [{mlo:.3f},{mhi:.3f}]")
 
+# N15: E4 transfer worked example (2x2, pooled LCE).  tau(x) = .3 + .3x + .1x^2 is identified;
+# m0 = .3 + k x, m1 = (.6 - k) + (.1 + k) x, true k = .1.  Electorate A has precincts at x = .1, .3;
+# electorate B at x = .6, .9 (equal sizes).  A's veteran rate is published (model-implied, +/- d).
+def e4_example(d):
+    xs_all = [.1, .3, .6, .9]; xa = np.array([.1, .3]); xb = np.array([.6, .9])
+    m1 = lambda x, k: (.6 - k) + (.1 + k) * x
+    m0 = lambda x, k: .3 + k * x
+    ks = np.linspace(-2, 2, 400001)
+    ok = np.ones_like(ks, bool)
+    for x in xs_all:
+        ok &= (m0(x, ks) >= 0) & (m0(x, ks) <= 1) & (m1(x, ks) >= 0) & (m1(x, ks) <= 1)
+    rate = lambda xv, k: np.sum(xv * m1(xv, k)) / np.sum(xv)      # group-1 weighted
+    if d is not None:
+        trueA = rate(xa, .1)
+        rA = np.array([rate(xa, k) for k in ks[ok]]) if False else (np.sum(xa * (.6 + .1 * xa)) + ks * np.sum(xa * (xa - 1))) / np.sum(xa)
+        ok &= np.abs(rA - trueA) <= d + 1e-12
+    rB = (np.sum(xb * (.6 + .1 * xb)) + ks[ok] * np.sum(xb * (xb - 1))) / np.sum(xb)
+    return rB.min(), rB.max(), rate(xb, .1)
+lo0, hi0, tB = e4_example(None); lo1, hi1, _ = e4_example(0.0); lo2, hi2, _ = e4_example(0.02)
+report("N15 E4 transfer worked example", abs(lo1 - tB) < 1e-4 and abs(hi1 - tB) < 1e-4 and lo2 < tB < hi2,
+       f"electorate B veteran rate (model-implied, truth {tB:.3f}): LCE alone [{lo0:.3f},{hi0:.3f}]; "
+       f"with A's table, same pattern exactly: [{lo1:.3f},{hi1:.3f}]; pattern may differ (A's rate +/- .02): [{lo2:.3f},{hi2:.3f}]")
+
 print(f"\n{sum(results)}/{len(results)} PASS")

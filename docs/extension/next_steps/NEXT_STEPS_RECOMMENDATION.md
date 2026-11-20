@@ -1,6 +1,6 @@
 # What to build next in eiPartialID: a recommendation
 
-*Planning note, 20 November 2026. Written against `claude/wizardly-volta-lbh4bm` at 7077dfd (v0.3.1 on `master`, the round-2 corrections, the technical report and the methods paper). Nothing in the package, the theory documents, the report or the paper is changed. Checks are in this folder: `verify_next_steps.py` (labels N1–N14, 24/24 PASS, output in `verify_next_steps_output.txt`) and two population studies, `sharp_gain_study.py` and `sharp_gain_study_2xC.py` (outputs alongside).*
+*Planning note, 20 November 2026. Written against `claude/wizardly-volta-lbh4bm` at 7077dfd (v0.3.1 on `master`, the round-2 corrections, the technical report and the methods paper). Nothing in the package, the theory documents, the report or the paper is changed. Checks are in this folder: `verify_next_steps.py` (labels N1–N15, 25/25 PASS, output in `verify_next_steps_output.txt`) and two population studies, `sharp_gain_study.py` and `sharp_gain_study_2xC.py` (outputs alongside).*
 
 *How to read it. Part 1 is the one-page summary. Part 3 has one section per recommended step. Each section starts with three plain-language parts (what it is, a worked example, why it comes at this point), which you can read without the technical notes that follow them. Parts 4–7 cover what to leave for later, the external review, the decisions needed from you, and what was verified.*
 
@@ -35,10 +35,10 @@
 **Not now** (Part 4): a series-based M-SHARP estimator; M-LOC as a separate module; B1(M), κ, CAR-δ and dispersion; causal DiD before the descriptive layer and Batch C; switching the default interval (this would reverse a decision of yours); general R×C full-law estimation.
 
 **Decisions needed from you before building starts** (Part 6):
-* D1. Should `print()` lead with the actual rate?
+* D1. Which target should lead `print()`: the actual rate or the model-implied rate? (Open; no earlier decision. My recommendation: the actual rate. It reverses nothing.)
 * D2. Should the count layer be a new function or a `target =` mode of `eiBounds()`?
 * D3. Do you accept moving M-SHARP and M-LOC down?
-* D4. The open DiD data decisions (PHASE1b §D), which gate Batch C and the causal layer of Step 2.
+* D4. The remaining Wisconsin/Iowa DiD data decisions (common base, composition and stayers, township selection), now that it is known no poll books exist. They gate batch C and the causal layer of Step 2.
 * D5. How should integers be handled by default?
 
 ---
@@ -62,7 +62,7 @@
   * PACKAGE_DESIGN and NEW_AVENUES (batch D);
   * the M-SIGN and WS5 code (batch E).
 
-  So the build order in PACKAGE_DESIGN §6 has not had an outside check.
+  So the build order in PACKAGE_DESIGN §6 has not had an outside check. None of batches C, D and E has been sent: C is gated on the DiD data decisions (now partly answered: no poll books exist); D is unblocked but unscheduled; E has no reviewer.
 * **The repository's own next step** (`NEXT_BUILD.md` item 4) is M-SHARP as a series bound, followed by M-LOC (C1), 2×C joint signs (R6), R×2 trees (R5) and then the DiD wrappers. PACKAGE_DESIGN §6 justifies this order by proof readiness.
 
 ### 2.2 Which of the review's points (written at 27557df) later work already addresses
@@ -93,6 +93,8 @@
   3. In regime R2 (many small groups), print the effective number of units for the focal group, $1/\sum_iw_{ir}^2$, and the width of the finite-sample interval next to the DD width. This adds information without changing the default.
   4. Have `ladder()` print only proved implications (for example M1 ⊂ M1δ ⊂ M2 and "signed slopes ⇒ weighted-local") and list the other rungs as side by side.
   5. Rename "M-ORD-Δ (MTR)" in PACKAGE_DESIGN §7 to "ordering of changes". MTR is a causal assumption.
+* **Worked example.** A fit with 93 ridings of 10 polls (regime R2). *Today* `print()` shows the CLR interval with the line "algorithmic", and nothing tells the reader that the proved alternative is uninformative here. *With Step 0* it adds, for instance: "effective number of units for veterans: 41; finite-sample interval [0.08, 0.97] vs Duncan–Davis [0.10, 0.95]". The reader then sees directly that, in this regime, only the algorithmic interval is informative. (Illustrative numbers.)
+* **Why first.** It is cheap, it uses no new theory, and the review batches it schedules take weeks to come back, so they should start now. Batch D's gate is met but it is unscheduled; batch E has no reviewer; batch C waits for the DiD data decisions (D4).
 * **Proofs**: none. **Tests**: snapshot tests of `print()`.
 
 ---
@@ -328,7 +330,7 @@ The **exact** uses add these facts as equalities on the actual votes, with no mo
   | Old | 70 | 35 | 40 |
 
   Arithmetic within each band gives P2's veteran yes count in **[10, 45]** instead of [10, 50] (N9). This is covariate adjustment with no assumption at all. It serves the covariate wish on your list at almost no cost.
-* **Transfer (E4).** Neighbouring electorates' tables are used to bound a held-out electorate's table under "the same hidden pattern ± δ". Without the module you have the LCE bounds. With it you have a narrower interval whose validity depends on δ. NZ shows which δ was needed historically.
+* **Transfer (E4), the part that serves your NZ work.** Two electorates under the straight-line model (two groups): electorate A has precincts with 10% and 30% veterans, electorate B has precincts with 60% and 90%. *Without the module* the model-implied veteran rate in B is in **[0.529, 0.751]**. *With A's published table*, and the assumption that the hidden pattern is the same in both, B's rate is pinned at **0.656** (with two groups one table fixes the pattern completely, NEW_AVENUES E1). *Allowing the pattern to differ by an amount worth 2 points on A's rate*, B's rate is in **[0.650, 0.662]** (N15). How large a difference was needed in past NZ elections is exactly what leave-one-electorate-out measures; NEW_AVENUES §5.2 suggests it may be large, in which case the gain shrinks accordingly.
 
 **Why now.**
 * **For you**, the value is E4 on NZ: NZ publishes every electorate's table, so leave-one-electorate-out tests whether transfer of the hidden pattern works, and gives the model layer its first real validation. It needs a proof (rank) and the actual-vs-model allowance, hence its place after the cheaper steps.
@@ -409,7 +411,7 @@ For the actual voters it adds nothing: precinct-by-precinct arithmetic already u
 
 *You have told us there are no poll books, linked records, CVRs or sub-tables for your projects. The modules below need such data. They are worth keeping because other users have it (archives with poll books, US cast-vote records, linked historical records), and each is small once Step 1 exists. Build them after Step 4, or earlier if a user with the data asks; their order among themselves follows effort: G1, then G2, then G3. The exact E5 rows (totals, strata) belong here too but ship inside Step 1 (§3.5).*
 
-#### G1. M-AUDIT, choosing which precinct to validate
+#### G1. M-AUDIT, choosing which precinct to validate (general-user feature)
 
 **What it does (plain language).** Archives sometimes let you recover the full table for a few precincts, from poll books linked to service records or from a validation study. That is expensive. M-AUDIT tells you **in advance** how much each precinct's table would narrow your answer, and it guarantees that narrowing whatever the table turns out to show. You can then spend the budget where it counts. Big precincts dominated by the group you study are often a poor choice: their arithmetic already pins the answer.
 
@@ -425,7 +427,7 @@ Recovering P2's table removes exactly 40 of the 60 votes of uncertainty (the rat
 
 There is one complication. If a published total links the precincts, the gains stop adding up. Take a published county total of 45 veteran yes votes and the target "P1's rate". Auditing P2 then pins P1 completely: it removes all 20 votes of P1's range, though P2 is not in the target. Without the total it would remove nothing (N8c).
 
-**Why now.**
+**Why here (in the general-user track, not Step 2).**
 * **It serves other users' data, not yours**: no poll books or linked records exist for Wisconsin/Iowa.
 * For users who can recover tables it changes what they do in the archive, and it is a thin layer on Step 1 whose main fact is elementary.
 * **Cost:** small code, no new data beyond costs, one small proof item.
@@ -448,7 +450,7 @@ There is one complication. If a published total links the precincts, the gains s
 
 ---
 
-#### G2. M-CVR, ballot patterns across contests
+#### G2. M-CVR, ballot patterns across contests (general-user feature)
 
 **What it does (plain language).** Many US jurisdictions publish cast-vote records: for each ballot, the choice in every contest. Knowing that no ballot split its ticket tells you that **every group voted the same way in both contests**, even though the records still cannot say how any group voted in either one. M-CVR bounds group-specific *differences* across contests: split-ticket voting, roll-off and down-ballot defection.
 
@@ -457,7 +459,7 @@ There is one complication. If a published total links the precincts, the gains s
 * With 4 ballots "yes–no", the difference is in **[0, 0.08]** (N11).
 * Without the module, the package would treat each contest separately and say nothing about the difference.
 
-**Why here.**
+**Why here (general-user track).**
 * With Step 1 in place it is a change of columns and nothing else.
 * It is a strict gain, and it leaves the proved negative result (C1: joint margins do not help a single contest's cell) intact.
 * **It serves other users' data**: you have no CVR application, but public CVRs exist (Kuriwaki et al. 2024) and split-ticket questions are common.
@@ -473,15 +475,26 @@ There is one complication. If a published total links the precincts, the gains s
 
 ---
 
-#### G3. M-MISCLASS, uncertain group labels
+#### G3. M-MISCLASS, uncertain group labels (general-user feature)
 
-*
-  * *Plain language*: when "veteran" comes from record linkage, some labels are wrong. Bounding the number of wrong labels with an audit gives honest (wider) bounds.
-  * *Example*: P2 records 60 veterans. If up to 2 men could be mislabelled, the veterans' yes rate widens from [0.167, 0.833] to [0.138, 0.862] (N14).
-  * *Technical*: counts by true group × recorded label × outcome, with audit bounds on false and missed matches. A ratio with an unknown denominator is linear-fractional, so use profiling over integer group totals. Build it on Step 1. Molinari (2008) supplies the framework.
-  * *When*: for a user who has a linkage audit. **Not your data**: no audit exists for your projects.
+**What it does (plain language).** When "veteran" comes from linking names across records, some men are labelled wrongly: a few veterans are missed and a few non-veterans are counted as veterans. If an audit says how many labels can be wrong, the module widens the bounds just enough to cover those errors. The answer then stays honest about the group's definition instead of looking more precise than the data are.
 
----
+**Information or assumption used.** An upper bound on the number of wrong labels (false and missed matches), from a clerical audit or a second register. Errors may depend on how men voted unless evidence says otherwise.
+
+**The question it answers.** "How much could my result move if some group labels are wrong?"
+
+**Worked example.** Precinct P2 records 60 veterans among 100 men, with 50 yes votes. *Without the module*, treating every label as correct, the veterans' yes rate is in [0.167, 0.833]. *With the module* and up to 2 mislabelled men, it is in **[0.138, 0.862]** (N14). The module widens rather than narrows. Its value is that a narrow model-based interval is not taken at face value when the group itself is measured with error.
+
+**Why here (general-user track, last).** No linkage audit exists for your projects, so it serves other users only. It is the most expensive of the three general-user modules (ratios with unknown denominators), and it matters only when a user has an audit.
+
+**Technical notes.**
+* Counts by true group × recorded label × outcome, with the observed recorded-label and outcome totals and audit bounds on false and missed matches.
+* A rate whose denominator (the true group size) is unknown is linear-fractional: profile over integer group totals, or use a Charnes–Cooper transformation for a single ratio. A difference of two such ratios needs joint profiling.
+* Start at the accounting rung (Step 1). Plugging an uncertain composition into the LCE polynomial breaks the simple LP.
+* Framework: Molinari (2008). Proof item: small (validity of the profiled LP; monotone in the error budget).
+* **Inference**: deterministic given exact audit counts; a design-based region if the audit is a sample.
+* **Interface**: `eiCounts(..., misclass = list(row = "vet", false_pos = 2, false_neg = 2, outcome_dependent = TRUE))`.
+* **Tests**: N14; brute force on small tables; bounds widen monotonically in the error budget and reduce to Step 1 at zero.
 
 * **R16/R15 (M-SIGN out of experimental).** Unchanged. They are on the theory side, they run in parallel, and they are not a build step.
 
@@ -532,10 +545,10 @@ There is one complication. If a published total links the precincts, the gains s
 
 ## Part 6. Decisions you need to make before building starts
 
-* **D1. Print order.** Should `print.eiRxC()` lead with the actual-rate block (DD, then any count-layer restrictions, then `ci_actual`/`proj_actual`) and put the model-implied block second? *My recommendation: yes, as the default, with `target = "model"` restoring the current order.* This does not touch your CLR decision.
+* **D1. Print order (open: you have made no earlier decision on this).** Should `print.eiRxC()` lead with the actual-rate block (DD, then any count-layer restrictions, then `ci_actual`/`proj_actual`) and put the model-implied block second? *My recommendation: yes, as the default, with `target = "model"` restoring the current order.* This does not touch your CLR decision.
 * **D2. One function or two.** Either a new `eiCounts()` that `eiBounds()` calls for its actual-rate block, or a single `eiBounds(target = )` with two engines. *Recommendation: a separate `eiCounts()` (clean semantics: exact, no inference) that `eiBounds()` embeds.*
 * **D3. Re-ordering.** Do you accept moving M-SHARP (to a diagnostic) and M-LOC (into M-CONTRAST) below the count-layer modules? This changes `NEXT_BUILD.md` item 4 and PACKAGE_DESIGN §6 steps 1b–4.
-* **D4. The DiD data decisions** (PHASE1b §D: common base, composition, stayers). They gate Batch C and therefore the causal layer of Step 2. The descriptive layer can be built before them. (The earlier question of which application drives the build is answered: your aggregate-only work, with the general-user track after.)
+* **D4. The DiD data decisions for Wisconsin/Iowa** (PHASE1b §D), restated for what is now known. Your own driver is Wisconsin/Iowa with **aggregate margins only** (no poll books, no linked service records), plus NZ. So the DiD is built entirely on the exact rungs (Δ0, Δ4, the composition polytope, party P2/P3) and on FD, with no validation data, and audit-based ideas do not apply to it. The decisions still open are: the common base of eligible men in each period; how to treat aging-in and exits (stayers, interval bases from the 1860/1870 censuses); and which townships enter (the selection point in PHASE1b §D.6). Once these are fixed, batch C can be sent, and the causal layer of Step 2 can follow it. The descriptive layer does not wait for them.
 * **D5. Integers.** Should the default be `integer = "auto"` (MILP only when rows break total unimodularity, otherwise the LP with a certificate)? Or always LP with a flag? *Recommendation: "auto", with a time limit that falls back to the LP bound plus a labelled gap.*
 * **D6 (minor).** Batch D's gate is met but it is unscheduled, and batch E has no reviewer. Send batch D with this recommendation attached, so the reviewer sees the revised order; choose a reviewer for batch E.
 
@@ -543,7 +556,7 @@ There is one complication. If a published total links the precincts, the gains s
 
 ## Part 7. What I verified, and what I take on trust
 
-**Verified numerically here** (`verify_next_steps.py`, 24/24 PASS):
+**Verified numerically here** (`verify_next_steps.py`, 25/25 PASS):
 
 | Label | Claim | Result |
 |---|---|---|
@@ -557,6 +570,7 @@ There is one complication. If a published total links the precincts, the gains s
 | N11 | Ballot-pattern example (difference exactly 0; ≤ 0.08) | confirmed |
 | N12a–c | Kitagawa identity; contrast example [0, 0.20]; under LCE the secant terms equal the P-S objects at the midpoint | max diff 2.5e-16 |
 | N13, N14 | Exception-mass and misclassification examples | confirmed |
+| N15 | E4 transfer example (B's rate [0.529, 0.751] → 0.656; ±2 points on A → [0.650, 0.662]) | confirmed |
 
 **Population studies** (`sharp_gain_study.py`, `sharp_gain_study_2xC.py`). Pooled LCE, oracle law at replicated composition types, large precincts, Beta or Dirichlet heterogeneity. The result is that the full law narrows the model-implied group rates by little.
 

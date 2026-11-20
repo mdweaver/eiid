@@ -1,0 +1,166 @@
+% Section 1
+\section{Introduction}\label{sec:intro}
+
+\subsection{The problem}
+
+Ecological inference (EI) asks how groups behaved when only aggregates are
+observed. A unit is a polling place, a precinct, a county or a riding. For
+each unit we see the shares of its members in $R$ groups (how its electorate
+voted in an earlier election, or its ethnic composition) and the shares of its
+members in $C$ outcome categories (how it voted in a later election, or whether
+it turned out). We want the latent $R\times C$ table of rates: the share of the
+members of group $r$ who chose outcome $c$, unit by unit and, above all, for
+the electorate as a whole. Transition rates between elections, turnout by
+group, and racially polarised voting are the standard examples.
+
+The data link groups and outcomes only through an accounting identity: in each
+unit, the outcome shares are the group shares weighted by the unknown rates.
+A unit has $RC$ unknown rates, but its margins supply only $C-1$ free
+equations. Without further structure the rates are not point-identified, and
+neither is their electorate-wide average.
+
+The classical answers resolve this in one of two ways. The first assumes enough
+to obtain a single number. Goodman's ecological regression assumes that the
+rates are the same in every unit~\citep{goodman1953}. King's method assumes a
+truncated bivariate normal distribution for the unit rates~\citep{king1997}, and
+hierarchical R$\times$C models make related distributional
+assumptions~\citep{rjkt2001,greinerquinn2009}. These assumptions do the
+identifying work, and the data cannot check them. When they fail, for example
+because group behaviour depends on the composition of the unit, the answer can
+be confidently wrong. The second answer assumes nothing beyond the accounting
+identity and reports the widest possible range, the Duncan--Davis ``method of
+bounds''~\citep{duncan1953}. It is always valid, but often too wide to be
+useful.
+
+\subsection{The aim of the bounding approach}
+
+Partial identification takes the middle road~\citep{manski2003,tamer2010,molinari2020}.
+It states an assumption, derives the set of values of the target that are
+consistent with the data and that assumption (the \emph{identified set}), and
+reports that set. When the assumption is weak the set is wide, but it is
+credible. When the assumption is strong the set is narrow, but it rests on more.
+The researcher can see exactly what each assumption buys.
+
+\citet{jkst2019} (JKST below) carried out this programme for $2\times2$ tables.
+Their assumption is \emph{linear contextual effects} (LCE): each group's
+expected rate may depend on the composition of the unit, but only linearly. LCE
+is much weaker than Goodman's constancy, which is the special case with no
+contextual effect. JKST show that under LCE the aggregate regression of the
+outcome share on the group share is quadratic, that it identifies all but one
+number, and that requiring the implied rates to be probabilities bounds that
+number and hence the target.
+
+This paper extends the programme in three directions and sets out what can be
+learned under each assumption, with honest uncertainty:
+\begin{enumerate}
+\item \textbf{General R$\times$C tables.} The unidentified part grows from one
+number to a $(C-1)R(R-1)/2$-dimensional set, and the bound becomes a linear
+program (LP).
+\item \textbf{A ladder of assumptions.} Units are often nested in districts
+(precincts in ridings, counties in states). District baselines protect against
+aggregation bias across districts, and shared contextual effects carry the
+information of the most informative district to all of them. Sign beliefs from
+monotone ecological inference~\citep{egghm2025} add further, cheap restrictions.
+Each assumption is a rung, and rungs are reported side by side.
+\item \textbf{Inference.} Every bound is computed from an estimated regression.
+Each endpoint is the tightest of many estimated candidate limits, so the
+plug-in bound is biased inward, sometimes badly. Valid confidence intervals must
+treat each endpoint as an intersection bound~\citep{clr2013}.
+\end{enumerate}
+
+\subsection{Contributions}
+
+The results are of four kinds, and we keep them apart throughout. A result
+labelled \emph{proved} has a complete proof in the supplementary appendix. A
+\emph{cited} result applies a published theorem whose conditions we verify. A
+\emph{conjecture} is stated precisely, supported by checks or simulation, and
+not proved. An \emph{algorithm} is a procedure whose validity is not proved;
+simulation evidence does not promote it to a theorem.
+
+\paragraph{Identification in R$\times$C.} Under LCE the regression of the outcome
+shares on the group shares identifies the symmetric part $Q$ of the
+contextual-effect matrices and nothing about the skew part $K$
+(Lemma~\ref{lem:decomp}). We characterise the sharp identified set $\ThI$ for
+$K$ through conditional support-function inequalities (Theorem~\ref{thm:sharp}),
+define two larger sets $\ThX$ and $\ThO$, prove the nesting
+$\ThI\subseteq\ThX\subseteq\ThO$ (Proposition~\ref{prop:nesting}), and show that
+the outer set $\ThO$ is exactly what the regression function can deliver
+(Proposition~\ref{prop:sharpreg}). $\ThO$ is a polytope, and bounds on any linear
+target are an LP (Proposition~\ref{prop:lp}). For two groups the LP has a closed
+form (Proposition~\ref{prop:tworows}). In $2\times2$ the construction reproduces
+JKST's published bounds exactly (Proposition~\ref{prop:jkst}).
+
+\paragraph{Districts and the rung ladder.} Grouping units adds nothing without a
+model that links groups (Proposition~\ref{prop:D0}). With such a model, the
+sharpness theorem carries over to any mean model that is affine in its unknowns
+(Theorem~\ref{thm:affine}), and the rungs form a ladder of nested identified sets
+(Theorem~\ref{thm:ladder}). We give a closed form for shared contextual effects
+with two groups, which shows how one district with lopsided units and an extreme
+baseline tightens the bound everywhere (Proposition~\ref{prop:D3}), and the exact
+condition under which the pooled model is valid (Proposition~\ref{prop:D4}).
+
+\paragraph{Signs, reinforcement and monotonicity.} Beliefs about the sign of the
+between-group and within-group (contextual) associations, and the belief that the
+two reinforce each other, are accounting identities away from data-computable
+quantities (Lemma~\ref{lem:M1}). On realised tables they give LP bounds that are
+sharp for continuous unit tables (Proposition~\ref{prop:N1}). Under the pooled
+linear rung each becomes one linear row in $K$, the restricted bound is sharp for
+the regression (Theorem~\ref{thm:R3}), and a face test decides exactly when a
+belief tightens a target (Proposition~\ref{prop:R2}). These sign rows are
+implemented in the accompanying package as an \emph{experimental} module: the
+results are proved for the pooled model only, and sharpness and inference under
+district rungs are open. A monotone nonparametric rung gives a valid outer LP
+(Proposition~\ref{prop:N2}); its sharp version is a conjecture
+(Conjecture~\ref{conj:N2}).
+
+\paragraph{Inference.} Each endpoint is a minimum of finitely many linear
+functions of the regression coefficients (Lemma~\ref{lem:minlin}). The plug-in
+endpoint has a non-normal limit with negative mean when candidates tie
+(Theorem~\ref{thm:limit}, Proposition~\ref{prop:triangular}). We prove asymptotic
+coverage for a conservative interval and for projection and fixed-superset
+intervals (Theorem~\ref{thm:ci}), give a variance-adaptive allowance for the
+realised rate (Proposition~\ref{prop:bd}), tests of the model
+(Proposition~\ref{prop:tests}), a finite-sample interval valid in every
+asymptotic regime (Theorem~\ref{thm:finite}), and inference with added sign rows
+and either/or restrictions (Theorem~\ref{thm:R10}). The CLR-type interval with
+simulated candidates, the package default, is narrower in grouped designs, but
+its validity is Conjecture~\ref{conj:clr}.
+
+\paragraph{Software and evidence.} The R package \pkg{eiPartialID} implements the
+rungs, the intervals and the tests, and prints for each fit which result covers
+its intervals. A Monte Carlo study with 1000 replications per design, a benchmark
+with known truth from New Zealand elections, and simulations of the sign module
+show where each interval is informative and what happens when an assumption is
+false.
+
+\subsection{Related work}
+
+The bounds of \citet{duncan1953} are the model-free baseline. \citet{crossmanski2002}
+study ecological inference with an instrument that makes some rates constant
+across units and obtain a point; LCE is weaker, and the bounds here lie between
+their data-alone region and their point. The random-set formulation of sharp
+identified sets follows \citet{bmm2011}. The inference builds on intersection
+bounds~\citep{clr2013}, directionally differentiable functionals
+\citep{shapiro1991,fangsantos2019}, and the distinction between covering the
+parameter and covering the identified set~\citep{imbensmanski2004,stoye2009}.
+The sign and reinforcement beliefs come from \citet{egghm2025} (EGGHM below);
+their identities hold for any bounded outcome and are used here as accounting
+identities. The view of the sources of uncertainty follows
+\citet{aaiw2023} and \citet{aiz2014}.
+
+\subsection{Plan}
+
+Section~\ref{sec:setting} sets out the data, the targets, the model and the
+assumptions, each with a plain-language reading. Section~\ref{sec:rxc} gives
+the identification results for R$\times$C tables under pooled LCE.
+Section~\ref{sec:districts} adds districts and the rung ladder.
+Section~\ref{sec:signs} adds sign, reinforcement and monotonicity beliefs.
+Section~\ref{sec:inference} turns the identified sets into confidence intervals
+and tests. Section~\ref{sec:package} describes the R package,
+Section~\ref{sec:evidence} the numerical evidence and a worked example, and
+Section~\ref{sec:open} the open questions. The supplementary appendix contains
+the proofs in one notation.
+
+In the main text each formal statement is followed by a plain-language reading
+and, for the key results, a sketch of the argument. A sketch is a guide to the
+proof, not a substitute for it.

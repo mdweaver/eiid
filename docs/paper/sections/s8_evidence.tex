@@ -1,0 +1,370 @@
+% Section 8
+\section{Numerical evidence and an application}\label{sec:evidence}
+
+The results below are evidence, not proof. They check that the theory behaves as
+stated in designs where the truth is known, and they show where the proved
+intervals are informative. All intervals are nominal 95\%.
+
+\subsection{Verification}
+
+Every closed form, inclusion and counterexample in Sections~\ref{sec:rxc}--\ref{sec:inference}
+has a numerical or symbolic check against brute force or an LP solver. Examples:
+the homogeneous form reproduces JKST's bounds to $10^{-16}$; the two-row closed
+form agrees with the LP in 300 random cases, and its district version
+(Proposition~\ref{prop:D3}) in 126 cases plus 195 with pure vertices; the face test
+of Proposition~\ref{prop:R2} agrees with brute force in 800 of 800 cases; and every
+counterexample quoted in the readings (the singleton hull, the null-direction
+projection failure, the changing-system limit $\min\{Z,1-Z\}$, the
+district-reversal example, the three-point bracket design) is reproduced exactly.
+Two parts are not machine-checked: the measure-theoretic steps of
+Theorems~\ref{thm:sharp} and~\ref{thm:affine}, which rest on cited theorems, and the
+remark on randomising over integer vertices, which is only a sketch and is not used.
+
+\subsection{Monte Carlo design}
+
+Unit rates are Beta (for $2\times2$) or Dirichlet (for $3\times3$) draws whose
+conditional means are exactly linear in composition given the district. So M1
+always holds, and M0 holds only without district shifts. Each design has 1000
+replications. Coverage is the share of replications whose interval contains the
+truth; an empty interval (an empty inflated set, or crossing ends) counts as not
+covering. A coverage of 1 means every replication covered, and the exact one-sided
+95\% lower confidence bound is then $0.05^{1/1000}=0.997$. Monte Carlo standard
+errors are in parentheses. Widths are medians after clipping to $[0,1]$. The
+projection interval for $B$ takes its Bhatia--Davis allowance from a projection
+interval for $\bar m$ on the rung alone at level 0.005, with 0.04 on the
+estimation part (Proposition~\ref{prop:bd}); the CLR interval for $B$ uses the
+Bhatia--Davis allowance with a CLR input. Designs:
+\begin{itemize}
+\item A: $2\times2$, M1, 10 districts of 93 units (regime R1) and 93 districts of 30;
+\item C: $2\times2$ pooled, with an implied rate close to 0 at one vertex, so
+Slater's condition holds, but only just;
+\item E: $2\times2$ pooled, compositions spanning $[0.02,0.98]$, with group $b$'s
+mean rate exactly 0 at the right vertex and group $w$'s exactly 0 at the left, so
+the identified set of the model-implied rate is a single point and Slater fails;
+\item B: $3\times3$ pooled, four targets.
+\end{itemize}
+
+\begin{table}[t]
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrc ccc ccc@{}}
+\toprule
+& & & \multicolumn{3}{c}{Model-implied rate $\Bt$} & \multicolumn{3}{c}{Actual rate $B$} \\
+\cmidrule(lr){4-6}\cmidrule(lr){7-9}
+Design & $q$ & DD & Conservative & CLR & Projection & Conservative & CLR & Projection \\
+\midrule
+A, $10\times93$ & 21 & 0.574 & 1 / 0.596 & 1 / 0.432 & 1 / 0.554 & 1 / 0.696 & 1 / 0.538 & 1 / 0.662 \\
+A, $93\times30$ & 187 & 0.567 & 1 / 0.633 & 1 / 0.414 & 1 / 0.932 & 1 / 0.694 & 1 / 0.477 & 1 / 0.964 \\
+C, boundary & 3 & 0.325 & 0.996 / 0.041 & 0.994 / 0.039 & 0.999 / 0.041 & 1 / 0.087 & 0.999 / 0.057 & 1 / 0.059 \\
+E, Slater fails & 3 & 0.271 & 0.990 / 0.179 & \textbf{0.944} / 0.143 & 0.995 / 0.194 & 1 / 0.249 & 0.998 / 0.207 & 1 / 0.251 \\
+B, loyalty & 12 & 0.835 & 1 / 0.592 & 1 / 0.557 & 1 / 0.581 & 1 / 0.675 & 1 / 0.659 & 1 / 0.679 \\
+B, defection & 12 & 0.635 & 1 / 0.399 & 1 / 0.369 & 1 / 0.395 & 1 / 0.447 & 1 / 0.431 & 1 / 0.445 \\
+B, demobilisation & 12 & 0.533 & 1 / 0.333 & 1 / 0.304 & 1 / 0.329 & 1 / 0.381 & 1 / 0.363 & 1 / 0.378 \\
+B, mobilisation & 12 & 0.884 & 1 / 0.619 & 1 / 0.559 & 1 / 0.595 & 1 / 0.683 & 1 / 0.646 & 1 / 0.661 \\
+\bottomrule
+\end{tabular}
+\caption{Monte Carlo, model holds: coverage / median width (1000 replications). $q$ is the degrees of freedom of the projection critical value: $q=\dim\beta$ in the $2\times2$ designs; in design B the Monte Carlo fitted all three columns (18 coefficients) and used $q=\operatorname{rank}\hat\Sigma=12$, the exact adding-up reduction, which equals the number of coefficients on the $C-1$ free columns that the package fits. DD is the median Duncan--Davis width. Design E, CLR for $\Bt$: Monte Carlo standard error 0.007.}\label{tab:mc1}
+\end{table}
+
+\begin{table}[t]
+\centering\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}rrccccccc@{}}
+\toprule
+& & & Plug-in & \multicolumn{3}{c}{Model-implied rate $\Bt$} & \multicolumn{2}{c}{Actual rate $B$} \\
+\cmidrule(lr){5-7}\cmidrule(lr){8-9}
+Districts & $q$ & DD & cover / empty & CLR & Projection & Theorem~\ref{thm:finite} & CLR & Conservative \\
+\midrule
+30 & 61 & 0.571 & 0.305 / 0.241 & 0.999 / 0.557 & 1 / 0.967 & 1 / 1.000 & 1 / 0.746 & 1 / 1.000 \\
+93 & 187 & 0.566 & 0.042 / 0.463 & 0.995 / 0.467 & 1 / 1.000 & 1 / 1.000 & 0.998 / 0.575 & 1 / 0.930 \\
+200 & 401 & 0.566 & 0.005 / 0.717 & 0.996 / 0.416 & 1 / 1.000 & 1 / 1.000 & 1 / 0.491 & 1 / 0.890 \\
+\bottomrule
+\end{tabular}
+\caption{Monte Carlo, many small districts (regime R2): M1, $2\times2$, 10 units per district. Coverage / median width. The projection interval and Theorem~\ref{thm:finite} for $B$ have coverage 1 and width 1.000 in every row.}\label{tab:mc2}
+\end{table}
+
+\subsection{Monte Carlo results}
+
+Tables~\ref{tab:mc1} and~\ref{tab:mc2} report the designs in which the model holds.
+
+\begin{enumerate}
+\item \emph{No proved interval under-covers where its theorem applies.} The
+projection interval covers at least 0.995 (design E, standard error 0.002) and the
+conservative interval at least 0.990 (design E, 0.003). Theorem~\ref{thm:finite}
+covered in every replication of every design where it was computed, including
+regime R2 and designs A. In the R2 rows ($93\times30$ and 10 units per district),
+$q$ grows with the number of districts, so the coverage of the projection and
+conservative intervals there is itself a simulation finding.
+\item \emph{CLR (a simulation finding) covers at least 0.994 in every design where
+Slater's condition holds}, including R2 with 200 districts. At the Slater failure
+(design E), CLR for $\Bt$ covers 0.944 (standard error 0.007), within one standard
+error of nominal. This is the informative case: the identified set is a point, the
+interval has no slack, and coverage falls from near one to the nominal level. The
+coverage of 1 elsewhere reflects truths in the interior of the identified set.
+\item \emph{The plug-in fails as Theorem~\ref{thm:limit} and
+Proposition~\ref{prop:triangular} predict.} In R2 its coverage falls to 0.305, 0.042
+and 0.005 at 30, 93 and 200 districts, and it is empty 24\%, 46\% and 72\% of the
+time. In design E it covers 0.267 and is empty half the time: with a point
+identified set, any sampling noise empties it.
+\item \emph{The projection interval is informative only when $q$ is small.} Its
+critical value grows like $\sqrt q$: 2.8 at $q=3$, 4.6 at $q=12$, 14.8 at $q=187$ and
+21.2 at $q=401$, against about 2--3 for CLR. In pooled designs it is only 0.01--0.03
+wider than CLR; with 10 districts it is 0.554 against 0.432; with 93 districts it
+is 0.93, and $[0,1]$ at 10 units per district. In grouped designs with many districts,
+CLR is the only informative interval, and its support there is simulation only.
+\item \emph{Theorem~\ref{thm:finite} is valid but uninformative}: clipped width
+1.000 in every M1 design, including $10\times93$, where CLR is 0.43 and
+Duncan--Davis 0.57.
+\item \emph{In R2, CLR narrows as districts are added}: for $\Bt$, 0.557, 0.467 and
+0.416 at 30, 93 and 200 districts. With 200 districts of 10 units it is narrower
+than Duncan--Davis (0.566).
+\item \emph{The residual term is a large part of the width.} Targeting $\Bt$ instead
+of $B$ narrows CLR by 0.06--0.10 in the $3\times3$ design and 0.06--0.19 in the
+$2\times2$ M1 designs. The Bhatia--Davis allowance narrows CLR for $B$ from 0.086 to
+0.057 in the boundary design C; where the plausible rates include 0.5 it equals
+Popoviciu's and is up to 0.015 wider, because part of $\alpha$ is spent on $\bar m$.
+The projection interval for $B$ with the proved allowance of
+Proposition~\ref{prop:bd} differs in width by at most 0.002 from the version with a
+CLR input, and its coverage is the same in every design.
+\item \emph{Rank.} The numerical rank of $\hat\Sigma$ equals $\dim\beta$ in every
+replication of every $2\times2$ design ($\dim\beta$ from 3 to 401). The $3\times3$
+fit on all three columns has rank 12 of 18 because of the exact adding-up identity;
+on the $C-1$ free columns it has full rank 12.
+\end{enumerate}
+
+\paragraph{District shocks.} Table~\ref{tab:shocks} compares M0 and M1 in a
+$2\times2$ design with 20 districts of 50 units. The district shifts are added to
+both groups' rates and depend on the district's mean composition $m_d$: none (S0);
+affine in $m_d$ plus noise (S1); or a common shock $0.25\cos(2\pi m_d)$, which is not
+affine (S2). With a non-affine shock every M0 interval fails, mostly by being empty,
+while M1 covers in every replication and the pooling test always rejects. With
+affine shifts the pooling test rejects every time, because M0 is false for the
+observed design (Proposition~\ref{prop:tests}(c)), yet M0's intervals still cover:
+shifts affine in composition change the pooled conditional mean almost only
+through terms the pooled model absorbs (Proposition~\ref{prop:D4}(b)). A rejection
+of the pooling test says that M0 is wrong, not that its intervals are.
+
+\begin{table}[t]
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llccccc@{}}
+\toprule
+Shifts & Fit & Plug-in & CLR, $\Bt$ & Projection, $\Bt$ & Projection, $B$ & Pooling test \\
+\midrule
+S0 none & M0 & 1 / 0.000 & 1 / 0.329 & 1 / 0.336 & 1 / 0.436 & \\
+ & M1 & 0.999 / 0.000 & 1 / 0.468 & 1 / 0.704 & 1 / 0.808 & size 0.090 ($\chi^2$) \\
+S1 affine & M0 & 1 / 0.000 & 1 / 0.335 & 1 / 0.344 & 1 / 0.444 & \\
+ & M1 & 0.938 / 0.000 & 1 / 0.437 & 1 / 0.672 & 1 / 0.773 & rejects 1.000 \\
+S2 non-affine & M0 & 0.002 / 0.987 & 0.009 (0.963) & 0.013 (0.950) & 0.206 (0.478) & \\
+ & M1 & 0.997 / 0.002 & 1 / 0.328 & 1 / 0.509 & 1 / 0.611 & rejects 1.000 \\
+\bottomrule
+\end{tabular}
+\caption{District shocks, M0 against M1: $2\times2$, 20 districts $\times$ 50 units, 1000 replications. Coverage / median width; for S2 under M0, coverage with the share of empty intervals in parentheses. The plug-in column gives coverage / share empty. The pooling-test column gives the $\chi^2$ rejection rate at 5\%.}\label{tab:shocks}
+\end{table}
+
+\paragraph{Calibration of the tests.} In design S0 the pooling test has 38
+restrictions. Its HC3 Wald statistic has mean 39.7 and variance 100, against 38 and
+76 for $\chi^2_{38}$, and the $\chi^2$ test rejects 0.090 (standard error 0.009) at
+nominal 5\% in the 1000-replication study above. A separate 2000-replication run
+with the restricted wild bootstrap ($B=399$) gives:
+
+\begin{center}\small
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Test & Restrictions & Replications & $\chi^2$ & F & Wild bootstrap \\
+\midrule
+Pooling (M0 against M1) & 38 & 2000 & 0.078 (0.006) & 0.072 (0.006) & 0.043 (0.005) \\
+Curvature (M1 against M2) & 19 & 1000 & 0.057 (0.007) & 0.055 (0.007) & 0.054 (0.007) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The two $\chi^2$ figures for the pooling test (0.090 and 0.078) come from different
+runs and differ by about one combined standard error. The bootstrap is close to
+nominal in this design; that is a simulation finding.
+
+\subsection{A benchmark with known truth: New Zealand elections}
+
+New Zealand publishes, for each electorate, the exact cross-tabulation of the party
+vote by the electorate (candidate) vote, together with polling-place totals of both.
+This gives a benchmark in which the truth is known. Units are polling places; rows
+are the party vote (Labour, National, other); columns are the electorate vote
+(Labour candidate, National candidate, other); seven general elections, 2002--2020.
+Intervals are for the actual rate, use the Bhatia--Davis allowance, and are
+intersected with Duncan--Davis. The benchmark was computed with version 0.2.0 of the
+package. Version 0.3.1 calibrates the tests by a wild bootstrap and takes the variance
+bound of the projection interval for $B$ from Proposition~\ref{prop:bd}; these
+differences can move the projection and test columns slightly.
+
+\paragraph{One table per electorate.} There are 492 electorate tables with a median
+of 64 polling places each, and 4302 cells. The pooled model's CLR and projection
+intervals covered every cell, at about Duncan--Davis width (median width ratio
+1.00; CLR median width 0.833 against 0.843 for DD). Adding the ordering belief that
+each party's voters are at least as likely as the other party's voters to vote for
+that party's candidate also covered every cell. Goodman's constancy (L6) gave
+intervals with median width 0.415 that covered 0.939 of cells and missed the truth
+with a non-empty interval in 2.2\%. The plug-in estimate of the M0 identified set was
+empty in 48\% of cells. With about 64 units per table, the valid intervals are about
+as wide as Duncan--Davis.
+
+\paragraph{Electorates as districts.} Pooling each election's 62--69 electorates
+(3398--6550 polling places) and fitting M1 with electorates as districts, the
+curvature test (M1 against M2) rejects M1 and the pooling test rejects M0 in all seven
+elections ($p\approx0$; the pooling test has 366--408 restrictions). The M1 plug-in
+estimate is empty in all seven elections, but that is a sample diagnostic only: the
+emptiness test rejects the pooled model in two elections (2002 and 2020) and M1 in
+none. Over the 63 cells (seven elections, nine cells), the M1 CLR
+intervals had crossing ends (or ends outside the logical range) in 21\% of cells and missed the truth with a non-empty
+interval in 8\% (5 of 63); the projection interval never missed, but it was as wide
+as Duncan--Davis. Where the model is wrong, the tests flag it, and a non-empty CLR
+interval is not reassurance.
+
+\subsection{The sign module}
+
+\paragraph{How often signs add information.} In 2000 random $2\times2$ LCE designs
+with true signs imposed, the within sign strictly tightened JKST's interval in 83\%
+of designs (median width ratio 0.70), the between sign in 89\% (0.67), and CR, with
+unknown sign, in 80\% of the 1060 designs where CR holds (0.69). In a $3\times2$
+design with true-sign rows on both associations, a row was implied in 8\% of
+target-row pairs, cut the set but not the target in 28\%, and tightened the target in
+64\% (Proposition~\ref{prop:R2}).
+
+\paragraph{CR at the edge.} Table~\ref{tab:cr} uses a $2\times2$ design with 150
+units, 600 replications, Beta rates with linear means (so LCE and CR hold) and the
+conservative interval for the gap $\tilde D$. In the first row the truth lies on the
+edge of the CR band, so $\delta^*_W=0$.
+
+\begin{table}[t]
+\centering\footnotesize
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Design & JKST alone & CR slab & CR branch union & CR plug-in bracket \\
+\midrule
+Truth on the CR edge, $\ER^*=0.15$ & 1.000 / 1.106 & 0.992 / 0.359 & 0.992 / 0.357 & \textbf{0.917} / 0.256 \\
+Truth on the edge, $\ER^*=0.005$ & 1.000 / 1.223 & 1.000 / 0.242 & 1.000 / 0.242 & 1.000 / 0.147 \\
+Interior truth & 1.000 / 1.232 & 1.000 / 0.480 & 1.000 / 0.480 & 1.000 / 0.388 \\
+\bottomrule
+\end{tabular}
+\caption{Contextual reinforcement in $2\times2$: coverage / median length of conservative intervals for the gap (600 replications). The branch union is measured by its occupied length. No interval was empty.}\label{tab:cr}
+\end{table}
+
+The slab cuts the median length from 1.106 to 0.359 at the edge and keeps coverage.
+The plug-in bracket, which imposes $\hull\{\gamma\widehat\ER,\widehat\ER\}$ and then
+adds the target's own inflation, covers 0.917 (550 of 600), consistent with the limit of
+Theorem~\ref{thm:R10}(e) (at most 0.9335 in the three-point design). The literal
+intersection of the fitted bracket with a finished JKST interval covered 304 of 600
+(51\%), in line with its limit of at most one half. The package's default CLR branch
+union, in a separate run of 200 replications of the edge design, covered 0.990 with
+median width 0.230; that interval is algorithmic.
+
+\paragraph{A false belief.} With the same generator and means $m_0=.40-sx$ and
+$m_1=.50+s-sx$, the aggregate regression is $.40+.10x$ for every $s$, the between
+sign is positive throughout, and for $s>0$ both contextual slopes are negative, so
+CR is false.
+
+\begin{center}\small
+\begin{tabular}{@{}rrccccc@{}}
+\toprule
+Units & $s$ & True $\tilde D$ & JKST covers & CR slab covers & JKST width & CR width \\
+\midrule
+150 & 0 & .100 & 400/400 & 399/400 & 1.262 & .306 \\
+150 & .08 & .170 & 400/400 & 336/400 & 1.256 & .304 \\
+150 & .25 & .318 & 400/400 & 2/400 & 1.254 & .303 \\
+600 & 0 & .100 & 400/400 & 398/400 & 1.074 & .194 \\
+600 & .08 & .169 & 400/400 & 110/400 & 1.069 & .196 \\
+600 & .25 & .317 & 400/400 & 0/400 & 1.066 & .195 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+No interval was empty. A false restriction gives narrow, non-empty and reproducibly
+wrong intervals: precision makes the wrong answer more reproducible, not more
+credible. This is the price stated in Theorem~\ref{thm:R10}(d).
+
+\subsection{A worked example}\label{sec:example}
+
+We illustrate the package on the \code{voter\_vax} data distributed with the
+MonotoneEI package of EGGHM (and included in \pkg{eiPartialID}'s tests): 2059 US
+counties, with $X$ the Republican share of the presidential vote, $T$ the share
+vaccinated against COVID-19, and $N$ the total votes cast. Rows are Republican and
+other voters; the column is ``vaccinated''; the target is the gap $D=B_1-B_2$ between the two
+groups' vaccination rates (in this subsection $D$ denotes this gap, not a district). The example illustrates the mechanics. It is not a
+substantive finding: the vaccination share refers to the county population and the
+group shares to voters, so the closed-population assumption A1 holds only
+approximately.
+
+The code
+\begin{quote}\small
+\code{v <- read.csv("voter\_vax\_MonotoneEI.csv")}\\
+\code{tg <- list(D = matrix(c(1, -1, 0, 0), 2, 2), Rep = matrix(c(1, 0, 0, 0), 2, 2))}\\
+\code{cr <- list(cr = list(list(row = 1, col = 1)))}\\
+\code{fit <- function(ci, res = NULL)}\\
+\code{\ \ eiBounds(x = v\$prop\_republican, t = v\$prop\_covid\_vax, n = v\$total\_votes,}\\
+\code{\ \ \ \ \ \ \ \ \ \ \ weights = "n", targets = tg, ci = ci, seed = 1, restrictions = res)}\\
+\code{fit("clr"); fit("clr", cr); fit("conservative"); fit("conservative", cr)}
+\end{quote}
+fits the pooled rung with size weights, without and with contextual reinforcement,
+and gives the results in Table~\ref{tab:vv}. The estimated identified set for
+the gap under LCE alone is $[-0.486,-0.001]$: Republican voters' vaccination rate is
+lower, by between 0 and 49 points. The projection interval, which carries the
+asymptotic guarantee for the pooled model, is $[-0.607,0.080]$, and the CLR interval
+is slightly narrower. The actual-rate intervals are much wider, because the residual
+allowance covers each county's local luck.
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+& \multicolumn{2}{c}{M0 alone} & \multicolumn{2}{c}{M0 + CR} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+& Gap $D$ & Republican rate & Gap $D$ & Republican rate \\
+\midrule
+Estimate (identified set) & $[-0.486,-0.001]$ & $[0.345,0.597]$ & $[-0.470,-0.050]$ & $[0.354,0.571]$ \\
+CLR, $\Bt$ (algorithmic) & $[-0.571,\ \ 0.056]$ & $[0.301,0.623]$ & $[-0.525,-0.044]$ & $[0.330,0.580]$ \\
+Projection, $\Bt$ & $[-0.607,\ \ 0.080]$ & $[0.282,0.634]$ & $[-0.542,-0.043]$ & $[0.323,0.582]$ \\
+Conservative, $\Bt$ & $[-0.599,\ \ 0.112]$ & $[0.291,0.651]$ & $[-0.530,\ \ 0.011]$ & $[0.326,0.600]$ \\
+CLR, $B$ (algorithmic) & $[-0.750,\ \ 0.233]$ & $[0.229,0.694]$ & $[-0.702,\ \ 0.131]$ & $[0.259,0.650]$ \\
+Projection, $B$ & $[-0.763,\ \ 0.257]$ & $[0.210,0.705]$ & $[-0.719,\ \ 0.133]$ & $[0.252,0.652]$ \\
+Duncan--Davis & $[-0.763,\ \ 0.547]$ & $[0.202,0.881]$ & $[-0.763,\ \ 0.547]$ & $[0.202,0.881]$ \\
+\bottomrule
+\end{tabular}
+\caption{The \code{voter\_vax} example: 2059 counties, pooled rung, size-weighted regression, 95\% intervals. The conservative row comes from a separate fit with \code{ci = "conservative"}.}\label{tab:vv}
+\end{table}
+
+\paragraph{Descriptive quantities.} The Republican share has mean $\mu=0.482$ and
+between-county variance $0.0267$, so $\gamma=0.107$. The regression slope is
+$\ER=-0.470$ and the neighbourhood gap is $\NM=\gamma\ER=-0.050$. By
+Proposition~\ref{prop:G2}, each sign belief cuts the identified set at one of these
+two numbers:
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+Belief & Estimated set for $D$ \\
+\midrule
+$\delta_W\ge0$ (vaccination rises with the Republican share, on average) & $[-0.486,-0.470]$ \\
+$\delta_W\le0$ & $[-0.470,-0.001]$ \\
+$\delta_B\ge0$ (Republicans more likely to be vaccinated within a county) & $[-0.050,-0.001]$ \\
+$\delta_B\le0$ & $[-0.486,-0.050]$ \\
+CR (the two associations share a sign) & $[-0.470,-0.050]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+Under the rung alone neither association's sign is settled: the estimated set for
+$\delta_B$ is $[-0.488,0.055]$ and for $\delta_W$ is $[-0.525,0.018]$.
+\code{eiRedundancy()} reports that CR tightens the estimated set for $D$ by 0.066,
+whether added first or last. Since $\ER<0$, only the negative branch of CR is
+non-empty (Proposition~\ref{prop:tworowsign}(d)), and the CR set is the band between
+$\ER$ and $\NM$. With CR, the projection interval for $\Bt$, $[-0.542,-0.043]$,
+excludes zero: under LCE and CR, Republican voters' model-implied vaccination rate
+is lower, with an asymptotic guarantee for the pooled model
+(Theorem~\ref{thm:R10}). The conclusion is only as credible as CR.
+
+\paragraph{A joint rejection.} Imposing both $\delta_W\ge0$ and $\delta_B\ge0$ asks
+for $D\le\ER=-0.470$ and $D\ge\NM=-0.050$ at once, which is impossible. The estimated
+set is empty, and the emptiness test rejects the combination of the rung and the two
+beliefs, while the rung alone is not rejected. The package reports exactly this: the
+empty estimate is a sample diagnostic, the emptiness test is the test, the rejection
+is of the combination and does not say which part fails, and each belief on its own
+gives a non-empty set (Theorem~\ref{thm:R3}(e)). The signed associations have
+effective numbers of counties of 271 ($\delta_B$) and 188 ($\delta_W$), so no single
+county dominates them.

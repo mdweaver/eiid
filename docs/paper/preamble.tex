@@ -1,0 +1,70 @@
+% Shared preamble for the paper and its supplement (pdflatex).
+\PassOptionsToPackage{hyphens}{url}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[letterpaper,margin=1in]{geometry}
+\usepackage{setspace}
+\setstretch{1.12}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs,array,tabularx,longtable}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{microtype}
+\usepackage[authoryear,round]{natbib}
+\usepackage{xr-hyper}
+\usepackage[hidelinks]{hyperref}
+\urlstyle{same}
+\setlength{\emergencystretch}{3em}
+\setlist{itemsep=2pt,topsep=4pt}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash\hspace{0pt}}p{#1}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+% ---------------- notation ----------------
+\newcommand{\Bset}{\mathfrak B}
+\newcommand{\Kspace}{\mathcal K}
+\newcommand{\ThI}{\Theta_I}
+\newcommand{\ThX}{\Theta_X}
+\newcommand{\ThO}{\Theta_O}
+\newcommand{\E}{\mathbb E}
+\newcommand{\R}{\mathbb R}
+\newcommand{\conv}{\operatorname{conv}}
+\newcommand{\supp}{\operatorname{supp}}
+\newcommand{\vertx}{\operatorname{vert}}
+\newcommand{\affdim}{\operatorname{affdim}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\sym}{\operatorname{sym}}
+\newcommand{\skw}{\operatorname{skew}}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\hull}{\operatorname{hull}}
+\newcommand{\sgn}{\operatorname{sign}}
+\newcommand{\one}{\mathbf 1}
+\newcommand{\Bt}{\tilde B}
+\newcommand{\DD}{\mathrm{DD}}
+\newcommand{\CI}{\mathrm{CI}}
+\newcommand{\ER}{\mathrm{ER}}
+\newcommand{\NM}{\mathrm{NM}}
+\newcommand{\pkg}[1]{\textsf{#1}}
+\newcommand{\code}[1]{\texttt{#1}}
+
+% ---------------- result environments ----------------
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{conjecture}{Conjecture}
+\theoremstyle{definition}
+\newtheorem{assumption}{Assumption}
+\newtheorem{definition}{Definition}
+\newtheorem{procedure}{Procedure}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+\newtheorem{example}{Example}
+
+% plain-language reading and sketch of the argument
+\newenvironment{reading}{\par\smallskip\noindent\textit{Reading.}\ }{\par\smallskip}
+\newenvironment{sketch}{\par\smallskip\noindent\textit{Sketch of the argument.}\ }{\par\smallskip}
+% status tag printed after a result's title
+\newcommand{\status}[1]{\textup{[\textsf{#1}]}}

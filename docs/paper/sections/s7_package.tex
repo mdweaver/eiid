@@ -1,0 +1,118 @@
+% Section 7
+\section{The R package}\label{sec:package}
+
+The methods are implemented in the R package \pkg{eiPartialID}, version 0.3.1,
+which extends the $2\times2$ package of JKST. The original functions
+(\code{generateBounds()}, \code{evaluateBounds()}) are unchanged; with a range
+offset of $10^{-5}$ and HC1 variances, the new code reproduces them on JKST's
+census example to $10^{-10}$. The LPs are solved with \pkg{lpSolve} and the
+robust covariances come from \pkg{sandwich}.
+
+\subsection{The main function}
+
+\code{eiBounds()} computes bounds and confidence intervals under one rung. Its
+main arguments and defaults are:
+\begin{itemize}
+\item the data, as a formula or as \code{x}, \code{t} and unit sizes \code{n}, with
+an optional \code{group} (the districts);
+\item \code{model}: \code{"M0"} (default), \code{"M1"}, \code{"M1delta"} (with
+\code{delta}), \code{"M2"}, \code{"L4"} (with \code{row\_constant}), \code{"L5"},
+\code{"L6"};
+\item \code{targets}: linear targets as weight matrices (by default every cell rate);
+\item \code{range}: \code{"hull"} (default; the group-wise sample hull,
+Proposition~\ref{prop:consistency}(c)), \code{"trim"} (dropped units enter
+through Duncan--Davis, Proposition~\ref{prop:trim}) or \code{"extrapolate"} (pure
+units or a user matrix, with a warning that validity there is assumed,
+Proposition~\ref{prop:simplex});
+\item \code{weights}: \code{"none"} or \code{"n"} for the regression;
+\code{vcov}: \code{"HC3"} (default), \code{"HC1"}, \code{"HC0"};
+\item \code{ci}: \code{"clr"} (default; Conjecture~\ref{conj:clr}, with
+\code{ndraw = 100} simulated draws), \code{"conservative"}
+(Theorem~\ref{thm:ci}(a)) or \code{"none"}; \code{alpha = 0.05};
+\item \code{fpc}: the residual allowance for the actual rate,
+\code{"bhatia-davis"} (default; Proposition~\ref{prop:bd}) or \code{"popoviciu"}
+($S_1$);
+\item \code{restrictions}: optional rows (\code{zeros}, \code{order}, \code{sign},
+\code{slope}, \code{linear}, \code{external}), and the sign module's \code{assoc}
+(signs on $\delta_B$, one-vs-rest or pairwise, and on $\delta_W$, W1 or W2) and
+\code{cr} (contextual reinforcement);
+\item \code{union}: \code{"pieces"} (print every piece of a union) or \code{"hull"};
+\item \code{eta}: the sensitivity parameter of Proposition~\ref{prop:S1};
+\code{jkst = TRUE} adds JKST's $\CI_x$ with its revert-to-Duncan--Davis rule;
+\code{tests = TRUE} computes the tests of Proposition~\ref{prop:tests}.
+\end{itemize}
+
+\paragraph{What a fit reports.} For each target, \code{eiBounds()} returns:
+\code{estimate}, the plug-in estimate of the outer identified set for the
+model-implied rate (not a confidence interval); \code{ci\_model}, the CLR (or
+conservative) interval for $\Bt$; \code{ci\_actual}, the same for $B$ with the
+residual allowance; \code{proj\_model} and \code{proj\_actual} (computed only with
+\code{ci = "clr"}, and \code{NA} with \code{ci = "conservative"}), the projection
+intervals of Theorem~\ref{thm:ci}(b2)(ii) computed from the CLR candidates, with
+$q=\dim\beta$ and, for $B$, the Bhatia--Davis allowance taken from a projection
+interval for $\bar m$ on the rung alone (Proposition~\ref{prop:bd}); and the
+Duncan--Davis interval. Intervals for $B$ are intersected with Duncan--Davis. The
+rank of $\hat\Sigma$ is printed as a diagnostic; candidates whose gradients load on
+a numerically null direction of $\hat\Sigma$ are dropped as a labelled safeguard,
+which can only widen the projection interval. A CLR candidate with zero estimated
+variance is treated as exact only if its gradient is zero.
+
+With optional restrictions, the rung alone is also fitted and printed beside the
+restricted result; with several restrictions it is labelled as their joint effect.
+The \code{tests} component holds the emptiness test, the curvature test (M1 against
+M2) and the pooling test, each with $\chi^2$, F and restricted-wild-bootstrap
+p-values ($B=399$). An empty estimate is reported as a sample diagnostic, not a
+test; the emptiness test is the test.
+
+\paragraph{What \code{print()} says about each fit.} Every fit prints a status line
+that names the result covering its intervals:
+\begin{itemize}
+\item \emph{Pooled M0:} the projection intervals carry an asymptotic guarantee
+(Theorem~\ref{thm:ci}(b2)(ii)), or the conservative interval does
+(Theorem~\ref{thm:ci}(a)) when \code{ci = "conservative"}; with sign or CR rows the
+line adds that the guarantee is Theorem~\ref{thm:R10} for the pooled model.
+\item \emph{Grouped rungs without sign rows:} an asymptotic guarantee only with few,
+large groups (regime R1); with many small groups, a simulation finding.
+\item \emph{Grouped rungs with sign or CR rows:} no coverage theorem.
+\end{itemize}
+CLR lines are labelled ``algorithmic, coverage supported by simulation, not
+proved''; for $B$ the label adds that the Bhatia--Davis bound also uses a CLR
+interval; with CR, the CLR interval is the union of the CLR branch intervals.
+Every sign or CR restriction prints a line marking the module as experimental,
+with its proof status. Grouped fits with sign rows print that each sign is one
+pooled restriction across groups and that the bound is an outer set whose
+sharpness under grouped rungs is not proved; pooled fits may label the estimate
+sharp for the regression (Theorem~\ref{thm:R3}(b)). Notes flag near-boundary fits
+(Slater slack below 0.005), few units per group (median below 30, where CLR
+coverage rests on simulation), unbounded estimates (a hull that is not
+full-dimensional), a Bhatia--Davis input interval for $\bar m$ inside $[0,.05]$
+or $[.95,1]$ (where the condition of Proposition~\ref{prop:bd} is doubtful and
+\code{fpc = "popoviciu"} is recommended), and joint rejections, naming the rejected
+combination and saying whether the rung alone is rejected.
+
+\subsection{Other functions}
+
+\begin{itemize}
+\item \code{eiRedundancy()} reports what each restriction buys, using the face test
+of Proposition~\ref{prop:R2} at the point estimate (never solver duals): the
+verdict and the width gain when the restriction is added first (to the rung alone)
+and last (to the full stack); the associations already settled by the rung
+alone, with their intervals; the CR branches and the connectivity certificate of
+Theorem~\ref{thm:R3}(c); EGGHM's descriptive quantities ($\gamma$, $\ER$, $\NM$),
+with a warning never to intersect the bracket with a confidence interval; and the
+weight concentration of each signed association (the largest unit weight and the
+effective number of units).
+\item \code{ladder()} fits the rungs from the most to the least plausible
+(Theorem~\ref{thm:ladder}(c)).
+\item \code{sensitivity()} with \code{dial = "eta"}, and \code{breakdown()}, implement
+Proposition~\ref{prop:S1}; with \code{dial = "slack"}, \code{sensitivity()} relaxes the sign
+beliefs by a slack in probability units, with a breakdown value along a stated
+scalar path (Proposition~\ref{prop:N1}(d)).
+\item \code{eiModules()} lists the restriction types with their proof status, and
+\code{eiBenchmark()} computes coverage on data with known truth.
+\end{itemize}
+
+\paragraph{Not implemented.} Sign rows on realised tables (N1), the monotone rung
+N2, local contextual rows, the series bound that would tighten the outer set
+towards $\ThX$, the finite-sample interval of Theorem~\ref{thm:finite} (because it is
+uninformative), covariates and integer tables.

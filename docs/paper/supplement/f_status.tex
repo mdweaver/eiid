@@ -1,0 +1,50 @@
+% S6 status
+\section{Status of the numbered results}\label{sec:statuslist}
+
+\emph{Proved}: a complete proof is given above. \emph{Cited}: the result applies a
+published theorem whose conditions are verified but whose proof is not repeated.
+\emph{Conjecture}: stated precisely and not proved. \emph{Algorithm}: a procedure
+whose validity is not proved.
+
+{\small
+\begin{longtable}{@{}L{0.30\linewidth}L{0.40\linewidth}L{0.22\linewidth}@{}}
+\toprule
+Result & Status & Scope \\
+\midrule\endfirsthead
+\toprule Result & Status & Scope \\ \midrule\endhead
+Lemmas~\ref{P-lem:polytope}--\ref{P-lem:estimand} & proved & pooled model \\
+Theorem~\ref{P-thm:sharp}, Corollary~\ref{P-cor:sharp} & proved; measure-theoretic steps rest on the cited theorems of Section~\ref{sec:conv} & continuous rates \\
+Lemma~\ref{P-lem:outer}, Propositions~\ref{P-prop:nesting}--\ref{P-prop:IequalsO} & proved; Proposition~\ref{P-prop:IequalsO}(b) is sufficient only & \\
+Propositions~\ref{P-prop:jkst}--\ref{P-prop:undetectable}, Lemma~\ref{P-lem:box}, Corollary~\ref{P-cor:joint} & proved & characterisation of strict joint gains for $R\ge3$ open \\
+Integer vertices of the unit polytope & proved (total unimodularity) & \\
+Randomising over integer vertices & sketch only; not used & \\
+Proposition~\ref{P-prop:D0}, Lemmas~\ref{P-lem:D1}--\ref{P-lem:D2} & proved & \\
+Theorem~\ref{P-thm:affine} & proved by reduction to Theorem~\ref{P-thm:sharp} & \\
+Theorem~\ref{P-thm:ladder}, Propositions~\ref{P-prop:D3}--\ref{P-prop:D7} & proved & \\
+Lemma~\ref{P-lem:M1}, Propositions~\ref{P-prop:N1}--\ref{P-prop:joint} & proved & continuous unit tables \\
+Proposition~\ref{P-prop:integer} & proved & $2\times2$, margins only; other cases open \\
+Proposition~\ref{P-prop:Krows} & proved; (c) for M0 only & \\
+Theorem~\ref{P-thm:R3} & proved & pooled M0 only \\
+Propositions~\ref{P-prop:R2}--\ref{P-prop:sandwich} & proved & \\
+Proposition~\ref{P-prop:rank} & proved for stars; general spanning trees checked numerically for chains only & \\
+Proposition~\ref{P-prop:PN} & proved & pooled $2\times2$ \\
+Conjecture~\ref{P-conj:C1} & conjecture & \\
+Lemma~\ref{P-lem:N21}, Proposition~\ref{P-prop:N2}, Lemma~\ref{P-lem:bins} & proved & finite support \\
+Conjecture~\ref{P-conj:N2} & conjecture; sufficiency on a finite support sketched & \\
+Proposition~\ref{P-prop:N23} & proved as a calculus identity; not an observable restriction & \\
+Lemma~\ref{P-lem:minlin}, Propositions~\ref{P-prop:consistency}, \ref{P-prop:triangular} & proved & fixed constraint system (Lemma~\ref{P-lem:minlin}) \\
+Theorem~\ref{P-thm:limit} & cited structure (directional delta method; bootstrap characterisation) & fixed constraint system \\
+Theorem~\ref{P-thm:ci}(a), (b2) & proved & M0; M1/M2 in regime R1 \\
+Theorem~\ref{P-thm:ci}(b1) & cited (CLR, Theorem 4, Condition P) & finite candidate set \\
+Conjecture~\ref{P-conj:clr} & conjecture; the procedure is an algorithm & package default \\
+Lemma~\ref{P-lem:reduction} & proved & \\
+Proposition~\ref{P-prop:bd} & proved with a proved input interval; with a CLR input it inherits Conjecture~\ref{P-conj:clr} & \\
+Proposition~\ref{P-prop:tests} & (a), (c) proved; (b) proved for fixed dimension & wild-bootstrap calibration: simulation only \\
+Theorem~\ref{P-thm:finite} & proved & every regime, every $n$ \\
+Propositions~\ref{P-prop:select}, \ref{P-prop:S1} & proved; Proposition~\ref{P-prop:S1} is an outer bound & \\
+Theorem~\ref{P-thm:R10} & by interval version (Table~\ref{P-tab:R10} of the main text): conservative and projection proved, full-candidate CLR cited, simulated-candidate CLR algorithmic; (e) proved analytically & pooled M0 only \\
+M1, M2 in regime R3 & conjecture & \\
+CLR coverage in regime R2 & simulation finding & \\
+\bottomrule
+\end{longtable}
+}

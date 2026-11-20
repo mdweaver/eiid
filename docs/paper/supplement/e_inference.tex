@@ -1,0 +1,336 @@
+% S5 proofs for Section 6
+\section{Proofs for Section 6: inference}\label{sec:proofs-inference}
+
+Throughout, (I1)--(I2) of the main text hold: conditional on the design (and the
+district effects), the unit residuals are independent with mean zero, and the design
+is fixed. The regression coefficients $\hat\beta$ are OLS for a fixed-dimensional
+parameter with a full-rank design, so $\sqrt n(\hat\beta-\beta_0)$ is asymptotically
+normal with a consistent HC covariance estimate (outcomes are bounded). Constraint terms
+are $s(\beta)=S\beta$ (stacked), the target is $\varphi_0(\beta)+\omega^\top k$, and
+$\theta_\lambda(\beta)=g_\lambda^\top\beta$ with $g_\lambda=\nabla\varphi_0+S^\top\lambda$.
+
+\begin{proofof}{Lemma~\ref{P-lem:minlin}}
+The LP $\max\{\omega^\top k:s+Ak\ge0\}$ has Lagrangian $\omega^\top k+\lambda^\top(s+Ak)$;
+stationarity in the free $k$ requires $\omega+A^\top\lambda=0$, so the dual is
+$\min\{\lambda^\top s:\lambda\ge0,\ A^\top\lambda=-\omega\}$, and feasibility with bounded
+value gives equal optimal values. The dual feasible set lies in $\{\lambda\ge0\}$, so it
+contains no line and is pointed; a linear objective bounded below attains its minimum
+at one of its finitely many vertices. The dual feasible set does not depend on $\beta$,
+because $A$ and $\omega$ are fixed by the design. So
+$\varphi_U(\beta)-\varphi_0(\beta)=\min_{\lambda\in\Lambda}\lambda^\top s(\beta)$ wherever
+the primal is feasible and bounded. A minimum of finitely many linear functions is
+concave and piecewise linear. The lower endpoint follows by replacing $\omega$ with
+$-\omega$.
+\end{proofof}
+
+\begin{proofof}{Proposition~\ref{P-prop:consistency}}
+(c) A vertex of $\hat A_d$ is an observed composition, hence in $A_d$, so
+$\hat A_d\subseteq A_d$, the constraints over $\hat A_d$ are a subset of those over $A_d$,
+and the feasible set is weakly larger.
+
+(a) By Lemma~\ref{P-lem:minlin},
+$\varphi_U(\beta)-\varphi_U(\beta')=\varphi_0(\beta-\beta')+[\min_\lambda\lambda^\top
+s(\beta)-\min_\lambda\lambda^\top s(\beta')]$, and the bracket is bounded by
+$\max\|S^\top\lambda\|\,\|\beta-\beta'\|$ over the optimal duals at $\beta$ or $\beta'$.
+For $\beta$ near $\beta_0$, the Slater point $\tilde k$ stays $\varepsilon/2$-strictly
+feasible, and under strict feasibility the optimal duals are bounded:
+$\|\lambda\|_1\le(\text{value}-\text{value at the strictly feasible point})/(\varepsilon/2)$.
+Hence $|\hat\varphi_U-\varphi_U(\beta_0;\hat A)|\le L\|\hat\beta-\beta_0\|=O_p(n^{-1/2})$,
+with $L$ uniform in the hull because the constraint set over $\hat A$ is a subset of that
+over $A$.
+
+(b) The feasible sets $\Theta(\hat A)$ are compact and convex, contain $\Theta(A)$ by (c),
+and decrease as $\hat A$ grows. If $k\in\Theta(\hat A_p)$ for all $p$ and $v\in A$, take
+$v_p\in\hat A_p$ with $v_p\to v$; the constraints are continuous in $v$, so $k$ satisfies
+the constraint at $v$, and $\bigcap_p\Theta(\hat A_p)=\Theta(A)$. A decreasing sequence of
+compact convex sets converges in Hausdorff distance to its intersection, so the support
+functions, and hence the LP values, converge. In the non-nested case,
+$\Theta(A)\subseteq\Theta(\hat A_n)$ for every $n$; if $k_n\in\Theta(\hat A_n)$ and
+$k_{n_j}\to k$, then for each $v\in A$ pick $v_j\in\hat A_{n_j}$ with $v_j\to v$, and
+continuity of the constraints in $(k,v)$ gives $k\in\Theta(A)$. So the upper Kuratowski
+limit is $\Theta(A)$, which is contained in every term; in a common bounded set this is
+Hausdorff convergence.
+\end{proofof}
+
+The error splits as $\hat\varphi_U-\varphi_U(\beta_0;A)=[\hat\varphi_U-\varphi_U(\beta_0;\hat
+A)]+[\varphi_U(\beta_0;\hat A)-\varphi_U(\beta_0;A)]$. The first part is $O_p(n^{-1/2})$ by
+(a); the second is non-negative and tends to zero by (b), but no rate is shown for it.
+
+\begin{proofof}{Theorem~\ref{P-thm:limit}}
+By Lemma~\ref{P-lem:minlin}, $\varphi_U(\beta)=\min_{\lambda\in\Lambda}g_\lambda^\top\beta$,
+a finite minimum of linear maps. Such a map is Lipschitz, and its directional derivative
+at $\beta_0$ in direction $h$ is $\min_{\lambda\in\Lambda^*}g_\lambda^\top h$; a Lipschitz
+map with directional derivatives in finite dimensions is Hadamard directionally
+differentiable. The directional delta method gives the limit. (i) A minimum over a
+singleton is linear, so the limit is normal. (ii) Let $Y=g_\lambda^\top\mathcal Z$ and
+$Y'=g_{\lambda'}^\top\mathcal Z$ with $\Var(Y-Y')>0$. Then
+$\E\min_{\Lambda^*}g^\top\mathcal Z\le\E\min(Y,Y')=\tfrac12\E(Y+Y')-\tfrac12\E|Y-Y'|=-\tfrac12\E|Y-Y'|<0$.
+If $\Var(g_\lambda^\top\mathcal Z-g_{\lambda'}^\top\mathcal Z)=0$ for all active pairs, the
+minimum equals each $g_\lambda^\top\mathcal Z$ a.s., which is normal. (iii) In case (ii)
+the derivative is not linear on the support of $\mathcal Z$, so the condition of
+Fang and Santos for bootstrap consistency fails. This theorem applies published results
+to the structure of Lemma~\ref{P-lem:minlin}; its status is ``cited structure''.
+
+The condition that the constraint system be fixed matters. For
+$f_n(\theta)=\min\{\theta,-\theta+n^{-1/2}\}$ at $\theta_0=0$ with
+$\sqrt n(\hat\theta-\theta_0)\Rightarrow Z$, the first piece is uniquely active for every
+$n$, yet $\sqrt n(f_n(\hat\theta)-f_n(\theta_0))\Rightarrow\min\{Z,1-Z\}$, which is not
+normal; Proposition~\ref{P-prop:triangular} covers this case.
+\end{proofof}
+
+\begin{proofof}{Proposition~\ref{P-prop:triangular}}
+By Lemma~\ref{P-lem:minlin} for the design-$n$ system,
+$\varphi_{U,n}(\beta)=\min_{\lambda\in\Lambda_n}\theta_{\lambda,n}(\beta)$. Hence, exactly,
+$\sqrt n(\hat\varphi_{U,n}-\varphi_{U,n}(\beta_0))=\min_\lambda\big(g_{\lambda,n}^\top\sqrt
+n(\hat\beta-\beta_0)+c_{\lambda,n}\big)$. Since $\sqrt n(\hat\beta-\beta_0)=O_p(1)$ and the
+gradients are bounded, a candidate with $c_{\lambda,n}\to\infty$ exceeds the active
+candidates' terms with probability tending to one and drops out. The remaining
+finitely many terms converge jointly in distribution to
+$(g_\lambda^\top\mathcal Z+c_\lambda)_\lambda$, and the minimum is continuous. Without the
+localisation condition the same holds along every subsequence on which it holds, and
+the limit may differ between subsequences.
+\end{proofof}
+
+\begin{proofof}{Theorem~\ref{P-thm:ci}(a)}
+(1) Let $\mathcal E$ be the event that $s_j(\beta_0)\le s_j(\hat\beta)+\hat
+c\hat\sigma_{s_j}$ for all $j$ and $|\varphi_0(\beta_0)-\varphi_0(\hat\beta)|\le\hat
+c\hat\sigma_{\varphi_0}$. These are linear functionals of one asymptotically normal
+vector, $\mathcal E$ is a convex event, the CLT holds uniformly over convex sets, and
+$\hat\Sigma$ is consistent, so $\liminf P(\mathcal E)\ge1-\alpha_U-\alpha_L$. For M1 and
+M2 this needs $\dim\beta$ fixed (regime R1).
+(2) On $\mathcal E$, the true $k_0$ satisfies $s(\beta_0)+Ak_0\ge0$, hence
+$s(\hat\beta)+\hat c\hat\sigma_s+Ak_0\ge0$, so $k_0\in\hat\Theta^+$. This uses only that
+$k_0$ is feasible, not Slater's condition.
+(3) On $\mathcal E$, $\Bt=\varphi_0(\beta_0)+\omega^\top k_0$ lies in
+$[\varphi_0(\hat\beta)-\hat c\hat\sigma_{\varphi_0}+\min_{\hat\Theta^+}\omega^\top k,\
+\varphi_0(\hat\beta)+\hat c\hat\sigma_{\varphi_0}+\max_{\hat\Theta^+}\omega^\top k]$.
+(4) $E=\sum_iw_ie_i$ with $e_i$ independent given the design, mean zero and
+$\Var(e_i\mid V_i)\le\tfrac14$ (Popoviciu), so $s_n^2:=\Var(E\mid\text{design})\le S_1^2$.
+(5) $\limsup_nP(|E|>z_{\alpha_E}S_1)\le\alpha_E$ if $\max_iw_i^2/\sum_iw_i^2\to0$. It
+suffices that every subsequence has a further subsequence along which this holds; take
+one along which $s_n/S_1\to\rho\in[0,1]$. If $\rho=0$, Chebyshev's inequality gives
+$P(|E|>z_{\alpha_E}S_1)\le s_n^2/(z_{\alpha_E}^2S_1^2)\to0$. If $\rho>0$, the summands
+$w_ie_i$ are independent with $|w_ie_i|\le|w_i|$, and
+$\max_i|w_i|/s_n\le2\max_i|w_i|/(\rho'(\sum_iw_i^2)^{1/2})\to0$ for any $0<\rho'<\rho$ and
+large $n$; so Lindeberg's condition holds relative to $s_n$, $E/s_n\Rightarrow N(0,1)$,
+and $P(|E|>z_{\alpha_E}S_1)\le P(|E|/s_n>z_{\alpha_E})\to\alpha_E$. (A central limit
+theorem under the weight condition alone would not suffice, for instance when only one
+summand has positive variance; the subsequence argument covers that case.)
+(6) Since $B=\Bt+E$, $B\notin\CI$ requires either $\Bt$ outside the interval of (3) or
+$|E|>z_{\alpha_E}S_1$. (7) A union bound gives
+$\limsup P(B\notin\CI)\le\alpha_U+\alpha_L+\alpha_E$.
+\end{proofof}
+
+\emph{Part (b1)} replaces step (1) by CLR's coverage of each intersection bound, which
+needs the finite index set $\Lambda$ of Lemma~\ref{P-lem:minlin} and their Condition~P;
+steps (4)--(7) are unchanged. Condition~P(iv) requires gradients bounded away from zero
+and a positive definite limiting covariance: in this setting, $C-1$ columns, a full-rank
+design and $g_\lambda\ne0$ for every candidate.
+
+\begin{proofof}{Theorem~\ref{P-thm:ci}(b2)}
+(1) Under the model the primal LP at $\beta_0$ is feasible, because $k_0$ is. For any
+dual-feasible $\lambda$ and any primal-feasible $k$,
+$\omega^\top k=-\lambda^\top Ak\le\lambda^\top s(\beta_0)$, since $\lambda\ge0$ and
+$s+Ak\ge0$. So $\theta_\lambda(\beta_0)\ge\varphi_U(\beta_0)$ for every dual-feasible
+$\lambda$, not only optimal ones.
+(2) On $\mathcal E=\{\theta_\lambda(\beta_0)\le\hat\theta_\lambda+\hat c\hat\sigma_\lambda\
+\forall\lambda\in\bar\Lambda\}$,
+$\hat U\ge\min_{\lambda\in\hat\Lambda}\theta_\lambda(\beta_0)\ge\varphi_U(\beta_0)$, because
+$\hat\Lambda\subseteq\bar\Lambda$.
+(3) Case (i): the standardised errors $(\theta_\lambda(\beta_0)-\hat\theta_\lambda)/\hat\sigma_\lambda$,
+$\lambda\in\bar\Lambda$, are a fixed finite collection of standardised linear
+functionals of $\hat\beta$, jointly asymptotically normal, so $P(\mathcal E)\to1-\alpha_U$.
+(4) Case (ii): the reduced parameterisation contains the positive-definite case
+($L=I$, $b=0$). Write $\hat e=\hat\eta-\eta_0$. For every $g$,
+$g^\top(\hat\beta-\beta_0)=(L^\top g)^\top\hat e$ exactly, so by Cauchy--Schwarz in the
+metric of $\hat\Sigma_\eta$ (positive definite with probability tending to one),
+\[
+|g^\top(\hat\beta-\beta_0)|\le(\hat e^\top\hat\Sigma_\eta^{-1}\hat e)^{1/2}(g^\top L\hat\Sigma_\eta L^\top g)^{1/2}
+=(n\,\hat e^\top\hat\Sigma_\eta^{-1}\hat e)^{1/2}\hat\sigma_g .
+\]
+This holds for every $g$ at once, including $g$ with $L^\top g=0$, for which both sides
+are zero. By continuous mapping $n\hat e^\top\hat\Sigma_\eta^{-1}\hat e\Rightarrow\chi^2_q$,
+because $\Sigma_\eta$ is non-singular. So the event holds for every candidate and both
+ends with probability tending to $1-\alpha$. Non-singularity is essential: with a
+pseudoinverse of a singular $\Sigma$, an error of order $o(n^{-1/2})$ in a null direction
+is neither zero nor controlled, as the example $(Z/\sqrt n,-1/n)$ of the main text shows.
+\end{proofof}
+
+\begin{proofof}{Lemma~\ref{P-lem:reduction}}
+Write $\tau^*=\min_{\mu\in\Lambda}(\hat\theta_\mu+\hat c_p\hat\sigma_\mu)$ for the threshold
+of the selection rule over $\Lambda$. A minimiser of this expression belongs to
+$\hat\Lambda$, so the minimum over $\hat\Lambda$ equals $\tau^*$: the threshold is the same.
+The set selected over $\hat\Lambda$ is CLR's selected set $\hat V$ intersected with
+$\hat\Lambda$, and $\hat V\subseteq\hat\Lambda$ by hypothesis, so it is $\hat V$. The
+critical value $\hat c$ is computed over the selected set, so it coincides, and so does
+$\hat U=\min_{\lambda\in\hat V}(\hat\theta_\lambda+\hat c\hat\sigma_\lambda)$. The coverage of
+Theorem~\ref{P-thm:ci}(b1) therefore carries over.
+\end{proofof}
+
+\begin{proofof}{Proposition~\ref{P-prop:bd}}
+(1) $\bar m$ is a linear target under the rung (Proposition~\ref{P-prop:lp} with weights
+$\pi$), and the rung alone holds at the truth, so $\mathcal E_v=\{\bar m\in\CI_v\}$ has
+$\liminf P(\mathcal E_v)\ge1-\alpha_v$ by Theorem~\ref{P-thm:ci}(a) or (b2)(ii).
+(2) By the Bhatia--Davis inequality and concavity of $m(1-m)$,
+$s_n^2\le\sum_iw_i^2m_i(1-m_i)\le(\sum_iw_i^2)\bar m(1-\bar m)=\bar s^2$; on $\mathcal E_v$,
+$\hat S_{BD}\ge\bar s\ge s_n$.
+(3) So $\{|E|>z_{\alpha_E}\hat S_{BD}\}\subseteq\{|E|>z_{\alpha_E}\bar s\}\cup\mathcal E_v^c$, with
+$\bar s$ deterministic given the design.
+(4) $\limsup P(|E|>z_{\alpha_E}\bar s)\le\alpha_E$: along a subsequence with
+$s_n/\bar s\to0$ use Chebyshev; otherwise $\max_i|w_i|/s_n\to0$ by the condition
+$\max_iw_i^2/\bar s^2\to0$, and Lindeberg's theorem applies relative to $s_n$, as in step
+(5) of part (a) with $\bar s$ in place of $S_1$.
+(5) A union bound with the estimation event of (a) or (b2)(ii) finishes.
+If $\CI_v$ is a CLR interval, the same argument holds on the event that $\CI_v$ covers
+$\bar m$, whose probability is the subject of Conjecture~\ref{P-conj:clr}.
+\end{proofof}
+
+\begin{proofof}{Proposition~\ref{P-prop:tests}}
+(a) Under the model $k_0\in\hat\Theta^+$ on $\mathcal E$ (step (2) of part (a) of
+Theorem~\ref{P-thm:ci}), so $P(\hat\Theta^+=\emptyset)\le P(\mathcal E^c)$, whose limit
+superior is at most $\alpha_U+\alpha_L$.
+
+(b) This is the standard Wald test for OLS with a fixed number of restrictions; the
+count of restrictions follows from Lemma~\ref{P-lem:D1}(b): the rank gap between the M2
+and M1 designs is $(D^\star-1)R(R-1)/2$ per column, and column $C$'s restrictions are
+implied by adding up.
+
+(c) Under M1 and (I1), $\E[\beta_i\mid\text{design}]=M_H(X_i)+Z_{D_i}$ with
+$Z_d=[\zeta_{c,d,r}]_{rc}$. M0 holds for the observed units iff some $H'$ has
+$M_{H'}(X_i)=M_H(X_i)+Z_{D_i}$ for all $i$, i.e.\ $G_cX_i=\zeta_{c,D_i}$ with $G=H'-H$.
+Within district $d$ this reads $(G_c-\zeta_{c,d}\one^\top)X_i=0$ for every unit $i$ in
+$d$, using $\one^\top X_i=1$. The district's compositions include $R$ affinely
+independent points, which are linearly independent because they lie in
+$\{\one^\top x=1\}$, so $G_c=\zeta_{c,d}\one^\top$. This holds for every $d$ and
+$\zeta_{c,1}=0$, so $G_c=0$ and every $\zeta_{c,d}=0$. Conversely $\zeta=0$ gives M0 with
+$H'=H$. The shifts are coefficients of the M1 regression, identified by
+Lemma~\ref{P-lem:D1}(d), and the Wald test of $\zeta=0$ has $(D^\star-1)(C-1)R$
+restrictions for the $C-1$ free columns.
+\end{proofof}
+
+\begin{proofof}{Theorem~\ref{P-thm:finite}}
+(1) $T_i\in\Delta^{C-1}$, so $Y_i(f)=\sum_cw_{ic}(f)T_{ic}$ is a convex combination of the
+$w_{ic}(f)$ and lies in an interval of length $\rho_i(f)$.
+(2) Under the mean model and full rank, OLS is conditionally unbiased:
+$\E[f(\hat\beta)\mid\text{design}]=f(\beta_0)$, because $\E[T_{ic}\mid\text{design}]=z_i^\top\beta_{c,0}$.
+(3) The $Y_i(f)$ are independent given the design, so by Hoeffding's inequality
+$P(f(\beta_0)-f(\hat\beta)\ge h(f;\delta))\le\delta$, and likewise on the other side.
+(4) Let $\mathcal E$ be the event that $s_j(\beta_0)\le s_j(\hat\beta)+h_j$ for all $j$ and
+$|\varphi_0(\beta_0)-\varphi_0(\hat\beta)|\le h_0$. It is an intersection of $J+2$ one-sided
+events, so $P(\mathcal E^c)\le(J+2)\delta=\alpha_s$.
+(5) On $\mathcal E$, the true $k_0$ satisfies $s(\beta_0)+Ak_0\ge0$, hence
+$k_0\in\hat\Theta^{\rm fin}$, and $\Bt=\varphi_0(\beta_0)+\omega^\top k_0$ lies in the interval
+without $t_E$. That proves (b), and (c), because $\hat\Theta^{\rm fin}\ne\emptyset$ on
+$\mathcal E$.
+(6) $E=\sum_iw_{ir}e_{irc}$ with independent $e_{irc}\in[-m_{rc}(V_i),1-m_{rc}(V_i)]$, an
+interval of length one, so $P(|E|\ge t_E)\le2\exp(-2t_E^2/\sum_iw_{ir}^2)=\alpha_E$.
+(7) $B=\Bt+E$, and a union bound over (4) and (6) gives (a). (d) holds because $B$ lies
+in the Duncan--Davis interval surely.
+\end{proofof}
+
+\begin{proofof}{Proposition~\ref{P-prop:select}}
+(a) Fewer constraints give a weakly larger feasible set (Theorem~\ref{P-thm:ladder}(b)).
+(b) Conditioning on the design fixes $\mathcal D'$, so a procedure's conditional coverage
+given the design, for the fixed set $\mathcal D'$, is its coverage given the design and
+$\mathcal D'$.
+\end{proofof}
+
+\begin{proofof}{Proposition~\ref{P-prop:S1}}
+(1) $\E[T\mid X]=X^\top QX+X^\top\nu(X)=X^\top QX$, so $Q$ is unchanged.
+(2) $M_H(x)+\nu(x)\in\Bset$ implies $M_H(x)\ge-\nu(x)\ge-\eta$ elementwise on $A$; $M_H$
+is linear, so this is equivalent to the same inequality at the vertices,
+$s+Ak\ge-\eta\one$.
+(3) $\Bt_{rc}=\sum_iw_i[M_H(X_i)+\nu(X_i)]_{rc}=\varphi(k)+\sum_iw_i\nu_{rc}(X_i)$, and the last
+term lies in $[-\eta,\eta]$ because the weights sum to one. For $\sum a_{rc}B_{rc}$ the
+last term lies in $[-\eta\sum|a_{rc}|,\eta\sum|a_{rc}|]$.
+The breakdown value is well defined because the bounds are nested in $\eta$: a
+conclusion that holds for every value in the $\eta$-bound holds for every smaller $\eta$.
+\end{proofof}
+
+\subsection{Inference with added rows}
+
+\begin{proofof}{Theorem~\ref{P-thm:R10}}
+(a) (1) Under the model, $k_0$ satisfies the base rows and the added rows at $\beta_0$
+(Theorem~\ref{P-thm:R3}(e) and the hypothesis). (2) Each added $s_j(\hat\beta)$ is a linear
+map of $\hat\beta$, so it is jointly asymptotically normal with the base terms; with the
+maximum in step (1) of Theorem~\ref{P-thm:ci}(a) taken over all rows,
+$\liminf P(\mathcal E)\ge1-\alpha_U-\alpha_L$. A row whose $s_j$ does not depend on $\beta$
+has zero variance, is imposed exactly, and is left out of the maximum. (3) On $\mathcal E$,
+$k_0\in\hat\Theta^+$, and steps (3)--(7) of Theorem~\ref{P-thm:ci}(a) and
+Proposition~\ref{P-prop:tests}(a) go through, since they use only $k_0\in\hat\Theta^+$ and
+the residual term. (4) For version (b), the endpoint is still a minimum of finitely
+many linear functions of $\beta$, because Lemma~\ref{P-lem:minlin} needs only rows linear
+in $\beta$ with fixed $a_j$. CLR applies to the augmented system if its conditions hold
+there: the added rows change the dual feasible set, its vertices, the gradients, the
+selection and the quantile, so the conditions must be checked anew; the projection and
+fixed-superset arguments of (b2) carry over directly. For a contrast $B_1-B_0$, the
+residual is $\sum_i(w_{i1}e_{i1}-w_{i0}e_{i0})$, each unit term has range at most
+$w_{i1}+w_{i0}$, so $\tfrac12\{\sum_i(w_{i1}+w_{i0})^2\}^{1/2}$ is a valid standard-deviation
+envelope under conditional independence; the sum of the per-cell envelopes is also
+valid, by Minkowski's inequality, and more conservative.
+
+(b) (1) Let $l^*$ be a piece that holds at the truth, $s_{l^*}(\beta_0)+a^\top k_0\ge0$.
+(2) On $\mathcal E$, which now includes every piece,
+$s_{l^*}(\beta_0)\le s_{l^*}(\hat\beta)+\hat c\hat\sigma_{l^*}$, so
+$\max_l(s_l(\hat\beta)+\hat c\hat\sigma_l)+a^\top k_0\ge0$. (3) For given data this is one
+linear row in $k$, which $k_0$ satisfies on $\mathcal E$; proceed as in step (3) of part (a). The argument
+uses one simultaneous event and no strict feasibility. At a tie, inflating all pieces
+and then maximising still dominates the true piece. The row is not linear in $\beta$
+(an endpoint becomes a maximum of minima), so Lemma~\ref{P-lem:minlin} fails and CLR does
+not apply; for CLR the branch union of (c) is used. (4) For one-vs-rest and $2\times2$
+CR, Theorem~\ref{P-thm:R3}(d) gives
+$D^{r*}\ge\min(\ER^*,\gamma_r\ER^*)\iff\max(D^{r*}-\ER^*,D^{r*}-\gamma_r\ER^*)\ge0$, and
+similarly for the upper side; each piece is linear in $\beta$ apart from the common
+term in $k$.
+
+(c) (1) Fix a branch $j^*$ with $k_0\in C_{j^*}$; it is non-random, because $k_0$ is a
+population quantity. (2) The model ``rung $\cap\,C_{j^*}$'' holds, so by (a),
+$\liminf P(\theta_0\in\CI(C_{j^*}))\ge1-\alpha$. (3)
+$\CI(C_{j^*})\subseteq\CI(C_+)\cup\CI(C_-)\subseteq$ its hull. (4) The other branch's
+interval is never used for coverage, so its level is irrelevant, and no split is
+needed. (5) Both sets empty implies the $j^*$ set is empty, which has limiting
+probability at most $\alpha_U+\alpha_L$ (Proposition~\ref{P-prop:tests}(a) for version (a),
+the crossing argument of (d) for version (b)). If the true branch switches along a
+triangular array of designs, branch validity is needed along each subsequence on which
+a branch is true; there are only two labels.
+
+(d) (1) For version (a), $\CI=\emptyset$ requires $\hat\Theta^+=\emptyset$, which requires
+$\mathcal E^c$. (2) For version (b) with $\theta_0=\Bt$, a crossing $\hat L>\hat U$ requires
+$\hat U<\theta_0$ or $\hat L>\theta_0$, with limiting probabilities at most $\alpha_U$ and
+$\alpha_L$ by one-sided validity, whatever the width of the identified set. For the
+target $B$, the residual allowance only widens the interval, so a crossing of the
+$B$-interval implies a crossing of the $\Bt$-interval. (3) In both cases the empty event
+lies inside a non-coverage event of bounded probability. (4) Since
+$\{\theta_0\in\CI\}\subseteq\{\CI\ne\emptyset\}$,
+$P(\text{cover}\mid\CI\ne\emptyset)=P(\text{cover})/P(\CI\ne\emptyset)\ge P(\text{cover})$. If the
+restrictions are false, step (1) of part (a) fails and nothing is claimed.
+
+(e) (1) Repeat each of $X=1/4,1/2,3/4$ equally often with equal sizes. Take $m_0=.4$
+and $m_1=.55$ constant, with group rates drawn independently across units and groups
+from bounded laws with these means and positive variance (for example, beta draws of
+fixed concentration). Every base row has strict slack, OLS has a full-rank fixed design
+and a positive definite limiting covariance, and HC3 is consistent. The positive CR
+branch has $\tilde D_0=\ER=.15$ on its upper edge. (2) In the basis
+$((1-x)^2,2x(1-x),x^2)$, for any coefficient vector $q$, $\ER(q)=q_{11}-q_{00}$ and the
+target constant is $c_D(q)=\tfrac7{12}(q_{11}-q_{00})$, because $\E[X^2]/\E[X]=7/12$ and the
+middle coefficient cancels by symmetry; so the ratio of their standard errors is
+exactly $7/12$. (3) With probability tending to one the plug-in sign is positive and
+the base rows allow the $k$ attaining the plug-in upper edge (strict slack and
+continuity), so the naive upper endpoint is $\widehat\ER+k_{\rm crit}\operatorname{se}(c_D)$.
+(4) Its critical value is calibrated on eight one-sided base rows and two target tails,
+so by the union bound $k_{\rm crit}\le z_{.995}$ at level .95, whatever the correlations.
+(5) Non-coverage is the event $\{\widehat\ER-\ER<-k_{\rm crit}\operatorname{se}(c_D)\}$, so
+$\limsup_nP(\tilde D_0\in\CI_{\rm naive})\le\Phi(\tfrac7{12}z_{.995})=0.933525<0.95$.
+(6) With a simulated critical value from 4000 draws, each draw exceeds $z_{.996}$ with
+probability at most .04 by the same union bound, and an empirical .95 quantile above that
+threshold needs at least 200 exceedances; so the limiting coverage is at most
+$\Phi(\tfrac7{12}z_{.996})+P\{\mathrm{Bin}(4000,.04)\ge200\}=0.940092$.
+
+For the literal intersection of the fitted bracket with a finished JKST interval: in the
+design of (e), its upper endpoint cannot exceed $\widehat\ER$ with probability tending to
+one, so its limiting coverage of $\tilde D_0=\ER$ is at most one half. The intersection
+is not in general contained in the naive interval: dropping an empty intersection
+before expanding endpoints and expanding first do not commute (with a raw base interval
+$[0,.1]$, bracket $[.15,.2]$ and target allowance .1, the raw intersection is empty
+although the expanded base meets the bracket), so this bound is proved directly.
+\end{proofof}

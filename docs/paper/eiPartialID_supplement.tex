@@ -1,0 +1,41 @@
+\documentclass[11pt]{article}
+\input{preamble}
+\externaldocument[P-]{eiPartialID_paper}
+
+\renewcommand{\thesection}{S\arabic{section}}
+\renewcommand{\theequation}{S\arabic{equation}}
+\renewcommand{\thetable}{S\arabic{table}}
+
+% a restated result from the main text, with its paper number
+\newenvironment{restate}[1]{\par\medskip\noindent\textbf{#1.}\ \itshape}{\par\smallskip}
+% a proof with a named result
+\newenvironment{proofof}[1]{\begin{proof}[Proof of #1]}{\end{proof}}
+
+\title{Supplementary Appendix to\\ ``Partial Identification for R$\times$C Ecological Inference:\\
+Identified Sets, Inference and Software''}
+\author{[Author]}
+\date{November 2026}
+
+\begin{document}
+\maketitle
+
+\noindent This appendix proves the results of the main text, in the order in which
+they appear there and under the same numbers. Each section restates the results
+briefly and then proves them. Section~\ref{sec:conv} fixes conventions and lists the
+published theorems the proofs use. Section~\ref{sec:statuslist} records the status
+of every numbered result. Where a source argument is only a sketch, this is said
+at that point.
+
+\tableofcontents
+
+\input{supplement/a_conventions}
+\input{supplement/b_rxc}
+\input{supplement/c_districts}
+\input{supplement/d_signs}
+\input{supplement/e_inference}
+\input{supplement/f_status}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}

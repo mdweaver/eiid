@@ -1,0 +1,70 @@
+% S1 conventions
+\section{Conventions and cited results}\label{sec:conv}
+
+\subsection{Notation}
+
+The notation is that of the main text. Units are $i=1,\dots,n$; rows (groups)
+$r,s=1,\dots,R$; columns (outcomes) $c=1,\dots,C$. $X\in\Delta^{R-1}$ and
+$T\in\Delta^{C-1}$ are the row and column shares, $N$ the unit size, $D$ the
+district when there are districts, and $V$ the design variables ($V=(X,N)$ in the
+pooled model, $V=(X,N,D)$ with districts). $\Bset=(\Delta^{C-1})^R$ is the set of
+rate matrices, with inner product $\langle u,b\rangle=\sum_{rc}u_{rc}b_{rc}$ and
+Frobenius norm; every $b\in\Bset$ has $\|b\|\le\sqrt R$. $J=\one\one^\top$.
+$S(x,t)=\{b\in\Bset:b^\top x=t\}$ is the unit Duncan--Davis polytope and
+$h_S(u;x,t)=\max_{b\in S(x,t)}\langle u,b\rangle$ its support function.
+$H=(H_1,\dots,H_C)$, $M_H(x)_{rc}=e_r^\top H_cx$, $Q_c=\sym H_c$, $K_c=\skw H_c$,
+$\Kspace=\{K:K_c^\top=-K_c,\sum_cK_c=0\}$ and $k$ the free coordinates $k_{c,rs}$
+($c<C$, $r<s$). The model $\mathcal M(H;A)$ is defined by (S1)--(S3) of the main
+text, $\psi(u;v)=\int h_S(u;x,t)P_{T\mid V=v}(dt)$, and $\mu_r=\E[NX_r]>0$,
+$\mu_{rs}=\E[NX_rX_s]$, with $\E[N]<\infty$ throughout (standing integrability).
+For a probability measure $P_X$ and a closed set $A$, $\supp_AP_X$ is the support of
+the restriction $E\mapsto P(X\in A\cap E)$. It equals $\supp P_X$ when
+$P(X\in A)=1$, and in general can be strictly smaller than $\supp P_X\cap A$.
+
+The following elementary fact is used repeatedly.
+
+\begin{lemma}[Agreement on the restricted support]\label{lem:supp}
+If continuous $f,g$ agree $P_X$-almost everywhere on $A$, they agree on $\supp_AP_X$.
+\end{lemma}
+\begin{proof}
+If $f(x_0)\ne g(x_0)$ at some $x_0\in\supp_AP_X$, then $f\ne g$ on an open set
+$U\ni x_0$, and $P(X\in A\cap U)>0$ by the definition of the support, a
+contradiction.
+\end{proof}
+
+\subsection{Published results used in the proofs}
+
+The proofs cite the following standard results. Theorem numbers refer to the
+editions listed in the references.
+
+\begin{center}\footnotesize
+\begin{tabularx}{\linewidth}{@{}L{0.24\linewidth}Y@{}}
+\toprule
+Name & Statement and source \\
+\midrule
+Regular conditional distributions & On Polish spaces they exist, and $\E[f(V,T)\mid V]=\int f(V,t)P_{T\mid V}(dt)$ a.s.\ for bounded jointly measurable $f$ \citep[Theorems 6.3--6.4]{kallenberg2002}. \\
+Support functions & Closed convex sets are determined, and ordered, by their support functions \citep[Corollary 13.1.1]{rockafellar1970}. \\
+Berge's theorem & The maximum of a continuous function over a compact-valued upper hemicontinuous correspondence is upper semicontinuous \citep[Theorem 17.31]{aliprantisborder2006}. \\
+Measurable maximum theorem & A Carathéodory objective over a weakly measurable compact-valued correspondence has a measurable argmax selector \citep[Theorem 18.19]{aliprantisborder2006}. \\
+Dunford--Pettis & Uniformly integrable subsets of $L^1$ are relatively weakly compact \citep[Corollary IV.8.11]{dunfordschwartz1958}. \\
+Mazur & Convex norm-closed subsets of a normed space are weakly closed \citep[Theorem 3.7]{brezis2011}. \\
+Weak continuity & Norm-continuous linear maps are weak-to-weak continuous \citep[Theorem 3.10]{brezis2011}. \\
+Hahn--Banach & A point outside a closed convex set is strictly separated from it \citep[Theorem 3.4(b)]{rudin1991}; $(L^1)^*=L^\infty$ on a probability space \citep[Theorem 6.15]{folland1999}. \\
+Riesz & $L^1$ convergence implies a.s.\ convergence along a subsequence \citep[Theorem 4.9]{brezis2011}. \\
+Gale's theorem & A transportation problem is feasible iff every set of supply nodes demands no more than the capacity of its neighbours \citep[Theorem 1]{gale1957}. \\
+LP duality & A feasible LP with bounded value has an optimal dual solution of equal value; a linear function bounded below on a pointed polyhedron attains its minimum at one of its finitely many vertices; the optimal value of a feasible bounded LP is continuous and piecewise linear in its right-hand side, concave for a maximum. The perturbation function of a row $a^\top k\le b$ is concave and non-decreasing, and its superdifferential is the set of optimal multipliers of the row \citep[Theorems 23.2, 24.1, 29.1]{rockafellar1970}; \citep[Section 5.2]{bertsimastsitsiklis1997}. \\
+Directional delta method & For Hadamard directionally differentiable maps \citep{shapiro1991}; \citep[Theorem 2.1]{fangsantos2019}. The standard bootstrap is consistent iff the derivative is linear on the support of the Gaussian limit \citep[Theorem 3.1, Corollary 3.1]{fangsantos2019}. \\
+CLR & Intersection-bound inference with parametric bounding functions over a finite index set, under Condition~P \citep[Theorem 4, with Lemma 4 and Example 1]{clr2013}. \\
+Uniform CLT & The multivariate CLT holds uniformly over convex sets \citep[Theorem 17.5]{bhattacharyarao1976}. \\
+Lindeberg--Feller CLT & For independent summands \citep[Theorem 27.2]{billingsley1995}. \\
+Hoeffding & For independent $Y_i\in[a_i,b_i]$, $P(\sum_i(Y_i-\E Y_i)\ge t)\le\exp\{-2t^2/\sum_i(b_i-a_i)^2\}$ \citep[Theorem 2]{hoeffding1963}. \\
+Variance bounds & Popoviciu: $\Var(Y)\le(b-a)^2/4$ for $Y\in[a,b]$. Bhatia--Davis: $\Var(Y)\le(M-\mu)(\mu-m)$ for $Y\in[m,M]$ with mean $\mu$ \citep{bhatiadavis2000}. \\
+Chebyshev's association inequality & For non-decreasing $f,g$ and any probability law on $\R$, $\Cov(f(Z),g(Z))\ge0$ \citep[Theorem 2.14]{blm2013}. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+For the textbook results the theorem numbers are given for orientation; the
+content of each is standard.
+EGGHM's two-group identities (their Propositions~4 and~6 and Lemma~1) are used
+as identities valid for any bounded outcome; they are re-derived where needed.

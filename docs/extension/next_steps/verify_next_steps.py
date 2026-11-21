@@ -313,8 +313,8 @@ report("N10b ordering row gives fractional LP endpoint", found is not None,
        "(single unit: rounding fixes it; with rows coupling units it need not)")
 
 # a coupled case: three units, a published veteran-yes total for all three (equality) plus
-# two pooled realised ordering rows with different unit weights (as the realised delta_B and
-# delta_W rows of 2c M1 weight units differently):  sum_i w_i (y_i/V_i - (Y_i-y_i)/(N_i-V_i)) >= 0.
+# two weighted average-gap rows with different unit weights (not the realised one-vs-rest W1
+# rows, which are totals on Y_rc(S) and stay integral; PHASE6a Lemma C1):  sum_i w_i (y_i/V_i - (Y_i-y_i)/(N_i-V_i)) >= 0.
 # Search for an LP-feasible, integer-infeasible system, or an integer endpoint above the rounded
 # LP endpoint. (One coupling row plus one total cannot do it: box x total is TU and the row's
 # max over it is attained at an integer vertex.)

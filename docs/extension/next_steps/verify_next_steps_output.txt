@@ -1,0 +1,36 @@
+PASS N1 subset identity 2xC: 800 support-function comparisons (C=2..5, 2-5 atoms), max |diff| = 3.7e-16
+PASS N1b lifted LP = Minkowski sum: 60 cases, max |diff| = 2.2e-16
+PASS N2 subset identity Rx2: 800 comparisons (R=2..5), max |diff| = 4.4e-16
+PASS N3a coordinate-only exact at C=3: 150 cases, max excess = 0.0e+00
+PASS N3b coordinate-only looser at C>=4: strictly looser in 103/150 (C=4), 126/150 (C=5); max excess 0.105, 0.119
+PASS N3c review 2x4 example: group-1 mass to columns 1+2: coordinate-only [0.000, 0.500], exact [0.250, 0.250] (as a share of group 1: [0.00,1.00] vs 0.50); candidate (1/4,1/4,0,0) admitted by coordinates: True, by subsets: False
+PASS N4 size conditioning: small: [0.5,0.5], large: [0.0,1.0], intersection (size invariance) = 1/2; pooled over size: [0.25,0.75]
+PASS N5 M-SHARP worked example: regression-only: group-1 mean at x=1/2 in [0,1]; with the precinct law: [0.40, 0.60]
+PASS N6 DD worked example: P1 veteran-yes in (0, 20), P2 in (10, 50); veteran yes-rate in [0.125, 0.875]
+PASS N7 realised ordering: lower limits become [6, 30]; veteran yes-rate in [0.45, 0.875]
+PASS N8a audit gain = d_i (separable): 200 random designs, every precinct and a random true table: max |gain - d_i| = 0.0e+00
+PASS N8b published total (E5) worked example: with the town total 45: P2 veteran-yes in [25,45] (rate [0.417,0.750]) vs DD [10,50] (rate [0.167,0.833])
+PASS N8c audit gain not separable with a coupling row: target P1: no total: width 20, auditing P2 removes [0.0, 0.0, 0.0]; with the total 45: width 20, auditing P2 removes [20.0, 20.0, 20.0] (P2 truth 25/35/45)
+PASS N8d remaining width concave in the audited count: 200 random 4-unit designs with two coupling rows: 0 concavity violations in 1640 checks
+PASS N9 stratified margins: young (5, 10), old (5, 35): P2 veteran-yes in [10,45] vs [10,50] unstratified
+PASS N10a integer endpoints, margins only: 300 random integer tables (2-3 x 2-4), random integer targets: 0 fractional LP optima
+PASS N10b ordering row gives fractional LP endpoint: N=5, V=1, yes=1: LP lower veteran-yes 0.200, integer 1 (single unit: rounding fixes it; with rows coupling units it need not)
+PASS N10c coupled rows: LP and integer answers can differ beyond rounding: LP feasible but no integer table: N=[13, 10, 14], V=[2, 8, 9], yes=[13, 8, 4], published veteran-yes total 11, LP lower end for unit 1 = 2.000, integer = None
+PASS N11 ballot patterns: no split tickets: A's support in contest 1 in [0,1] but its contest-1 minus contest-2 difference = [0,-0]; with 4 split (10) ballots: difference in [0.00,0.08], support in [0.04,1.00]
+PASS N12a symmetric decomposition identity: 500 random cases, max |diff| = 2.2e-16
+PASS N12c LCE: secant terms = local P-S objects at the midpoint: 500 random H, pairs and steps: max |diff| = 4.4e-16
+PASS N12b contrast worked example: average group gap: accounting only [-0.600,0.733]; with both signs [0.000,0.200]
+PASS N13 exception-mass example: lower end of veteran yes-rate by exception share pi: {0: 0.45, 0.5: 0.2, 1: 0.125} (pi = .5: either precinct may be the exception; the worst is P2)
+PASS N14 misclassification example: recorded labels: [0.167,0.833]; up to 2 mislabelled: [0.138,0.862]
+PASS N15 E4 transfer worked example: electorate B veteran rate (model-implied, truth 0.656): LCE alone [0.529,0.751]; with A's table, same pattern exactly: [0.656,0.656]; pattern may differ (A's rate +/- .02): [0.650,0.662]
+PASS N16 polynomial ladder widens: group-1 rate (truth 0.632): straight lines [0.436,0.779]; quadratic [0.419,0.796]; cubic [0.359,0.820]; Duncan-Davis (no model) [0.324,0.834]
+PASS N17 odds-ratio dial example: P2 veteran yes rate: DD [0.167,0.833]; OR >= 1 (ordering) [0.500,0.833]; 1 <= OR <= 4 [0.500,0.633]
+PASS N18 hull contrasts imply the model between sign: 0 violations among random designs with O_rs >= 0 at all support points
+PASS N19 Berkson correction for matched composition: 20 random units (20-200 men, match probabilities in [0,1]): max |MC - formula| = 3.0e-05 (MC error ~1e-4)
+PASS N20 estimated margin widens the count-layer range: expected count 60 treated as exact: [0.167,0.833]; true count in its 95% set [56,64]: [0.107,0.893] (covers the actual rate with prob >= .95 under calibrated, independent matches)
+PASS N21 set-valued pre-trends in relative-magnitude bounds: arithmetic only: pre DiD D0 in [-1.23,1.27], post DiD D1 in [-1.08,1.42]; ATT with Mbar=1: joint [-2.35,2.65], endpoint-wise [-2.35,2.69]; trend dial M=.10: [-1.18,1.52]. Narrow pre-trends (pre totals pinned to +/-2 votes): D0 in [-0.06,0.10], ATT joint [-0.60,0.90]
+PASS N22 covariate-benchmarked kappa: when the benchmark is informative: A covariate shares composition, small contextual effect: R2(Y~X,Z) 0.90, R2(X~Z) 0.26, kappa_Z 0.4183, kappa_true 0.0014, m* 0.00, overlap factor 2.4, bias of CAR(Z) for B_1 -0.026; B covariate explains outcome, not composition, large contextual effect: R2(Y~X,Z) 0.88, R2(X~Z) 0.00, kappa_Z 0.0000, kappa_true 0.0607, m* 2823.14, overlap factor 2.4, bias of CAR(Z) for B_1 -0.165; C covariate absorbs most composition variation, large contextual effect: R2(Y~X,Z) 0.92, R2(X~Z) 0.92, kappa_Z 0.9909, kappa_true 0.0060, m* 0.01, overlap factor 5.0, bias of CAR(Z) for B_1 -0.123; D modest covariate tied to composition, small contextual effect: R2(Y~X,Z) 0.53, R2(X~Z) 0.27, kappa_Z 0.1234, kappa_true 0.0024, m* 0.02, overlap factor 2.4, bias of CAR(Z) for B_1 -0.016
+PASS N23 neighbour-bounded deviations: M2: A in [-0.10, 0.10]; centre .05: A in [-0.10, 0.10]; adjacency .03: A in [-0.05, 0.05]; distance Lipschitz lam=.03: A in [-0.05, 0.05]; adjacency .03 + centre .05: A in [-0.05, 0.05]; disconnected (A isolated): A in [-0.10, 0.10]
+PASS N24 contests as districts: Q-relation holds (max dev 0e+00); contest 1 alone: kappa_1 in [-0.539,0.467], group-1 rate [0.498,0.840]; contest 2 alone: kappa_2 in [-0.459,0.380]; under C2 (b = 1.1): kappa_1 in [-0.418,0.345], group-1 rate [0.539,0.798] (truth 0.715)
+
+34/34 PASS

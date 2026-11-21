@@ -565,4 +565,42 @@ report("N20 estimated margin widens the count-layer range", rl < 10 / 60 and ru 
        f"expected count 60 treated as exact: [{10/60:.3f},{50/60:.3f}]; true count in its 95% set "
        f"[{min(Vset)},{max(Vset)}]: [{rl:.3f},{ru:.3f}] (covers the actual rate with prob >= .95 under calibrated, independent matches)")
 
+# N21: relative-magnitude (Rambachan-Roth-style) causal bounds when pre-period trends are themselves
+# EI bounds. Two precincts (100 men each; 20 and 60 veterans), three elections t = -1, 0, 1 (post).
+# Latent veteran-yes totals s_t = y_1t + y_2t lie in the sum of the precincts' DD boxes. The gap
+# g_t = B_v,t - B_n,t = s_t (1/80 + 1/120) - Y_t / 120 is linear in s_t. Pre-period DiD D0 = g0 - g_-1,
+# post DiD D1 = g1 - g0 (they SHARE s_0). ATT = D1 - b1 with |b1| <= Mbar |b0|, b0 = D0 (no treatment
+# before t = 1). Joint: optimise over (s_-1, s_0, s_1) together. Endpoint-wise: take D0's and D1's
+# intervals separately and combine extremes (can pair incompatible histories).
+Yv = {-1: (30, 45), 0: (32, 48), 1: (30, 60)}
+def sbox(t):
+    (a, b) = Yv[t]
+    l1, u1 = max(0, 20 + a - 100), min(20, a); l2, u2 = max(0, 60 + b - 100), min(60, b)
+    return l1 + l2, u1 + u2
+cf = 1 / 80 + 1 / 120
+g = lambda t, st: st * cf - sum(Yv[t]) / 120
+def att_bounds(Mbar, boxes, joint=True, grid=161):
+    S = {t: np.linspace(*boxes[t], grid) for t in (-1, 0, 1)}
+    if joint:
+        sm1, s0, s1 = np.meshgrid(S[-1], S[0], S[1], indexing="ij")
+        D0 = g(0, s0) - g(-1, sm1); D1 = g(1, s1) - g(0, s0)
+        return float((D1 - Mbar * np.abs(D0)).min()), float((D1 + Mbar * np.abs(D0)).max()), \
+               (float(D0.min()), float(D0.max())), (float(D1.min()), float(D1.max()))
+    sm1, s0 = np.meshgrid(S[-1], S[0], indexing="ij"); D0 = g(0, s0) - g(-1, sm1)
+    s0b, s1 = np.meshgrid(S[0], S[1], indexing="ij"); D1 = g(1, s1) - g(0, s0b)
+    a0 = float(np.abs(D0).max())
+    return float(D1.min() - Mbar * a0), float(D1.max() + Mbar * a0), None, None
+B = {t: sbox(t) for t in (-1, 0, 1)}
+jl, ju, D0r, D1r = att_bounds(1.0, B, True); el, eu, _, _ = att_bounds(1.0, B, False)
+# trend dial with M = .10 for comparison, and a "narrow pre-trend" variant: a model rung pins the
+# pre-period totals s_-1, s_0 to +/- 2 votes around a central value (illustrative).
+td = (D1r[0] - .10, D1r[1] + .10)
+Bn = dict(B); Bn[-1] = (B[-1][0] + (B[-1][1] - B[-1][0]) / 2 - 2, B[-1][0] + (B[-1][1] - B[-1][0]) / 2 + 2)
+Bn[0] = (B[0][0] + (B[0][1] - B[0][0]) / 2 - 2, B[0][0] + (B[0][1] - B[0][0]) / 2 + 2)
+nl, nu, nD0, nD1 = att_bounds(1.0, Bn, True)
+report("N21 set-valued pre-trends in relative-magnitude bounds", jl >= el - 1e-9 and ju <= eu + 1e-9,
+       f"arithmetic only: pre DiD D0 in [{D0r[0]:.2f},{D0r[1]:.2f}], post DiD D1 in [{D1r[0]:.2f},{D1r[1]:.2f}]; "
+       f"ATT with Mbar=1: joint [{jl:.2f},{ju:.2f}], endpoint-wise [{el:.2f},{eu:.2f}]; trend dial M=.10: [{td[0]:.2f},{td[1]:.2f}]. "
+       f"Narrow pre-trends (pre totals pinned to +/-2 votes): D0 in [{nD0[0]:.2f},{nD0[1]:.2f}], ATT joint [{nl:.2f},{nu:.2f}]")
+
 print(f"\n{sum(results)}/{len(results)} PASS")

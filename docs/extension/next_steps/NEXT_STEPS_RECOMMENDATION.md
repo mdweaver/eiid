@@ -1,6 +1,13 @@
 # What to build next in eiPartialID: a recommendation
 
-*Planning note, 20 November 2026; revised 21 November after your decisions D1–D8. Written against `claude/wizardly-volta-lbh4bm` at 7077dfd (v0.3.1 on `master`, the round-2 corrections, the technical report and the methods paper). Nothing in the package, the theory documents, the report or the paper is changed. Checks are in this folder: `verify_next_steps.py` (labels N1–N20, 30/30 PASS, output in `verify_next_steps_output.txt`) and two population studies, `sharp_gain_study.py` and `sharp_gain_study_2xC.py` (outputs alongside).*
+*Planning note, 20 November 2026; revised 21 November after your decisions D1–D12. Written against `claude/wizardly-volta-lbh4bm` at 7077dfd (v0.3.1 on `master`, the round-2 corrections, the technical report and the methods paper). Nothing in the package, the theory documents, the report or the paper is changed. Checks are in this folder: `verify_next_steps.py` (labels N1–N21, 31/31 PASS, output in `verify_next_steps_output.txt`) and two population studies, `sharp_gain_study.py` and `sharp_gain_study_2xC.py` (outputs alongside).*
+
+*Scope (your rule, 21 Nov): this repository develops **general theory and methods**. Wisconsin/Iowa and NZ appear only as **illustrations** of the data shapes the methods are built for:
+* aggregates with a second-scale composition and repeated elections;
+* aggregates with published tables;
+* matched (estimated) group counts.
+
+*Project-specific choices are not deliverables of this plan: data assembly, match calibration, covariate sets, township selection and Wisconsin-specific dial settings. They are collected in a short note at the end (Part 9).*
 
 *How to read it. Part 1 is the one-page summary. Part 3 has one section per recommended step. Each section starts with three plain-language parts (what it is, a worked example, why it comes at this point), which you can read without the technical notes that follow them. Part 4 works through NEW_AVENUES.md avenue by avenue. Parts 5–8 cover what to leave for later, the external review, the decisions needed from you, and what was verified.*
 
@@ -14,7 +21,7 @@
 
 1. **Most applied questions are about the people who actually voted**, for example “what share of these veterans voted yes?”. Today the package answers that question only through the Duncan–Davis column and `ci_actual`, which come last in `print()`. Every optional restriction acts on the *model-implied* rate (`eiModules()`: zeros, order, sign, slope, linear, external, assoc and cr all restrict the mean). The paper (§7) lists sign rows on realised tables as not implemented. The realised-table results are already proved (2c Prop. M2; DD; PHASE2d Δ0/Δ4), so the gap is in the code, not the theory.
 2. **M-SHARP's gain depends on one feature of the data: polarised precincts.** In an oracle study that knows the law of returns exactly (`sharp_gain_study*.py`), using the whole law instead of the regression narrowed the model-implied group rates by a median of **0–1%** (at most 5%) when precinct rates are spread unimodally around their means (2×2, 2×3 and 2×4; SD up to about .25). There, the review's subset rows added nothing beyond averaged cell limits. When precinct rates are **bimodal** (some precincts near 0 and others near 1 within a group), the gain is **8–37%** (median 17%; 2×2, small or large precincts). Small precincts alone add 1–8%. So M-SHARP is neither worthless nor generally useful. A cheap "kink mass" diagnostic on your NZ and Wisconsin data should decide whether to build the estimator. The review's subset identity is correct (verified, N1–N3), and it is the right tool if the estimator is built.
-3. **Your applications have aggregate margins only.** The count layer serves them directly: the exact DiD rungs are realised-table results, and comparisons and exception frontiers need no extra data. The modules with the largest gains for *other* users bring in information (an audited precinct, a published total, a cast-vote record); in the count layer each is an exact equality or extra columns, so they are cheap to add later (verified, N6–N11).
+3. **The applications in view have aggregate margins only** (illustrated by the Wisconsin/Iowa suffrage data and the NZ tables). The count layer serves such data directly: the exact DiD rungs are realised-table results, and comparisons and exception frontiers need no extra data. The modules with the largest gains for *other* users bring in information (an audited precinct, a published total, a cast-vote record); in the count layer each is an exact equality or extra columns, so they are cheap to add later (verified, N6–N11).
 
 **What changed after your decisions of 21 Nov.**
 * D3 accepted, with E4 moved last (Step 9).
@@ -32,31 +39,32 @@
 
 **Recommended order**
 
-| Step | Module (working name) | What the user gets | Serves | New proofs | Data | Effort |
+| Step | Module (working name) | What the user gets | Typical data (illustration) | New proofs | Data | Effort |
 |---|---|---|---|---|---|---|
 | 0 | Finish in-flight work | tag v0.3.1; print fixes (§3.0); the planned batches D/E become the proof and code reviews of existing modules | all | none | none | S |
-| 1 | **M-COUNT**: count-table layer, `eiCounts()`, printed first by `eiBounds()` | exact bounds for the actual rates, gaps and sub-area totals; realised signs, orderings, odds-ratio dial and CR (one vocabulary with `object =`); known cells and totals; integer check "auto"; the cross-layer combination rule and free LCE test | you + all | R19, R27 | margins | M |
-| 1b | **Estimated margins** (M-MISCLASS, moved in): margin sets from match probabilities; Berkson correction in the LCE layer | honest ranges when group counts are expected counts from matching | **you** (Wisconsin matched veterans) | R25, R26 | match probabilities | M |
-| 2 | **DiD theory track**: general descriptive and causal theory with a gap register for changing populations (PHASE2e), proof review; then `eiChange()`/`eiATT()` and code review | a general, proved DiD layer; ATT only with explicit trend dials | **you** (Wisconsin/Iowa, data later) | R11a–d, R25/R26 in two periods | two elections' margins | L (theory), then M |
-| 3 | **M-CONTRAST**: finite-composition comparisons, in levels and in changes (M-LOC as its "hull" option under LCE; the finite form of NA's no-offsetting ceiling) | signs on *prespecified* comparisons, with an upper cap on the gap | you + all | R22 | margins | S–M |
-| 4 | **M-CTX2**: B1(M) with κ-annotated endpoints, per column, range form | a dial benchmarked by the identified county-level contextual effect; the DiD's yardstick | **you** (Wisconsin/Iowa county share) | R8 (B1) | second-scale composition | M |
-| 5 | **CAR(Z)-δ**: covariate adjustment with a dial, sharing Step 4's model | covariate-adjusted bounds with δ curves, covariate benchmarks and an overlap warning, beside B1(M) | you + all | R8 (CAR), overlap factor | covariates with overlap | M |
-| 6 | **M-EXCEPT**: exception-mass frontiers | "how many exceptional precincts before my conclusion fails?" | you + all | R23 | margins | M |
-| 7 | **M-SHARP diagnostic** (estimator only if polarised precincts are found) | when the full law could tighten an LCE bound | you (diagnostic) | R24, R9′ | margins | M |
-| 8 | **M-BERN**: polynomial outer/inner ladder (with L1′) | how much of an LCE answer rests on straight lines | you + all | designed (NA §4) | margins | M |
-| 9 | **M-DATA E4**: NZ leave-one-electorate-out transfer (last, by your decision) | validation of the model layer; a reference distribution for Steps 4–5's dials | you (NZ) | R21 + allowance | NZ tables | M |
-| G1–G2 | **General-user track**: M-AUDIT, M-CVR; E5 rows ship inside Step 1 | features for users with audits or CVRs | **other users** | R20; none | external data | S, S |
+| 1 | **M-COUNT**: count-table layer, `eiCounts()`, printed first by `eiBounds()` | exact bounds for the actual rates, gaps and sub-area totals; realised signs, orderings, odds-ratio dial and CR (one vocabulary with `object =`); known cells and totals; integer check "auto"; the cross-layer combination rule and free LCE test | any aggregates | R19, R27 | margins | M |
+| 1b | **Estimated margins** (M-MISCLASS, moved in): margin sets from match probabilities; Berkson correction in the LCE layer | honest ranges when group counts are expected counts from matching | matched group counts (e.g. veterans matched to a census) | R25, R26 | match probabilities | M |
+| 2 | **DiD theory track**: general descriptive and causal theory with a gap register for changing populations (PHASE2e), proof review; then `eiChange()`/`eiATT()` and code review | a general, proved DiD layer; ATT only with explicit trend dials | repeated elections, same units (e.g. Wisconsin/Iowa referenda) | R11a–d; R25/R26 across periods | two elections' margins | L (theory), then M |
+| 3 | **M-CONTRAST**: finite-composition comparisons, in levels and in changes (M-LOC as its "hull" option under LCE; the finite form of NA's no-offsetting ceiling) | signs on *prespecified* comparisons, with an upper cap on the gap | any aggregates | R22 | margins | S–M |
+| 4 | **M-CTX2**: B1(M) with κ-annotated endpoints, per column, range form | a dial benchmarked by the identified county-level contextual effect; the DiD's yardstick | a composition at a second scale (e.g. county share) | R8 (B1) | second-scale composition | M |
+| 5 | **CAR(Z)-δ**: covariate adjustment with a dial, sharing Step 4's model | covariate-adjusted bounds with δ curves, covariate benchmarks and an overlap warning, beside B1(M) | unit covariates with overlap | R8 (CAR), overlap factor | covariates with overlap | M |
+| 6 | **M-EXCEPT**: exception-mass frontiers | "how many exceptional precincts before my conclusion fails?" | any aggregates | R23 | margins | M |
+| 7 | **M-SHARP diagnostic** (estimator only if polarised precincts are found) | when the full law could tighten an LCE bound | any aggregates (diagnostic) | R24, R9′ | margins | M |
+| 8 | **M-BERN**: polynomial outer/inner ladder (with L1′) | how much of an LCE answer rests on straight lines | any aggregates | designed (NA §4) | margins | M |
+| 9 | **M-DATA E4**: NZ leave-one-electorate-out transfer (last, by your decision) | validation of the model layer; a reference distribution for Steps 4–5's dials | published area tables (e.g. NZ) | R21 + allowance | published tables | M |
+| G1–G2 | **General-user track**: M-AUDIT, M-CVR; E5 rows ship inside Step 1 | features for users with audits or CVRs | audits, CVRs | R20; none | external data | S, S |
 | later | KL-ball reference dial; R16/R15 for M-SIGN (theory track); 2×C joint signs (R6), R×2 trees (R5). Research: Avenue A on pooled NZ, single index (R14), covariance/dispersion | — | — | — | — | — |
 
 Every step gets a **proof review** and a separate **code review** (D7; table at the start of Part 3).
 
 **Not now** (Part 5): a series-based M-SHARP estimator (unless the diagnostic finds polarised precincts); M-LOC as a separate module; dispersion/covariance and Avenue A (research); DiD code before its theory has passed proof review; switching the default interval (this would reverse a decision of yours); general R×C full-law estimation.
 
-**Decisions** (Part 7). D1–D8 are settled (21 Nov). Remaining:
-* D9. Are the match probabilities calibrated and independent across men, and was matching done without vote-related variables? If not, set the calibration slack for Step 1b.
-* D10. Which township covariates for CAR(Z) (Step 5)? They should be prespecified, with overlap checked.
-* D11. Scope of the DiD theory: number of periods (two, or T ≥ 2 with pre-periods), and which causal layers (trend dial, relative magnitudes, MTR/ND/PS).
-* D12. Step 5 vs Step 6 order (covariates before or after exception frontiers); either is defensible.
+**Decisions** (Part 7). D1–D12 are settled or deferred:
+* D9 and D10 are deferred to your project; in the plan they are user inputs.
+* D11: T ≥ 2 and all three causal layers.
+* D12: CAR(Z) before M-EXCEPT, as ordered.
+
+Still open: whether to add contests as districts (C2), bounded neighbour differences, or the covariance diagnostic (all currently research or later).
 
 ---
 
@@ -167,10 +175,10 @@ Target: the veterans' yes rate across both precincts (80 veterans).
 
 **Why now.**
 * Most later modules (descriptive DiD, comparisons, exceptions, and the general-user features: audits, known tables, ballot patterns) are a few rows or columns added to this layer.
-* For your own work it is the base of the Wisconsin/Iowa DiD: the exact DiD rungs (Δ0, Δ4) are realised-table results.
+* It is the base of the DiD layer: the exact DiD rungs (Δ0, Δ4) are realised-table results.
 * Its theory is done: DD, 2c Prop. M2 for realised signs and CR, and PHASE2d Δ0/Δ4.
 * It answers the question applied users ask first.
-* It needs only aggregate margins, which is all your applications have.
+* It needs only aggregate margins, which is all many applications have.
 * **Cost:** moderate code (a new LP builder, targets, witnesses and an optional MILP), one small proof item, no data.
 
 **Technical notes.**
@@ -219,20 +227,20 @@ Target: the veterans' yes rate across both precincts (80 veterans).
 
 ### 3.1b Step 1b: estimated margins (probabilistically matched group counts): M-MISCLASS moves into your track
 
-**The problem (plain language).** In some of your Wisconsin data the number of veterans in a township is not a count. It is an *expected* count from matching soldier lists to the census, so each man carries a probability of being a veteran. Two consequences follow:
+**The problem (plain language).** Group counts are sometimes not counts. In the Wisconsin illustration, the number of veterans in a township It is an *expected* count from matching soldier lists to the census, so each man carries a probability of being a veteran. Two consequences follow:
 * The package must accept non-integer margins, and the integer check must switch off for them.
 * More fundamentally, the arithmetic bounds are exact only if the margins are right. An estimated margin is not right; it is uncertain.
 
 Treating the expected count as exact gives a range that is too narrow and can miss the truth.
 
-**What the module does.** It replaces "the township had 60 veterans" by "the township had between 56 and 64 veterans, with 95% probability, given the match probabilities". The arithmetic bounds are then computed over every table consistent with any count in that range. The answer becomes a confidence statement: "with probability at least 95%, the true veteran yes rate lies in this range". It holds *if* the match probabilities are calibrated (a man given 0.5 is a veteran half the time) and independent across men. If calibration is doubtful, a slack dial widens the margin sets. An audit of some matches, if one ever exists, would narrow them. This is the misclassification problem (formerly G3) with the error law supplied by the matcher, so it moves from the general-user track into your track.
+**What the module does.** It replaces "the township had 60 veterans" by "the township had between 56 and 64 veterans, with 95% probability, given the match probabilities". The arithmetic bounds are then computed over every table consistent with any count in that range. The answer becomes a confidence statement: "with probability at least 95%, the true veteran yes rate lies in this range". It holds *if* the match probabilities are calibrated (a man given 0.5 is a veteran half the time) and independent across men. If calibration is doubtful, a slack dial widens the margin sets. An audit of some matches, if one ever exists, would narrow them. This is the misclassification problem (formerly G3) with the error law supplied by the matcher. It moves from the general-user track into the core plan, because estimated margins are common. The calibration slack and the match probabilities are user inputs; choosing them for a given project is outside this plan.
 
 **Worked example** (N20). Precinct P2: 100 men, 50 yes votes. Matching makes 50 men certain veterans and gives 20 men probability 0.5 each, so the expected count is 60.
 * *Treating 60 as exact* (what M-COUNT would do without this step): the veteran yes rate is in **[0.167, 0.833]**.
 * *With the module*: the true count lies in [56, 64] with probability 0.95, so the rate is in **[0.107, 0.893]**. The range is wider, and it is honest about the matching.
 
 **Why here (Step 1b, immediately after Step 1).**
-* It decides whether Step 1's "exact" claim holds for your own data, and it changes the DiD theory in Step 2, where a matched composition enters both periods.
+* It decides whether Step 1's "exact" claim holds whenever a group margin is estimated (matched records, survey-based margins), and it changes the DiD theory in Step 2, where a matched composition enters both periods.
 * It is mostly linear programming over margin sets plus a probability calculation. The theory is short but new (below).
 * **Cost:** M. New proof items R25 and R26. Data: the match probabilities (or at least, per township, the number of certain matches and the probabilities of the uncertain ones).
 
@@ -275,21 +283,21 @@ You will supply data later. Implementation follows once the theory has passed it
 * If untreated trends could differ by up to 10 points, the effect of service is −5 to +35 points. If by at most 2, it is +3 to +27.
 * *Without the theory*, users combine these by hand and can mix descriptive and causal claims. PACKAGE_DESIGN §7's "MTR" label for orderings of changes is one example of that mix.
 
-**Why here.** It is your own application, and you asked for theory and proofs first. The theory reuses PHASE2d, which is written but unreviewed, and generalises it. Doing it second lets it build on Step 1's count layer and Step 1b's estimated margins (a matched composition enters both periods). **Cost:** theory L; implementation M.
+**Why here.** DiD is central to the applications in view, and you asked for general theory and proofs first. The theory reuses PHASE2d, which is written but unreviewed, and generalises it. Doing it second lets it build on Step 1's count layer and Step 1b's estimated margins (a matched composition enters both periods). **Cost:** theory L; implementation M.
 
 **Deliverables.**
 1. **Document** `docs/extension/PHASE2e_did_general.md`, built from PHASE2d and generalising it. Contents:
-   * **Setting**: units, R groups, C outcomes, T ≥ 2 periods; a fixed population as the base case.
+   * **Setting**: units, R groups, C outcomes, **T ≥ 2 elections with pre-periods** (your decision D11); a fixed population as the base case.
    * **Descriptive rungs**:
      * Δ0 (product of periods);
      * Δ4 (signs and CR on changes) beyond 2×2;
      * finite contrasts on changes (Step 3's changes version);
      * FD (first-difference LCE) and DiD-S, with their sharpness;
      * estimated margins in both periods (Step 1b).
-   * **Causal layer**:
-     * $ATT=D-b$ with $\lvert b\rvert\le M$;
-     * relative magnitudes over **one feasible sequence** of pre-trends (not endpoint by endpoint);
-     * MTR/ND/PS (2d Prop. CL);
+   * **Causal layer**, with **all three** forms developed (D11):
+     * a trend dial: $ATT=D-b$ with $\lvert b\rvert\le M$;
+     * bounds relative to pre-period trends (Rambachan–Roth relative magnitudes, and smoothness), over **one feasible sequence** of latent pre-trends taken jointly with the post-period violation. The precise treatment is in "Set-valued pre-trends" below;
+     * MTR with ND and PS (2d Prop. CL);
      * spillovers onto the comparison group as an explicit sensitivity term;
      * the rule that a causal label requires a stated comparison group and trend assumption.
    * **Gap register** (deferred, named): entry; exit; aging-in; stayers vs leavers; interval bases from censuses; changing unit boundaries. For each, the theorem that holds without it, the assumption or data bound that would close it, and the rung it would modify.
@@ -305,6 +313,34 @@ You will supply data later. Implementation follows once the theory has passed it
    * checks the causal layer's closed forms against LPs;
    * confirms each gap-register item fails as stated when its assumption is dropped, each with a check that fails on the naive statement.
 4. **Reviews**: an external proof review of PHASE2e (replacing batch C), then implementation (`eiChange()`, `eiATT()`) and a separate code review.
+
+**Set-valued pre-trends: why relative-magnitude bounds may be uninformative, and how the theory must handle it.** *Your caution, made precise.*
+
+*Plain language.* In ordinary DiD, the pre-period trends are estimated as numbers. Rambachan–Roth then say: "the post-period violation of parallel trends is at most M̄ times the largest pre-period violation". Here the pre-period trends are themselves EI bounds, ranges rather than numbers. The rule must then allow for the *largest* pre-period trend the data cannot rule out. When the pre-period ranges are wide, that allowance swamps everything.
+
+*Theory to write (PHASE2e).*
+* **Joint object.** The latent tables of all periods determine every DiD at once. Let $\mathcal D$ be the joint set of $(D_{\text{pre}},D_1)$ they allow. It is not a box: adjacent DiDs share a period's latent table.
+* **Treatment of the pre-periods.** With no treatment before $t=1$, $D_t=b_t$ for $t\le0$. The relative-magnitude set is
+  $$\{D_1-b_1:\ (D_{\text{pre}},D_1)\in\mathcal D,\ \lvert b_1\rvert\le\bar M\max_{t\le0}\lvert D_t\rvert\},$$
+  optimised jointly. Taking each pre-period's extreme separately can pair incompatible histories, so it is weakly wider; the review insists on the joint form.
+* **Degeneration** (a proposition to prove).
+  * (a) The relative-magnitude bound is contained in the trend-dial bound with $M=\bar M\cdot\sup_{\mathcal D}\lvert D_{\text{pre}}\rvert$. It equals it when the maximisers are compatible, which is the endpoint-wise case.
+  * (b) It is uninformative, covering the whole logical range, once $\bar M\sup\lvert D_{\text{pre}}\rvert$ exceeds the gap between the post-period DiD range and the logical limits.
+  * (c) It is informative only when a rung narrows the pre-period DiDs: a model rung (FD/R1), Δ4 signs, or contrasts on changes. With point-identified pre-trends it reduces to standard Rambachan–Roth.
+  * (d) Sampling uncertainty in model-based pre-trends enters through one joint confidence region, not period-by-period intervals.
+* **Proof items.** R11b′: the joint-set formula and (a)–(d). R11c: inference with a joint region.
+
+*Worked example* (N21; two precincts, three elections, arithmetic only).
+* The pre-period DiD is only known to lie in **[−1.23, 1.27]**, and the post-period DiD in [−1.08, 1.42]. Both are wide, because Duncan–Davis alone is wide here.
+* With M̄ = 1, the ATT bound is:
+  * **[−2.35, 2.65]** jointly;
+  * [−2.35, 2.69] endpoint-wise.
+
+  Both extend beyond the logical range of a DiD of rates ([−2, 2]), so the result is **no information**.
+* A plain trend dial with M = 0.10 gives [−1.18, 1.52]. This is wide too, but only because the post-period DiD itself is wide.
+* If a model rung pinned the pre-period totals to within ±2 votes, the pre-period DiD would shrink to [−0.06, 0.10]. The relative-magnitude bound becomes [−0.60, 0.90]: the allowance falls from ±1.27 to ±0.10.
+
+The lesson for the plan: relative-magnitude bounds are worth computing only on top of rungs that narrow the pre-period DiDs, and `eiATT()` should print the implied M = M̄·sup|D_pre| beside them so the reader sees when they collapse to a trend dial or to nothing.
 
 **Technical notes.**
 * **Descriptive.** The rows on changes are count-layer rows on the two-period product, with exact coverage. FD and DiD-S are LCE-layer rows on changes. They combine by intersection (Part 3A).
@@ -340,7 +376,7 @@ The target is the average veteran–other gap across the two bins.
 * It is the most useful assumption-based module and costs little.
 * Its identity is algebra (N12a). Under LCE the same rows are exactly the existing sandwich objects at the midpoint of the comparison (N12c). M-LOC is therefore the special case "every comparison along the hull", and its proof debt (C1) concerns only the implication to $\delta_W$, not its computation.
 * It works both in the count layer (bins of actual voters) and under LCE.
-* It needs no data beyond the margins, so it serves your NZ and Wisconsin work directly. Its version on *changes* (comparing low- and high-veteran townships' changes) is the finite form of DiD-S (PACKAGE_DESIGN §7) and needs no linearity in either period.
+* It needs no data beyond the margins, so it applies to any aggregate data. Its version on *changes* (comparing low- and high-veteran townships' changes) is the finite form of DiD-S (PACKAGE_DESIGN §7) and needs no linearity in either period.
 * It comes after Steps 1–2 because those are exact; this one adds beliefs.
 * **Cost:** S–M, one small proof item.
 
@@ -380,14 +416,14 @@ The target is the average veteran–other gap across the two bins.
 
 **The question it answers.** "If context inside a township matters no more than M times what the county-level pattern shows, what is the veteran gap?" And: "how much contextual variation does each end of my bound require?"
 
-**Worked example** (your data; [NA, `apply_B_suffrage`, `apply_kappa_suffrage`]; trusted; plug-in, no confidence intervals). Wisconsin 1865, trimmed units, veteran minus non-veteran yes rate.
+**Worked example** (illustration on the Wisconsin data; [NA, `apply_B_suffrage`, `apply_kappa_suffrage`]; trusted; plug-in, no confidence intervals). Wisconsin 1865, trimmed units, veteran minus non-veteran yes rate.
 * *Without the module*: pooled LCE gives **[−0.066, 0.452]**, which does not settle the sign.
 * *With B1(M = 1)* on the yes column: **[0.049, 0.297]**, a positive gap. With M = 0.5: [0.111, 0.235].
 * *κ annotation* (same data, pooled LCE; see the κ table in §4.8(a) for the cap's effect): the lower end of −0.065 needs κ above 0.25. Capping κ at 0.25 lifts the lower end to 0.019. The data's own floor is κ = 0.015.
 * *A warning that belongs in the output*: imposed on all three columns jointly, B1 is empty at the plug-in unless M ≥ 3.85 (1857) or 6.65 (1865). Iowa 1868 is empty even under plain M0. This is why the step includes the emptiness test and proper intervals, not plug-in sets.
 
 **Why here.**
-* It is NEW_AVENUES' first choice for near-term use (§9), and it applies directly to **your Wisconsin/Iowa data**, where the county share is the second scale.
+* It is NEW_AVENUES' first choice for near-term use (§9), and it applies to any data with a composition measured at a second scale (in the Wisconsin/Iowa illustration, the county share).
 * It gives the DiD its yardstick. M-CTX2-Δ replaces FD3's free δ with a measured contextual effect (PACKAGE_DESIGN §7). It is also the benchmark of the right kind for any CAR-style sensitivity (NEW_AVENUES §14.5).
 * It comes after Steps 1–3 because those are exact, or use only directional beliefs. This step adds a magnitude belief on the LCE layer, and it needs a proof first (R8; until then the module carries "experimental").
 * Calibration. NZ (Step 9) is the only data with known truths, and the NEW_AVENUES author argued that it should calibrate these dials first. You moved E4 to last, because most applications will lack the tables it needs. So Step 4 ships with its dials uncalibrated: M_min and κ annotation, reported with intervals, plus breakdown values. When Step 9 is built, its NZ output (the κ, δ and M values the truths needed) becomes a reference distribution that is printed beside these dials.
@@ -428,7 +464,7 @@ They combine in **one LP** on the shared model "each group's mean rate = effect 
 * With compositions confined to [0.3, 0.7] within covariate cells, a δ of 0.05 becomes a half-width of 0.125 at the vertex rate (overlap factor 2.5).
 * *Without the module*: no covariate adjustment at all, or a point estimate (Goodman within cells) that silently assumes δ = 0. *With it*: an interval that widens honestly with δ and with poor overlap, beside B1(M)'s like-for-like benchmark.
 
-**Why here.** You said covariates are potentially available, both for your townships and in general, so it is a real candidate, not a rare case. It shares Step 4's model, so it comes right after it. It is placed after B1(M) because its benchmark is the weaker one for EI's signature threat. Covariate adjustment was earlier low priority by your decision. Covariate availability makes it worth a numbered step, but it can trade places with Step 6 if you prefer. **Cost:** M (LP rows per covariate cell or a linear η(Z); the overlap factor; the benchmarks).
+**Why here.** Covariates are commonly available in applications of these models, so it is a real candidate, not a rare case. The covariate set is a user input. It shares Step 4's model, so it comes right after it. It is placed after B1(M) because its benchmark is the weaker one for EI's signature threat. Covariate adjustment was earlier low priority by your decision. Covariate availability makes it worth a numbered step, but it can trade places with Step 6 if you prefer. **Cost:** M (LP rows per covariate cell or a linear η(Z); the overlap factor; the benchmarks).
 
 **Technical notes.**
 * **Model.** $E[\beta\mid X,Z,z]=\eta(Z)+\Delta$, with $\lVert\Delta\rVert_\infty\le\delta$ (LP) or $E[\Delta_j^2]\le\kappa_j\operatorname{Var}(Y)$ (SOCP). With linear η, CAR(Z) is the LCE+Z model with the own-composition effect set to zero (NEW_AVENUES §13.4).
@@ -497,7 +533,7 @@ For the actual voters it adds nothing: precinct-by-precinct arithmetic already u
 * Precinct by precinct, group 1's rate is at most 20% in the first kind of precinct and at least 80% in the second. Its mean is therefore between **40% and 60%** (N5).
 * Size can matter in the same way. Small precincts that split 0%/100% at a 50/50 composition force the mean to 50%. If rates do not depend on size, that carries over to large precincts, whereas pooling sizes would give [25%, 75%] (N4).
 
-**Why it comes last of the numbered steps.** (Its diagnostic can run on your NZ data; that is the one place to look for the size channel.)
+**Why it comes last of the numbered steps.** (Its diagnostic can be demonstrated on the NZ data, which have many small booths.)
 * In an oracle study that knows the law exactly, with precinct rates spread *unimodally* around their means, it narrowed the model's group rates by a median of 0–1% and at most 5%:
   * 2×2: 36 designs, median ratio 1.00, minimum 0.95;
   * 2×3/2×4: 24 designs, minimum 0.97–0.98 with 40,000 draws per type.
@@ -538,7 +574,7 @@ For the actual voters it adds nothing: precinct-by-precinct arithmetic already u
 
 A reader sees that a cubic bend gives back most of the distance to Duncan–Davis on the lower end.
 
-**Why here.** It is the credibility check for every LCE number in your NZ and Wisconsin papers, but it adds no tightening. It therefore comes after the steps that add information or beliefs. It shares its machinery with L1′ (quadratic contextual effects), which is on PHASE4's second-release list. **Cost:** M (the outer/inner LP pair, the dimension formula and degree elevation); no new proof beyond NEW_AVENUES §4.2's design.
+**Why here.** It is the credibility check for every LCE number, but it adds no tightening. It therefore comes after the steps that add information or beliefs. It shares its machinery with L1′ (quadratic contextual effects), which is on PHASE4's second-release list. **Cost:** M (the outer/inner LP pair, the dimension formula and degree elevation); no new proof beyond NEW_AVENUES §4.2's design.
 
 **Technical notes.**
 * Degree-$J$ homogeneous effects leave $d_J=(C-1)[R\binom{R+J-1}{J}-\binom{R+J}{J+1}]$ free directions (NA §4.2, proved by counting).
@@ -552,7 +588,7 @@ A reader sees that a cubic bend gives back most of the distance to Duncan–Davi
   * the gap shrinks with grid refinement and elevation;
   * reproduce LCE at $J=1$.
 
-### 3.7c Step 9: known tables (M-DATA): E4 transfer on NZ for you; exact uses (E5) as general-user features
+### 3.7c Step 9: known tables (M-DATA): E4 transfer (validated on NZ); exact uses (E5) as general-user features
 
 **What it does (plain language).** Sometimes more is published than precinct totals:
 * a county-wide count of veterans who voted yes;
@@ -571,7 +607,7 @@ The **exact** uses add these facts as equalities on the actual votes, with no mo
   | Old | 70 | 35 | 40 |
 
   Arithmetic within each band gives P2's veteran yes count in **[10, 45]** instead of [10, 50] (N9). This is covariate adjustment with no assumption at all. It serves the covariate wish on your list at almost no cost.
-* **Transfer (E4), the part that serves your NZ work.** Two electorates under the straight-line model (two groups): electorate A has precincts with 10% and 30% veterans, electorate B has precincts with 60% and 90%. *Without the module* the model-implied veteran rate in B is in **[0.529, 0.751]**. *With A's published table*, and the assumption that the hidden pattern is the same in both, B's rate is pinned at **0.656** (with two groups one table fixes the pattern completely, NEW_AVENUES E1). *Allowing the pattern to differ by an amount worth 2 points on A's rate*, B's rate is in **[0.650, 0.662]** (N15). How large a difference was needed in past NZ elections is exactly what leave-one-electorate-out measures; NEW_AVENUES §5.2 suggests it may be large, in which case the gain shrinks accordingly.
+* **Transfer (E4), demonstrated on NZ-type data.** Two electorates under the straight-line model (two groups): electorate A has precincts with 10% and 30% veterans, electorate B has precincts with 60% and 90%. *Without the module* the model-implied veteran rate in B is in **[0.529, 0.751]**. *With A's published table*, and the assumption that the hidden pattern is the same in both, B's rate is pinned at **0.656** (with two groups one table fixes the pattern completely, NEW_AVENUES E1). *Allowing the pattern to differ by an amount worth 2 points on A's rate*, B's rate is in **[0.650, 0.662]** (N15). How large a difference was needed in past NZ elections is exactly what leave-one-electorate-out measures; NEW_AVENUES §5.2 suggests it may be large, in which case the gain shrinks accordingly.
 
 **Why now.**
 * **For you**, the value is E4 on NZ: NZ publishes every electorate's table, so leave-one-electorate-out tests whether transfer of the hidden pattern works, and gives the model layer its first real validation. It needs a proof (rank) and the actual-vs-model allowance, hence its place after the cheaper steps.
@@ -805,7 +841,7 @@ That is the population picture. In samples:
 
 NZ has 31,359 booths with median size 262, and its variance slope on the binomial term is 0.69–0.81 [NA, D1; point estimates; SEs under M-15]. That is consistent with coin-flip voting plus heterogeneity.
 
-**Verdict: research only** (not in the build order). It serves **your NZ data**, but only if the national file is pooled. That requires a cross-electorate model (a common mean structure), which is itself a strong assumption. A2, the source of most of the gain, is the least defensible piece (§1.4).
+**Verdict: research only** (not in the build order). It applies to **NZ-type data**, but only if the national file is pooled. That requires a cross-electorate model (a common mean structure), which is itself a strong assumption. A2, the source of most of the gain, is the least defensible piece (§1.4).
 * *Depends on*:
   * moment-inequality inference for conditional variance functions (Andrews–Shi type);
   * the R×C version of A2 (a conjecture);
@@ -841,7 +877,7 @@ NZ has 31,359 booths with median size 262, and its variance slope on the binomia
 
   Plug-in emptiness is not a test (the package's own rule), so these need the emptiness test before they are read as evidence.
 
-**Verdict: build now, as Step 4** (with κ annotation, §4.8(a); after E4 on NZ, which calibrates it). It serves **your Wisconsin/Iowa data**: the county share is the second scale, and the effects are identified. It is NEW_AVENUES' first choice for near-term use, and it gives the DiD its dial. M-CTX2-Δ replaces FD3's free δ with a measured yardstick (PACKAGE_DESIGN §7).
+**Verdict: build now, as Step 4** (with κ annotation, §4.8(a); after E4 on NZ, which calibrates it). It applies to **Wisconsin/Iowa-type data** (aggregates with a second-scale composition): the county share is the second scale, and the effects are identified. It is NEW_AVENUES' first choice for near-term use, and it gives the DiD its dial. M-CTX2-Δ replaces FD3's free δ with a measured yardstick (PACKAGE_DESIGN §7).
 * *Depends on*:
   * R8, the B1 rank condition (NA Prop. B1, a sketch). Proving it is the first task of the step;
   * the parametrisation-invariant M (§2.3; the Wisconsin numbers above use the entry-wise form);
@@ -892,7 +928,7 @@ NZ has 31,359 booths with median size 262, and its variance slope on the binomia
 
 The ladder shows how quickly the LCE answer gives way as curvature is allowed.
 
-**Verdict: build, as Step 8** (after Step 7). It serves **your data and others'**: it is the natural robustness display for every LCE result in the NZ and Wisconsin papers.
+**Verdict: build, as Step 8** (after Step 7). It applies to **any data**: it is the natural robustness display for every LCE result in the NZ and Wisconsin papers.
 * *Depends on*: the outer/inner pair (designed, NA §4.2). The degree must be prespecified (2c §6 counterexample).
 * L1′ (quadratic contextual effects, on the repository's list) is its J=2 case. Build them together.
 * It does not tighten anything, so it does not compete with the steps above for user value. It does compete for credibility, so it should not slip far.
@@ -930,7 +966,7 @@ The ladder shows how quickly the LCE answer gives way as curvature is allowed.
 
 **Worked example.** N5 (Step 7): a group's mean at a 50/50 composition goes from [0, 1] to [0.4, 0.6] when half the precincts vote 10% and half 90%. With unimodal heterogeneity the gain is a median of 0–1%; with bimodal (polarised) precinct rates it is 8–37% (my oracle study, extended after consultation).
 
-**Verdict: build later, as a diagnostic (Step 7).** It serves **your NZ data** as the place to test the size channel. Two pieces of §6 are now settled or redirected:
+**Verdict: build later, as a diagnostic (Step 7).** It applies to **NZ-type data** as the place to test the size channel. Two pieces of §6 are now settled or redirected:
 * The "finite core-determining class" conjecture is **proved** for 2×C and R×2 by the review's subset identity (my R24). The class is the proper subsets of outcomes (or of groups).
 * The "kink-mass" diagnostic is the right trigger for running the oracle at all.
 
@@ -963,7 +999,7 @@ The ladder shows how quickly the LCE answer gives way as curvature is allowed.
 *(b) Single-index contextual effects.*
 * **Plain language.** Context matters through one dimension of a place's make-up, for example a left–right index of the electorate.
 * **Example** [NA, `check_single_index_dim`, reproduced]. In 3×3 the unknown directions fall from 6 to 2.
-* **Verdict: research only for now.** It could be large for **your NZ 3×3 tables**, and E4's leave-one-out is the natural test. But R14 is a conjecture and the computation is nonconvex (an LP per direction on a grid). Revisit after Step 9.
+* **Verdict: research only for now.** It could be large for **3×3 tables such as NZ's**, and E4's leave-one-out is the natural test. But R14 is a conjecture and the computation is nonconvex (an LP per direction on a grid). Revisit after Step 9.
 
 *(c) Odds-ratio dial.*
 * **Plain language.** In each precinct, the group-by-vote odds ratio lies in a range. "At least 1" is the ordering belief of Step 1. An upper limit adds "but not extremely polarised".
@@ -1016,7 +1052,7 @@ The ladder shows how quickly the LCE answer gives way as curvature is allowed.
 * A sensitivity bound benchmarked on an ordinary covariate gives 0.006–0.032 for that same bias of 0.080 (understated by up to 12×).
 * Overlap: with compositions confined to [0.3, 0.7], a δ = 0.05 relaxation leaves a half-width of 2.5 × 0.05 = 0.125 at the vertex. With [0.4, 0.6] the factor is 5.
 
-**Verdict: build now, as Step 5** (revised after your decision D5: covariates are potentially available for your townships and in general).
+**Verdict: build now, as Step 5** (revised after your decision D5: covariates are commonly available in applications).
 * **Your data and others'.** It needs township-level covariates with composition varying within covariate cells (positivity); which covariates is decision D10. With county-level Z only, CAR collapses into Avenue B (§14.7), so Step 5 shares Step 4's model and is reported beside it.
 * *Depends on*: R8 (validity, monotonicity), the overlap factor beyond 2×2 (a conjecture), and the SOCP form of the κ/r² dials.
 * **Cinelli–Hazlett / Chernozhukov et al. contours**: **do not build**. Point users to `seine`, and print §14.4's caution when they do.
@@ -1054,7 +1090,7 @@ So the data cannot sign the correlation. Without the module, A2 must *assume* it
 |---|---|---|---|
 | E4 several validation tables (+δ) | 1 | Step 9 | Same direction. I put the count layer and the exact DiD first because your Wisconsin/Iowa work needs no tables, and the E4 rank result needs a proof (R21) plus the allowance |
 | E5 stratified / crossing / multi-way margins | 2 | Inside Step 1 (other users) | You have no such tables. The rows are nearly free once the count layer exists, so they ship with it rather than as a step |
-| B second-scale context, B1(M) | 3 (1st in §9) | **Step 4** | Agree that it is the most practical new rung for your data (county share in Wisconsin/Iowa). The plug-in emptiness on all columns makes inference (CLR or projection plus the emptiness test) part of the step, not an afterthought |
+| B second-scale context, B1(M) | 3 (1st in §9) | **Step 4** | Agree that it is the most practical new rung for data with a second-scale composition (county share in the Wisconsin/Iowa illustration). The plug-in emptiness on all columns makes inference (CLR or projection plus the emptiness test) part of the step, not an afterthought |
 | CAR(Z)-δ | 4 | **Step 5** (after your decision D5) | Shares B1(M)'s model and comes right after it. With county-level Z it reduces to B. B1's benchmark is like-for-like for contextual effects; covariate benchmarks are optimistic (§14.4) |
 | E6 validation microdata with Γ | 5 | General-user track | No validation data for your projects |
 | §13.5 covariance → dispersion ceilings | 6 | Research (with A) | Wisconsin estimate not PSD (1857) or unsigned (1865); local only |
@@ -1170,15 +1206,16 @@ So the data cannot sign the correlation. Without the module, A2 must *assume* it
 | D7 reviews | two separate reviews per module (proofs, code) | review table, Part 3 |
 | D8 M-15 flags | the NEW_AVENUES author adds them | — |
 
-**Remaining:**
-* **D9. Match probabilities** (Step 1b). Are they calibrated (a man given 0.3 is a veteran 30% of the time)? Independent across men? Computed without vote-related variables (the nondifferential assumption)? If calibration is doubtful, choose the slack ε, which widens the margin sets. If a hand-checked subsample of matches exists, it can narrow them.
-* **D10. Covariates for CAR(Z)** (Step 5). Which township covariates, prespecified before looking at bounds? The package will report overlap (composition varying within covariate cells) and refuse cells without it.
-* **D11. Scope of the DiD theory** (Step 2). Two periods or T ≥ 2 with pre-periods (needed for relative magnitudes)? Which causal layers: a trend-gap dial, relative magnitudes, MTR/ND/PS, or all three?
-* **D12. Step 5 vs Step 6.** Covariate adjustment before or after exception frontiers. I put covariates first because they share Step 4's model; either order works.
+**Answered (21 Nov, second round):**
+* **D9 (match calibration) and D10 (covariate set): deferred** to your research project. In the plan, the calibration slack and the covariate set are user inputs of general methods (Steps 1b and 5).
+* **D11 (DiD scope)**: T ≥ 2 elections with pre-periods. All three causal layers (trend dial, relative magnitudes, MTR/ND/PS), with the set-valued pre-trend theory and the degeneration result in Step 2.
+* **D12**: CAR(Z) before M-EXCEPT. Confirmed: Step 5, then Step 6.
+
+**Still open** (no answer yet; left as in the document): whether to add contests as districts (C2), bounded differences between named neighbours, or the covariance diagnostic.
 
 ## Part 8. What I verified, and what I take on trust
 
-**Verified numerically here** (`verify_next_steps.py`, 30/30 PASS):
+**Verified numerically here** (`verify_next_steps.py`, 31/31 PASS):
 
 | Label | Claim | Result |
 |---|---|---|
@@ -1197,6 +1234,7 @@ So the data cannot sign the correlation. Without the module, A2 must *assume* it
 | N18 | Hull contrasts (O_rs ≥ 0 at every support point) imply the model between sign δ_B(r,s) ≥ 0 | 0 violations |
 | N19 | Berkson correction for matched composition: E[T \| q] = q̄'Qq̄ + Var(u)·(Q_vv − 2Q_vn + Q_nn) | max error 3e−5 against simulation |
 | N20 | Estimated margin: expected count 60 treated as exact gives [0.167, 0.833]; true count in its 95% Poisson-binomial set [56, 64] gives [0.107, 0.893] | confirmed |
+| N21 | Set-valued pre-trends: pre-period DiD in [−1.23, 1.27]; relative-magnitude ATT (M̄ = 1) [−2.35, 2.65] jointly vs [−2.35, 2.69] endpoint-wise (no information); trend dial M = .10 gives [−1.18, 1.52]; with pre-period totals pinned to ±2 votes, ATT [−0.60, 0.90] | confirmed (grid over the joint set) |
 | N15 | E4 transfer example (B's rate [0.529, 0.751] → 0.656; ±2 points on A → [0.650, 0.662]) | confirmed |
 
 **Population studies** (`sharp_gain_study.py`, `sharp_gain_study_2xC.py`). Pooled LCE, oracle law at replicated composition types, Beta or Dirichlet heterogeneity.
@@ -1239,3 +1277,19 @@ Bimodal precinct rates are where the gains appear; the size channel (N4) is a se
 | R5, R6 (Blocks column) | now block nothing in the numbered order (deferred) | as before | — |
 | R8 (existing) | B1(M): the rank condition (NA Prop. B1), monotonicity in M and κ, the invariant-M LP form | partly (NA, sketch) | Step 4 |
 | R9′ | (replaces R9) outer validity of the instrument-averaged M-SHARP procedure, plus a gain study | open | Step 7 (only if an estimator is built) |
+
+---
+
+## Part 9. For applications (outside this repository's plan)
+
+*Your scope rule keeps these out of the plan. They are listed so that they are not lost.*
+* **Wisconsin/Iowa.**
+  * Assembling the referendum and governor returns.
+  * The common base of eligible men in each period, and the changing-population choices (entry, exit, interval bases). The theory's gap register (Step 2) names where each enters.
+  * Township selection.
+  * Calibration of the veteran match probabilities and the slack (D9; Step 1b's inputs).
+  * The township covariate set (D10; Step 5's input).
+  * Dial ranges for B1(M), κ and δ.
+  * Re-running `apply_B_suffrage`/`apply_kappa_suffrage` with the package's inference once Steps 4–5 exist.
+* **NZ.** The leave-one-electorate-out benchmark (Step 9's validation), and the kink-mass diagnostic run (Step 7). These double as package benchmarks, so their *scripts* belong in `benchmarks/`, and their substantive reading belongs in the application.
+* **M-15.** The NEW_AVENUES author adds the flags (D8). Re-deriving the two intervals needs the unit-level data and R.

@@ -1,0 +1,83 @@
+width of the population-average group-1 rate: Theta_O (regression only) vs Theta_X (full law)
+design                 truth            phi  Theta_O  Theta_X  ratio
+wide hull [.05,.95]    moderate gap       4    0.287    0.286   0.99
+wide hull [.05,.95]    moderate gap      10    0.287    0.273   0.95
+wide hull [.05,.95]    moderate gap      30    0.287    0.286   1.00
+wide hull [.05,.95]    moderate gap     100    0.287    0.286   0.99
+wide hull [.05,.95]    large gap          4    0.336    0.321   0.96
+wide hull [.05,.95]    large gap         10    0.336    0.330   0.98
+wide hull [.05,.95]    large gap         30    0.336    0.334   0.99
+wide hull [.05,.95]    large gap        100    0.336    0.336   1.00
+wide hull [.05,.95]    small gap          4    0.318    0.308   0.97
+wide hull [.05,.95]    small gap         10    0.318    0.318   1.00
+wide hull [.05,.95]    small gap         30    0.318    0.318   1.00
+wide hull [.05,.95]    small gap        100    0.318    0.318   1.00
+middle hull [.2,.6]    moderate gap       4    0.698    0.680   0.97
+middle hull [.2,.6]    moderate gap      10    0.698    0.696   1.00
+middle hull [.2,.6]    moderate gap      30    0.698    0.698   1.00
+middle hull [.2,.6]    moderate gap     100    0.698    0.698   1.00
+middle hull [.2,.6]    large gap          4    0.698    0.662   0.95
+middle hull [.2,.6]    large gap         10    0.698    0.684   0.98
+middle hull [.2,.6]    large gap         30    0.698    0.696   1.00
+middle hull [.2,.6]    large gap        100    0.698    0.698   1.00
+middle hull [.2,.6]    small gap          4    0.698    0.683   0.98
+middle hull [.2,.6]    small gap         10    0.698    0.697   1.00
+middle hull [.2,.6]    small gap         30    0.698    0.698   1.00
+middle hull [.2,.6]    small gap        100    0.698    0.698   1.00
+skewed [.02,.4]        moderate gap       4    0.733    0.732   1.00
+skewed [.02,.4]        moderate gap      10    0.733    0.733   1.00
+skewed [.02,.4]        moderate gap      30    0.733    0.733   1.00
+skewed [.02,.4]        moderate gap     100    0.733    0.733   1.00
+skewed [.02,.4]        large gap          4    0.733    0.704   0.96
+skewed [.02,.4]        large gap         10    0.733    0.730   1.00
+skewed [.02,.4]        large gap         30    0.733    0.733   1.00
+skewed [.02,.4]        large gap        100    0.733    0.733   1.00
+skewed [.02,.4]        small gap          4    0.733    0.733   1.00
+skewed [.02,.4]        small gap         10    0.733    0.733   1.00
+skewed [.02,.4]        small gap         30    0.733    0.733   1.00
+skewed [.02,.4]        small gap        100    0.733    0.733   1.00
+
+ratio Theta_X/Theta_O over 36 cells: median 1.00, min 0.95, share of cells with ratio < 0.9: 0.00
+phi is the Beta concentration of precinct-level group rates around their mean: phi = 4 means
+very heterogeneous precincts (sd up to .22), phi = 100 nearly homogeneous (sd up to .05).
+
+high-kink-mass designs: bimodal precinct rates (phi < 2) and/or small precincts (n voters)
+design                 truth            phi     n  Theta_O  Theta_X  ratio
+grid [.1,.9]           moderate gap     0.5    10    0.338    0.236   0.70
+grid [.1,.9]           moderate gap     0.5    20    0.338    0.256   0.76
+grid [.1,.9]           moderate gap     0.5    50    0.338    0.214   0.63
+grid [.1,.9]           moderate gap     0.5  1000    0.338    0.249   0.74
+grid [.1,.9]           moderate gap     1.0    10    0.338    0.256   0.76
+grid [.1,.9]           moderate gap     1.0    20    0.338    0.270   0.80
+grid [.1,.9]           moderate gap     1.0    50    0.338    0.276   0.82
+grid [.1,.9]           moderate gap     1.0  1000    0.338    0.287   0.85
+grid [.1,.9]           moderate gap     4.0    10    0.338    0.310   0.92
+grid [.1,.9]           moderate gap     4.0    20    0.338    0.326   0.97
+grid [.1,.9]           moderate gap     4.0    50    0.338    0.331   0.98
+grid [.1,.9]           moderate gap     4.0  1000    0.338    0.333   0.99
+grid [.1,.9]           large gap        0.5    10    0.389    0.332   0.85
+grid [.1,.9]           large gap        0.5    20    0.389    0.334   0.86
+grid [.1,.9]           large gap        0.5    50    0.389    0.338   0.87
+grid [.1,.9]           large gap        0.5  1000    0.389    0.340   0.87
+grid [.1,.9]           large gap        1.0    10    0.389    0.345   0.89
+grid [.1,.9]           large gap        1.0    20    0.389    0.344   0.88
+grid [.1,.9]           large gap        1.0    50    0.389    0.342   0.88
+grid [.1,.9]           large gap        1.0  1000    0.389    0.347   0.89
+grid [.1,.9]           large gap        4.0    10    0.389    0.357   0.92
+grid [.1,.9]           large gap        4.0    20    0.389    0.360   0.93
+grid [.1,.9]           large gap        4.0    50    0.389    0.361   0.93
+grid [.1,.9]           large gap        4.0  1000    0.389    0.367   0.94
+grid [.1,.9]           small gap        0.5    10    0.369    0.262   0.71
+grid [.1,.9]           small gap        0.5    20    0.369    0.254   0.69
+grid [.1,.9]           small gap        0.5    50    0.369    0.289   0.78
+grid [.1,.9]           small gap        0.5  1000    0.369    0.299   0.81
+grid [.1,.9]           small gap        1.0    10    0.369    0.300   0.81
+grid [.1,.9]           small gap        1.0    20    0.369    0.327   0.89
+grid [.1,.9]           small gap        1.0    50    0.369    0.326   0.88
+grid [.1,.9]           small gap        1.0  1000    0.369    0.338   0.92
+grid [.1,.9]           small gap        4.0    10    0.369    0.343   0.93
+grid [.1,.9]           small gap        4.0    20    0.369    0.363   0.98
+grid [.1,.9]           small gap        4.0    50    0.369    0.366   0.99
+grid [.1,.9]           small gap        4.0  1000    0.369    0.359   0.97
+
+high-kink-mass cells: median ratio 0.88, min 0.63, share < 0.9: 0.64

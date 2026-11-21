@@ -1,0 +1,28 @@
+mean (over columns) width ratio to Theta_O for the group-1 rates; oracle law, large precincts
+ C truth      design            phi  coord/O  subset/O
+ 3 polarised  wide [.05,.95]      3     0.98      0.98
+ 3 polarised  wide [.05,.95]     10     1.00      1.00
+ 3 polarised  wide [.05,.95]     50     0.99      0.99
+ 3 polarised  middle [.2,.6]      3     0.99      0.99
+ 3 polarised  middle [.2,.6]     10     1.00      1.00
+ 3 polarised  middle [.2,.6]     50     1.00      1.00
+ 3 mild       wide [.05,.95]      3     0.99      0.99
+ 3 mild       wide [.05,.95]     10     1.00      1.00
+ 3 mild       wide [.05,.95]     50     1.00      1.00
+ 3 mild       middle [.2,.6]      3     0.97      0.97
+ 3 mild       middle [.2,.6]     10     1.00      1.00
+ 3 mild       middle [.2,.6]     50     1.00      1.00
+ 4 polarised  wide [.05,.95]      3     0.98      0.98
+ 4 polarised  wide [.05,.95]     10     0.98      0.98
+ 4 polarised  wide [.05,.95]     50     1.00      1.00
+ 4 polarised  middle [.2,.6]      3     0.99      0.99
+ 4 polarised  middle [.2,.6]     10     1.00      1.00
+ 4 polarised  middle [.2,.6]     50     1.00      1.00
+ 4 mild       wide [.05,.95]      3     0.98      0.98
+ 4 mild       wide [.05,.95]     10     0.98      0.98
+ 4 mild       wide [.05,.95]     50     1.00      1.00
+ 4 mild       middle [.2,.6]      3     0.99      0.99
+ 4 mild       middle [.2,.6]     10     1.00      1.00
+ 4 mild       middle [.2,.6]     50     1.00      1.00
+C=3: median subset/O 1.00 (min 0.97); median coord/O 1.00; max extra gain of subsets over coordinates 0.000
+C=4: median subset/O 0.99 (min 0.98); median coord/O 0.99; max extra gain of subsets over coordinates 0.000

@@ -24,30 +24,35 @@
 2b. **WS-B8, responses to the two Batch B referees — done** (`reviews/B_partial_identification_response.md`, `reviews/B_ecological_inference_response.md`). The corrections themselves are done (WS-B0 to WS-B3, Nov 2026).
 3. **Release hygiene — done (0.3.0):** version and `NEWS.md`; M-SIGN flagged `experimental`; `MASS` removed and `eco` moved to Suggests (the NOTE is gone). Pull request to `master` merged (0.3.1); version tag `v0.3.1` to follow.
 
-### Next: a process-free paper version
-3b. **Paper version of the technical report** (on hold until the owner starts it): a journal-style methods paper, 35–50 pp., with a rewritten proof appendix; covers the core bounds and inference, the monotone results and M-SIGN (experimental), the package and the evidence; no DiD; no reference to the review process; conjectures and open items labelled and collected in a closing section.
+### Done since: technical report and paper
+3b. **Technical report** (`docs/report/`) and **methods paper** (`docs/paper/`): done and merged (Nov 2026).
 
-### Then: the first new module
-4. **M-SHARP, the series-based sharper bound** (PACKAGE_DESIGN step 1b; also first on PHASE4's agreed second-release list).
-   * It estimates the tighter set $\Theta_X$ by series regression of the unit-level Duncan–Davis limits, for pooled designs. It conditions on composition only, so when precinct size is informative it is "tighter than the outer set", not sharp (2c Remark N2.2.1; Conjecture N2.2′ is left open by decision, pending another reviewer's work on the rungs).
-   * It tightens every rung with **no new assumption**. It also answers the reviewer's point (2a §4.3) that the sharp set needs smoothing or pooling to be estimable.
-   * Proof item: R9 (consistency; never wider than the current outer set).
-   * The M-SIGN session's queued work can run alongside, on this branch: real-data runs (scripts only) and the slack documentation.
+### Build order from Nov 2026 (supersedes the earlier items 4–9)
+*Decided by the owner on 21 Nov 2026 from `next_steps/NEXT_STEPS_RECOMMENDATION.md`, which has the plain-language explanation, worked example, ordering reason and technical notes for every step, the combination matrix (Part 3A) and the avenue-by-avenue review of `NEW_AVENUES.md` (Part 4). **Scope rule:** this repository develops general theory and methods; application-specific work (data assembly, calibration, covariate choice) is outside it (recommendation Part 9). **Review rule:** every step gets a proof review and a separate code review.*
 
-### Then, in order of proof readiness (PACKAGE_DESIGN §6)
-5. **M-LOC**, weighted-local contextual monotonicity, in 2×2 and 2×C (step 2; needs conjecture C1, R1). Not blocked by Batch B, but P-N is now scoped to the pooled model (M0) or within a district.
-6. **2×C joint column signs** and ordinal cumulative columns (step 3; R6).
-7. **R×2 pairwise ordering plus local restrictions on spanning trees**, with hull diagnostics (step 4; R4, R5).
-8. **DiD wrappers**: the Δ-rungs and FD (PHASE4 second-release list). Gated on batch C of the review plan and the Wisconsin/Iowa data decisions. Δ0 and Δ4 are sharp for continuous tables (integer tables: R15).
-9. **Quadratic contextual effects (L1′)** as a weaker rung, and the optional non-negative-correlation assumption for the unit-level term (both on PHASE4's list).
+0. **Housekeeping:** printout fixes; the planned batches D and E become the proof and code reviews of existing modules.
+1. **M-COUNT / `eiCounts()`**: exact bounds on actual counts and rates (Duncan–Davis first), realised ordering, sign and CR rows, known cells and published totals, integer check ("auto"; off for non-integer margins), witness tables. `eiBounds()` prints it first (`target = "model"` restores the old order). Combination rule: count rows and model rows never share one LP; the actual-rate answer intersects the two, and disjointness is a test of the model. Proof items R19, R27. **In progress.**
+1b. **Estimated margins**: margins from probabilistic matching enter as sets (calibration slack as user input); a Berkson correction on the model side. R25, R26.
+2. **DiD theory track** (general; T ≥ 2 with pre-periods): descriptive and causal (trend dial, bounds relative to set-valued pre-trends, MTR/ND/PS), with a register of where changing populations need assumptions or data-based bounds. Implementation (`eiChange()`, `eiATT()`) after its proof review. R11a–d, R11b′.
+3. **M-CONTRAST**: finite comparisons between prespecified kinds of places, in levels and changes; M-LOC becomes its `at = "hull"` option. R22.
+4. **B1(M) + κ**: context at a second scale, per column, with κ-annotated endpoints. R8.
+5. **M1(δ) with named neighbours**: adjacency or distance matrix (Lipschitz default δ_de = λ·d_de). R30.
+6. **CAR(Z)-δ**, then **covariate-benchmarked κ/δ** with three diagnostics (benchmark size, composition R², overlap factor). R28.
+7. **M-EXCEPT**: exception-mass frontiers. R23.
+8. **M-SHARP diagnostic** (kink mass, (X,N) conditioning); the estimator only if polarised precincts are found. R24, R9′.
+9. **M-BERN** polynomial robustness ladder, with L1′.
+10. **C2, contests as districts**, with its overidentification test. R29.
+11. **E4 table transfer** (NZ leave-one-out), last.
+
+General-user track: M-AUDIT, M-CVR (exact published-table rows ship inside step 1).
 
 ### Later or research-dependent
 * **From the Batch B review:** grouped-rung proofs for M-SIGN (R16, needed to drop "experimental" under M1/M2); integer unit tables (R15); per-group W2 restrictions (U8(a)); the drop-one display and the L5/L6 sign check; the N2 global LP only (local rows dropped, U4(a)).
-* PACKAGE_DESIGN steps 5–11: shared $K$ across validation tables (E4/E5), B1(M), κ ceilings, N2 grid LP, multiple contests, CAR-δ, dispersion. These are mostly data-dependent.
+* Research only (recommendation Part 4): Avenue A (unit size, with the dispersion ceiling and the covariance route), single index (R14), KL-ball reference dial.
 * **Covariate adjustment** (Phase 2c; review-response WS8, low priority by decision).
 * **Informative finite-sample inference for many small groups.** Theorem P3.8 is valid but uninformative; this is open (P3 §10).
 * **Closing Conjecture P3.5(b3)**, which would make the CLR default a theorem.
 
-## Decision for you
+## Decisions
 
-The main choice is whether **M-SHARP** (my recommendation: no new assumption, fixes a reviewer concern, and was already agreed for the second release) comes before **M-LOC** (PACKAGE_DESIGN's step 2). Either way, items 1–3 come first.
+All settled (recommendation Part 6, D1–D12); D9 (match calibration) and D10 (covariate set) are user inputs, outside this repository.

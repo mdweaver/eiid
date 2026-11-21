@@ -317,6 +317,8 @@ Let $a=\mu\operatorname{Var}_{w^1}(X)$, $b=(1-\mu)\operatorname{Var}_{w^0}(X)$, 
 
 ## 6. Ladder (b): build order with rigor checklists
 
+*Superseded order (Nov 2026): the build order below is replaced by `next_steps/NEXT_STEPS_RECOMMENDATION.md` and `NEXT_BUILD.md` (count layer first; M-SHARP narrowed to a diagnostic; M-LOC folded into M-CONTRAST; B1(M), neighbours, CAR(Z) with covariate benchmarks, C2 and E4 added). The rigour checklist below still applies to every step, with a separate proof review and code review per step.*
+
 **Standard checklist** (every step must clear it before its module enters the API):
 - [ ] **S1 Statement.** The formal assumption, its object (unit/mean/link), its target (actual/model), and a plain-language version.
 - [ ] **S2 Structure.** Affinity in $k$ (or convexity), and the LP/union/grid form; for grids, outer validity.

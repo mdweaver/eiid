@@ -1,6 +1,6 @@
 # What to build next in eiPartialID: a recommendation
 
-*Planning note, 20 November 2026; revised 21 November after your decisions D1–D12. Written against `claude/wizardly-volta-lbh4bm` at 7077dfd (v0.3.1 on `master`, the round-2 corrections, the technical report and the methods paper). Nothing in the package, the theory documents, the report or the paper is changed. Checks are in this folder: `verify_next_steps.py` (labels N1–N21, 31/31 PASS, output in `verify_next_steps_output.txt`) and two population studies, `sharp_gain_study.py` and `sharp_gain_study_2xC.py` (outputs alongside).*
+*Planning note, 20 November 2026; revised 21 November after your decisions D1–D12. Written against `claude/wizardly-volta-lbh4bm` at 7077dfd (v0.3.1 on `master`, the round-2 corrections, the technical report and the methods paper). Nothing in the package, the theory documents, the report or the paper is changed. Checks are in this folder: `verify_next_steps.py` (labels N1–N22, 32/32 PASS, output in `verify_next_steps_output.txt`) and two population studies, `sharp_gain_study.py` and `sharp_gain_study_2xC.py` (outputs alongside).*
 
 *Scope (your rule, 21 Nov): this repository develops **general theory and methods**. Wisconsin/Iowa and NZ appear only as **illustrations** of the data shapes the methods are built for:
 * aggregates with a second-scale composition and repeated elections;
@@ -47,7 +47,7 @@
 | 2 | **DiD theory track**: general descriptive and causal theory with a gap register for changing populations (PHASE2e), proof review; then `eiChange()`/`eiATT()` and code review | a general, proved DiD layer; ATT only with explicit trend dials | repeated elections, same units (e.g. Wisconsin/Iowa referenda) | R11a–d; R25/R26 across periods | two elections' margins | L (theory), then M |
 | 3 | **M-CONTRAST**: finite-composition comparisons, in levels and in changes (M-LOC as its "hull" option under LCE; the finite form of NA's no-offsetting ceiling) | signs on *prespecified* comparisons, with an upper cap on the gap | any aggregates | R22 | margins | S–M |
 | 4 | **M-CTX2**: B1(M) with κ-annotated endpoints, per column, range form | a dial benchmarked by the identified county-level contextual effect; the DiD's yardstick | a composition at a second scale (e.g. county share) | R8 (B1) | second-scale composition | M |
-| 5 | **CAR(Z)-δ**: covariate adjustment with a dial, sharing Step 4's model | covariate-adjusted bounds with δ curves, covariate benchmarks and an overlap warning, beside B1(M) | unit covariates with overlap | R8 (CAR), overlap factor | covariates with overlap | M |
+| 5 | **CAR(Z)-δ**: covariate adjustment with a dial, sharing Step 4's model | covariate-adjusted bounds with δ and κ curves; covariate-benchmarked κ_k/δ_k with the bridge "remainder ≤ m × covariate k"; diagnostics R²(X~Z) and overlap; shown beside B1(M) | unit covariates with overlap | R8 (CAR), R28, overlap factor | covariates with overlap | M |
 | 6 | **M-EXCEPT**: exception-mass frontiers | "how many exceptional precincts before my conclusion fails?" | any aggregates | R23 | margins | M |
 | 7 | **M-SHARP diagnostic** (estimator only if polarised precincts are found) | when the full law could tighten an LCE bound | any aggregates (diagnostic) | R24, R9′ | margins | M |
 | 8 | **M-BERN**: polynomial outer/inner ladder (with L1′) | how much of an LCE answer rests on straight lines | any aggregates | designed (NA §4) | margins | M |
@@ -448,7 +448,7 @@ The target is the average veteran–other gap across the two bins.
 
 ### 3.5 Step 5: CAR(Z)-δ, covariate adjustment with a dial (shares Step 4's model)
 
-**What it does (plain language).** Among townships alike on covariates (wealth, nativity, farm values, denomination), assume the veteran share tells you nothing more about how each group voted. That is "no contextual effect once the covariates are held fixed". The dial δ lets that fail: group rates may still depend on composition by up to δ. At δ = 0 the answer is a point (Goodman within covariate cells). As δ grows it widens back toward the no-model bounds. The package reports the whole curve, a benchmark for δ from each covariate ("dropping wealth would create a violation of size δ_wealth"), and an overlap warning: where composition varies little within covariate cells, every δ is magnified.
+**What it does (plain language).** Among places alike on covariates (for example wealth, nativity, denomination), assume the veteran share tells you nothing more about how each group voted. That is "no contextual effect once the covariates are held fixed". The dial δ lets that fail: group rates may still depend on composition by up to δ. At δ = 0 the answer is a point (Goodman within covariate cells). As δ grows it widens back toward the no-model bounds. The package reports the whole curve, a benchmark for δ from each covariate ("dropping wealth would create a violation of size δ_wealth"), and an overlap warning: where composition varies little within covariate cells, every δ is magnified.
 
 **Information or assumption used.** Township covariates, with veteran share varying within covariate cells (positivity), and a judgement about δ.
 
@@ -457,6 +457,38 @@ The target is the average veteran–other gap across the two bins.
 * **B1(M)** conditions on composition at a second scale and benchmarks M against the *identified* county-level contextual effect: a benchmark of the same kind as the threat.
 
 They combine in **one LP** on the shared model "each group's mean rate = effect of covariates + effect of own composition + effect of county composition", with both caps imposed. If the county share is itself one of the covariates, CAR(Z) is B1(M = 0), so report them as one model with two dials, not as two independent checks. NEW_AVENUES §14.7 recommends reporting CAR-δ curves, the overlap factor, covariate benchmarks and B1(M) side by side, and that is what Steps 4–5 produce together.
+
+**Covariate-benchmarked κ and δ (a general part of this step).** Following NEW_AVENUES §14.8, at your suggestion.
+* **Construction.** Under CAR(Z), dropping covariate $k$ creates an *identified* violation of CAR($Z_{-k}$): $\Delta^{(-k)}(x,z_{-k})=E[\eta(Z)\mid X=x,Z_{-k}]-E[\eta(Z)\mid Z_{-k}]$. Its size gives two benchmarks: $\kappa_k=E[(\Delta^{(-k)}_j)^2]/\operatorname{Var}(Y)$ (a variance share) and $\delta_k=\sup\lvert\Delta^{(-k)}_j\rvert$ (sup norm). A joint benchmark $\kappa_Z$ drops all covariates at once.
+* **The bridge assumption, in plain language.** "Whatever contextual violation remains after adjusting for the covariates is at most *m* times what covariate *k* accounts for": $\kappa\le m\,\kappa_k$, or $\delta\le m\,\delta_k$. **m is a judgement.** The benchmark only sets the scale on which that judgement is expressed. It does not identify m: the multiple the truth actually needs, $m^*$, is never observed.
+* **When it is informative: your point, made precise.** Three printed quantities decide it.
+  1. **The size of the benchmark, κ_k (and δ_k).** A small κ_k at a believable m gives narrow bounds. A large κ_k gives a large allowance even when it is conservative.
+  2. **How much of the composition the covariates absorb**, $R^2(X\sim Z)$, and for each covariate $R^2(Z_k\sim X\mid Z_{-k})$. When covariates absorb most composition variation, little composition variation is left for a contextual remainder. Its variance share is then small. This is your "remainder from contextual bias may be highly limited", and it holds **in variance terms**.
+  3. **The overlap factor.** The same high $R^2(X\sim Z)$ means composition varies little *within* covariate cells. Each group's rate is then an extrapolation to an all-one-group place, and any remainder is magnified on the way. So a small variance share does **not** imply a small error in the group rate.
+* **Small examples** (N22; one covariate, an invisible contextual violation of known size).
+  * *Covariate shares composition, small contextual effect* ($R^2(X\sim Z)=0.26$). The truth needs only a tiny fraction of the benchmark ($m^*\approx0$), and the CAR(Z) answer for group 1 is off by only −0.026. The benchmark is safe and informative if κ_Z is modest.
+  * *Covariate absorbs most composition variation* ($R^2(X\sim Z)=0.92$). The remainder's variance share is small, κ_true = 0.006. But the overlap factor doubles (2.4 → 5.0), and the CAR(Z) answer for group 1 is still off by **−0.123**. Moreover κ_Z = 0.99, so a bridge at m = 1 allows almost any violation: safe but uninformative.
+  * *Covariate explains the outcome but not composition* ($R^2(Y\sim X,Z)=0.88$, $R^2(X\sim Z)=0.00$). κ_Z ≈ 0, so any m calibrated to it allows nothing, and the truth needs **m* ≈ 2,800**. This is the §14.4 understatement case in its extreme form.
+* **Reconciling with §14.4** (benchmarks can understate contextual bias by up to 12×).
+  * Understatement happens when the true violation acts **through composition itself** (an own-composition contextual effect) and the covariates are only weakly tied to composition. κ_k is large only for covariates that both move rates *and* are associated with composition given the other covariates. No observed covariate is as collinear with composition as composition itself.
+  * The three cases separate two notions that are easy to conflate:
+    * covariates that explain a lot of the **outcome**: $R^2(Y\sim X,Z)$ was 0.88–0.92 in all three cases, and it predicted nothing about $m^*$;
+    * covariates that explain a lot of the **composition**: $R^2(X\sim Z)$. This one matters, but in two opposite directions (point 2 against point 3).
+  * Outcome R² cannot bound the contextual remainder at all, because that remainder is invisible in $E[Y\mid X,Z]$ (§14.3).
+* **Relation to Step 4's B1 benchmark.**
+  * B1(M) benchmarks the own-composition effect against the *identified* effect of composition at another scale, a benchmark of the **same nature** as the threat.
+  * Covariate benchmarks calibrate omitted-covariate-type violations, and they are optimistic for contextual ones.
+  * **Show both whenever a second-scale composition exists.** When they disagree, the B1 allowance should govern statements about contextual bias.
+  * Without a second-scale composition, print the covariate benchmark with the §14.4 caution and the overlap factor beside it.
+* **Proof items** (proposed **R28**):
+  * (a) identification of $\Delta^{(-k)}$ under CAR(Z) with positivity;
+  * (b) validity of the bridge bound and monotonicity in m, with its LP (δ) and SOCP (κ) forms;
+  * (c) the group-rate error bound in terms of κ and the overlap operator norm in R×C, generalising §14.5's 2×2 factor;
+  * (d) a statement that $m^*$ is not identified, so the bridge is untestable except through emptiness.
+* **Checks.**
+  * N22, extended to several covariates and to R×C.
+  * Coverage of the bridge bound at m ≥ m* and failure at m < m*, by simulation with a known truth.
+  * The bridge bound collapses to CAR(Z) at m = 0 and to DD as m → ∞.
 
 **Worked example** [NA, `check_car_sensitivity`, reproduced].
 * A contextual violation that leaves the regression exactly unchanged biases a group's rate by 0.080.
@@ -475,7 +507,7 @@ They combine in **one LP** on the shared model "each group's mean rate = effect 
   * The benchmark $\delta_k$ and its caveats (§14.5).
 * **Inference.** η(Z) is estimated, by series or within cells. Rows enter the CLR and projection stacks for linear η. Semiparametric nuisance estimation is a Phase-3 question (§13.4). Positivity diagnostics are printed.
 * **Do not build** the Cinelli–Hazlett/Chernozhukov contours. Point to `seine` with §14.4's caution.
-* **Interface.** `eiBounds(..., covariates = ~ wealth + nativity, restrictions = list(car = list(delta = seq(0, .1, .01), norm = "sup")), z = ~ county_vetshare)`; `print(fit, overlap = TRUE, benchmarks = TRUE)`.
+* **Interface.** `eiBounds(..., covariates = ~ Z1 + Z2, restrictions = list(car = list(delta = seq(0, .1, .01), norm = "sup", bench = list(kappa = TRUE, m = c(0.5, 1, 2)))), z = ~ area_share)`; `print(fit, overlap = TRUE, benchmarks = TRUE)` prints κ_k, δ_k, $R^2(X\sim Z)$, $R^2(Z_k\sim X\mid Z_{-k})$, the overlap factor and, when z is given, the B1 benchmark beside them.
 * **Tests.**
   * Reproduce `check_car_sensitivity` Parts 1–3.
   * δ = 0 equals Goodman within cells.
@@ -1215,7 +1247,7 @@ So the data cannot sign the correlation. Without the module, A2 must *assume* it
 
 ## Part 8. What I verified, and what I take on trust
 
-**Verified numerically here** (`verify_next_steps.py`, 31/31 PASS):
+**Verified numerically here** (`verify_next_steps.py`, 32/32 PASS):
 
 | Label | Claim | Result |
 |---|---|---|
@@ -1234,6 +1266,7 @@ So the data cannot sign the correlation. Without the module, A2 must *assume* it
 | N18 | Hull contrasts (O_rs ≥ 0 at every support point) imply the model between sign δ_B(r,s) ≥ 0 | 0 violations |
 | N19 | Berkson correction for matched composition: E[T \| q] = q̄'Qq̄ + Var(u)·(Q_vv − 2Q_vn + Q_nn) | max error 3e−5 against simulation |
 | N20 | Estimated margin: expected count 60 treated as exact gives [0.167, 0.833]; true count in its 95% Poisson-binomial set [56, 64] gives [0.107, 0.893] | confirmed |
+| N22 | Covariate-benchmarked κ with a known contextual violation: covariates tied to composition need m* ≈ 0; covariates explaining the outcome but not composition need m* ≈ 2,800; covariates absorbing most composition (R²(X~Z) = .92) give κ_true = .006 but a group-rate error of −.123 (overlap factor 5.0) | confirmed |
 | N21 | Set-valued pre-trends: pre-period DiD in [−1.23, 1.27]; relative-magnitude ATT (M̄ = 1) [−2.35, 2.65] jointly vs [−2.35, 2.69] endpoint-wise (no information); trend dial M = .10 gives [−1.18, 1.52]; with pre-period totals pinned to ±2 votes, ATT [−0.60, 0.90] | confirmed (grid over the joint set) |
 | N15 | E4 transfer example (B's rate [0.529, 0.751] → 0.656; ±2 points on A → [0.650, 0.662]) | confirmed |
 
@@ -1272,6 +1305,7 @@ Bimodal precinct rates are where the gains appear; the size channel (N4) is a se
 | R24 | Subset identity (2×C, R×2) = Aumann expectation | proof sketch here; checked N1–N3 | Step 7 |
 | R25 | Count layer with set-valued margins: coverage ≥ 1−α if P(V ∈ 𝒱) ≥ 1−α; joint margin sets from match probabilities; monotone in a calibration slack | (a) one-line argument; (b), (c) to write | Step 1b |
 | R26 | LCE layer with matched (Berkson) composition: known regression correction tr(QΣ_u); allowance for the target's weights; nondifferential matching assumption | correction checked (N19); rest open | Step 1b |
+| R28 | Covariate-benchmarked κ/δ: identification of the drop-one violation under CAR(Z); validity and monotonicity of the bridge bound; group-rate error bound via the overlap operator in R×C; m* not identified | checked by simulation (N22); proofs to write | Step 5 |
 | R27 | Cross-layer intersection: coverage ≥ 1−α; disjointness is a level-α test of the model layer and its rows | union-bound argument, to write | Steps 1, 3A |
 | R1 (reword) | C1 is needed only for the implication weighted-local ⇒ $\delta_W\ge0$, not to compute M-CONTRAST/M-LOC | J | the M-LOC ⇒ SIGN-W cell only |
 | R5, R6 (Blocks column) | now block nothing in the numbered order (deferred) | as before | — |

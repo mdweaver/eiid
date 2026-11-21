@@ -603,4 +603,41 @@ report("N21 set-valued pre-trends in relative-magnitude bounds", jl >= el - 1e-9
        f"ATT with Mbar=1: joint [{jl:.2f},{ju:.2f}], endpoint-wise [{el:.2f},{eu:.2f}]; trend dial M=.10: [{td[0]:.2f},{td[1]:.2f}]. "
        f"Narrow pre-trends (pre totals pinned to +/-2 votes): D0 in [{nD0[0]:.2f},{nD0[1]:.2f}], ATT joint [{nl:.2f},{nu:.2f}]")
 
+# N22: covariate-benchmarked kappa (NEW_AVENUES 14.8) with a KNOWN true contextual violation.
+# Units: covariate Z ~ U(-1,1); composition X = c0 + g Z + U(-w, w) (g, w set how much Z explains X).
+# Rates: m1 = .5 + b Z + D1, m0 = .3 + .5 b Z + D0, plus unit noise (sd .08 per group), with the
+# invisible contextual violation of 14.3: D1 = k (1 - X), D0 = -k X (x'D = 0: E[Y|X,Z] is untouched).
+# Benchmark (drop Z, the only covariate): Delta^(-Z)_1 = b (E[Z|X] - E Z); kappa_Z = E[(.)^2]/Var(Y).
+# Truth: CAR(Z) violation for group 1 = -k (X - E[X|Z]); kappa_true = E[(.)^2]/Var(Y).
+# m* = kappa_true / kappa_Z: the multiple of the benchmark the truth needs.
+# Overlap factor (14.5, 2x2): mean over Z of (2 - a - b)/(b - a) for the within-cell range [a, b] of X.
+def kappa_case(c0, g, w, b, k, n=400000):
+    Z = rng.uniform(-1, 1, n); X = c0 + g * Z + rng.uniform(-w, w, n)
+    e1, e0 = rng.normal(0, .08, n), rng.normal(0, .08, n)
+    m1 = .5 + b * Z + k * (1 - X) + e1; m0 = .3 + .5 * b * Z - k * X + e0
+    Y = X * m1 + (1 - X) * m0; VY = Y.var()
+    EZgX = np.polyval(np.polyfit(X, Z, 3), X)
+    kZ = np.mean((b * (EZgX - Z.mean())) ** 2) / VY
+    EXgZ = c0 + g * Z
+    kt = np.mean((k * (X - EXgZ)) ** 2) / VY
+    A = np.column_stack([np.ones(n), X, Z, X * Z, X ** 2])
+    r2Y = 1 - np.var(Y - A @ np.linalg.lstsq(A, Y, rcond=None)[0]) / VY
+    r2X = 1 - np.var(X - EXgZ) / X.var()
+    a_, b_ = EXgZ - w, EXgZ + w
+    ovl = np.mean((2 - a_ - b_) / (b_ - a_))
+    # bias of the CAR(Z) answer for group 1's rate: CAR recovers eta_1 = .5 + b Z (the violation is
+    # invisible), the truth is B_1 = E[X m1]/E[X]
+    B1_true = np.sum(X * m1) / np.sum(X); B1_car = np.sum(X * (.5 + b * Z)) / np.sum(X)
+    return dict(R2_Y=r2Y, R2_X=r2X, kZ=kZ, kt=kt, m=kt / kZ, ovl=ovl, bias=B1_car - B1_true)
+cases = {"A covariate shares composition, small contextual effect": (.4, .15, .25, .4, .05),
+         "B covariate explains outcome, not composition, large contextual effect": (.4, .0, .25, .4, .30),
+         "C covariate absorbs most composition variation, large contextual effect": (.5, .35, .10, .4, .30),
+         "D modest covariate tied to composition, small contextual effect": (.4, .15, .25, .1, .03)}
+res = {nm: kappa_case(*v) for nm, v in cases.items()}
+rA, rB, rC = res[list(cases)[0]], res[list(cases)[1]], res[list(cases)[2]]
+ok = rA["m"] < 1 and rB["m"] > 10 and rC["kt"] < rB["kt"] / 5 and rC["ovl"] > rA["ovl"] and abs(rC["bias"]) > 4 * abs(rA["bias"])
+report("N22 covariate-benchmarked kappa: when the benchmark is informative", ok,
+       "; ".join(f"{nm}: R2(Y~X,Z) {r['R2_Y']:.2f}, R2(X~Z) {r['R2_X']:.2f}, kappa_Z {r['kZ']:.4f}, "
+                 f"kappa_true {r['kt']:.4f}, m* {r['m']:.2f}, overlap factor {r['ovl']:.1f}, bias of CAR(Z) for B_1 {r['bias']:+.3f}" for nm, r in res.items()))
+
 print(f"\n{sum(results)}/{len(results)} PASS")

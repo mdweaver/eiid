@@ -397,6 +397,32 @@ report("T5 round the rows, not the endpoint", "F",
        "(fails on 'the integer endpoint is the LP endpoint rounded')")
 
 # ---------------------------------------------------------------------------
+# T6 [F] (review issue 1): in class (iii) the ORIGINAL margins+totals matrix need not be TU,
+# yet F_rd is integral (via the substitution n_2c = b_c - y_c). Design of review check RC1.
+# ---------------------------------------------------------------------------
+L = CountLP(a=[[1, 1]] * 3, b=[[1, 1]] * 3)
+RC = L.R + L.C
+rows_M = [L.cellrow([0, 1, 2], 0, 0), np.array(L.Aeq[2 * RC + 0]), L.cellrow([1, 2], 0, 1), np.array(L.Aeq[1 * RC + L.R + 1]),
+          np.array(L.Aeq[1 * RC + 1]), L.cellrow([0, 1], 1, 0), np.array(L.Aeq[0 * RC + L.R + 0])]
+cols_M = [L.ix(0, 0, 0), L.ix(2, 0, 0), L.ix(2, 0, 1), L.ix(1, 0, 1), L.ix(1, 1, 1), L.ix(1, 1, 0), L.ix(0, 1, 0)]
+minor = round(np.linalg.det(np.array(rows_M)[:, cols_M]))
+bad = 0; fr6 = 0; n6 = 0
+for _ in range(100):
+    tabs = [rng.integers(0, 6, size=(2, 2)) for _ in range(3)]
+    L6 = CountLP(tabs)
+    t1 = sum(t[0, 0] for t in tabs); L6.total([0, 1, 2], 0, 0, lo=t1 - rng.random(), hi=t1 + rng.random())
+    t2 = tabs[0][1, 0] + tabs[1][1, 0]; L6.total([0, 1], 1, 0, lo=t2 - rng.random(), hi=t2 + rng.random())
+    t3 = tabs[1][0, 1] + tabs[2][0, 1]; L6.total([1, 2], 0, 1, lo=t3 - rng.random(), hi=t3 + rng.random())
+    Lr6 = L6.rounded(); tg = rng.integers(-3, 4, size=L6.nv)
+    for sense in (1, -1):
+        v, x = Lr6.lp(tg, sense); vi, _ = Lr6.ip(tg, sense); n6 += 1
+        bad += (v is None) != (vi is None) or (v is not None and abs(v - vi) > 1e-7); fr6 += frac(x) > 1e-7
+report("T6 class (iii): the original matrix is not TU, but F_rd is integral", "F", abs(minor) == 2 and bad == 0 and fr6 == 0,
+       f"3 units 2x2, totals {{012}} on (1,1), {{01}} on (2,1), {{12}} on (1,2): a 7x7 minor of the margins+totals matrix = {minor} "
+       f"(fails on 'the constraint matrix of the rounded system is TU' in class (iii)); {n6} endpoints with random rhs: "
+       f"{bad} LP != MILP, {fr6} fractional vertices (integrality holds via the substitution)")
+
+# ---------------------------------------------------------------------------
 # N10a-c (from verify_next_steps.py, reproduced; N10c with explicit, named rows)
 # ---------------------------------------------------------------------------
 nonint = 0
@@ -639,6 +665,21 @@ report("S4 unit rows can make a between sign refutable (2c M3(c) needs no unit r
        f"two units N=10, V=5, yes=5; Y^NM = {g['YNM']:.1f}; known cell y_1 = 0 and box y_2 <= 4: "
        f"between-sign system infeasible = {feas is None}")
 
+# S5 [F] (review issue 5): with fractional boxes on several units the integer values of Y need not be
+# the lattice inside the continuous interval (T5 design + between sign)
+L = CountLP(a=[[1, 4], [1, 4]], b=[[1, 4], [1, 4]])
+for i in range(2): L.box(i, 0, 0, lo=0.2)
+YNM5 = thresholds([[1, 4], [1, 4]], [[1, 4], [1, 4]], 0, 0)[0]; L.total([0, 1], 0, 0, lo=YNM5)
+tg = L.cellrow([0, 1], 0, 0); clo, _ = L.lp(tg, 1); chi, _ = L.lp(tg, -1)
+ivals = sorted({y0 + y1 for y0 in (0, 1) for y1 in (0, 1) if y0 >= 0.2 and y1 >= 0.2 and y0 + y1 >= YNM5})
+ilo, _ = L.rounded().lp(tg, 1)
+in_int = [k for k in range(math.ceil(clo - 1e-9), math.floor(chi + 1e-9) + 1)]
+report("S5 integer values are an integer interval, not always the lattice in the continuous range", "F",
+       abs(YNM5 - 0.4) < 1e-12 and ivals == [2] and in_int == [1, 2] and abs(ilo - 2) < 1e-9,
+       f"two units (N=5, V=1, yes=1), ordering boxes n >= 0.2, between sign Y >= Y^NM = {YNM5:.1f}: continuous range "
+       f"[{clo:.1f}, {chi:.1f}] contains {in_int}; integer values {ivals}; C2(b)'s formula max(Y^-_rd, ceil Y^NM) = {ilo:.0f} "
+       "(fails on 'the integer gap set is the lattice inside the continuous interval')")
+
 print("=== Worked examples (count layer) ===")
 # E1: realised ordering, two precincts (P1: 100, 20 V, 30 yes; P2: 100, 60 V, 50 yes)
 L = CountLP(a=[[20, 80], [60, 40]], b=[[30, 70], [50, 50]])
@@ -810,6 +851,37 @@ report("X4 disjointness tests the conjunction: a false count row is rejected too
        f"model true; false count rows (the known cells of 90% of units set to their DD minima), 1000 units: rejection rate "
        f"{s_fr['rej']/REP:.3f} (fails on 'a disjoint answer rejects the model, not the realised-table rows')")
 
+# X6 [F] (review issue 2): a BELIEF row about the realised table is an event under the model.
+# Pooled-LCE-type truth with binomial unit draws; an oracle interval for B (B~ +/- 1.96 sd(E)); belief
+# row 'B >= t' (a total on the veteran-yes count). Conditional coverage / rejection given the row can
+# violate 1-alpha / alpha; the union bounds (*) hold in every replication by inclusion.
+r6 = np.random.default_rng(66); p6 = 200
+X6_ = r6.uniform(0.05, 0.95, size=p6); N6 = r6.integers(50, 151, size=p6)
+V6 = np.clip(np.rint(N6 * X6_).astype(int), 1, N6 - 1); X6_ = V6 / N6; m16 = 0.30 + 0.40 * X6_; m06 = 0.20 + 0.20 * X6_
+Bt = (V6 * m16).sum() / V6.sum(); sdE = math.sqrt((V6 * m16 * (1 - m16)).sum()) / V6.sum()
+out6 = []
+for kt in (1.0, 2.4):
+    t = Bt + kt * sdE; nrep = 20000
+    y1 = r6.binomial(V6, m16, size=(nrep, p6)); y0 = r6.binomial(N6 - V6, m06, size=(nrep, p6))
+    B = y1.sum(1) / V6.sum(); Y = y1 + y0
+    ddlo = np.maximum(0, V6 + Y - N6).sum(1) / V6.sum(); ddhi = np.minimum(V6, Y).sum(1) / V6.sum()
+    ci_lo, ci_hi = Bt - 1.96 * sdE, Bt + 1.96 * sdE
+    row = B >= t                                            # the belief row holds in this replication
+    c_lo = np.maximum(ddlo, t); c_hi = ddhi                 # count set with the belief row
+    lo = np.maximum(c_lo, ci_lo); hi = np.minimum(c_hi, ci_hi)
+    empty = lo > hi; cover = (~empty) & (lo <= B) & (B <= hi); miss_ci = (B < ci_lo) | (B > ci_hi)
+    ok_star = np.all((~cover) <= (miss_ci | ~row)) and np.all((empty & row) <= miss_ci)
+    out6.append((kt, row.mean(), cover[row].mean() if row.any() else np.nan, empty[row].mean() if row.any() else np.nan,
+                 (~cover).mean(), miss_ci.mean() + (~row).mean(), (empty & row).mean(), miss_ci.mean(), ok_star))
+a6, b6 = out6
+report("X6 belief rows: conditional level fails; the union bounds (*) hold", "F",
+       a6[2] < 0.95 and b6[3] > 0.05 and a6[8] and b6[8],
+       f"200 units, oracle 95% interval for B, belief row 'B >= B~ + k sd(E)'. k = 1.0: P(row) = {a6[1]:.3f}, coverage of "
+       f"C ∩ CI given the row {a6[2]:.3f}; k = 2.4: P(row) = {b6[1]:.4f}, rejection rate given the row {b6[3]:.3f} "
+       f"(fails on reading 'under H_C and H_M' as conditioning on the belief row). Unconditional: miss {a6[4]:.3f} <= "
+       f"{a6[5]:.3f} and {b6[4]:.3f} <= {b6[5]:.3f}; P(reject and row) {a6[6]:.4f} <= {a6[7]:.4f}, {b6[6]:.4f} <= {b6[7]:.4f}; "
+       f"the inclusions behind (*) hold in every replication: {a6[8] and b6[8]}")
+
 s_j = simulate(REP, known_frac=0.5, p=1000, seed=17)
 wj = np.array(s_j["w_joint"]); wi = np.array(s_j["w_int"])
 report("X5 the intersection is not the smallest valid set (R27(iii))", "I",
@@ -837,6 +909,18 @@ report("G1 general-target allowance: Var(E_phi) <= S_phi^2 under within-unit dep
        maxratio <= 1 + 1e-12 and abs(attained - 1) < 1e-12,
        f"200 random designs (gap target, random dependent joint laws of the two group rates per unit): max Var/S^2 = "
        f"{maxratio:.4f}; perfectly opposite rates attain {attained:.4f}")
+
+# G2 (review issue 4): Hoeffding allowance t_E(phi) for a gap target, extremal dependent rates
+r7 = np.random.default_rng(77); p7 = 60
+N7 = r7.integers(10, 60, size=p7); V7 = np.minimum(r7.integers(1, 9, size=p7), N7 - 1)
+c1 = V7 / V7.sum(); c0 = -(N7 - V7) / (N7 - V7).sum(); rho7 = np.abs(c1) + np.abs(c0)
+aE = 0.05; tE = math.sqrt(0.5 * math.log(2 / aE) * np.sum(rho7 ** 2))
+flip = r7.random((40000, p7)) < 0.5                         # (beta_1, beta_0) = (1,0) or (0,1)
+Z = np.where(flip, c1, c0)                                 # Z_i = c1 if (1,0), c0 if (0,1)
+E7 = (Z - (0.5 * c1 + 0.5 * c0)).sum(1)
+tail = np.mean(np.abs(E7) > tE)
+report("G2 Lemma 4.1(b): Hoeffding allowance t_E(phi) for a gap target", "V", tail <= aE,
+       f"60 units, perfectly opposite group rates (the extremal law of G1), 40,000 draws: P(|E| > t_E) = {tail:.4f} <= alpha_E = {aE}")
 
 print()
 print(f"{sum(results)}/{len(results)} PASS")

@@ -25,5 +25,8 @@ PASS N14 misclassification example: recorded labels: [0.167,0.833]; up to 2 misl
 PASS N15 E4 transfer worked example: electorate B veteran rate (model-implied, truth 0.656): LCE alone [0.529,0.751]; with A's table, same pattern exactly: [0.656,0.656]; pattern may differ (A's rate +/- .02): [0.650,0.662]
 PASS N16 polynomial ladder widens: group-1 rate (truth 0.632): straight lines [0.436,0.779]; quadratic [0.419,0.796]; cubic [0.359,0.820]; Duncan-Davis (no model) [0.324,0.834]
 PASS N17 odds-ratio dial example: P2 veteran yes rate: DD [0.167,0.833]; OR >= 1 (ordering) [0.500,0.833]; 1 <= OR <= 4 [0.500,0.633]
+PASS N18 hull contrasts imply the model between sign: 0 violations among random designs with O_rs >= 0 at all support points
+PASS N19 Berkson correction for matched composition: 20 random units (20-200 men, match probabilities in [0,1]): max |MC - formula| = 3.0e-05 (MC error ~1e-4)
+PASS N20 estimated margin widens the count-layer range: expected count 60 treated as exact: [0.167,0.833]; true count in its 95% set [56,64]: [0.107,0.893] (covers the actual rate with prob >= .95 under calibrated, independent matches)
 
-27/27 PASS
+30/30 PASS

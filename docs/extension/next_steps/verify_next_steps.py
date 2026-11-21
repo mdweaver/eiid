@@ -515,4 +515,54 @@ report("N17 odds-ratio dial example", abs(o1[0] - .5) < 1e-3 and o2[1] < 50 / 60
        f"P2 veteran yes rate: DD [{10/60:.3f},{50/60:.3f}]; OR >= 1 (ordering) [{o1[0]:.3f},{o1[1]:.3f}]; "
        f"1 <= OR <= 4 [{o2[0]:.3f},{o2[1]:.3f}]")
 
+# N18: M-CONTRAST "hull" implies the model between signs. delta_B(r,s) = E_p[X_r X_s (m_r - m_s)]
+# has non-negative weights, so O_rs(x) = m_r(x) - m_s(x) >= 0 at every support point implies
+# delta_B(r,s) >= 0 (redundant when both are imposed; checked on random LCE designs).
+viol = 0
+for _ in range(2000):
+    R = rng.integers(2, 5); I = rng.integers(3, 12)
+    X = rng.dirichlet(np.ones(R), size=I); p = rng.dirichlet(np.ones(I)); H = rng.normal(size=(R, R))
+    M = X @ H.T                                   # m(x_i) = H x_i, rows = units
+    r_, s_ = 0, 1
+    O = M[:, r_] - M[:, s_]
+    if np.all(O >= 0):
+        dB = np.sum(p * X[:, r_] * X[:, s_] * O)
+        viol += dB < -1e-12
+report("N18 hull contrasts imply the model between sign", viol == 0, f"{viol} violations among random designs with O_rs >= 0 at all support points")
+
+# N19: estimated (probabilistically matched) composition. If each of a unit's N men is a veteran
+# with known match probability q_j, independently, the true share X = qbar + u with E[u | q] = 0
+# (Berkson error) and Var(u | q) = sum_j q_j (1 - q_j) / N^2.  Then for one column (2 groups,
+# X = veteran share) E[T | q] = qbar' Q qbar + Var(u) * (Q_vv - 2 Q_vn + Q_nn): a KNOWN correction
+# to the regression that involves only the symmetric part Q, so K stays the only unknown.
+# Assumes the match probabilities carry no information about rates beyond the true composition.
+Hm = np.array([[.55, .40], [.20, .30]])         # m_v(x) = .55 x + .40 (1-x) etc. (rows v, n; cols v-share, n-share)
+Qm = (Hm + Hm.T) / 2
+maxdiff = 0.0
+for _ in range(20):
+    Nn = rng.integers(20, 200); q = rng.beta(.5, .5, size=Nn) * rng.uniform(.2, 1)
+    qbar = q.mean(); var_u = np.sum(q * (1 - q)) / Nn ** 2
+    sims = 200000
+    V = (rng.uniform(size=(sims, Nn)) < q).sum(1) / Nn       # true veteran share draws
+    Xs = np.stack([V, 1 - V], 1)
+    ET_mc = np.mean(np.einsum("ij,jk,ik->i", Xs, Qm, Xs))   # E[X'QX | q]; rates' noise averages out
+    xb = np.array([qbar, 1 - qbar])
+    ET_formula = xb @ Qm @ xb + var_u * (Qm[0, 0] - 2 * Qm[0, 1] + Qm[1, 1])
+    maxdiff = max(maxdiff, abs(ET_mc - ET_formula))
+report("N19 Berkson correction for matched composition", maxdiff < 5e-4,
+       f"20 random units (20-200 men, match probabilities in [0,1]): max |MC - formula| = {maxdiff:.1e} (MC error ~1e-4)")
+
+# N20: count layer with an estimated group margin.  P2: 100 men, 50 yes.  Matching gives 50 men
+# with probability 1 and 20 with probability .5 (expected veterans 60, sd 2.24).  An exact
+# (Poisson-binomial) central 95% set for the true count is used as the margin set.
+from math import comb
+pmf = np.array([comb(20, k) * .5 ** 20 for k in range(21)])            # extra veterans among the 20
+cdf = np.cumsum(pmf); lo_k = int(np.searchsorted(cdf, .025)); hi_k = int(np.searchsorted(cdf, .975))
+Vset = range(50 + lo_k, 50 + hi_k + 1)
+rates = [(dd_count(100, Vv, 50)[0] / Vv, dd_count(100, Vv, 50)[1] / Vv) for Vv in Vset]
+rl, ru = min(a for a, b in rates), max(b for a, b in rates)
+report("N20 estimated margin widens the count-layer range", rl < 10 / 60 and ru > 50 / 60,
+       f"expected count 60 treated as exact: [{10/60:.3f},{50/60:.3f}]; true count in its 95% set "
+       f"[{min(Vset)},{max(Vset)}]: [{rl:.3f},{ru:.3f}] (covers the actual rate with prob >= .95 under calibrated, independent matches)")
+
 print(f"\n{sum(results)}/{len(results)} PASS")

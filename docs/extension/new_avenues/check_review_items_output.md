@@ -24,3 +24,5 @@ DD width for group A's aggregate yes rate: one-way margins 0.748; with group x a
 |---|---|---|---|---|---|
 | 1857 | 0.084 | 0.129 | 3.35 | False | [1.01, 11.91] |
 | 1865 | 0.218 | 0.106 | -0.16 | True | [-0.49, 0.70] |
+
+*(Nov 2026 note: the cluster SE / cluster-bootstrap figures above predate decision D3, under which eiPartialID's inference is conditional on the design with no clustering. Re-derive before use; see `MSIGN_REVIEW_LOG.md` M-15.)*

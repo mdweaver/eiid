@@ -22,3 +22,5 @@ share of units whose party-vote and candidate-vote totals differ by >2%: 0.00
 | OTH->LAB | 0.052 | 0.28 | 357 |
 | OTH->NAT | 0.058 | 0.28 | 357 |
 | OTH->OTH | 0.071 | 0.22 | 357 |
+
+*(Nov 2026 note: the cluster SE / cluster-bootstrap figures above predate decision D3, under which eiPartialID's inference is conditional on the design with no clustering. Re-derive before use; see `MSIGN_REVIEW_LOG.md` M-15.)*

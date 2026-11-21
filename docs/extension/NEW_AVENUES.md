@@ -41,7 +41,7 @@ Three structural facts frame the search:
 **Main messages.**
 
 * **A is the most interesting avenue scientifically, and it is not a new assumption to most of the EI literature.** Every likelihood-based EI model (King, Wakefield, Brown–Payne, Greiner–Quinn, Imai–Lu–Strauss) already assumes binomial or multinomial voting within poll-row cells.
-* **A works in New Zealand.** In 31,359 NZ polling places the $1/n$ term is clearly present and binomial-sized: the slope on its binomial prediction is 0.69–0.81, with SE about 0.10 (§1.6).
+* **A works in New Zealand.** In 31,359 NZ polling places the $1/n$ term is clearly present and binomial-sized: the slope on its binomial prediction is 0.69–0.81, with SE about 0.10 (§1.6; clustered SE predating decision D3, M-15).
 * **But A is statistically expensive.** The information sits in the smallest units, and naive plug-in bounds are badly biased inward.
 * **B is the most practical new rung.** It uses one more variable that analysts usually have, and its dial $M$ fits the existing sensitivity machinery.
 
@@ -471,7 +471,7 @@ D can be done at any point, as infrastructure.
 | `new_avenues/sim_second_moments.py` → `_output.md` | Avenue A, identification and estimation, four designs | large identification gain; valid estimation needs many units |
 | `new_avenues/sim_two_scale_context.py` → `_output.md` | Avenue B, rungs B0–B3, true and false $M$ | smooth gain in $M$; correct failure when $M<\lambda$ |
 | `new_avenues/check_structural_claims.py` → `_output.md` | C1 (CVRs add nothing), E1 (rank of $K\mapsto B^*$) | PASS / PASS |
-| `new_avenues/export_nz_units.R`, `new_avenues/nz_diagnostics.py` → `_output.md` | D1: binomial slope in NZ; D2: persistence of the K-part | slope 0.69–0.81 (SE ≈ 0.10); persistence 0.03–0.51 |
+| `new_avenues/export_nz_units.R`, `new_avenues/nz_diagnostics.py` → `_output.md` | D1: binomial slope in NZ; D2: persistence of the K-part | slope 0.69–0.81 (clustered SE ≈ 0.10, M-15); persistence 0.03–0.51 |
 | `new_avenues/sim_size_grid.py` → `_output.md` | Avenue A: how many units, and how small | needs thousands of units with median size of a few hundred or less |
 | `new_avenues/check_nesting.py` → `_output.md` | outcome nesting, no model (§12.3) | no change to a single outcome; contrast width 0.39 of no-nesting (median) |
 | `new_avenues/check_nesting_lce.py` → `_output.md` | outcome nesting under linear contextual effects | no change to a single outcome in 400 designs |
@@ -716,7 +716,7 @@ $\Sigma$ is identified, and the correlation that A2 merely *assumed* to be non-n
 * It needs compositional support near the vertices and midpoints of the simplex.
 
 **Wisconsin check** (yes rate, units ≥ 100 men, coin-flip upper bound removed):
-* **1857:** the estimated $\Sigma$ is **not positive semidefinite** (implied "correlation" 3.35; bootstrap interval [1.0, 11.9]). The quadratic-form structure fails, or noise dominates.
+* **1857:** the estimated $\Sigma$ is **not positive semidefinite** (implied "correlation" 3.35; cluster-bootstrap interval [1.0, 11.9] *(predates decision D3; re-derive before use, M-15)*). The quadratic-form structure fails, or noise dominates.
 * **1865:** SDs 0.22 (veterans) and 0.11 (non-veterans), correlation −0.16, 90% cluster-bootstrap interval **[−0.49, 0.70]** *(cluster bootstrap predates decision D3; re-derive before use, M-15)*. The data cannot even sign the correlation.
 
 **Assessment:** a clean theoretical bridge, and the right replacement for A2's sign assumption, but data-hungry. It should not displace E4/E5.
@@ -910,7 +910,7 @@ The lesson from §14.4 is to parametrise the violation **directly in outcome uni
 * **Data demands.** $\Sigma(z)$ via polarisation needs $\operatorname{Var}(Y\mid X,Z)$ at vertices *and* edge midpoints for each $z$. That is positivity twice over, plus fourth moments.
 * **It is more testable than CAR (proved implications).**
   * $\operatorname{Var}(Y\mid X,Z)$ must be quadratic in $X$ (no cubic or quartic terms), and the implied $\Sigma(z)$ must be PSD.
-  * Wisconsin 1857: implied correlation 3.35, bootstrap interval [1.0, 11.9]. That is borderline evidence *against* CAR2, or against the quadratic form with unequal unit sizes.
+  * Wisconsin 1857: implied correlation 3.35, cluster-bootstrap interval [1.0, 11.9] (M-15: re-derive without clustering before relying on it). That is borderline evidence *against* CAR2, or against the quadratic form with unequal unit sizes.
   * Clipping eigenvalues, as recommended, would hide this. Report the test before clipping.
 * **A new role (proposal): the scale for an $R^2$ dial on group rates.**
   * If only the *variance* is assumed invariant, $\operatorname{Var}(B\mid X,Z)=\Sigma(Z)$, with no CAR on means, then $\operatorname{Var}(Y\mid X,Z)=X^\top\Sigma(Z)X$ still identifies $\Sigma$. The conditional variance is taken around $E[Y\mid X,Z]$, which absorbs mean violations.

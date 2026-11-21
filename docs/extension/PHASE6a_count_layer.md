@@ -4,7 +4,7 @@
 
 *Theory only. Nothing in the package or in other theory documents is changed; problems found in them are listed in §9. Checks: `verify_phase6a.py` (output `verify_phase6a_output.txt`, **36/36 PASS**), tagged as in 2c and 5a: **[F]** fails on an earlier or tempting statement and passes on the one made here; **[V]** verifies a statement made here; **[I]** illustrates.*
 
-*Status in brief (after the proof review, `reviews/PHASE6a_proof_review.md`; its 15 issues are fixed as listed in §10). Every proved item is labelled **P; proof review pending** until the reviewer confirms the fixes. R19(a)–(e): integrality for TU classes (i)–(iii) (TU of the original matrix for (i)–(ii)); LP outer and MILP exact outside them. Prop. C2 (realised one-vs-rest signs and CR in counts, one sign set, integer versions). Lemma 4.1 (asymptotic and Hoeffding residual allowances for linear count targets with design-measurable coefficients). R27: union bounds $(*)$; exact level-α coverage and test with identity rows only (margins, published totals, audited cells); with belief rows, coverage $\ge1-\alpha-P(\text{rows false})$ and P(reject while the rows hold) ≤ α. R27(iii-a) (compatible values): P; R27(iii-b) (non-minimality): a computed example. What remains of R15 becomes a computed check (§3.4).*
+*Status in brief (after the proof review, `reviews/PHASE6a_proof_review.md`; its 15 issues are fixed as listed in §10). Round 2 of the review confirmed the fixes (one residual phrase, N1, fixed in §10); every proved item is labelled **P; proof reviewed (docs/extension/reviews/PHASE6a_proof_review.md)**. R19(a)–(e): integrality for TU classes (i)–(iii) (TU of the original matrix for (i)–(ii)); LP outer and MILP exact outside them. Prop. C2 (realised one-vs-rest signs and CR in counts, one sign set, integer versions). Lemma 4.1 (asymptotic and Hoeffding residual allowances for linear count targets with design-measurable coefficients). R27: union bounds $(*)$; exact level-α coverage and test with identity rows only (margins, published totals, audited cells); with belief rows, coverage $\ge1-\alpha-P(\text{rows false})$ and P(reject while the rows hold) ≤ α. R27(iii-a) (compatible values): P; R27(iii-b) (non-minimality): a computed example. What remains of R15 becomes a computed check (§3.4).*
 
 ---
 
@@ -76,7 +76,7 @@ When the margins are integers, every realised table is an integer table. The **r
 
 *Proof.* Each rounding step replaces a row by one with the same integer solutions [Chv; alg]; for bounds this is the one-variable case. The rounded rows are implied by the original ones, so $F_{\rm rd}\subseteq F$. ∎
 
-*Check.* B1, T5, N10b. **Status: P; proof review pending.**
+*Check.* B1, T5, N10b. **Status: P; proof reviewed (docs/extension/reviews/PHASE6a_proof_review.md).**
 
 ---
 
@@ -99,7 +99,7 @@ When the margins are integers, every realised table is an integer table. The **r
 4. Item 3: by definition every $n\in F$ is consistent with all the stated information. [Def]
 5. Item 4: emptiness is the definition; CR applies 1–4 to each branch; slack dials enter only right-hand sides, so 2c M2 step 6 applies verbatim. [2c:M2(c),(d)] ∎
 
-*Relation to 2c M2.* In $\beta$ coordinates (§1.1) $F$ is 2c's N1 feasible set with unit restrictions $U_i$, plus the rows that couple units (totals). R19(a) is M2(a)–(d) for general linear count targets and count rows. **Status: P; proof review pending** (standard; NS called it standard).
+*Relation to 2c M2.* In $\beta$ coordinates (§1.1) $F$ is 2c's N1 feasible set with unit restrictions $U_i$, plus the rows that couple units (totals). R19(a) is M2(a)–(d) for general linear count targets and count rows. **Status: P; proof reviewed (docs/extension/reviews/PHASE6a_proof_review.md)** (standard; NS called it standard).
 
 ### 2.1.1 Duncan–Davis as the margins-only case
 
@@ -117,7 +117,7 @@ When the margins are integers, every realised table is an integer table. The **r
 4. (b): within a unit, the maximum of $n_{irc}$ is $\min(a_{ir},b_{ic})$. Given it, the least feasible $n_{isc}$ is $\max(0,b_{ic}-n_{irc}-(N_i-a_{ir}-a_{is}))$, which equals the unconditional Fréchet minimum $\max(0,b_{ic}-N_i+a_{is})$ in both cases $a_{ir}\le b_{ic}$ and $a_{ir}>b_{ic}$. So both separate optima are attained simultaneously; the minimum is symmetric. [2; alg]
 5. (c): interval arithmetic is outer because each cell's range is taken separately. One unit with rows $(3,2,0),(2,3,0),(0,0,5)$: the merged rate of rows 1+2 in column 1 is exactly $[0,0.5]$, cellwise $[0,1]$; row 1's share in columns 1+2 is exactly $[0,1]$, cellwise $[0,2]$ (D3). ∎
 
-*Checks.* D1 (1296 single-cell targets on random integer data: LP = Fréchet, max error $2\times10^{-16}$); D1b (the package's reference datasets `rxc_example_3x3.csv`, `msign_example_3x2.csv`, non-integer counts: LP = the package's `.rxc_dd_cells` formula, max error $3\times10^{-16}$); D2 (one-column gaps, 150 designs); **D3 [F]** (multi-cell targets). **Status: P; proof review pending.**
+*Checks.* D1 (1296 single-cell targets on random integer data: LP = Fréchet, max error $2\times10^{-16}$); D1b (the package's reference datasets `rxc_example_3x3.csv`, `msign_example_3x2.csv`, non-integer counts: LP = the package's `.rxc_dd_cells` formula, max error $3\times10^{-16}$); D2 (one-column gaps, 150 designs); **D3 [F]** (multi-cell targets). **Status: P; proof reviewed (docs/extension/reviews/PHASE6a_proof_review.md).**
 
 *Consequence for D1 (DD first).* The block printed first by `eiBounds()` (decision D1) must be the margins-only **LP** value. It coincides with the current `duncan_davis` column for single cells and one-column contrasts (Lemma 2.1(a)–(b)); for other combination targets the current column is outer and the LP is the exact margins-only bound (§9, item 3).
 
@@ -160,7 +160,7 @@ Classes (i), (ii): fix any subset of rows. We give a signing as in [GH].
 
 *Checks.* B1 (60 tiny designs, all integer tables enumerated: integer endpoints = LP over the rounded system, 0 fractional witnesses); T6 (the class-(iii) example of review check RC1: the original matrix has a minor 2, yet rounded LP = MILP on 200 random right-hand sides); B2 (integer values of an aggregate form an integer interval); T1–T3 (classes (i)–(iii), 400 random designs each with fractional boxes and a known cell: LP = MILP at 800 endpoints each, 0 fractional dual-simplex vertices); T4 (exhaustive minors: a class-(i) matrix is TU); **T5 [F]** (two units with ordering boxes $n\ge0.2$: unrounded LP total 0.4, its ceiling 1, integer answer 2); N10a, N10b (reproduced from NS).
 
-**Status: P; proof review pending.** (Integrality is proved for classes (i)–(iii); TU of the original matrix for (i)–(ii) only. (ii) and (iii) go beyond NS's "margins, known cells and per-unit boxes".)
+**Status: P; proof reviewed (docs/extension/reviews/PHASE6a_proof_review.md).** (Integrality is proved for classes (i)–(iii); TU of the original matrix for (i)–(ii) only. (ii) and (iii) go beyond NS's "margins, known cells and per-unit boxes".)
 
 ### 2.3 R19(c): rows that break total unimodularity
 
@@ -180,7 +180,7 @@ Examples (check C1 and N10c):
 * **Three pairwise-crossing totals** (e.g. totals published by three geographies): three units with $N=2$, one veteran, one yes vote each, and each pair's veteran-yes total equal to 1. The LP witness puts $1/2$ in each cell; no integer table exists. The 0/1 matrix has a $3\times3$ minor equal to 2 (T4).
 * **N10c** (NS, reproduced with named rows): three 2×2 units, $N=(13,10,14)$, $V=(2,8,9)$, yes $=(13,8,4)$, a published veteran-yes total of 11, and two **average-gap rows** $\sum_iw_i\big(y_i/V_i-(Y_i-y_i)/(N_i-V_i)\big)\ge0$ with $w_i=1$ (the unweighted mean of unit gaps) and $w_i=N_i-V_i$. The LP is feasible (witness veteran-yes $(2,\,6.372,\,2.628)$), it stays feasible after each row is rounded, and enumeration finds no integer table. These rows weight units unequally; they are **not** the realised associations of 2c M1, which are totals (§3, §9 item 1).
 
-**Status: P; proof review pending.** The `integer = "auto"` rule (§6) follows: whole row set in one class of R19(b) → rounded LP; otherwise, with integer margins → MILP.
+**Status: P; proof reviewed (docs/extension/reviews/PHASE6a_proof_review.md).** The `integer = "auto"` rule (§6) follows: whole row set in one class of R19(b) → rounded LP; otherwise, with integer margins → MILP.
 
 ### 2.4 R19(d): the witness at each endpoint
 
@@ -195,7 +195,7 @@ Examples (check C1 and N10c):
 
 *Proof.* 1 [vert]; feasibility of an optimal solution is its definition. 2 [HK] on $F_{\rm rd}$ with 1. 3 Def MILP. 4 $F_\pm\subseteq F_+\cup F_-$. 5 Def. ∎
 
-*Check.* W1: all 17,693 LP and MILP solutions computed in §§2–3 of the script reproduce every margin and satisfy every row and bound; E1 prints the integer witnesses $(6,30)$ and $(20,50)$ of the realised-ordering example. **Status: P; proof review pending.**
+*Check.* W1: all 17,693 LP and MILP solutions computed in §§2–3 of the script reproduce every margin and satisfy every row and bound; E1 prints the integer witnesses $(6,30)$ and $(20,50)$ of the realised-ordering example. **Status: P; proof reviewed (docs/extension/reviews/PHASE6a_proof_review.md).**
 
 ### 2.5 R19(e): non-integer (estimated) margins
 
@@ -208,7 +208,7 @@ Examples (check C1 and N10c):
 
 *Proof.* 1: R19(a)'s proof never uses integrality. 2: a sum of integers is an integer. 3: R19(a) item 2 assumes the true margins. ∎
 
-*Check.* E5 (an expected count 60 treated as exact gives $[0.167,0.833]$, NS N20; margin 59.4 gives a lower end attained by a real table with exactly those margins). Honest coverage under estimated margins is Step 1b (§7). **Status: P; proof review pending.**
+*Check.* E5 (an expected count 60 treated as exact gives $[0.167,0.833]$, NS N20; margin 59.4 gives a lower end attained by a real table with exactly those margins). Honest coverage under estimated margins is Step 1b (§7). **Status: P; proof reviewed (docs/extension/reviews/PHASE6a_proof_review.md).**
 
 ---
 
@@ -236,13 +236,13 @@ and let $ER^r$ be Goodman's one-vs-rest regression with intercept (data only), a
 4. (d): 2c M1(c) for the collapsed population, with (a). [2c:M1(c)]
 5. (e): (c), (d) are rows on $Y_{rc}(\mathcal S)$ with coefficient 1 on each $n_{irc}$, $i\in\mathcal S$; (b) has coefficients $a_{is}/N_i$ varying with $i$. [alg] ∎
 
-*Check.* S1: 200 random R×C populations, the three count forms against 2c Definition 1 computed from shares and rates, max error $1\times10^{-16}$. **Status: P; proof review pending.** (Each $\delta^r_W$ row needs $\operatorname{Var}_p(X_r)>0$ over its own unit set.)
+*Check.* S1: 200 random R×C populations, the three count forms against 2c Definition 1 computed from shares and rates, max error $1\times10^{-16}$. **Status: P; proof reviewed (docs/extension/reviews/PHASE6a_proof_review.md).** (Each $\delta^r_W$ row needs $\operatorname{Var}_p(X_r)>0$ over its own unit set.)
 
 ### 3.2 2c M2 and M3 in count coordinates
 
 **Proposition C2.** Fix $(r,c)$, the one-vs-rest pairing (W1), and **one unit set $\mathcal S$**: every sign row is over $\mathcal S$, $Y_{rc}$ means $Y_{rc}(\mathcal S)$, and $N,A_r,Y_c,\operatorname{Var}_p(X_r)$ are computed over $\mathcal S$, with $\operatorname{Var}_p(X_r)>0$ and $0<A_r<N$. (With sign rows over several sets, or a target over another set, the closed forms below do not apply; R19(b) items 1–2 still give integer endpoints by the rounded LP when the rows are in one class. Review check RC5b.)
 (a) **Continuous (2c M2, M3 restated).** Any system of one-vs-rest sign rows on $(r,c)$ (any directions, slacks) cuts $Y_{rc}$ to an interval $J$: $\delta^r_B$ rows give half-lines at $Y^{NM}_{rc}$ (shifted by $N\varepsilon$), $\delta^r_W$ rows half-lines at $Y^{ER}_{rc}(\varepsilon)$; CR (without slack) is $J_+=[Y^{NM},Y^{ER}]\cup J_-=[Y^{ER},Y^{NM}]$, one of which is a point or empty; with slack on the CR rows both branches can be nondegenerate intervals. With no unit rows, the range of $Y_{rc}$ is the DD interval $[Y^-,Y^+]$ (Lemma 2.1(a)) and 2c M3(a)–(d) hold verbatim with $D=D^r_c$, an increasing affine function of $Y_{rc}$: in particular $Y^{NM}_{rc}\in[Y^-,Y^+]$, so a between sign is never refuted in this continuous, margins-only problem, and a within sign is refuted iff $Y^{ER}<Y^-$ (resp. $>Y^+$).
-(b) **Integer.** With integer margins and unit rows of R19(b)'s class (i) on the same cell (boxes, known cells, totals on $(r,c)$ over at most two laminar families, with $\mathcal S$ addable to one of them), the integer values of $Y_{rc}$ under the sign rows are **all integers** in $[\max(Y^-_{\rm rd},\lceil\text{lower thresholds}\rceil),\ \min(Y^+_{\rm rd},\lfloor\text{upper thresholds}\rfloor)]$, where $Y^\pm_{\rm rd}$ are the integer extremes without the sign rows. So the integer gap set is $\{D^r_c(k)\}$ for the integers $k$ in that interval (step $\kappa_r=1/A_r+1/(N-A_r)$). Without unit rows, or with integer boxes, this is the lattice inside the continuous interval; with fractional boxes on several units it can be strictly smaller (T5: continuous range $[0.4,2]$, integer values $\{2\}$; check S5). For any other linear target under the same rows, integer endpoints = rounded LP (R19(b)); under CR, two rounded LPs.
+(b) **Integer.** With integer margins and unit rows of R19(b)'s class (i) on the same cell (boxes, known cells, totals on $(r,c)$ over at most two laminar families, with $\mathcal S$ addable to one of them), the integer values of $Y_{rc}$ under the sign rows are **all integers** in $[\max(Y^-_{\rm rd},\lceil\text{lower thresholds}\rceil),\ \min(Y^+_{\rm rd},\lfloor\text{upper thresholds}\rfloor)]$, where $Y^\pm_{\rm rd}$ are the integer extremes without the sign rows. So the integer gap set is $\{D^r_c(k)\}$ for the integers $k$ in that interval (step $\kappa_r=1/A_r+1/(N-A_r)$). When every unit row (box, known cell, total) has an integer right-hand side, this is the lattice inside the continuous interval; otherwise it can be strictly smaller (fractional boxes on several units, or fractional totals: review check RC11) (T5: continuous range $[0.4,2]$, integer values $\{2\}$; check S5). For any other linear target under the same rows, integer endpoints = rounded LP (R19(b)); under CR, two rounded LPs.
 (c) **Integer refutation.** Without unit rows: a between sign always has an integer table ($\lceil Y^{NM}\rceil\le Y^+$, since $Y^+$ is an integer $\ge Y^{NM}$); a within sign is integer-infeasible iff $\lfloor Y^{ER}\rfloor<Y^-$ (resp. $\lceil Y^{ER}\rceil>Y^+$); CR is integer-infeasible iff no integer lies in its continuous interval of $Y_{rc}$. Since $Y^\pm$ are integers, a single sign is integer-refuted iff it is continuously refuted ($\lfloor Y^{ER}\rfloor<Y^-\iff Y^{ER}<Y^-$); only CR, or several signs together, can be integer-infeasible while continuously feasible. With unit rows a between sign can be refuted even continuously.
 
 *Plain reading.* For "group $r$ voted $c$ more than the rest" (between or within, or both as contextual reinforcement), the belief acts only on the total number of group-$r$ people choosing $c$: it sets a floor or a ceiling on that one number. With whole people, the floor is rounded up and the ceiling down, and every whole number in between is possible. Known counts and cell limits do not change this.
@@ -250,10 +250,10 @@ and let $ER^r$ be Goodman's one-vs-rest regression with intercept (data only), a
 *Proof.*
 1. (a): by Lemma C1(c)–(d) each row is $Y_{rc}\ge$ or $\le$ a threshold, so the system is $F_0\cap\{Y_{rc}\in J\}$. CR's branches are the intersections of the two half-lines with matching signs. [L C1; 2c Def 2]
 2. With no unit rows, $Y_{rc}$ ranges over $[Y^-,Y^+]$ (Lemma 2.1(a)). The projection of the R×C problem onto $Y_{rc}$ equals that of the collapsed two-row problem (both are the DD sums), and $D^r_c$ is the collapsed gap; so 2c M3, whose proof uses only this range, the identities of M1(c) and the equal-rates witness, applies. The equal-rates table $n_{irc}=a_{ir}b_{ic}/N_i$ lies in $\mathcal P$ and has $Y_{rc}=Y^{NM}_{rc}$, which proves $Y^{NM}\in[Y^-,Y^+]$ directly. [L 2.1; 2c:M1(c), M3; NW]
-3. (b): the sign rows are totals on $(r,c)$ over $\mathcal S$ (L C1(e)), so the system is in class (i). R19(b) items 1–3 give integrality, integer endpoints, and (for $Y_{rc}(\mathcal S)$, addable by hypothesis) every integer between. The gap set is the image under the affine map of Lemma C1(a); it is the full lattice in the continuous interval only when $Y^\pm_{\rm rd}$ are the rounded continuous extremes, i.e. without fractional boxes on several units. [L C1; R19(b)]
+3. (b): the sign rows are totals on $(r,c)$ over $\mathcal S$ (L C1(e)), so the system is in class (i). R19(b) items 1–3 give integrality, integer endpoints, and (for $Y_{rc}(\mathcal S)$, addable by hypothesis) every integer between. The gap set is the image under the affine map of Lemma C1(a); it is the full lattice in the continuous interval when every unit row has an integer right-hand side; otherwise it can be strictly smaller (T5, S5). [L C1; R19(b)]
 4. (c): $Y^\pm$ are integers (Lemma 2.1(a) with integer margins), and $Y^{NM}\le Y^+$ (step 2), so $\lceil Y^{NM}\rceil\le Y^+$; the rest is (b) with one half-line or with $J_\pm$. With unit rows the range of $Y_{rc}$ shrinks to $[Y^-_{\rm rd},Y^+_{\rm rd}]$, which need not contain $Y^{NM}$, so a between sign can be refuted (S4). [2; 3] ∎
 
-*Checks.* S2 **[F]**: 500 CR branches in random R×C designs (up to 3×3) with a box and a known cell: rounded LP = MILP at 1000 endpoints, 0 fractional vertices (fails on NS's statement that pooled realised signs and CR break TU, §9 item 1). S3: 2c Remark M2.1's two referee examples reproduced in counts (continuous CR image $\{0\}$ and integer CR empty; between-sign integer lower gap $2/15$). S3b: closed forms against the LP in 200 random 2×2 populations, and the integer lower end $\max(Y^-,\lceil Y^{NM}\rceil)$. S4: a known cell and a box make a between sign infeasible. S5: the T5 design (review check RC5): integer values $\{2\}$ while the continuous range $[0.4,2]$ contains 1. **Status: P; proof review pending.**
+*Checks.* S2 **[F]**: 500 CR branches in random R×C designs (up to 3×3) with a box and a known cell: rounded LP = MILP at 1000 endpoints, 0 fractional vertices (fails on NS's statement that pooled realised signs and CR break TU, §9 item 1). S3: 2c Remark M2.1's two referee examples reproduced in counts (continuous CR image $\{0\}$ and integer CR empty; between-sign integer lower gap $2/15$). S3b: closed forms against the LP in 200 random 2×2 populations, and the integer lower end $\max(Y^-,\lceil Y^{NM}\rceil)$. S4: a known cell and a box make a between sign infeasible. S5: the T5 design (review check RC5): integer values $\{2\}$ while the continuous range $[0.4,2]$ contains 1. **Status: P; proof reviewed (docs/extension/reviews/PHASE6a_proof_review.md).**
 
 *Relation to 2c Remark M2.1.* Its proposition (2×2, margins only, sign rows on one column: integer gap set = DD ∩ lattice) is the special case $R=2$, no unit rows, of (b). Prop. C2(b) extends it to R×C one-vs-rest rows, to box/known-cell unit restrictions and published totals on the same cell, and (Corollary 2.2, class (iii)) to several columns jointly when $R=2$. 2c is not edited (§9 item 4).
 
@@ -310,7 +310,7 @@ For $\varphi=B_{rc}$, $\rho_i=w_{ir}$ and $S_\varphi=S_1$ of P3.5(a). For a one-
 
 **Remark 4.1a (the representation of a target; review issue 3).** $\tilde B_\varphi$, $E_\varphi$ and $S_\varphi$ refer to the stated representation $(\varphi_0,v)$. Adding $\lambda_{ic}\big(\sum_rn_{irc}-b_{ic}\big)$ with design-measurable $\lambda$ leaves $\varphi$ unchanged on $\mathcal P$ but changes $v$ and $\varphi_0$ (which then uses the observed $b_{ic}$), and hence $E_\varphi$ and $S_\varphi$. Example: the one-vs-rest gap written as $\kappa_rY_{rc}-Y_c/(N-A_r)$ or over cells as $Y_{rc}/A_r-\sum_{s\ne r}Y_{sc}/(N-A_r)$; the two $E_\varphi$ differ by $(Y_c-E[Y_c\mid\text{design}])/(N-A_r)$ (review check RC7: $S_\varphi$ 0.0465 vs 0.0555). Each representation is valid with its own allowance. The package may use any **fixed** representation chosen from the design alone (for example the one minimising $S_\varphi$), never one chosen after seeing the outcomes.
 
-*Check.* G1: 200 designs with random dependent joint laws of the two group rates in each unit: $\operatorname{Var}/S_\varphi^2\le0.21$; perfectly opposite rates attain 1. G2: the Hoeffding allowance of (b) for a gap target, simulated tail probability at most $\alpha_E$. **Status: P; proof review pending** (P3.5(a) steps 4–5 and P3.8's Hoeffding step with a different range). So P3.5(a), (b2)(ii) and P3.8 give actual-target intervals for every linear count target with design-measurable coefficients, by replacing $S_1$ with $S_\varphi$ (resp. $t_E$ with $t_E(\varphi)$). The Bhatia–Davis version P3.5(c1) is proved only for single cells and must not be used for multi-cell targets.
+*Check.* G1: 200 designs with random dependent joint laws of the two group rates in each unit: $\operatorname{Var}/S_\varphi^2\le0.21$; perfectly opposite rates attain 1. G2: the Hoeffding allowance of (b) for a gap target, simulated tail probability at most $\alpha_E$. **Status: P; proof reviewed (docs/extension/reviews/PHASE6a_proof_review.md)** (P3.5(a) steps 4–5 and P3.8's Hoeffding step with a different range). So P3.5(a), (b2)(ii) and P3.8 give actual-target intervals for every linear count target with design-measurable coefficients, by replacing $S_1$ with $S_\varphi$ (resp. $t_E$ with $t_E(\varphi)$). The Bhatia–Davis version P3.5(c1) is proved only for single cells and must not be used for multi-cell targets.
 
 ### 4.3 Which model intervals qualify, and their status
 
@@ -346,7 +346,7 @@ $$P(B_\varphi\notin\mathcal C_\varphi\cap\mathrm{CI}_\varphi)\le P(B_\varphi\not
 4. (iii-a): a table $n\in F$ is consistent with the margins and rows. $H_M$ restricts only the conditional means $m(V_i)$ of the unit rates (P3-S1a). If $m(V_i)$ lies in the relative interior of $\mathfrak B$, then for any $\beta_i$ in $\mathfrak B$ the two-point law putting mass $\lambda$ on $\beta_i$ and $1-\lambda$ on $(m(V_i)-\lambda\beta_i)/(1-\lambda)$ has mean $m(V_i)$ and, for small $\lambda>0$, both points in $\mathfrak B$. So no table of $F$ is excluded by the count rows together with $H_M$; only its probability is restricted. (With structural zeros in $m$, the same holds for tables respecting them.) Hence no deterministic set smaller than $\mathcal C_\varphi$ follows. [Def; P3-S1a; convexity of $\mathfrak B$]
 5. (iii-b): Remark 4.4 gives a set valid at the same level by (i)-type arguments; X5 shows it strictly narrower in every one of 1000 replications of a design. ∎
 
-**Status:** $(*)$, (i), (ii) **P; proof review pending**, with the model interval's status inherited (table §4.3); the exact level-α statements are for identity rows only. (iii-a) **P; proof review pending**. (iii-b) a computed example; no general dominance is claimed.
+**Status:** $(*)$, (i), (ii) **P; proof reviewed (docs/extension/reviews/PHASE6a_proof_review.md)**, with the model interval's status inherited (table §4.3); the exact level-α statements are for identity rows only. (iii-a) **P; proof reviewed (docs/extension/reviews/PHASE6a_proof_review.md)**. (iii-b) a computed example; no general dominance is claimed.
 
 **Remark 4.1 (why count rows and model rows never share one LP).** An LP with count rows on $n$ and model rows on $k$, linked unit by unit through $n_{irc}=a_{ir}m_{rc}(V_i)$, would set $E=0$: it treats realised rates as the model's means, which is false for a finite electorate (PD §4.2 footnote f; 2c Remark M5.1). Under LCE no per-unit constraint links the realised counts to $k$; the only link is the target identity $B_\varphi=\tilde B_\varphi+E_\varphi$, with $E_\varphi$ controlled in probability (Lemma 4.1). That link is used once, in the intersection. PD §4.2 footnote f becomes this rule instead of a warning.
 
@@ -461,20 +461,20 @@ Step 1b (NS §3.1b) comes next, with proof items **R25** (coverage of the count 
 
 | Result | Statement | Status | Checks |
 |---|---|---|---|
-| R19(a) | LP over $\prod_i\mathcal P_i\cap$ rows; valid; sharp for continuous tables given the information | P; review pending | D1, D1b, E1, E2 |
-| Lemma 2.1 | DD = margins-only LP for single cells and one-column contrasts; cellwise DD outer otherwise (including $D^r_c$, $R\ge3$) | P; review pending | D1, D1b, D2, D3 [F] |
-| R19(b) | integrality for classes (i)–(iii) (whole row set in one class); TU of the original matrix for (i)–(ii), of the reduced matrix for (iii); integer endpoints = rounded LP; witnesses integer; all intermediate integers for addable aggregates | P; review pending | B1, B2, T1–T4, T5 [F], T6 [F], N10a, N10b |
-| R19(c) | outside the classes: LP outer, MILP exact; fractional vertices, gaps beyond rounding and integer infeasibility occur | P; review pending | C1, N10c |
-| R19(d) | witness = basic optimal solution; integer under (b) | P; review pending | W1, E1 |
-| R19(e) | non-integer margins: exact for the stated margins; integer check not applicable | P; review pending | E5 |
-| Lemma C1 | realised associations in counts; one-vs-rest rows are totals on $Y_{rc}(\mathcal S)$ | P; review pending | S1 |
-| Prop. C2 | one sign set $\mathcal S$: 2c M2/M3 in counts; integer values of $Y_{rc}(\mathcal S)$ = an integer interval (the full lattice only without fractional boxes on several units); integer refutation | P; review pending | S2 [F], S3, S3b, S4, S5 [F] |
-| Lemma 4.1 | residual allowances $S_\varphi$ (asymptotic) and $t_E(\varphi)$ (Hoeffding) for linear count targets with design-measurable coefficients; representation-dependent | P; review pending | G1, G2 |
-| R27 $(*)$, (i), (ii) | union bounds $(*)$; with identity rows only, coverage at the model interval's level and a level-α test of the model; with belief rows, coverage $\ge1-\alpha-P(n^\circ\notin F)$ and P(reject ∧ rows true) ≤ α | P; review pending; status inherited from the model interval | X1, X2, X3 [F], X4 [F], X6 [F] |
-| R27(iii) | compatible values = $\mathcal C_\varphi$ (P; review pending); not minimal (computed example, design-based $\mathcal K$) | P / example | X5 |
+| R19(a) | LP over $\prod_i\mathcal P_i\cap$ rows; valid; sharp for continuous tables given the information | P; proof reviewed | D1, D1b, E1, E2 |
+| Lemma 2.1 | DD = margins-only LP for single cells and one-column contrasts; cellwise DD outer otherwise (including $D^r_c$, $R\ge3$) | P; proof reviewed | D1, D1b, D2, D3 [F] |
+| R19(b) | integrality for classes (i)–(iii) (whole row set in one class); TU of the original matrix for (i)–(ii), of the reduced matrix for (iii); integer endpoints = rounded LP; witnesses integer; all intermediate integers for addable aggregates | P; proof reviewed | B1, B2, T1–T4, T5 [F], T6 [F], N10a, N10b |
+| R19(c) | outside the classes: LP outer, MILP exact; fractional vertices, gaps beyond rounding and integer infeasibility occur | P; proof reviewed | C1, N10c |
+| R19(d) | witness = basic optimal solution; integer under (b) | P; proof reviewed | W1, E1 |
+| R19(e) | non-integer margins: exact for the stated margins; integer check not applicable | P; proof reviewed | E5 |
+| Lemma C1 | realised associations in counts; one-vs-rest rows are totals on $Y_{rc}(\mathcal S)$ | P; proof reviewed | S1 |
+| Prop. C2 | one sign set $\mathcal S$: 2c M2/M3 in counts; integer values of $Y_{rc}(\mathcal S)$ = an integer interval (the full lattice only without fractional boxes on several units); integer refutation | P; proof reviewed | S2 [F], S3, S3b, S4, S5 [F] |
+| Lemma 4.1 | residual allowances $S_\varphi$ (asymptotic) and $t_E(\varphi)$ (Hoeffding) for linear count targets with design-measurable coefficients; representation-dependent | P; proof reviewed | G1, G2 |
+| R27 $(*)$, (i), (ii) | union bounds $(*)$; with identity rows only, coverage at the model interval's level and a level-α test of the model; with belief rows, coverage $\ge1-\alpha-P(n^\circ\notin F)$ and P(reject ∧ rows true) ≤ α | P; proof reviewed; status inherited from the model interval | X1, X2, X3 [F], X4 [F], X6 [F] |
+| R27(iii) | compatible values = $\mathcal C_\varphi$ (P; proof reviewed); not minimal (computed example, design-based $\mathcal K$) | P / example | X5 |
 | R15 remainder | rows outside the classes | computed check (MILP), no theorem | C1 |
 
-Register rows added to PD §8: **R19** and **R27**, both "P; proof review pending" (R27 with the identity/belief-row restriction).
+Register rows added to PD §8: **R19** and **R27**, both "P; proof reviewed (docs/extension/reviews/PHASE6a_proof_review.md)" (R27 with the identity/belief-row restriction).
 
 ---
 
@@ -511,4 +511,4 @@ The proof review (`reviews/PHASE6a_proof_review.md`, branch `claude/mcount-proof
 | 13 C2(c) | wording | single signs integer-refuted iff continuously refuted; only CR or several signs differ |
 | 14 degenerate units | wording | $N_i>0$; odds-ratio convention; $\operatorname{Var}_p(X_r)>0$ over each sign set (Corollary 2.2, Lemma C1) |
 | 15 $\delta_B(r,s)$ example | wording | stated as a fractional vertex only (integer endpoint = rounded LP); gaps beyond rounding rest on the other examples; a 20,000-design search found no $\delta_B$ instance beyond rounding |
-
+| N1 (round 2) C2(b): integer right-hand sides | error (one phrase) | "without unit rows, or with integer boxes" replaced by "when every unit row (box, known cell, total) has an integer right-hand side"; proof step 3 says "otherwise it can be strictly smaller (T5, S5)" (review check RC11: fractional totals, continuous range $[0.8,4]$, integer values $\{2,3,4\}$) |

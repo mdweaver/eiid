@@ -640,4 +640,65 @@ report("N22 covariate-benchmarked kappa: when the benchmark is informative", ok,
        "; ".join(f"{nm}: R2(Y~X,Z) {r['R2_Y']:.2f}, R2(X~Z) {r['R2_X']:.2f}, kappa_Z {r['kZ']:.4f}, "
                  f"kappa_true {r['kt']:.4f}, m* {r['m']:.2f}, overlap factor {r['ovl']:.1f}, bias of CAR(Z) for B_1 {r['bias']:+.3f}" for nm, r in res.items()))
 
+# N23: bounded differences between named neighbours (M1(delta) neighbour option). Three districts on a
+# line A - B - C. Each district's deviation v_d = k^(d) - c_d (one free coordinate, 2x2) has its own
+# M2 range: A [-.10,.10], B [-.02,.02] (well identified), C [-.12,.12]. Target: A's deviation.
+#   centre form   : exists kbar with |v_d - kbar| <= dc for all d            (existing M1(delta))
+#   adjacency     : |v_A - v_B| <= dn, |v_B - v_C| <= dn
+#   distance, Lipschitz default: |v_d - v_e| <= lam * dist(d,e) for all pairs (dist AB = BC = 1, AC = 2)
+#   distance, radius: neighbours iff dist <= r (r = 1 gives the adjacency graph)
+#   disconnected   : B - C adjacent, A isolated
+def dev_range(rows):
+    # variables v_A, v_B, v_C, kbar ; rows: list of (coef vector, rhs) meaning coef . v <= rhs
+    bnds = [(-.10, .10), (-.02, .02), (-.12, .12), (None, None)]
+    A = np.array([r[0] for r in rows]) if rows else None; b = [r[1] for r in rows] if rows else None
+    c = np.array([1., 0, 0, 0])
+    hi = lp_max(c, A_ub=A, b_ub=b, bounds=bnds)[0]; lo = -lp_max(-c, A_ub=A, b_ub=b, bounds=bnds)[0]
+    return round(lo, 4), round(hi, 4)
+def absrow(i, j, d):
+    e = np.zeros(4); e[i] = 1; e[j] = -1
+    return [(e, d), (-e, d)]
+centre = lambda dc: sum([absrow(i, 3, dc) for i in range(3)], [])
+adj = lambda dn, edges: sum([absrow(i, j, dn) for i, j in edges], [])
+lip = lambda lam: absrow(0, 1, lam) + absrow(1, 2, lam) + absrow(0, 2, 2 * lam)
+out = {"M2": dev_range([]), "centre .05": dev_range(centre(.05)),
+       "adjacency .03": dev_range(adj(.03, [(0, 1), (1, 2)])),
+       "distance Lipschitz lam=.03": dev_range(lip(.03)),
+       "adjacency .03 + centre .05": dev_range(adj(.03, [(0, 1), (1, 2)]) + centre(.05)),
+       "disconnected (A isolated)": dev_range(adj(.03, [(1, 2)]))}
+report("N23 neighbour-bounded deviations", out["adjacency .03"] == (-0.05, 0.05) and out["centre .05"] == (-0.1, 0.1)
+       and out["disconnected (A isolated)"] == (-0.1, 0.1),
+       "; ".join(f"{k}: A in [{v[0]:.2f}, {v[1]:.2f}]" for k, v in out.items()))
+
+# N24: contests as districts (C2), 2x2, one column per contest. m^(j)(x) = H^(j) x, x = (x1, 1 - x1),
+# rows = groups. C2: H^(2) = a J + b H^(1)  =>  Q^(2) = a J + b Q^(1) (testable) and K^(2) = b K^(1).
+# K = kappa [[0, 1], [-1, 0]]. Each contest alone bounds its kappa by validity at the hull ends;
+# under C2 kappa_2 = b kappa_1, so kappa_1 lies in the intersection.
+H1 = np.array([[.80, .55], [.35, .15]]); a2, b2 = -.12, 1.1
+H2 = a2 * np.ones((2, 2)) + b2 * H1
+J = np.array([[0, 1.], [-1, 0]])
+def kappa_range(H, xs=(.1, .9)):
+    Q = (H + H.T) / 2; lo, hi = -np.inf, np.inf
+    for x1 in xs:
+        x = np.array([x1, 1 - x1]); q = Q @ x; g = J @ x      # m = q + kappa g
+        for r in range(2):
+            for bound, sgn in ((0, 1), (1, -1)):              # q_r + kappa g_r >= 0 ; <= 1
+                coef = g[r] * sgn; rhs = (bound - q[r]) * sgn  # coef*kappa >= rhs
+                if abs(coef) < 1e-12: continue
+                if coef > 0: lo = max(lo, rhs / coef)
+                else: hi = min(hi, rhs / coef)
+    return lo, hi
+k1 = kappa_range(H1); k2 = kappa_range(H2)
+Q1, Q2 = (H1 + H1.T) / 2, (H2 + H2.T) / 2
+qcheck = np.max(np.abs(Q2 - (a2 * np.ones((2, 2)) + b2 * Q1)))
+k1c = (max(k1[0], k2[0] / b2), min(k1[1], k2[1] / b2))
+xs = np.array([.1, .3, .5, .7, .9]); w = xs / xs.sum()
+def B1(kap):  # group-1 rate (row 0) of contest 1, group-1 weighted over the five precinct types
+    Q = Q1; return float(np.sum(w * np.array([(Q @ np.array([x, 1 - x]))[0] + kap * (J @ np.array([x, 1 - x]))[0] for x in xs])))
+truth_k = (H1 - H1.T)[0, 1] / 2
+report("N24 contests as districts", qcheck < 1e-12 and k1c[0] <= truth_k <= k1c[1] and (k1c[1] - k1c[0]) < (k1[1] - k1[0]),
+       f"Q-relation holds (max dev {qcheck:.0e}); contest 1 alone: kappa_1 in [{k1[0]:.3f},{k1[1]:.3f}], group-1 rate "
+       f"[{B1(k1[0]):.3f},{B1(k1[1]):.3f}]; contest 2 alone: kappa_2 in [{k2[0]:.3f},{k2[1]:.3f}]; under C2 (b = {b2}): "
+       f"kappa_1 in [{k1c[0]:.3f},{k1c[1]:.3f}], group-1 rate [{B1(k1c[0]):.3f},{B1(k1c[1]):.3f}] (truth {B1(truth_k):.3f})")
+
 print(f"\n{sum(results)}/{len(results)} PASS")

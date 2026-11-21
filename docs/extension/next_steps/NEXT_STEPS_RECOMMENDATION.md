@@ -55,18 +55,18 @@
 | 10 | **C2: contests as districts**: several contests on one ballot share contextual structure up to level and scale | lopsided contests pin the hidden pattern for close ones; testable restrictions | several contests, same units | R29 | contest returns per unit | M |
 | 11 | **M-DATA E4**: NZ leave-one-electorate-out transfer (last, by your decision) | validation of the model layer; a reference distribution for Steps 4–6's dials | published area tables (e.g. NZ) | R21 + allowance | published tables | M |
 | G1–G2 | **General-user track**: M-AUDIT, M-CVR; E5 rows ship inside Step 1 | features for users with audits or CVRs | audits, CVRs | R20; none | external data | S, S |
-| later | KL-ball reference dial; R16/R15 for M-SIGN (theory track); 2×C joint signs (R6), R×2 trees (R5). Research: Avenue A on pooled NZ, single index (R14), covariance/dispersion | — | — | — | — | — |
+| later | KL-ball reference dial; R16/R15 for M-SIGN (theory track); 2×C joint signs (R6), R×2 trees (R5). Research: Avenue A on pooled NZ (with the dispersion ceiling), single index (R14) | — | — | — | — | — |
 
 Every step gets a **proof review** and a separate **code review** (D7; table at the start of Part 3).
 
-**Not now** (Part 5): a series-based M-SHARP estimator (unless the diagnostic finds polarised precincts); M-LOC as a separate module; dispersion/covariance and Avenue A (research); DiD code before its theory has passed proof review; switching the default interval (this would reverse a decision of yours); general R×C full-law estimation.
+**Not now** (Part 5): a series-based M-SHARP estimator (unless the diagnostic finds polarised precincts); M-LOC as a separate module; Avenue A and the dispersion ceiling (research); the covariance diagnostic (dropped by your decision); DiD code before its theory has passed proof review; switching the default interval (this would reverse a decision of yours); general R×C full-law estimation.
 
 **Decisions** (Part 7). D1–D12 are settled or deferred:
 * D9 and D10 are deferred to your project; in the plan they are user inputs.
 * D11: T ≥ 2 and all three causal layers.
 * D12: CAR(Z) before M-EXCEPT, as ordered.
 
-Added by your decision: C2 (contests as districts) as Step 10, just before E4; bounded differences between named neighbours as an option of M1(δ), Step 5 (adjacency or distance matrix). Still open: the covariance diagnostic (currently research).
+Added by your decision: C2 (contests as districts) as Step 10, just before E4; bounded differences between named neighbours as an option of M1(δ), Step 5 (adjacency or distance matrix). Dropped by your decision: the covariance diagnostic (one line kept inside Avenue A). No decisions remain open.
 
 ---
 
@@ -516,7 +516,33 @@ The target is the average veteran–other gap across the two bins.
 
 They combine in **one LP** on the shared model "each group's mean rate = effect of covariates + effect of own composition + effect of county composition", with both caps imposed. If the county share is itself one of the covariates, CAR(Z) is B1(M = 0), so report them as one model with two dials, not as two independent checks. NEW_AVENUES §14.7 recommends reporting CAR-δ curves, the overlap factor, covariate benchmarks and B1(M) side by side, and that is what Steps 4–6 produce together.
 
-**Covariate-benchmarked κ and δ (a general part of this step).** Following NEW_AVENUES §14.8, at your suggestion.
+**Worked example** [NA, `check_car_sensitivity`, reproduced].
+* A contextual violation that leaves the regression exactly unchanged biases a group's rate by 0.080.
+* A covariate-benchmarked sensitivity bound would report 0.006–0.032 for the same bias.
+* With compositions confined to [0.3, 0.7] within covariate cells, a δ of 0.05 becomes a half-width of 0.125 at the vertex rate (overlap factor 2.5).
+* *Without the module*: no covariate adjustment at all, or a point estimate (Goodman within cells) that silently assumes δ = 0. *With it*: an interval that widens honestly with δ and with poor overlap, beside B1(M)'s like-for-like benchmark.
+
+**Why here.** Covariates are commonly available in applications of these models, so it is a real candidate, not a rare case. The covariate set is a user input. It shares Step 4's model, so it comes right after it. It is placed after B1(M) because its benchmark is the weaker one for EI's signature threat. Covariate adjustment was earlier low priority by your decision. Covariate availability makes it worth a numbered step, but it can trade places with Step 7 if you prefer. **Cost:** M (LP rows per covariate cell or a linear η(Z); the overlap factor; the benchmarks).
+
+**Technical notes.**
+* **Model.** $E[\beta\mid X,Z,z]=\eta(Z)+\Delta$, with $\lVert\Delta\rVert_\infty\le\delta$ (LP) or $E[\Delta_j^2]\le\kappa_j\operatorname{Var}(Y)$ (SOCP). With linear η, CAR(Z) is the LCE+Z model with the own-composition effect set to zero (NEW_AVENUES §13.4).
+* **Proof items.**
+  * R8 (CAR part): validity and monotonicity in δ.
+  * The invisible-violation class in R×C (§14.3; proved in its simple form).
+  * The overlap factor beyond 2×2 (a conjecture).
+  * The benchmark $\delta_k$ and its caveats (§14.5).
+* **Inference.** η(Z) is estimated, by series or within cells. Rows enter the CLR and projection stacks for linear η. Semiparametric nuisance estimation is a Phase-3 question (§13.4). Positivity diagnostics are printed.
+* **Do not build** the Cinelli–Hazlett/Chernozhukov contours. Point to `seine` with §14.4's caution.
+* **Interface.** `eiBounds(..., covariates = ~ Z1 + Z2, restrictions = list(car = list(delta = seq(0, .1, .01), norm = "sup", bench = list(kappa = TRUE, m = c(0.5, 1, 2)))), z = ~ area_share)`; `print(fit, overlap = TRUE, benchmarks = TRUE)` prints κ_k, δ_k, $R^2(X\sim Z)$, $R^2(Z_k\sim X\mid Z_{-k})$, the overlap factor and, when z is given, the B1 benchmark beside them.
+* **Tests.**
+  * Reproduce `check_car_sensitivity` Parts 1–3.
+  * δ = 0 equals Goodman within cells.
+  * δ → ∞ equals DD.
+  * Monotone in δ.
+  * B1(M = 0) coincides with CAR(Z) when z ∈ Z.
+* **Reviews**: proof review, then code review.
+
+**Covariate-benchmarked κ and δ (a general part of this step, built on the CAR(Z)-δ construction above; kept as written by your decision).** Following NEW_AVENUES §14.8, at your suggestion.
 * **Construction.** Under CAR(Z), dropping covariate $k$ creates an *identified* violation of CAR($Z_{-k}$): $\Delta^{(-k)}(x,z_{-k})=E[\eta(Z)\mid X=x,Z_{-k}]-E[\eta(Z)\mid Z_{-k}]$. Its size gives two benchmarks: $\kappa_k=E[(\Delta^{(-k)}_j)^2]/\operatorname{Var}(Y)$ (a variance share) and $\delta_k=\sup\lvert\Delta^{(-k)}_j\rvert$ (sup norm). A joint benchmark $\kappa_Z$ drops all covariates at once.
 * **The bridge assumption, in plain language.** "Whatever contextual violation remains after adjusting for the covariates is at most *m* times what covariate *k* accounts for": $\kappa\le m\,\kappa_k$, or $\delta\le m\,\delta_k$. **m is a judgement.** The benchmark only sets the scale on which that judgement is expressed. It does not identify m: the multiple the truth actually needs, $m^*$, is never observed.
 * **When it is informative: your point, made precise.** Three printed quantities decide it.
@@ -547,32 +573,6 @@ They combine in **one LP** on the shared model "each group's mean rate = effect 
   * N22, extended to several covariates and to R×C.
   * Coverage of the bridge bound at m ≥ m* and failure at m < m*, by simulation with a known truth.
   * The bridge bound collapses to CAR(Z) at m = 0 and to DD as m → ∞.
-
-**Worked example** [NA, `check_car_sensitivity`, reproduced].
-* A contextual violation that leaves the regression exactly unchanged biases a group's rate by 0.080.
-* A covariate-benchmarked sensitivity bound would report 0.006–0.032 for the same bias.
-* With compositions confined to [0.3, 0.7] within covariate cells, a δ of 0.05 becomes a half-width of 0.125 at the vertex rate (overlap factor 2.5).
-* *Without the module*: no covariate adjustment at all, or a point estimate (Goodman within cells) that silently assumes δ = 0. *With it*: an interval that widens honestly with δ and with poor overlap, beside B1(M)'s like-for-like benchmark.
-
-**Why here.** Covariates are commonly available in applications of these models, so it is a real candidate, not a rare case. The covariate set is a user input. It shares Step 4's model, so it comes right after it. It is placed after B1(M) because its benchmark is the weaker one for EI's signature threat. Covariate adjustment was earlier low priority by your decision. Covariate availability makes it worth a numbered step, but it can trade places with Step 7 if you prefer. **Cost:** M (LP rows per covariate cell or a linear η(Z); the overlap factor; the benchmarks).
-
-**Technical notes.**
-* **Model.** $E[\beta\mid X,Z,z]=\eta(Z)+\Delta$, with $\lVert\Delta\rVert_\infty\le\delta$ (LP) or $E[\Delta_j^2]\le\kappa_j\operatorname{Var}(Y)$ (SOCP). With linear η, CAR(Z) is the LCE+Z model with the own-composition effect set to zero (NEW_AVENUES §13.4).
-* **Proof items.**
-  * R8 (CAR part): validity and monotonicity in δ.
-  * The invisible-violation class in R×C (§14.3; proved in its simple form).
-  * The overlap factor beyond 2×2 (a conjecture).
-  * The benchmark $\delta_k$ and its caveats (§14.5).
-* **Inference.** η(Z) is estimated, by series or within cells. Rows enter the CLR and projection stacks for linear η. Semiparametric nuisance estimation is a Phase-3 question (§13.4). Positivity diagnostics are printed.
-* **Do not build** the Cinelli–Hazlett/Chernozhukov contours. Point to `seine` with §14.4's caution.
-* **Interface.** `eiBounds(..., covariates = ~ Z1 + Z2, restrictions = list(car = list(delta = seq(0, .1, .01), norm = "sup", bench = list(kappa = TRUE, m = c(0.5, 1, 2)))), z = ~ area_share)`; `print(fit, overlap = TRUE, benchmarks = TRUE)` prints κ_k, δ_k, $R^2(X\sim Z)$, $R^2(Z_k\sim X\mid Z_{-k})$, the overlap factor and, when z is given, the B1 benchmark beside them.
-* **Tests.**
-  * Reproduce `check_car_sensitivity` Parts 1–3.
-  * δ = 0 equals Goodman within cells.
-  * δ → ∞ equals DD.
-  * Monotone in δ.
-  * B1(M = 0) coincides with CAR(Z) when z ∈ Z.
-* **Reviews**: proof review, then code review.
 
 ### 3.6 Step 7: M-EXCEPT, how many exceptions can a conclusion survive?
 
@@ -980,6 +980,7 @@ NZ has 31,359 booths with median size 262, and its variance slope on the binomia
   * the R×C version of A2 (a conjecture);
   * a decision on how to pool NZ across electorates.
 * A0: **drop** (implied by Θ_X, never binds).
+* If Avenue A research proceeds, the covariance route of §13.5 (estimating the cross-group correlation from Var(T | x) under homoskedastic deviations) is the candidate replacement for A2's sign assumption. It is otherwise dropped from the plan.
 
 **Fit.**
 * LCE layer: A1/A2 are SOCP or LMI rows, or LP rows with ordering in 2×2.
@@ -1203,11 +1204,7 @@ The ladder shows how quickly the LCE answer gives way as curvature is allowed.
 
 So the data cannot sign the correlation. Without the module, A2 must *assume* it is non-negative. With the module, it would be estimated, but here it is not estimable.
 
-**Verdict: research only** (local inference and an r² dial need many units with good overlap). For your data: Wisconsin evidence negative; NZ untested. It does not move aggregate bounds (§13.7 D). Its two eventual uses:
-* replacing A2's sign assumption inside Avenue A research;
-* a printed diagnostic: the PSD test, reported before any clipping.
-
-**Fit.** Unit or second-moment level (local). It belongs with Avenue A.
+**Verdict: dropped from the plan** (your decision, 21 Nov). It does not move aggregate bounds (§13.7 D), and the Wisconsin illustration was negative (1857 not PSD) or unsigned (1865). Its only remaining role, replacing A2's sign assumption, is recorded as one line inside Avenue A research (§4.1).
 
 ### 4.11 Excluded composition shifters (§13.6)
 
@@ -1226,7 +1223,7 @@ So the data cannot sign the correlation. Without the module, A2 must *assume* it
 | B second-scale context, B1(M) | 3 (1st in §9) | **Step 4** | Agree that it is the most practical new rung for data with a second-scale composition (county share in the Wisconsin/Iowa illustration). The plug-in emptiness on all columns makes inference (CLR or projection plus the emptiness test) part of the step, not an afterthought |
 | CAR(Z)-δ | 4 | **Step 6** (after your decision D5) | Shares B1(M)'s model and comes right after it. With county-level Z it reduces to B. B1's benchmark is like-for-like for contextual effects; covariate benchmarks are optimistic (§14.4) |
 | E6 validation microdata with Γ | 5 | General-user track | No validation data for your projects |
-| §13.5 covariance → dispersion ceilings | 6 | Research (with A) | Wisconsin estimate not PSD (1857) or unsigned (1865); local only |
+| §13.5 covariance → dispersion ceilings | 6 | Dropped (one line inside Avenue A research) | Wisconsin estimate not PSD (1857) or unsigned (1865); local only |
 | No-offsetting ceiling; single index; κ (§12) | 7 | No-offsetting → Step 3 (M-CONTRAST); κ → Step 4; single index → research | M-CONTRAST is the finite, derivative-free form of the no-offsetting ceiling. κ annotation is cheap and pairs naturally with B1(M). The single index rests on a conjecture (R14) and is nonconvex |
 | A coin-flip rungs | 8 | Research | Agree: strong identification, weak estimability. `sim_size_grid` suggests NZ's national file is the one place it could work, so I would name that as the research project |
 | Excluded shifters | 9 | Drop (clean case in E5) | Agree |
@@ -1287,7 +1284,7 @@ So the data cannot sign the correlation. Without the module, A2 must *assume* it
 | **M-SHARP series estimator** (NEXT_BUILD item 4, R9 as stated) | The oracle gain is median 0–1% (at most 5%) under unimodal heterogeneity, 8–37% under bimodal precinct rates (`sharp_gain_study*.py`); build the estimator only if the kink-mass diagnostic finds bimodality. Plug-in versions are biased inward. "Tightens every rung" is not a sensible release criterion | Step 8's diagnostic finds data with large kink mass, or the NZ benchmark shows gains |
 | **M-LOC as its own module** | It is the "everywhere" option of M-CONTRAST under LCE (N12c). C1 (R1) is needed only for the implication to $\delta_W$ | none; build it with Step 3 |
 | **2×C joint/ordinal signs (R6), R×2 spanning trees (R5)** | Evidence of user demand is thin, and R5(c) and R6 are open or only checked. These are LCE-only refinements | an application with ordered outcomes or ≥3 groups that asks for them |
-| **M-DISP/covariance, Avenue A, single index, tensor contests** (see Part 4 for each) | A and the covariance route need thousands of units and a pooling model; the single index rests on conjecture R14 and is nonconvex; tensor contests need implausible local independence | a decision to pool NZ nationally (A); a proof of R14 |
+| **M-DISP, Avenue A, single index, tensor contests** (see Part 4 for each; the covariance diagnostic is dropped) | A and the dispersion route need thousands of units and a pooling model; the single index rests on conjecture R14 and is nonconvex; tensor contests need implausible local independence | a decision to pool NZ nationally (A); a proof of R14 |
 | **Causal DiD before the descriptive layer and Batch C** | PHASE1b and PHASE2d are unreviewed; the causal labels need explicit trend assumptions | Batch C returned |
 | **Switching the default interval to projection** | **This would reverse your decision.** I do not recommend it now. 0.3.1 already prints projection beside CLR with a per-fit status, and Step 0 adds the R2-regime line | Conjecture P3.5(b3) fails in a design users meet, or a referee insists |
 | **General R×C full-law estimation** | The cost is high and the gain unproven (above) | Step 8 shows gains |
@@ -1348,7 +1345,11 @@ So the data cannot sign the correlation. Without the module, A2 must *assume* it
 * C2, contests as districts: Step 10, just before E4 (now Step 11, last).
 * Bounded differences between named neighbours: an option of M1(δ), Step 5, with neighbours defined by an adjacency matrix or a distance matrix (Lipschitz default).
 
-**Still open:** the covariance diagnostic (left as research).
+**Final choices (21 Nov, fourth round):**
+* The covariance diagnostic is **dropped** from the plan. One line inside Avenue A (§4.1) records its only research role.
+* Covariate-benchmarked κ is kept as written in Step 6.
+
+**No decisions remain open.**
 
 ## Part 8. What I verified, and what I take on trust
 

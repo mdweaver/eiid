@@ -247,6 +247,22 @@ report("RC5 C2(b): integer set is NOT 'the lattice inside the continuous interva
        f"two units (N=5,V=1,yes=1), ordering boxes n>=0.2, between sign Y>=Y^NM=0.4: continuous Y range [{clo:.1f},{chi:.1f}], "
        f"integers in it {lattice}, integer values {ints}; C2(b)'s formula max(Y^-_rd, ceil Y^NM) = 2 is right, the 'So ...' sentence is not")
 
+# RC11 [CE, round 2]: the corrected C2(b) says the integer gap set is the full lattice "without unit rows, or with
+# integer boxes". Integer boxes are not enough: fractional TOTALS on disjoint multi-unit sets (class (i) unit rows)
+# have the same effect as T5's fractional boxes. The right condition is integer right-hand sides for all unit rows.
+L = Sys(a=[[1, 4]] * 4, b=[[1, 4]] * 4)                      # four units N=5, V=1, yes=1; no boxes at all
+L.total([0, 1], 0, 0, lo=0.2); L.total([2, 3], 0, 0, lo=0.2)  # two fractional totals on disjoint sets (one laminar family)
+YNM = 4 * (1 * 1 / 5); L.total([0, 1, 2, 3], 0, 0, lo=YNM)  # between sign over all units: Y >= 0.8
+tgt = L.vec([(i, 0, 0) for i in range(4)])
+clo, _ = L.lp(tgt, 1); chi, _ = L.lp(tgt, -1)
+latt = [k for k in range(0, 5) if clo - 1e-9 <= k <= chi + 1e-9]
+ints = [k for k in range(0, 5) if L.ip(tgt, 1, extra_eq=(tgt, k))[0] is not None]
+report("RC11 corrected C2(b): 'with integer boxes' is not enough; fractional totals also shrink the lattice", "CE",
+       latt == [1, 2, 3, 4] and ints == [2, 3, 4],
+       f"four units (N=5,V=1,yes=1), no boxes, totals y0+y1 >= 0.2 and y2+y3 >= 0.2, between sign Y >= {YNM:.1f}: "
+       f"continuous range [{clo:.1f},{chi:.1f}] contains {latt}; integer values {ints}; condition should read "
+       f"'all unit rows with integer right-hand sides'")
+
 # RC5b [CE]: C2(a)/(b) need all sign rows on one unit set S and the target Y_rc(S): sign set != target set
 L = Sys(a=[[2, 2], [2, 2]], b=[[2, 2], [2, 2]])
 YNM0 = 2 * 2 / 4                                             # sign on unit set S = {0} only: Y_11({0}) >= 1

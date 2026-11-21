@@ -237,3 +237,67 @@ The pairwise $\delta_B(r,s)$ example (LP 45.098, integer 45) shows a fractional 
 * [ ] Issue 11: design-based selection hypothesis in Remark 4.4.
 
 None of these changes the LP the package solves, the TU routing (apart from issue 8's whole-set test), or the margins-only cross-layer test. Issue 2 changes what may be printed when belief rows enter the count layer. Issue 3 constrains which targets get an actual-rate model interval.
+
+---
+
+## 7. Round 2 confirmation (6a at `claude/mcount-theory` ed709f11)
+
+*Confirmation pass on the author's fixes (6a §10). I merged ed709f11 into this branch as a fast-forward, read the full diff of 6a and PD §8, and reran both scripts.*
+
+*Reruns:*
+* `verify_phase6a.py`: **36/36 PASS**, output identical to the committed `verify_phase6a_output.txt`. The new checks T6, S5, X6 and G2 reproduce RC1, RC5 and RC8 and test Lemma 4.1(b).
+* `phase6a_review_checks.py`: **14/14 PASS**. That is the 13 checks of round 1, unchanged and all still passing, plus a new check RC11.
+
+### 7.1 Verdict per issue
+
+| Issue | Verdict | Notes |
+|---|---|---|
+| 1 class (iii) matrix not TU | **resolved** | The statement now concludes integrality. TU of the original matrix is claimed for (i)–(ii) only, and (iii) is proved via the reduced system; the proof's first paragraph, step 5 and step 6 all say so. The register row is restated to match. T6 reproduces the minor 2. |
+| 2 belief rows are events | **resolved** | See §7.2. |
+| 3 design-measurable $v$; representation | **resolved** | The hypothesis is now in Lemma 4.1 and §1.2, and outcome-margin denominators are excluded. Remark 4.1a covers the representation question, requiring one fixed from the design alone. C2 and C8 are updated. |
+| 4 P3.8 for multi-cell targets | **resolved** | Lemma 4.1(b) adds the Hoeffding allowance and the §4.3 row is restated; see §7.2. |
+| 5 C2(b) lattice sentence | **resolved, with a residual one-phrase error (N1 below)** | The false sentence is replaced and S5 reproduces RC5. However, the replacement condition "without unit rows, or with integer boxes" is still too weak. |
+| 6 one sign set; CR slack | **resolved** | The preamble fixes $\mathcal S$ and the target $Y_{rc}(\mathcal S)$. With several sign sets the note now falls back to R19(b) items 1–2. The CR clause says "without slack", and (b) requires $\mathcal S$ to be addable. |
+| 7 $R\ge3$ and $C\ge3$ | **resolved** | Fixed in the R19(c) example, §3.4, §9 item 1 and the register row. |
+| 8 class (ii) bullet; one class for the whole row set | **resolved** | Fixed in the R19(b) statement, Corollary 2.2 (bullet and proviso), C4 (the crossing-graph bipartiteness test is stated correctly) and C10. |
+| 9 $D^r_c$ | **resolved** | Fixed in Lemma 2.1(c), C2 and §9 item 3. |
+| 10 "identified set" | **resolved** | (iii-a) is restated as the set of compatible realised values, with interiority required for every unit at some $k$ in the model set. |
+| 11 design-based $\mathcal K$ | **resolved** | Remark 4.4 now carries the hypothesis, citing P3.7(b) and Lindeberg over $\mathcal U$. |
+| 12 exact arithmetic | **resolved** | C4 now requires exact rationals or a printed tolerance, and counts margins as integers only if they are exactly integer in the input. C10 tests it. |
+| 13 C2(c) | **resolved** | |
+| 14 degenerate units | **resolved** | $N_i>0$ is stated. The odds-ratio convention is correct: with all margins positive, the ratio is 0 at the lower end of the cell's range and ∞ at the upper end, never $0/0$. The variance condition is required over each sign set. |
+| 15 $\delta_B(r,s)$ example | **resolved** | The example is restated as a fractional vertex only, and R19(c)(3) is reworded. |
+
+### 7.2 What the fixes introduced
+
+**Lemma 4.1(b) (Hoeffding): correct.**
+* Given the design, the $Z_i$ are independent and each lies in an interval of length $\rho_i$; step 2 shows this holds whatever the dependence inside a unit, provided $v$ depends on the design only.
+* Hoeffding for $\sum_i(Z_i-EZ_i)$ then gives $2\exp(-2t^2/\sum\rho_i^2)$, which equals $\alpha_E$ at $t_E(\varphi)$. For a single cell, $\rho_i=w_{ir}$, which is P3.8 step 6 exactly.
+* $\varphi_0$ does not enter $E_\varphi$, so letting it depend on the data is harmless. The interval for $\tilde B_\varphi$ is $\varphi_0$ plus P3.8's interval for the design-coefficient functional $\sum v a m$.
+* G2 checks the extremal law.
+
+**R27 union bounds $(*)$: correct.**
+* Step 1 holds pointwise on $\{n^\circ\in F\}$. For integer endpoints it uses the fact that $n^\circ$ is an integer table of $F$, which is valid with exact integer margins.
+* $F$ may be random, because identity-row right-hand sides and the thresholds $Y^{NM}$, $Y^{ER}$ depend on data. The inclusions are per replication, so this does no harm.
+* (i) and (ii) for identity rows follow because $P(n^\circ\notin F)=0$. The belief-row readings are exactly the two inequalities, and the conditional-level caveat is stated and reproduced by X6.
+* Remark 4.2 is now consistent: $\alpha_C$ plays the role of $P(n^\circ\notin F)$.
+* C8's two printed texts match the theorem. The register row R27 states the restriction.
+
+**One residual error, N1 (C2(b), one phrase; error in a parenthetical).**
+* The corrected (b) says the integer gap set is "the lattice inside the continuous interval" *"without unit rows, or with integer boxes"*. Proof step 3 says the same in the form "only when … without fractional boxes on several units".
+* Fractional **totals** among C2(b)'s own unit rows (class (i) totals on $(r,c)$) have the same effect as fractional boxes. RC11: four units, no boxes, totals $y_0+y_1\ge0.2$ and $y_2+y_3\ge0.2$, and a between sign $Y\ge0.8$. The continuous range $[0.8,4]$ contains 1, but the integer values are $\{2,3,4\}$.
+* Fix: replace "or with integer boxes" by "or when every unit row (box, known cell, total) has an integer right-hand side". In proof step 3, replace "only when … i.e. without fractional boxes on several units" by "when every unit row has an integer right-hand side; otherwise it can be strictly smaller (T5, S5)". ("Only when" also overstates: a dominating threshold can restore the full lattice.)
+* Integer endpoints, R19(b) and the formula $[\max(Y^-_{\rm rd},\lceil\cdot\rceil),\min(Y^+_{\rm rd},\lfloor\cdot\rfloor)]$ are unaffected; only the description of when the full lattice appears is wrong.
+
+Nothing else new. I also rechecked these wording changes and found them correct:
+* the R19(b) item 3 clause "(for (iii), in the reduced system)";
+* the Corollary 2.2 proviso;
+* the R19(c)(3) rewording;
+* the §4.1 split of identity rows and belief rows;
+* the C4 and C8 contract text;
+* the §9 items.
+
+### 7.3 Can the register rows move from "proof review pending" to "proof reviewed"?
+
+* **R27: yes.** All issues assigned to it (2, 3, 4, 10, 11) are resolved, and the restated union bounds and Lemma 4.1(b) are correct. Its status remains inherited from the model interval (the §4.3 table). (iii-b) remains a computed example, not P.
+* **R19: yes, once the one-phrase fix N1 is made in Prop. C2(b) and its proof step 3.** The fix is textual and needs no further proof review; the coordinator can confirm it by reading the two sentences. Every other R19 issue (1, 5's main sentence, 6, 7, 8, 9, 12–15) is resolved.

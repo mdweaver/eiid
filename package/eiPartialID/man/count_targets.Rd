@@ -37,7 +37,7 @@ an object of class \code{"ecTarget"}.
 }
 \description{
 Constructors for the targets of \code{\link{eiCounts}}: linear functionals of the
-realised table over a known denominator (PHASE6a §1.2, contract C2).
+realised table over a known denominator (PHASE6a Sec. 1.2, contract C2).
 \itemize{
   \item \code{rate(row, col, where)}: \eqn{Y_{rc}(S)/A_r(S)}. \code{row} may name several
     rows (a merged group) and \code{col} several columns (a sum over columns).

@@ -11,7 +11,7 @@
 #   "total"  coefficient 1 on cell (r, c) over a unit set (published totals, W1 sign/CR rows);
 #   "gen"    anything else (pairwise orderings, pairwise and W2 signs).
 # With exactly integer margins every threshold is computed in exact rational arithmetic
-# (package gmp) and rounded inward (6a §1.4, contract C4, review check RC9); with non-integer
+# (package gmp) and rounded inward (6a Sec. 1.4, contract C4, review check RC9); with non-integer
 # margins thresholds are doubles and no rounding is done (R19(e)).
 
 # ---------------------------------------------------------------------------
@@ -25,7 +25,7 @@
 .ec_unit_of <- function(P, k) (k - 1L) %/% (P$R * P$C) + 1L
 
 # ---------------------------------------------------------------------------
-# the problem: margins (units with N_i = 0 dropped, 6a §1.1)
+# the problem: margins (units with N_i = 0 dropped, 6a Sec. 1.1)
 # ---------------------------------------------------------------------------
 .ec_problem <- function(A, B, rl, cl, units, integer_input = TRUE, data = NULL, tol = 1e-9) {
   A <- as.matrix(A); B <- as.matrix(B)
@@ -92,7 +92,7 @@
        cell = cell, units = units, label = label)
 }
 
-# inward rounding of one row (6a §1.4; [Chv]). Integer margins only.
+# inward rounding of one row (6a Sec. 1.4; [Chv]). Integer margins only.
 # bound / total rows: lo -> ceiling, hi -> floor. gen rows: scale to coprime integers first.
 .ec_round_row <- function(row) {
   if (is.null(row$coefq)) return(row)
@@ -223,7 +223,7 @@
 }
 
 # odds-ratio dial on a 2x2 unit: integer (or continuous) range of n11 with
-# psi_L <= n11 n22 / (n12 n21) <= psi_U, written k n22 >= psi_L n12 n21 (6a §1.3 convention)
+# psi_L <= n11 n22 / (n12 n21) <= psi_U, written k n22 >= psi_L n12 n21 (6a Sec. 1.3 convention)
 .ec_odds_box <- function(P, i, psiL, psiU) {
   a <- P$A[i, 1]; b <- P$B[i, 1]; N <- P$N[i]
   if (a == 0 || a == N || b == 0 || b == N) return(NULL)       # cell fixed by the margins: ignored
@@ -437,7 +437,7 @@
       a <- nm(P$A[i, r]); Ni <- nm(P$N[i]); b <- nm(P$B[i, c])
       if (is.null(s$over)) {
         if (P$A[i, r] == 0 || P$A[i, r] == P$N[i]) next          # no rest group, or no group r
-        # n/a >= (b - n)/(N - a) - slack  <=>  n >= a b / N - slack a (N - a) / N   (a box; 6a §1.3)
+        # n/a >= (b - n)/(N - a) - slack  <=>  n >= a b / N - slack a (N - a) / N   (a box; 6a Sec. 1.3)
         th <- a * b / Ni - nm(s$slack) * a * (Ni - a) / Ni
         if (s$sign > 0) bnd(i, r, c, th, NULL) else bnd(i, r, c, NULL, a * b / Ni + nm(s$slack) * a * (Ni - a) / Ni)
       } else {

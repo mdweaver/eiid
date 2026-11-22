@@ -354,14 +354,14 @@ often as the other men" raises the floors to 6 and 30 veteran yes votes:
 ```{r counts}
 d <- data.frame(precinct = c("P1", "P2"), vet = c(20, 60), other = c(80, 40),
                 yes = c(30, 50), no = c(70, 50))
-fit <- eiCounts(cbind(yes, no) ~ cbind(vet, other), data = d, unit = "precinct",
+cfit <- eiCounts(cbind(yes, no) ~ cbind(vet, other), data = d, unit = "precinct",
                 targets = list(rate("vet", "yes"), gap("vet", "other", "yes"),
                                rate("vet", "yes", where = precinct == "P2")),
                 restrictions = list(order_unit = list(row = "vet", col = "yes"),
                                     total = list(units = c("P1", "P2"), row = "vet",
                                                  col = "yes", lower = 40)))
-fit
-witness(fit, 1)
+cfit
+witness(cfit, 1)
 ```
 
 * The first column is always the margins-only range, computed as an exact LP. For

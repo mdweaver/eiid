@@ -72,7 +72,7 @@ exact LP; for multi-cell targets it is narrower than cellwise interval arithmeti
 
 \strong{Integer tables} (\code{integer}). With exactly integer margins (counts in the
 data; shares are not counts) \code{"auto"} rounds every row inward in exact rational
-arithmetic (package \pkg{gmp}; 6a §1.4) and checks whether the \emph{whole} row set lies in
+arithmetic (package \pkg{gmp}; 6a Sec. 1.4) and checks whether the \emph{whole} row set lies in
 one total-unimodularity class of R19(b): (i) totals on one cell whose unit sets form two
 laminar families (decided by 2-colouring the crossing graph); (ii) totals on cells of one
 column (or row), one laminar family per cell; (iii) \eqn{R = 2} (or \eqn{C = 2}), one
@@ -103,8 +103,10 @@ evaluated in \code{data}, e.g. \code{where = ~ county == "Dane"}).
     the realised ordering in every unit (row at least as supportive as \code{over}); the
     one-vs-rest version is a box, the pairwise version (\eqn{R \ge 3}) a two-cell row.
   \item \code{odds = list(psi = c(lower, upper), units)}: the 2 x 2 odds-ratio dial (a box;
-    ignored in units with a zero margin). A dial containing 1 can never be refuted by the
-    margins.
+    ignored in units with a zero margin). A dial containing 1 is labelled untestable: with
+    continuous tables and no other rows the equal-rates table (odds ratio 1) satisfies it,
+    so the margins alone do not contradict it (with whole people, or with other rows, they
+    can).
   \item \code{sign = list(type = "dB" or "dW", row, col, sign, version, other, where, slack)}:
     realised association signs (2c Definition 1 with realised rates); \code{"W1"}
     (one-vs-rest, default) is a total on \eqn{Y_{rc}(S)}; \code{"pair"} and \code{"W2"}

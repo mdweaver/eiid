@@ -1,5 +1,5 @@
 # The count layer (M-COUNT): eiCounts(), count targets, witness() and the cross-layer
-# (R27) block. Theory: docs/extension/PHASE6a_count_layer.md; contract §6 (C1-C10).
+# (R27) block. Theory: docs/extension/PHASE6a_count_layer.md; contract Sec. 6 (C1-C10).
 
 # ---------------------------------------------------------------------------
 # targets
@@ -8,7 +8,7 @@
 #' Count targets for eiCounts()
 #'
 #' Constructors for the targets of \code{\link{eiCounts}}: linear functionals of the
-#' realised table over a known denominator (PHASE6a §1.2, contract C2).
+#' realised table over a known denominator (PHASE6a Sec. 1.2, contract C2).
 #' \itemize{
 #'   \item \code{rate(row, col, where)}: \eqn{Y_{rc}(S)/A_r(S)}. \code{row} may name several
 #'     rows (a merged group) and \code{col} several columns (a sum over columns).
@@ -480,7 +480,7 @@ combo <- function(..., weights, label = NULL) {
 #'
 #' \strong{Integer tables} (\code{integer}). With exactly integer margins (counts in the
 #' data; shares are not counts) \code{"auto"} rounds every row inward in exact rational
-#' arithmetic (package \pkg{gmp}; 6a §1.4) and checks whether the \emph{whole} row set lies in
+#' arithmetic (package \pkg{gmp}; 6a Sec. 1.4) and checks whether the \emph{whole} row set lies in
 #' one total-unimodularity class of R19(b): (i) totals on one cell whose unit sets form two
 #' laminar families (decided by 2-colouring the crossing graph); (ii) totals on cells of one
 #' column (or row), one laminar family per cell; (iii) \eqn{R = 2} (or \eqn{C = 2}), one
@@ -511,8 +511,10 @@ combo <- function(..., weights, label = NULL) {
 #'     the realised ordering in every unit (row at least as supportive as \code{over}); the
 #'     one-vs-rest version is a box, the pairwise version (\eqn{R \ge 3}) a two-cell row.
 #'   \item \code{odds = list(psi = c(lower, upper), units)}: the 2 x 2 odds-ratio dial (a box;
-#'     ignored in units with a zero margin). A dial containing 1 can never be refuted by the
-#'     margins.
+#'     ignored in units with a zero margin). A dial containing 1 is labelled untestable: with
+#'     continuous tables and no other rows the equal-rates table (odds ratio 1) satisfies it,
+#'     so the margins alone do not contradict it (with whole people, or with other rows, they
+#'     can).
 #'   \item \code{sign = list(type = "dB" or "dW", row, col, sign, version, other, where, slack)}:
 #'     realised association signs (2c Definition 1 with realised rates); \code{"W1"}
 #'     (one-vs-rest, default) is a total on \eqn{Y_{rc}(S)}; \code{"pair"} and \code{"W2"}
@@ -584,7 +586,7 @@ eiCounts <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL, x = 
 # the printed wording of contract C8 (Unicode, with an ASCII fallback in non-UTF-8 locales)
 .ec_txt <- function(key) {
   u <- .ec_utf8()
-  al <- if (u) "α" else "alpha"; mi <- if (u) "−" else "-"; le <- if (u) "≤" else "<="
+  al <- if (u) "\u03b1" else "alpha"; mi <- if (u) "\u2212" else "-"; le <- if (u) "\u2264" else "<="
   switch(key,
          rej_id = paste0("disjoint: rejects (model + its rows) at level ", al),
          cov_bel = paste0("coverage at least 1 ", mi, " ", al, " ", mi, " P(belief rows false), which is unknown; ",
@@ -781,7 +783,8 @@ eiCounts <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL, x = 
                   if (tb$n_pieces[j] == 0) "empty" else if (tb$n_pieces[j] == 1) "one interval" else "two intervals"))
     }
     if (any(vapply(x$specs, function(s) s$type == "odds" && s$psi[1] <= 1 && s$psi[2] >= 1, TRUE)))
-      cat("  the odds-ratio dial contains 1: untestable (the margins can never refute it)\n")
+      cat("  the odds-ratio dial contains 1: untestable (with continuous tables and no other rows the margins alone\n",
+          "  do not contradict it: the equal-rates table has odds ratio 1)\n", sep = "")
   }
   cat("\n")
   if (any(grepl("TU class", tb$integer_status)))

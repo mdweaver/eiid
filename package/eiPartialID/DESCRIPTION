@@ -25,6 +25,7 @@ Imports:
   sandwich,
   stats,
   lpSolve,
+  gmp,
   graphics,
   grDevices
 RoxygenNote: 7.3.1

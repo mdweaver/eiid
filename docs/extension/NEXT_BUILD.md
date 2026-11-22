@@ -42,16 +42,18 @@
 8. **M-SHARP diagnostic** (kink mass, (X,N) conditioning); the estimator only if polarised precincts are found. R24, R9′.
 9. **M-BERN** polynomial robustness ladder, with L1′.
 10. **C2, contests as districts**, with its overidentification test. R29.
-11. **E4 table transfer** (NZ leave-one-out), last.
+11. *E4 table transfer: moved to the very end of the plan (owner, 22 Nov 2026); see below.*
 
 General-user track: M-AUDIT, M-CVR (exact published-table rows ship inside step 1).
 
-**After step 11: uncertain totals and compositions** (owner's decision, 22 Nov 2026; replaces step 1b). One general module for margins and compositions that are not known exactly but lie in a set with stated confidence: match probabilities (the former step 1b, R25/R26: Poisson-binomial margin sets, calibration slack, the Berkson correction in the LCE layer), survey-based margins, and changes in composition between elections (entry, exit, aging-in, from the DiD gap register). Placed late so that the needs found along the way (above all in the DiD theory's gap register) feed its specification. Until then, non-integer margins switch the integer check off and `print()` says the bounds are exact only for the stated margins.
+**After step 10: uncertain totals and compositions** (owner's decision, 22 Nov 2026; replaces step 1b). One general module for margins and compositions that are not known exactly but lie in a set with stated confidence: match probabilities (the former step 1b, R25/R26: Poisson-binomial margin sets, calibration slack, the Berkson correction in the LCE layer), survey-based margins, and changes in composition between elections (entry, exit, aging-in, from the DiD gap register). Placed late so that the needs found along the way (above all in the DiD theory's gap register) feed its specification. Until then, non-integer margins switch the integer check off and `print()` says the bounds are exact only for the stated margins.
 
-**After step 11: open items from M-COUNT** (owner's decision, 22 Nov 2026; `PHASE6a_count_layer.md`). Left open until the end of this plan, in this order of priority:
+**Then: open items from M-COUNT** (owner's decision, 22 Nov 2026; `PHASE6a_count_layer.md`). Left open until the end of this plan, in this order of priority:
 1. **A smaller valid set than the intersection** (R27(iii-b); computed example X5 only). Use the count rows when computing the model-to-actual allowance, so the combined answer can be tighter than count set ∩ model interval. Highest priority of the three: the owner considers it the most useful.
 2. **Integer theory outside the TU classes** (R15 remainder; PHASE6a §3.4). A theorem bounding the integer–continuous gap for pairwise orderings with R ≥ 3, W2 rows, totals across rows and columns, and mixtures. Lower priority: the certified MILP already gives exact answers.
 3. **Bhatia–Davis allowance for combined targets** (PHASE6a §9 item 7; P3.5(c1) covers single cells only). Lower priority: Popoviciu is valid, and the difference matters mainly with rates near 0 or 1 and small samples.
+
+**Last: E4 table transfer** (NZ leave-one-out; owner's decision, 22 Nov 2026). Moved after everything else, because the owner expects tables of this kind (a known cross-tabulation from a comparable setting) to exist in too few applications for the tool to be widely useful. Build only if such tables turn up.
 
 ### Later or research-dependent
 * **From the Batch B review:** grouped-rung proofs for M-SIGN (R16, needed to drop "experimental" under M1/M2); integer unit tables (R15); per-group W2 restrictions (U8(a)); the drop-one display and the L5/L6 sign check; the N2 global LP only (local rows dropped, U4(a)).

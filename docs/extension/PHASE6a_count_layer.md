@@ -320,8 +320,13 @@ For $\varphi=B_{rc}$, $\rho_i=w_{ir}$ and $S_\varphi=S_1$ of P3.5(a). For a one-
 | P3.5(b2)(ii) projection, Popoviciu allowance $S_\varphi$ | same; $q=\dim\beta$ or an exact reduction | **P** (asymptotic) |
 | projection with the Bhatia–Davis allowance P3.5(c1) | single-cell targets, $\mathrm{CI}_v$ on the rung alone, (c1)'s Lindeberg condition | **P** (asymptotic) |
 | P3.8 finite-sample interval, allowance $t_E(\varphi)$ (Lemma 4.1(b)) | any rung, any regime; design-measurable targets | **P** (finite sample; currently wide) |
+| point-identified rungs: L6, and L5 with one group (no free $k$) | P3.5(a) with an empty constraint system: $\tilde B_\varphi=c(\beta)$ is one linear functional of the fixed-dimension Goodman regression, so $\hat k=z_{1-\alpha_{\rm est}/2}$ (two-sided, the constant only), plus the allowance $S_\varphi$ (or $t_E(\varphi)$); any regime | **P** (asymptotic) |
+| L5 with several groups (Goodman within groups) | as the previous row, but $\dim\beta$ grows with the number of groups | **P** (asymptotic) in regime R1 (fixed groups) only; R2: simulation finding only (P3 §0.5) |
+| pooled L4 (M0 with `row_constant`, one group) | P3.5(a) and (b2)(ii): the L4 equalities $K_{c,rs}=Q_{c,rr}-Q_{c,rs}$ (2b Prop. D7(b)) are rows of the form $s(\beta)+Ak\ge0$ (each equality as two such rows), as in PHASE5a R10; fixed dimension, any regime. Near-zero width (point identification in 2×2) is covered because (a) is two-sided and (b2)(ii) simultaneous (P3 §4, Stoye remark) | **P** (asymptotic) |
+| pooled M1(δ) (one group) | with one group the δ-box around a free centre is vacuous, so M1(δ) is M0 (2b); P3.5(a), (b2)(ii) as for M0 | **P** (asymptotic) |
 | CLR as implemented (`ci_actual`; P3.5(b3), (c2)) | default interval | **algorithmic** (conjecture P3.5(b3)) |
 | grouped rungs (M1, M1(δ), M2, L4) **with** model sign rows | — | **no coverage theorem** (R16): the intersection is experimental |
+| grouped L4, M1(δ) **without** sign rows | P3.5(a), (b2)(ii) as for M1/M2 | **P** (asymptotic) in regime R1 only |
 | grouped rungs in regime R2 (many small districts) | — | simulation finding only (P3 §0.5) |
 
 ### 4.4 The rule

@@ -1,0 +1,95 @@
+PASS  [P2d] Δ1 Prop FD2: R1, R2 and R4 each point-identify the DiD under FD-LCE with non-linear levels  [max err 4.0e-16]
+PASS  [P2d] Δ1 Prop FD2(c): DiD_R4 lies between DiD_R1 and DiD_R2
+PASS  [P2d] Δ1 Prop FD2(d): under R4, Goodman on the change equals the DiD
+PASS  [P2d] Δ1 Prop FD3: dDiD/dDelta_w1 = -s, s = mu_vn (1/mu_v + 1/mu_n)
+PASS  [P2d] Δ2(a) FD outer LP contains the true DiD (levels non-linear, exact tau)
+PASS  [P2d] Δ2(b) per-period LCE (product of outer sets) is inside the FD outer bound  [60 cases]
+PASS  [P2d] Δ3 Prop Δ4: CR on changes never empty, one branch
+PASS  [P2d] Δ3 Prop Δ4: under realised CR on changes, sign(DiD) = sign(ER on Delta T)  [83 cases]
+PASS  [P2d] Δ4 Prop Δ6: with changing counts, DiD = I' + (s1 - s0) kappa_0 under R1
+PASS  [P2d] Δ4 Prop Δ6: truth inside the resulting interval
+PASS  [P2d] Δ5 Prop C2: aging-in decomposition of the post-war-base DiD; bias formula when aged-in vote like stayers
+PASS  [P2d] Δ6 Prop C1: composition polytope (interval aged-in split) bound contains the stayers' DiD
+PASS  [P2d] Δ7 Prop CL: ATT upper bound (epigraph LP) = closed form in the 2-row product case
+PASS  [P2d] Δ8 Prop P2: party margin + (Democrat, yes) = 0 leaves the veteran-yes range at Duncan-Davis
+PASS  [P2d] Δ8 Prop P3: selection on party only gives a range inside Duncan-Davis containing the truth  [strictly narrower in 152/300]
+PASS  E1 [V] Lemma E1 / Prop. E3(a): T-period ranges of separable targets are Minkowski sums of per-period ranges
+PASS  E1 [V] Prop. E3(b): two-row one-column DiD range = [G-_t1 - G+_t0, G+_t1 - G-_t0] (any R, C, T)
+PASS  E1 [F] Prop. E3(c): the joint set of event-study DiDs is not the box of their ranges (shared base table)  [40 designs, the box corner is infeasible in all]
+PASS  E2 [V] Lemma E2: every family of period tables extends to an integer within-person panel table
+PASS  E5/E6/E26 [V] brute force, two-period integer 2x2 tables, rung 'margins': integer set as stated (Props E3, E5, E6, E26)  [59 designs]
+PASS  E5/E6/E26 [V] brute force, two-period integer 2x2 tables, rung 'dW>=0': integer set as stated (Props E3, E5, E6, E26)  [59 designs]
+PASS  E5/E6/E26 [V] brute force, two-period integer 2x2 tables, rung 'dB>=0': integer set as stated (Props E3, E5, E6, E26)  [59 designs]
+PASS  E5/E6/E26 [V] brute force, two-period integer 2x2 tables, rung 'CR': integer set as stated (Props E3, E5, E6, E26)  [59 designs; integer CR empty in 1 with nonempty continuous set]
+PASS  E5/E6/E26 [V] brute force, two-period integer 2x2 tables, rung 'contrast': integer set as stated (Props E3, E5, E6, E26)  [59 designs]
+PASS  E4 [V] Lemma E4: change associations satisfy ER_D - D = dW_D / Var(X_r), NMc_D - D = -dB_D / (mu(1-mu)) in R x C
+PASS  E5 [V] Prop. E5(a)-(b): one-vs-rest closed forms on changes = LP over the R x C two-period product  [360 LPs]
+PASS  E5 [V] Prop. E5(c)-(d): NM on changes always in the margins-only range; NM_D = gamma ER_D, gamma < 1
+PASS  E5 [V] Prop. E5(e): pairwise and joint-column change rows are valid LP rows (truth inside); they can tighten  [pairwise sign tightened 40/40; second column's sign tightened 2/40]
+PASS  E5 [V] Prop. E5(f): T = 3, CR on changes in two pairs: the union of the 2^2 branch LPs contains the truth  [60 designs with realised CR in both pairs]
+PASS  E6 [V] Prop. E6: count-layer contrast on changes = [0, (dtau_H - dtau_L)/t] n margins-only range (LP, 2x3)  [59 designs; empty in 32 (the joint sign test rejects)]
+PASS  E7 [V] Lemma E7: FD in R x C, Delta Q identified exactly with non-linear levels; Delta K_c moves the DiD, not E[Delta T|X]
+PASS  E8 [V] Prop. E8: the sharp FD set contains the truth and lies inside the FD4 outer set; strictly when T varies within x  [100 designs; strictly narrower in 100]
+PASS  E8 [I] Prop. E8(c): with T_t degenerate given X the sharp set equals the FD4 outer set
+PASS  E9 [V] Prop. E9(a): 2x2 DiD-S rows on the hull <=> |Delta kappa| <= min(Dq(x_L), Dq(x_U)) (closed form)
+PASS  E9 [V] Prop. E9(b)-(c): DiD-S sharp set = sharp FD set n closed form; contains the truth; closed form sharp only sometimes  [39 designs: closed form sharp in 38, strictly wider in 1]
+PASS  E10 [V] Prop. E10: LCE-layer contrast on changes: mix = t O_D(xbar), rate = t L_D(xbar), sum = Dtau_H - Dtau_L
+PASS  E11 [V] Prop. E11: under per-period M0 (2x2) the model within-association on changes = identified - (a+b) Delta kappa
+PASS  E12 [V] Lemma E12: actual-minus-model DiD, per-unit variance <= (2(w_r+w_s))^2/4; attained by opposite changes  [max ratio over random laws 0.40; extreme law 1.00]
+PASS  E13 [V] Theorem E13 (R27 on the product): coverage of (count set n actual-target FD interval) = model interval's; rejection <= alpha  [300 replications: model interval 1.000, intersection 1.000, disjoint 0.000]
+PASS  E14 [V] Lemma E14: ATT_t = D_t - b_t + S_t (no anticipation; spillover S onto the comparison group)
+PASS  E15 [V] Prop. E15: no trend assumption => ATT set = [B^L_r1 - 1, B^U_r1]: the descriptive DiD alone says nothing
+PASS  E16/E17 [V] Theorem E16 / Cor. E17: trend-dial ATT set (joint LP) lies in D-set (+) [-(M+Lam), M+Lam]; equal unless the rate limits bind  [equal in 40, logical limits bind in 80]
+PASS  E17 [I] Cor. E17: NS worked example: D in [.05,.25]; M=.10 -> [-.05,.35]; M=.02 -> [.03,.27]; breakdown M* = .05
+PASS  E18 [V] N21 reproduced exactly by LP: D_pre [-1.23,1.27], D_post [-1.08,1.42]; RM(1) joint [-2.35,2.65], endpoint-wise [-2.35,2.69]  [joint -2.3542,2.6458; endpoint-wise -2.3542,2.6875]
+PASS  E18 [F] N21 corrected: with theta in [0,1] the RM set is [B^L-1, B^U] = the no-assumption set, not [-2.35,2.65]  [RM(1) with rate limits [-0.750,1.000] = no assumption [-0.750,1.000]]
+PASS  E18 [I] N21 narrow pre-trends (pre totals pinned to +/-2): D_pre [-0.06,0.10]; RM(1) [-0.60,0.90] (with rate limits: shown)  [with rate limits [-0.604,0.896]]
+PASS  E18 [V] Prop. E18(b): RM set = union of 2 x (pre pairs) LPs; equals grid brute force on N21  [grid -2.3542,2.6458]
+PASS  E19 [V] Prop. E19(a): RM set in trend-dial set with M = Mbar sup|D_pre|; upper ends equal iff a common maximiser exists  [equal 20, strictly inside 20]
+PASS  E19 [V] Prop. E19(b): RM upper end equals the no-assumption upper end iff the vacuity LP is feasible  [vacuous 37, informative 2, refuted 1]
+PASS  E19 [V] Prop. E19(c): margins only, allowance reaches Mbar max|g0 - G_pre| >= Mbar w_pre/2; pinned pre-trends give standard RR
+PASS  E19 [I] Def. RM: Rambachan-Roth consecutive differences and NS's 'levels relative to base' differ with two pre-periods  [consecutive [-2.509,2.073] vs levels [-2.691,1.782]]
+PASS  E20 [V] Prop. E20: smoothness with set-valued pre-trends: closed form = LP; extra width w_0 + w_-1 + 2M over PT
+PASS  E21 [V] Prop. E21(c): MTR+ND+PS with spillover dial, R x C, comparison = rest: ATT set = [0, U] closed form = LP
+PASS  E21 [V] Prop. E21(c): comparison = a named row (R = 3): U = B^U_r1 - max(B^L_r0, B^L_s1 - Lam) = LP (margins only: the two extremes are jointly attained)  [39 non-empty cases]
+PASS  E22 [V] Prop. E22(a): identical observables in all periods, same b, different S -> ATTs differ by the S gap
+PASS  E22 [F] Prop. E22(b): RM from pre-periods alone can exclude the true ATT when S != 0; RM (+) [-Lam, Lam] covers it  [truth 0.088; RM(Lam=0) [-0.086,0.008]; RM(Lam=.08) [-0.166,0.088]]
+PASS  E24 [F] Prop. E24: union of branch intervals covers (>= .95); the plug-in branch's interval alone under-covers  [union 0.949, plug-in branch 0.669]
+PASS  E25 [F] Prop. E25 (= E19(d)): joint region over all periods covers the RM ATT set; plug-in pre-trend + post interval under-covers  [joint 0.998, plug-in 0.873]
+PASS  E27 [V] Theorem E27: R=2, change rows on one column, period pairs forming paths, laminar unit sets: LP = MILP (integral)  [540 objectives (one pair; consecutive path; two pairs sharing a base); three pairs sharing a base (outside the theorem): LP != MILP in 0/180]
+PASS  G1 [F] entry: period-own Delta-0 range can miss the stayers' DiD; the entrant-row polytope contains it  [naive misses in 200/200; polytope covers in all]
+PASS  G2 [F] exit: pool rate != stayers' rate unless leavers vote like stayers; the dial identity holds exactly  [naive equality fails in 300/300]
+PASS  G3 [F] aging-in: common-base DiD != stayers' DiD; gap = (1-w_v)B^O_v0 - (1-w_n)B^O_n0 (2d C2)  [300/300]
+PASS  G4 [F] stayers vs leavers: PT in the pool (b = 0) with b != 0 among stayers when staying differs by group  [b_pool -0.000, b_stayers 0.060]
+PASS  G5 [F] interval bases: DD with a census-projected base taken as exact can exclude the truth; the interval base covers it  [naive misses in 300/300]
+PASS  G6 [F] changing boundaries: share-allocated margins can exclude the truth; coarsening to common units covers it  [naive misses or infeasible in 53/300]
+PASS  G7 [F] uncertain margins: expected counts taken as exact can miss the truth; the union over the margin set covers it  [naive misses in 36/200]
+PASS  G7 [V] uncertain margins: a composition common to both periods enters once (union over V inside the union over (V0, V1))  [strictly narrower in 20/20]
+PASS  G7 [F] R26 on changes: E[Delta T|q] = qbar'dQ qbar + Var(X|q)(dQvv - 2dQvn + dQnn) exactly; ignoring it is biased  [max bias of the uncorrected fit 7.29e-03]
+PASS  G8 [F] covariates: conditional PT within strata, unconditional DiD != ATT; treated-weighted stratum DiD = ATT  [unconditional 0.010, conditional 0.050, ATT 0.050]
+PASS  G9 [F] time-varying groups: DiD of period-specific group rates != within-person DiD of group stayers  [period groups 0.450, stayers 0.503]
+      W  B_v,post: [0.432, 0.732]
+      W  D_post (margins): [-0.407, 0.792]
+      W  D_pre (margins): [-0.598, 0.603]
+      W  ER, NM on post changes: [0.270, 0.143]
+      W  ER, NM on pre changes: [0.008, 0.004]
+      W  D_post (CR on changes): [0.143, 0.270]
+      W  D_pre (CR on pre changes): [0.004, 0.008]
+      W  ATT, no assumption: [-0.568, 0.732]
+      W  ATT, PT, margins only: [-0.407, 0.732]
+      W  ATT, PT + CR: [0.143, 0.270]
+      W  ATT, dial M=.05 + CR: [0.093, 0.320]
+      W  ATT, dial M=.05, spillover .02 + CR: [0.073, 0.340]
+      W  ATT, RM(1), margins only: [-0.568, 0.732]
+      W  ATT, RM(1), CR post only: [-0.405, 0.732]
+      W  ATT, RM(1), CR post and pre: [0.135, 0.278]
+      W  ATT, MTR+ND+PS, margins only: [0.000, 0.482]
+      W  ATT, MTR+ND+PS + CR: [0.000, 0.311]
+PASS  W [I] worked example (§9): numbers as printed above, each rung narrows or reports no information as stated
+PASS  E17 [F] review issue 1: E17(b) as first stated (one-sided rate limits) fails with a coupling row; the exact criterion holds  [max D -0.400, thetaPT at argmax 1.200..1.200, sharp PT set [-0.933,-0.800]]
+PASS  E17 [V] review issue 1: margins only, a maximiser of D minimises thetaPT and a minimiser maximises it (named row and rest)  [120 cases]
+PASS  E6 [F] review issue 2: the emptiness criterion needs 'or Dbar+ < 0': here dtau_H > dtau_L and cap >= Dbar-, yet the set is empty  [Dbar in [-0.150,-0.150], lambda 0.60, dtau_H - dtau_L 0.46, cap 0.767]
+PASS  W [I] review issue 12: RM(1) with CR on the pre-war change alone gives [-0.416, 0.732]; on both changes [0.135, 0.278]  [pre only (-0.416, 0.732)]
+PASS  G [V] review issue 14: the gap-register counts quoted in PHASE2e (G1, G5, G6, G7) match this run  [G1 200/200, G5 300/300, G6 53/300, G7 36/200]
+
+76/76 PASS

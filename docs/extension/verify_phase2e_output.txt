@@ -17,11 +17,11 @@ PASS  E1 [V] Lemma E1 / Prop. E3(a): T-period ranges of separable targets are Mi
 PASS  E1 [V] Prop. E3(b): two-row one-column DiD range = [G-_t1 - G+_t0, G+_t1 - G-_t0] (any R, C, T)
 PASS  E1 [F] Prop. E3(c): the joint set of event-study DiDs is not the box of their ranges (shared base table)  [40 designs, the box corner is infeasible in all]
 PASS  E2 [V] Lemma E2: every family of period tables extends to an integer within-person panel table
-PASS  E3 [V] brute force, two-period integer 2x2 tables, rung 'margins': integer set as stated (Props E3, E5, E6, E26)  [59 designs]
-PASS  E3 [V] brute force, two-period integer 2x2 tables, rung 'dW>=0': integer set as stated (Props E3, E5, E6, E26)  [59 designs]
-PASS  E3 [V] brute force, two-period integer 2x2 tables, rung 'dB>=0': integer set as stated (Props E3, E5, E6, E26)  [59 designs]
-PASS  E3 [V] brute force, two-period integer 2x2 tables, rung 'CR': integer set as stated (Props E3, E5, E6, E26)  [59 designs; integer CR empty in 1 with nonempty continuous set]
-PASS  E3 [V] brute force, two-period integer 2x2 tables, rung 'contrast': integer set as stated (Props E3, E5, E6, E26)  [59 designs]
+PASS  E5/E6/E26 [V] brute force, two-period integer 2x2 tables, rung 'margins': integer set as stated (Props E3, E5, E6, E26)  [59 designs]
+PASS  E5/E6/E26 [V] brute force, two-period integer 2x2 tables, rung 'dW>=0': integer set as stated (Props E3, E5, E6, E26)  [59 designs]
+PASS  E5/E6/E26 [V] brute force, two-period integer 2x2 tables, rung 'dB>=0': integer set as stated (Props E3, E5, E6, E26)  [59 designs]
+PASS  E5/E6/E26 [V] brute force, two-period integer 2x2 tables, rung 'CR': integer set as stated (Props E3, E5, E6, E26)  [59 designs; integer CR empty in 1 with nonempty continuous set]
+PASS  E5/E6/E26 [V] brute force, two-period integer 2x2 tables, rung 'contrast': integer set as stated (Props E3, E5, E6, E26)  [59 designs]
 PASS  E4 [V] Lemma E4: change associations satisfy ER_D - D = dW_D / Var(X_r), NMc_D - D = -dB_D / (mu(1-mu)) in R x C
 PASS  E5 [V] Prop. E5(a)-(b): one-vs-rest closed forms on changes = LP over the R x C two-period product  [360 LPs]
 PASS  E5 [V] Prop. E5(c)-(d): NM on changes always in the margins-only range; NM_D = gamma ER_D, gamma < 1
@@ -35,11 +35,11 @@ PASS  E9 [V] Prop. E9(a): 2x2 DiD-S rows on the hull <=> |Delta kappa| <= min(Dq
 PASS  E9 [V] Prop. E9(b)-(c): DiD-S sharp set = sharp FD set n closed form; contains the truth; closed form sharp only sometimes  [39 designs: closed form sharp in 38, strictly wider in 1]
 PASS  E10 [V] Prop. E10: LCE-layer contrast on changes: mix = t O_D(xbar), rate = t L_D(xbar), sum = Dtau_H - Dtau_L
 PASS  E11 [V] Prop. E11: under per-period M0 (2x2) the model within-association on changes = identified - (a+b) Delta kappa
-PASS  E12 [V] Lemma E13: actual-minus-model DiD, per-unit variance <= (2(w_r+w_s))^2/4; attained by opposite changes  [max ratio over random laws 0.40; extreme law 1.00]
-PASS  E13 [V] Theorem E12 (R27 on the product): coverage of (count set n actual-target FD interval) = model interval's; rejection <= alpha  [300 replications: model interval 1.000, intersection 1.000, disjoint 0.000]
+PASS  E12 [V] Lemma E12: actual-minus-model DiD, per-unit variance <= (2(w_r+w_s))^2/4; attained by opposite changes  [max ratio over random laws 0.40; extreme law 1.00]
+PASS  E13 [V] Theorem E13 (R27 on the product): coverage of (count set n actual-target FD interval) = model interval's; rejection <= alpha  [300 replications: model interval 1.000, intersection 1.000, disjoint 0.000]
 PASS  E14 [V] Lemma E14: ATT_t = D_t - b_t + S_t (no anticipation; spillover S onto the comparison group)
 PASS  E15 [V] Prop. E15: no trend assumption => ATT set = [B^L_r1 - 1, B^U_r1]: the descriptive DiD alone says nothing
-PASS  E16 [V] Theorem E16 / Cor. E17: trend-dial ATT set (joint LP) lies in D-set (+) [-(M+Lam), M+Lam]; equal unless the rate limits bind  [equal in 40, logical limits bind in 80]
+PASS  E16/E17 [V] Theorem E16 / Cor. E17: trend-dial ATT set (joint LP) lies in D-set (+) [-(M+Lam), M+Lam]; equal unless the rate limits bind  [equal in 40, logical limits bind in 80]
 PASS  E17 [I] Cor. E17: NS worked example: D in [.05,.25]; M=.10 -> [-.05,.35]; M=.02 -> [.03,.27]; breakdown M* = .05
 PASS  E18 [V] N21 reproduced exactly by LP: D_pre [-1.23,1.27], D_post [-1.08,1.42]; RM(1) joint [-2.35,2.65], endpoint-wise [-2.35,2.69]  [joint -2.3542,2.6458; endpoint-wise -2.3542,2.6875]
 PASS  E18 [F] N21 corrected: with theta in [0,1] the RM set is [B^L-1, B^U] = the no-assumption set, not [-2.35,2.65]  [RM(1) with rate limits [-0.750,1.000] = no assumption [-0.750,1.000]]
@@ -54,9 +54,9 @@ PASS  E21 [V] Prop. E21(c): MTR+ND+PS with spillover dial, R x C, comparison = r
 PASS  E21 [V] Prop. E21(c): comparison = a named row (R = 3): U = B^U_r1 - max(B^L_r0, B^L_s1 - Lam) = LP (margins only: the two extremes are jointly attained)  [39 non-empty cases]
 PASS  E22 [V] Prop. E22(a): identical observables in all periods, same b, different S -> ATTs differ by the S gap
 PASS  E22 [F] Prop. E22(b): RM from pre-periods alone can exclude the true ATT when S != 0; RM (+) [-Lam, Lam] covers it  [truth 0.088; RM(Lam=0) [-0.086,0.008]; RM(Lam=.08) [-0.166,0.088]]
-PASS  E23 [F] Prop. E24: union of branch intervals covers (>= .95); the plug-in branch's interval alone under-covers  [union 0.949, plug-in branch 0.669]
-PASS  E24 [F] Prop. E25 (= E19(d)): joint region over all periods covers the RM ATT set; plug-in pre-trend + post interval under-covers  [joint 0.998, plug-in 0.873]
-PASS  E25 [V] Theorem E27: R=2, change rows on one column, period pairs forming paths, laminar unit sets: LP = MILP (integral)  [540 objectives (one pair; consecutive path; two pairs sharing a base); three pairs sharing a base (outside the theorem): LP != MILP in 0/180]
+PASS  E24 [F] Prop. E24: union of branch intervals covers (>= .95); the plug-in branch's interval alone under-covers  [union 0.949, plug-in branch 0.669]
+PASS  E25 [F] Prop. E25 (= E19(d)): joint region over all periods covers the RM ATT set; plug-in pre-trend + post interval under-covers  [joint 0.998, plug-in 0.873]
+PASS  E27 [V] Theorem E27: R=2, change rows on one column, period pairs forming paths, laminar unit sets: LP = MILP (integral)  [540 objectives (one pair; consecutive path; two pairs sharing a base); three pairs sharing a base (outside the theorem): LP != MILP in 0/180]
 PASS  G1 [F] entry: period-own Delta-0 range can miss the stayers' DiD; the entrant-row polytope contains it  [naive misses in 200/200; polytope covers in all]
 PASS  G2 [F] exit: pool rate != stayers' rate unless leavers vote like stayers; the dial identity holds exactly  [naive equality fails in 300/300]
 PASS  G3 [F] aging-in: common-base DiD != stayers' DiD; gap = (1-w_v)B^O_v0 - (1-w_n)B^O_n0 (2d C2)  [300/300]
@@ -86,5 +86,10 @@ PASS  G9 [F] time-varying groups: DiD of period-specific group rates != within-p
       W  ATT, MTR+ND+PS, margins only: [0.000, 0.482]
       W  ATT, MTR+ND+PS + CR: [0.000, 0.311]
 PASS  W [I] worked example (§9): numbers as printed above, each rung narrows or reports no information as stated
+PASS  E17 [F] review issue 1: E17(b) as first stated (one-sided rate limits) fails with a coupling row; the exact criterion holds  [max D -0.400, thetaPT at argmax 1.200..1.200, sharp PT set [-0.933,-0.800]]
+PASS  E17 [V] review issue 1: margins only, a maximiser of D minimises thetaPT and a minimiser maximises it (named row and rest)  [120 cases]
+PASS  E6 [F] review issue 2: the emptiness criterion needs 'or Dbar+ < 0': here dtau_H > dtau_L and cap >= Dbar-, yet the set is empty  [Dbar in [-0.150,-0.150], lambda 0.60, dtau_H - dtau_L 0.46, cap 0.767]
+PASS  W [I] review issue 12: RM(1) with CR on the pre-war change alone gives [-0.416, 0.732]; on both changes [0.135, 0.278]  [pre only (-0.416, 0.732)]
+PASS  G [V] review issue 14: the gap-register counts quoted in PHASE2e (G1, G5, G6, G7) match this run  [G1 200/200, G5 300/300, G6 53/300, G7 36/200]
 
-71/71 PASS
+76/76 PASS

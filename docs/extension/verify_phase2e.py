@@ -274,7 +274,7 @@ check("E2 [V] Lemma E2: every family of period tables extends to an integer with
 
 
 # =====================================================================================
-# E3. Brute force of small two-period integer tables, every count-layer rung (2x2 units).
+# E5/E6/E26. Brute force of small two-period integer tables, every count-layer rung (2x2 units).
 #     Units are 2x2: n[t, i, 0, 0] (treated-group yes) determines the unit table.
 # =====================================================================================
 def brute_2x2(a, b, extra=None):
@@ -383,7 +383,7 @@ for rep in range(60):
         expect = sorted({d for d in allD if -1e-12 <= d <= dtau / tt + 1e-12})
         ok_brute["contrast"] &= S == expect
 for k, v in ok_brute.items():
-    check(f"E3 [V] brute force, two-period integer 2x2 tables, rung '{k}': integer set as stated (Props E3, E5, E6, E26)",
+    check(f"E5/E6/E26 [V] brute force, two-period integer 2x2 tables, rung '{k}': integer set as stated (Props E3, E5, E6, E26)",
           v, f"{n_designs} designs" + (f"; integer CR empty in {n_cr_int_empty} with nonempty continuous set"
                                        if k == "CR" else ""))
 
@@ -765,7 +765,7 @@ check("E11 [V] Prop. E11: under per-period M0 (2x2) the model within-association
 
 
 # =====================================================================================
-# E12. Two-period residual allowance (Lemma E13): Var of the actual-minus-model DiD <= S_D^2 with
+# E12. Two-period residual allowance (Lemma E12): Var of the actual-minus-model DiD <= S_D^2 with
 #      rho_i = 2 (w_ir + w_is); attained by opposite +-1 changes.
 # =====================================================================================
 ok12, worst12 = True, 0.0
@@ -782,12 +782,12 @@ for rep in range(300):
 # extreme law: (b_r0, b_r1, b_s0, b_s1) = (0,1,1,0) or (1,0,0,1) w.p. 1/2 each
 Zx = np.array([1 * 1 - 1 * (-1), 1 * (-1) - 1 * 1]); varx_ = np.mean(Zx ** 2) - np.mean(Zx) ** 2
 ok12 &= abs(varx_ - (2 * 2) ** 2 / 4) < 1e-12
-check("E12 [V] Lemma E13: actual-minus-model DiD, per-unit variance <= (2(w_r+w_s))^2/4; attained by opposite changes", ok12,
+check("E12 [V] Lemma E12: actual-minus-model DiD, per-unit variance <= (2(w_r+w_s))^2/4; attained by opposite changes", ok12,
       f"max ratio over random laws {worst12:.2f}; extreme law 1.00")
 
 
 # =====================================================================================
-# E13. Cross-layer rule on the two-period product (Theorem E12): FD + R1 (model DiD point-identified),
+# E13. Cross-layer rule on the two-period product (Theorem E13): FD + R1 (model DiD point-identified),
 #      actual-target interval = OLS interval + z S_D; count layer = margins-only range of the actual DiD.
 #      Coverage of the intersection = coverage of the model interval; disjointness rate <= alpha.
 # =====================================================================================
@@ -836,7 +836,7 @@ for rep in range(reps):
     cov_m += ci[0] <= actual <= ci[1]
     cov_i += inter[0] <= actual <= inter[1]
     rej += inter[0] > inter[1]
-check("E13 [V] Theorem E12 (R27 on the product): coverage of (count set n actual-target FD interval) = model interval's; rejection <= alpha",
+check("E13 [V] Theorem E13 (R27 on the product): coverage of (count set n actual-target FD interval) = model interval's; rejection <= alpha",
       cov_i == cov_m and cov_m / reps >= 0.95 - 0.02 and rej / reps <= alpha,
       f"{reps} replications: model interval {cov_m / reps:.3f}, intersection {cov_i / reps:.3f}, disjoint {rej / reps:.3f}")
 
@@ -909,7 +909,7 @@ for rep in range(40):
             n16_eq += 1
         else:
             n16_bind += 1
-check("E16 [V] Theorem E16 / Cor. E17: trend-dial ATT set (joint LP) lies in D-set (+) [-(M+Lam), M+Lam]; equal unless the rate limits bind",
+check("E16/E17 [V] Theorem E16 / Cor. E17: trend-dial ATT set (joint LP) lies in D-set (+) [-(M+Lam), M+Lam]; equal unless the rate limits bind",
       ok16 and n16_eq > 0 and n16_bind > 0, f"equal in {n16_eq}, logical limits bind in {n16_bind}")
 ws = (0.05, 0.25)
 check("E17 [I] Cor. E17: NS worked example: D in [.05,.25]; M=.10 -> [-.05,.35]; M=.02 -> [.03,.27]; breakdown M* = .05",
@@ -1101,8 +1101,8 @@ check("E20 [V] Prop. E20: smoothness with set-valued pre-trends: closed form = L
 
 
 # =====================================================================================
-# E21. MTR / ND / PS (Prop. E21): R x C, comparison = rest: U = B^U_r1 - max(B^L_r0, B_rest1(at B^U_r1) - Lam);
-#      comparison = a named row (R = 3): the endpoint-wise formula with B^L_s1 can be strictly too wide.
+# E21. MTR / ND / PS (Prop. E21(c)): R x C, comparison = rest: U = B^U_r1 - max(B^L_r0, B_rest1(at B^U_r1) - Lam);
+#      comparison = a named row (R = 3): U = B^U_r1 - max(B^L_r0, B^L_s1 - Lam), the ends being jointly attainable (6a L2.1(b)).
 # =====================================================================================
 ok21a, ok21b, n21_strict, n21 = True, True, 0, 0
 for rep in range(40):
@@ -1164,7 +1164,7 @@ check("E22 [F] Prop. E22(b): RM from pre-periods alone can exclude the true ATT 
 
 
 # =====================================================================================
-# E23. Unions across branches and periods (Prop. E24): the union of branch confidence sets covers at
+# E24. Unions across branches and periods (Prop. E24): the union of branch confidence sets covers at
 #      >= 1 - alpha; reporting only the plug-in branch's interval under-covers.
 # =====================================================================================
 reps, cov_u, cov_p = 20000, 0, 0
@@ -1179,12 +1179,12 @@ in_p = ne_p & (lo_p <= theta) & (theta <= hi_p)
 in_m = ne_m & (lo_m <= theta) & (theta <= hi_m)
 cov_u = np.mean(in_p | in_m)
 cov_p = np.mean(np.where(th >= 0, in_p, in_m))
-check("E23 [F] Prop. E24: union of branch intervals covers (>= .95); the plug-in branch's interval alone under-covers",
+check("E24 [F] Prop. E24: union of branch intervals covers (>= .95); the plug-in branch's interval alone under-covers",
       cov_u >= 0.95 - 0.005 and cov_p < 0.9, f"union {cov_u:.3f}, plug-in branch {cov_p:.3f}")
 
 
 # =====================================================================================
-# E24. Joint confidence region for model-based pre-trends (Prop. E25 = E19(d)): one joint region covers
+# E25. Joint confidence region for model-based pre-trends (Prop. E25 = E19(d)): one joint region covers
 #      the RM lower end; the plug-in pre-trend with an interval for the post DiD alone under-covers.
 #      g_t ~ N(g_t, s^2) independent estimates of three periods' gaps; D_pre = g0 - g_-1, D_post = g1 - g0.
 # =====================================================================================
@@ -1203,12 +1203,12 @@ cu = [np.array([-Mbar, -1 + Mbar, 1.0]), np.array([Mbar, -1 - Mbar, 1.0])]   # D
 j_hi = np.max([gh @ c + kq * s_ * np.linalg.norm(c) for c in cu], axis=0)
 cov_n = np.mean((naive_lo <= att_true) & (att_true <= naive_hi))
 cov_j = np.mean((j_lo <= att_true) & (att_true <= j_hi))
-check("E24 [F] Prop. E25 (= E19(d)): joint region over all periods covers the RM ATT set; plug-in pre-trend + post interval under-covers",
+check("E25 [F] Prop. E25 (= E19(d)): joint region over all periods covers the RM ATT set; plug-in pre-trend + post interval under-covers",
       cov_j >= 0.95 - 0.005 and cov_n < 0.93, f"joint {cov_j:.3f}, plug-in {cov_n:.3f}")
 
 
 # =====================================================================================
-# E25. Integer versions (Theorem E27): R = 2, change rows on one column and one period pair over a
+# E27. Integer versions (Theorem E27): R = 2, change rows on one column and one period pair over a
 #      laminar family of unit sets (rows rounded): the LP is integral (LP = MILP for random objectives).
 #      Two overlapping period pairs are outside the theorem (searched; reported).
 # =====================================================================================
@@ -1245,7 +1245,7 @@ for rep in range(60):
                 ok25 &= same; n25 += 1
             else:
                 gap_star += (not same); n_star += 1
-check("E25 [V] Theorem E27: R=2, change rows on one column, period pairs forming paths, laminar unit sets: LP = MILP (integral)", ok25,
+check("E27 [V] Theorem E27: R=2, change rows on one column, period pairs forming paths, laminar unit sets: LP = MILP (integral)", ok25,
       f"{n25} objectives (one pair; consecutive path; two pairs sharing a base); three pairs sharing a base (outside the theorem): LP != MILP in {gap_star}/{n_star}")
 
 
@@ -1524,5 +1524,79 @@ for k, v in W.items():
 check("W [I] worked example (§9): numbers as printed above, each rung narrows or reports no information as stated",
       W["ATT, RM(1), margins only"] == W["ATT, no assumption"] and W["ATT, PT + CR"] == W["D_post (CR on changes)"]
       and W["ATT, RM(1), CR post and pre"][0] > 0)
+
+
+# =====================================================================================
+# R. Checks added after the proof review (reviews/PHASE2e_proof_review.md, issues 1, 2, 12, 14).
+# =====================================================================================
+# Issue 1 (Cor. E17(b)): one 2x2 unit, a = (100, 100), 100 yes votes at both elections, one coupling row
+# 3 y0 - 2 y1 = 140 (y_t = treated-yes count). The earlier sufficient condition holds; the sharp upper end under
+# parallel trends (M = Lam = 0) is below max D; the exact criterion of E17(b) predicts this.
+aR = np.array([[100, 100]]); bR = np.array([[[100, 100]], [[100, 100]]])
+LR = CountLP(aR, bR)
+row = np.zeros(LR.nn); row[LR.ix(0, 0, 0, 0)] = 3; row[LR.ix(1, 0, 0, 0)] = -2
+Dv = did_vec(LR, 0, 1, 0, 0, 1)
+LRr = CountLP(aR, bR); LRr.add_eq(row, 140)
+Dmax = LRr.range(Dv)[1]
+thPT = rate_vec(LRr, 0, 0, 0) + rate_vec(LRr, 1, 0, 1) - rate_vec(LRr, 1, 0, 0)
+Bs1 = rate_vec(LRr, 1, 0, 1)
+Lp_ = CountLP(aR, bR); Lp_.add_eq(row, 140); Lp_.add_ge(Dv, Dmax - 1e-9)
+thp = Lp_.range(thPT); bsp = Lp_.range(Bs1)
+Dmin = LRr.range(Dv)[0]
+Lm_ = CountLP(aR, bR); Lm_.add_eq(row, 140); Lm_.add_le(Dv, Dmin + 1e-9)
+thm = Lm_.range(thPT); bsm = Lm_.range(Bs1)
+old_cond = thp[1] >= 0 and bsp[1] >= 0 and thm[0] <= 1 and bsm[0] <= 1
+LcR, attR, bvecR, eR, thR, SR = causal_lp(aR, bR, 0, 1, int_rows=[(row, 140), (-row, -140)])
+LcR.add_le(bvecR, 0.0); LcR.add_ge(bvecR, 0.0)
+sharp = LcR.range(attR)
+new_crit = thp[0] <= 1 + 1e-12 and thp[1] >= -1e-12          # some argmax n with thetaPT in [0, 1]
+check("E17 [F] review issue 1: E17(b) as first stated (one-sided rate limits) fails with a coupling row; the exact criterion holds",
+      old_cond and sharp[1] < Dmax - 1e-6 and not new_crit,
+      f"max D {Dmax:.3f}, thetaPT at argmax {thp[0]:.3f}..{thp[1]:.3f}, sharp PT set [{sharp[0]:.3f},{sharp[1]:.3f}]")
+# margins only: the inner conditions at n+ and n- imply the outer ones (n+ minimises, n- maximises thetaPT)
+ok_m, n_m = True, 0
+for rep in range(60):
+    a, b, n = rand_margins(4, 2, 2, 2) if rep % 2 else rand_polar(4, 2)
+    for comp in (1, "rest"):
+        L = CountLP(a, b)
+        Bc = (lambda t: rate_vec(L, comp, 0, t)) if comp != "rest" else (lambda t: rest_vec(L, 0, 0, t))
+        D = rate_vec(L, 0, 0, 1) - rate_vec(L, 0, 0, 0) - Bc(1) + Bc(0)
+        th = rate_vec(L, 0, 0, 0) + Bc(1) - Bc(0)
+        Dr, thr = L.range(D), L.range(th)
+        Lp = CountLP(a, b); Lp.add_ge(D, Dr[1] - 1e-9); Lm = CountLP(a, b); Lm.add_le(D, Dr[0] + 1e-9)
+        ok_m &= abs(Lp.range(th)[0] - thr[0]) < 1e-7 and abs(Lm.range(th)[1] - thr[1]) < 1e-7
+        n_m += 1
+check("E17 [V] review issue 1: margins only, a maximiser of D minimises thetaPT and a minimiser maximises it (named row and rest)",
+      ok_m, f"{n_m} cases")
+
+# Issue 2 (Prop. E6(b)): four pure units; bins L = {group-1 unit of 20, group-2 unit of 80}, H = {group-1 unit of 80,
+# group-2 unit of 20}; yes votes (10, 40, 40, 4) then (8, 40, 72, 16): Dbar+ < 0 <= cap, cap >= Dbar-, LP infeasible.
+aE = np.array([[20, 0], [0, 80], [80, 0], [0, 20]])
+yE = np.array([[10, 40, 40, 4], [8, 40, 72, 16]])
+bE = np.stack([np.column_stack([yE[t], aE.sum(1) - yE[t]]) for t in range(2)])
+LE = CountLP(aE, bE)
+Lb_, Hb_ = [0, 1], [2, 3]
+bg = lambda U: (rate_vec(LE, 0, 0, 1, U) - rate_vec(LE, 0, 0, 0, U)) - (rate_vec(LE, 1, 0, 1, U) - rate_vec(LE, 1, 0, 0, U))
+Dbar = 0.5 * (bg(Hb_) + bg(Lb_))
+lamE = aE[Hb_, 0].sum() / aE[Hb_].sum() - aE[Lb_, 0].sum() / aE[Lb_].sum()
+dtauE = (yE[1, Hb_].sum() - yE[0, Hb_].sum()) / aE[Hb_].sum() - (yE[1, Lb_].sum() - yE[0, Lb_].sum()) / aE[Lb_].sum()
+capE = dtauE / lamE
+rgE = LE.range(Dbar)
+LEb = CountLP(aE, bE); LEb.add_ge(lamE * Dbar, 0); LEb.add_le(lamE * Dbar, dtauE)
+infeas = LEb.range(Dbar) is None
+check("E6 [F] review issue 2: the emptiness criterion needs 'or Dbar+ < 0': here dtau_H > dtau_L and cap >= Dbar-, yet the set is empty",
+      infeas and dtauE > 0 and capE >= rgE[0] and rgE[1] < 0 and max(0, rgE[0]) > min(rgE[1], capE),
+      f"Dbar in [{rgE[0]:.3f},{rgE[1]:.3f}], lambda {lamE:.2f}, dtau_H - dtau_L {dtauE:.2f}, cap {capE:.3f}")
+
+# Issue 12 (§9.2): RM(1) with CR on the pre-war change only vs on both changes.
+pre_only = tuple(round(z, 3) for z in rm_range(aW, bW, 1.0, 1, 2, [(0, 1)], extra=crQ))
+check("W [I] review issue 12: RM(1) with CR on the pre-war change alone gives [-0.416, 0.732]; on both changes [0.135, 0.278]",
+      pre_only == (-0.416, 0.732) and W["ATT, RM(1), CR post and pre"] == (0.135, 0.278), f"pre only {pre_only}")
+
+# Issue 14: the counts quoted in the note's gap-register table match this run.
+doc = open(os.path.join(here, "PHASE2e_did_general.md")).read()
+check("G [V] review issue 14: the gap-register counts quoted in PHASE2e (G1, G5, G6, G7) match this run",
+      f"{fail1}/{n1}" in doc and f"{fail5}/{n5}" in doc and f"{fail6}/{n6}" in doc and f"{fail7}/{n7}" in doc,
+      f"G1 {fail1}/{n1}, G5 {fail5}/{n5}, G6 {fail6}/{n6}, G7 {fail7}/{n7}")
 
 print(f"\n{sum(results)}/{len(results)} PASS")

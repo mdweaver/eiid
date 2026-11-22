@@ -25,6 +25,10 @@
 #' \code{where} selects units: an expression evaluated in the data of the
 #' \code{eiCounts()} call (e.g. \code{where = county == "Dane"}), a logical vector with one
 #' value per row of the data, unit labels, or row numbers. \code{NULL} means all units.
+#' For the cross-layer interval the unit set must be fixed from the design (6a Lemma 4.1):
+#' an expression that uses an outcome (column) variable makes the target count-layer only,
+#' and for a set given as labels, numbers or a vector the printout says that a set chosen
+#' using the outcomes voids the cross-layer interval.
 #'
 #' @param row,row1,row2 row (group) label(s) or index(es).
 #' @param col column (outcome) label(s) or index(es).
@@ -326,7 +330,10 @@ combo <- function(..., weights, label = NULL) {
   }
   # the LP over the rounded rows: an outer bound for the integer values (R19(c) item 1), exact
   # in the TU classes (R19(b)); infeasible => no integer table (F^Z is contained in F_rd)
-  rl <- list(.ec_optimise(P, rows, tg$obj, -1, rd = TRUE), .ec_optimise(P, rows, tg$obj, 1, rd = TRUE))
+  same <- out$cont && all(vapply(rows, function(rw) isTRUE(rw$rounded) && identical(rw$coef_rd, rw$coef) &&
+                                    identical(rw$lo_rd, rw$lo) && identical(rw$hi_rd, rw$hi), TRUE))
+  rl <- if (same) list(clo, chi) else                  # rounding changed nothing: reuse the LP
+    list(.ec_optimise(P, rows, tg$obj, -1, rd = TRUE), .ec_optimise(P, rows, tg$obj, 1, rd = TRUE))
   if (!isTRUE(rl[[1]]$ok) || !isTRUE(rl[[2]]$ok)) { out$int_ok <- FALSE; return(out) }
   out$rd <- c(.ec_value(P, tg, rl[[1]]$x), .ec_value(P, tg, rl[[2]]$x))
   sol <- list(NULL, NULL); unres <- character(0)
@@ -553,18 +560,31 @@ combo <- function(..., weights, label = NULL) {
 #' laminar family per column (row). Single-cell rows (known cells, zeros, boxes, one-vs-rest
 #' orderings, the odds-ratio dial) and one-vs-rest (W1) sign and CR rows, which are totals
 #' (6a Lemma C1), fit the classes; then the LP over the rounded rows returns integer
-#' endpoints with integer witnesses ("integer-exact (TU class)"). Otherwise (pairwise
-#' orderings or signs, W2 signs, mixtures of classes, crossing families) each endpoint is a
-#' mixed-integer program ("integer-exact (MILP)"). The rows are rounded, never the
-#' endpoints (check T5). With non-integer margins (e.g. estimated counts) the integer check
+#' endpoints with integer witnesses ("integer-exact (TU class)"); a vertex is accepted only if
+#' it is integral before rounding and passes the exact check, otherwise the MILP is used.
+#' Otherwise (pairwise orderings or signs, W2 signs, \code{linear} rows, mixtures of classes,
+#' crossing families) each endpoint is a mixed-integer program ("integer-exact (MILP)"),
+#' solved by GLPK (suggested package \pkg{Rglpk}) with a time limit per program
+#' (\code{time_limit}), the objective scaled to integers from the exact weights, an exact check
+#' of the solution, and a certificate of optimality (a second program with
+#' \eqn{c'n \ge v^* + 1} must be infeasible). On timeout, without \pkg{Rglpk}, or when the
+#' certificate cannot be completed, the endpoint is the LP over the rounded rows, an outer
+#' bound, with the status "integer status unresolved (...): LP outer bound"; it is never
+#' labelled integer-exact. The rows are rounded, never the endpoints (check T5). Doubles typed
+#' by the user (bounds, coefficients, slack, \code{psi}) are rationalised: a fraction with
+#' denominator at most \eqn{10^6} within \eqn{10^{-12}} relative is used when one exists (so
+#' \code{1/3} means 1/3), and the printout lists the values changed; character fractions
+#' (\code{"1/3"}) in \code{linear} rows are exact. With non-integer margins (e.g. estimated counts) the integer check
 #' does not apply and the range is exact only for the stated margins (R19(e)).
 #' \code{"lp"} gives the continuous LP only; \code{"exact"} always solves the MILP.
 #'
 #' \strong{Restrictions} are a named list; each element is one specification or a list of
 #' them. Every specification may carry \code{object = "actual"} (the default; \code{"model"}
 #' is refused: model rows belong to \code{eiBounds()}) and \code{role = "identity"} or
-#' \code{"belief"} (default: identity for \code{known} and \code{total}, belief otherwise;
-#' see the cross-layer block). Units are given by \code{units} (labels or row numbers),
+#' \code{"belief"}. Defaults: identity for \code{known} and for a \code{total} given by
+#' \code{value} (its right-hand side is the realised value); belief for a \code{total} given
+#' as a floor or interval (\code{lower}/\code{upper}: a stated floor is a belief, 6a Sec. 4.1
+#' and C8; set \code{role = "identity"} for a published bracket) and for every other row. Units are given by \code{units} (labels or row numbers),
 #' \code{unit} (alias), or \code{where} (a logical vector, or a formula / quoted expression
 #' evaluated in \code{data}, e.g. \code{where = ~ county == "Dane"}).
 #' \itemize{
@@ -585,7 +605,10 @@ combo <- function(..., weights, label = NULL) {
 #'     realised association signs (2c Definition 1 with realised rates); \code{"W1"}
 #'     (one-vs-rest, default) is a total on \eqn{Y_{rc}(S)}; \code{"pair"} and \code{"W2"}
 #'     have unequal coefficients. \code{assoc} is accepted as an alias. Slack in the same
-#'     probability units as \code{eiBounds()}.
+#'     probability units as \code{eiBounds()}, but the scale (and every design quantity) is
+#'     computed over the sign's own unit set S, whereas the model layer uses all units.
+#'     \code{sign} may be +1/-1 or \code{">=0"}/\code{"<=0"}. An association whose coefficients
+#'     are all zero over S (e.g. X_r constant there) is vacuous and dropped with a note.
 #'   \item \code{cr = list(row, col, version, other, where, slack)}: realised contextual
 #'     reinforcement, a union of two row systems; the result may be two intervals.
 #' }

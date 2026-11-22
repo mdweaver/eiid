@@ -54,4 +54,8 @@ realised table over a known denominator (PHASE6a Sec. 1.2, contract C2).
 \code{where} selects units: an expression evaluated in the data of the
 \code{eiCounts()} call (e.g. \code{where = county == "Dane"}), a logical vector with one
 value per row of the data, unit labels, or row numbers. \code{NULL} means all units.
+For the cross-layer interval the unit set must be fixed from the design (6a Lemma 4.1):
+an expression that uses an outcome (column) variable makes the target count-layer only,
+and for a set given as labels, numbers or a vector the printout says that a set chosen
+using the outcomes voids the cross-layer interval.
 }

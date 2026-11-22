@@ -285,13 +285,13 @@
     gq <- function(k, psi) { k <- gmp::as.bigq(k); kq <- k * (gmp::as.bigq(N - a - b) + k) -
       psi * (gmp::as.bigq(a) - k) * (gmp::as.bigq(b) - k); kq }
     if (psiL > 0) {
-      ps <- gmp::as.bigq(psiL); k <- max(L, min(U, floor(root(psiL)) - 1))
+      ps <- .ec_rat(psiL, P$log); k <- max(L, min(U, floor(root(psiL)) - 1))
       while (k <= U && gq(k, ps) < 0) k <- k + 1
       while (k - 1 >= L && gq(k - 1, ps) >= 0) k <- k - 1
       lo <- k                                    # may be U + 1: empty
     }
     if (is.finite(psiU)) {
-      ps <- gmp::as.bigq(psiU); k <- min(U, max(L, ceiling(root(psiU)) + 1))
+      ps <- .ec_rat(psiU, P$log); k <- min(U, max(L, ceiling(root(psiU)) + 1))
       while (k >= L && gq(k, ps) > 0) k <- k - 1
       while (k + 1 <= U && gq(k + 1, ps) <= 0) k <- k + 1
       hi <- k
@@ -650,6 +650,10 @@
   for (rw in rows) {
     cf <- if (rd) rw$coef_rd else rw$coef
     lo <- if (rd) rw$lo_rd else rw$lo; hi <- if (rd) rw$hi_rd else rw$hi
+    if (rw$kind == "gen" && !(rd && isTRUE(rw$rounded))) {
+      # unit max-norm scaling (pairwise / W2 coefficients can be ~1e-5): numerically safer simplex
+      sc <- max(abs(cf)); if (sc > 0) { cf <- cf / sc; lo <- lo / sc; hi <- hi / sc }
+    }
     idx <- if (is.null(map)) rw$idx else map[rw$idx]
     if (is.finite(lo) && is.finite(hi) && lo == hi) {
       j <- j + 1; trip[[length(trip) + 1]] <- cbind(j, idx, cf); dir <- c(dir, "="); rhs <- c(rhs, lo)
@@ -697,7 +701,20 @@
   }
   m <- P$margin_all
   ex <- .ec_rows_trip(rows, m$n, rd)
-  sol <- .ec_lp_call(P$nv, obj, rbind(m$trip, ex$trip), c(rep("=", m$n), ex$dir), c(m$rhs, ex$rhs), sense, int)
+  trip <- rbind(m$trip, ex$trip); dir <- c(rep("=", m$n), ex$dir); rhs <- c(m$rhs, ex$rhs)
+  if (!int && .ec_have_glpk()) {
+    # GLPK's primal simplex (a basic optimal solution, i.e. a vertex: R19(d)); about 3x faster
+    # than lpSolve on large joint problems. Optimal: status 5; infeasible: 3 or 4; anything
+    # else falls back to lpSolve.
+    mm <- slam::simple_triplet_matrix(as.integer(trip[, 1]), as.integer(trip[, 2]), as.double(trip[, 3]),
+                                      nrow = max(trip[, 1]), ncol = P$nv)
+    d2 <- dir; d2[d2 == "="] <- "=="
+    g <- Rglpk::Rglpk_solve_LP(obj, mm, d2, rhs, max = sense > 0,
+                               control = list(canonicalize_status = FALSE, tm_limit = 20000L))
+    if (g$status == 5) return(list(ok = TRUE, x = g$solution, value = sum(obj * g$solution)))
+    if (g$status %in% c(3, 4)) return(list(ok = FALSE))
+  }
+  sol <- .ec_lp_call(P$nv, obj, trip, dir, rhs, sense, int)
   if (!sol$ok) return(list(ok = FALSE))
   list(ok = TRUE, x = sol$x, value = sum(obj * sol$x))
 }

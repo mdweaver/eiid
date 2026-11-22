@@ -41,6 +41,47 @@ Build step 1 (M-COUNT): the count layer. Theory: `docs/extension/PHASE6a_count_l
   `duncan_davis` column shows the exact range under `target = "actual"`; it differs from
   the old cellwise column only for combination targets, where the old one is outer
   (6a Lemma 2.1(c), §9 item 3).
+* Code review (`docs/extension/reviews/PHASE6a_code_review.md`), all 16 issues fixed:
+  * MILP: GLPK (suggested package `Rglpk`) instead of lpSolve's branch and bound, with a
+    time limit per integer program (`time_limit`, default 10 s), the objective scaled to
+    integers from the exact weights, an exact check of each solution, and a certificate
+    of optimality (a second program with c'n >= v* + 1 must be infeasible). On timeout or
+    without `Rglpk` the endpoint is the LP over the rounded rows with the status
+    "integer status unresolved (...): LP outer bound", never "integer-exact". Problems are
+    split into connected components of the unit-coupling graph. Pairwise delta_B and W2
+    rows at realistic unit sizes now finish (issues 1, 16).
+  * The TU path accepts a vertex only if it is integral before rounding and passes the
+    exact check; otherwise it falls back to the MILP (issue 6).
+  * `known` values follow the user's unit order; duplicated units and wrong value lengths
+    are refused; out-of-range row numbers and units dropped for N_i = 0 are errors with
+    clear messages (issues 2, 11).
+  * The count block can no longer stop `eiBounds()`: a failure gives a warning and the model
+    output; units with N_i = 0 on the x/t/n path are aligned (issue 3).
+  * Doubles typed by the user are rationalised (denominator <= 1e6 within 1e-12; printed),
+    and character fractions are exact (issue 4). An all-zero pairwise or W2 row is vacuous
+    and dropped with a note (issue 5).
+  * A `where =` expression that uses an outcome variable makes the target count-layer only;
+    sets given as labels or numbers print that the set must be fixed from the design (issue 7).
+  * A `total` given as a floor or interval defaults to a belief row; `value =` totals stay
+    identity rows (issue 8).
+  * Cross-layer statuses follow the 6a §4.3 rows added for L4, L5, L6 and M1(delta); for
+    point-identified rungs the model interval is the one-functional normal interval
+    (issue 9). The cross-layer block reuses the fit's simulation draws (issue 10).
+  * Labels: x/t vectors give X/notX, T/notT (issue 12); delta_B sign rows are labelled
+    delta_B (issue 13); long `known` labels are shortened, duplicate target labels are made
+    distinct, the binding line says jointly binding rows are not shown, the Lindeberg note
+    prints its value and is suppressed for the Hoeffding allowance, and `sign = ">=0"` /
+    `"<=0"` are accepted (issue 14).
+  * Regression tests: `tests/testthat/test-counts-review.R` (issue 15).
+  * Performance: `binding = "auto"` (default) is off above 200 units; only restrictions
+    active at the optimal LP vertex are refitted; joint LPs use GLPK when available; the
+    rounded LP is skipped when rounding changes nothing (500 units with 11 totals: 218 s
+    with binding before, 7.5 s by default and 73 s with `binding = TRUE` now).
+* P3.5(a) conservative interval (proof review round 3, nit a): the studentised maximum is
+  taken over the beta-dependent terms only; terms with zero standard error (e.g. the
+  reference district's rows under M1(delta)) are held exactly and no longer enter the
+  maximum as a constant 0. With no beta-dependent term the critical value is 0. This can
+  narrow conservative intervals slightly where such terms exist; it changes no other output.
 * Tests: `tests/testthat/test-counts.R` (contract C10: DD reproduction, brute-force
   enumeration per TU class, MILP rows and mixtures, T5, S5, RC11, N10c, RC9, 2c M2/M3
   closed forms, witnesses, the C8 wording, the embedding).

@@ -4,7 +4,7 @@
 
 *Theory only: no package code. Nothing in other documents is edited; problems found in them are listed in §11. Checks: `verify_phase2e.py` (output `verify_phase2e_output.txt`, **76/76 PASS**), which runs 2d's 15 checks unchanged and adds 61 (five of them after the proof review), tagged as in 2c, 5a and 6a: **[F]** fails on an earlier or tempting ("naive") statement and passes on the one made here; **[V]** verifies a statement made here; **[I]** illustrates.*
 
-*Status in brief.* Every result marked **P; proof review pending** has a numbered-step proof here and a numerical check. The independent proof review (`reviews/PHASE2e_proof_review.md`, branch `claude/did-proof-review`, merged here) accepted the core with no rejections and raised 19 issues; all are fixed as listed in §12, and the labels stay "proof review pending" until the reviewer confirms the fixes. **C** marks conjectures with numerical support; **O** marks open items. The descriptive layer (§§2–4) is complete for the fixed population: exact count-layer rungs on the T-period product (Δ0, Δ4 in R×C, contrasts on changes), the sharp identified set under FD, DiD-S sharpness, and the combination rule. The causal layer (§5) covers the three forms the owner asked for (trend dial; relative magnitudes and smoothness over the **joint** set of latent tables, with the degeneration proposition; MTR/ND/PS), a spillover dial, and the labelling rule. Inference (§6) covers unions and FD and gives the joint-region result. Integer versions (§7) cover margins, one-vs-rest rows on changes and change rows on one column. Changing populations and uncertain margins are collected in the gap register (§8). §9 says in plain language what can be said under which assumptions.
+*Status in brief.* Every result marked **P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md)** has a numbered-step proof here, a numerical check and an independent proof review (`reviews/PHASE2e_proof_review.md`, two rounds, merged here): the core was accepted with no rejections; its 19 issues and four residual items are fixed as listed in §12, and round 2 confirmed the fixes. **C** marks conjectures with numerical support; **O** marks open items. The descriptive layer (§§2–4) is complete for the fixed population: exact count-layer rungs on the T-period product (Δ0, Δ4 in R×C, contrasts on changes), the sharp identified set under FD, DiD-S sharpness, and the combination rule. The causal layer (§5) covers the three forms the owner asked for (trend dial; relative magnitudes and smoothness over the **joint** set of latent tables, with the degeneration proposition; MTR/ND/PS), a spillover dial, and the labelling rule. Inference (§6) covers unions and FD and gives the joint-region result. Integer versions (§7) cover margins, one-vs-rest rows on changes and change rows on one column. Changing populations and uncertain margins are collected in the gap register (§8). §9 says in plain language what can be said under which assumptions.
 
 ---
 
@@ -51,7 +51,7 @@ Every departure from (FP) (entry, exit, aging-in, interval bases, changing bound
 2. So the feasible set is the product of the unit-period transportation polytopes, which is 6a's $\mathcal P$ for the unit set $\{(i,t)\}$. [1; 6a §1.1]
 3. 6a R19(a) items 1–4 and R19(d) use only that $\mathcal P$ is a product of transportation polytopes and that the rows are linear. [6a:R19(a),(d)] ∎
 
-*Check.* E1 (Minkowski sums over periods; 40 designs, R = C = 3, T = 3). **Status: P; proof review pending.**
+*Check.* E1 (Minkowski sums over periods; 40 designs, R = C = 3, T = 3). **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md).**
 
 **Lemma E2 (within-person tables add nothing for period-margin targets).** Let $\nu_{irc_{-L}\dots c_P}\ge0$ be the panel table (people in unit $i$, group $r$, with outcome sequence $(c_t)_t$). Every family of period tables $n\in\mathcal P^{\mathcal T}$ is the set of one-period marginals of some panel table, and of an **integer** panel table when $n$ is integer. Hence, for targets and rows that depend on the panel only through the period tables (all targets of this note), the sets are the same whether the unknown is $\nu$ or $n$. Transition targets ("share of group $r$ that switched to $c$") are not of this kind and need $\nu$.
 
@@ -60,7 +60,7 @@ Every departure from (FP) (entry, exit, aging-in, interval bases, changing bound
 2. Integer case: list the $a_{ir}$ people of $(i,r)$; at each election give the first $n_{ir1t}$ of them outcome 1, the next $n_{ir2t}$ outcome 2, and so on (in any order per election). Counting outcome sequences gives an integer $\nu$ with the right marginals. [Def; alg]
 3. A target or row that depends on $\nu$ only through its marginals takes the same values on $\{\nu\}$ and on $\mathcal P^{\mathcal T}$. [1–2] ∎
 
-*Check.* E2 (200 integer instances, T = 3). Generalises 1b B2 Δ8 (two periods, a sketch there). **Status: P; proof review pending.**
+*Check.* E2 (200 integer instances, T = 3). Generalises 1b B2 Δ8 (two periods, a sketch there). **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md).**
 
 ### 1.3 Targets
 
@@ -75,7 +75,7 @@ All are linear count targets with coefficients that are functions of the design 
 
 * A **descriptive** statement is about the realised tables of the actual groups (count layer) or about the model-implied rates of the actual groups (model layer): "veterans' support rose 5 to 25 points more than others'".
 * A **causal** statement is about potential outcomes (§5): "service raised veterans' support by …". It is always **on top of** (↑) a descriptive set, never mixed into it.
-* **Rule (Definition 5.1 below).** A causal label requires a stated treated group and comparison group, a stated trend assumption, a stated spillover assumption and no anticipation. Without a trend assumption the descriptive DiD says nothing causal (Prop. E15).
+* **Rule (Definition 5.1 below).** A causal label requires a stated population, a stated treated group (and a comparison group when the trend assumption uses one), a stated trend assumption, a stated spillover assumption and no anticipation. Without a trend assumption the descriptive DiD says nothing causal (Prop. E15).
 
 ---
 
@@ -95,7 +95,7 @@ All are linear count targets with coefficients that are functions of the design 
 3. (c): $(g_t)_t$ ranges over the box $\prod_t[G^-_t,G^+_t]$ [1–2], and $(D_t)$ is its image under $g\mapsto(g_t-g_0)_{t\ne0}$. [Def] At the named corner $D_1=G^+_1-G^-_0$ forces $g_0=G^-_0$ and $D_{-1}=G^-_{-1}-G^+_0$ forces $g_0=G^+_0$, incompatible when $G^-_0<G^+_0$. [alg]
 4. (d): 2d Δ0(b)'s proof with the $T$-fold product $\mathcal S(w)=\prod_tS(x,t_t)$ in place of the twofold one: Lemma G (2d §1) applies because products preserve its hypotheses; the support function of a product is the sum [prod-supp]; setting all but one $u_t$ to 0 gives each election's condition, and summing gives the joint one. [2d:L G; 2d:Δ0(b)] ∎
 
-*Checks.* E1 [V] (a), (b) (40 designs, R = C = 3, T = 3); **E1 [F]** (c) (the box corner infeasible in all 40 designs). [P2d] Δ0's own checks run unchanged. **Status: P; proof review pending.** (a)–(b) generalise 2d Δ0(a) to R×C and T elections; (d) generalises 2d Δ0(b).
+*Checks.* E1 [V] (a), (b) (40 designs, R = C = 3, T = 3); **E1 [F]** (c) (the box corner infeasible in all 40 designs). [P2d] Δ0's own checks run unchanged. **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md).** (a)–(b) generalise 2d Δ0(a) to R×C and T elections; (d) generalises 2d Δ0(b).
 
 ### 2.2 Rows on changes
 
@@ -113,7 +113,7 @@ with $\gamma_r=\operatorname{Var}_p(X_r)/(\mu_r(1-\mu_r))\in(0,1]$.
 2. (b): $\delta^r_B=\sum_{s\ne r}E_p[X_rX_s(\beta_r-\beta_s)]=E_p[X_r(\beta_r-T_c)]$, using $\sum_{s\ne r}X_s\beta_s=T_c-X_r\beta_r$; in counts this is $(Y_{rc}(\mathcal S)-\sum_{i\in\mathcal S}X_{ir}b_{ic})/N(\mathcal S)$. [Def; simplex] $D^r$ is $\kappa_rY_{rc}-Y_c/(N-A_r)$ per election. $\delta^r_W=\operatorname{Var}_p(X_r)(ER^r-D^r)$ by 2c Lemma M1(c), with $ER^r$ a function of the data only. Subtract the two elections. [2c:M1(c); alg]
 3. (c): the collapsed population $(X_r,\Delta\beta_r,\Delta\beta^{\neg r})$, with $\Delta\beta^{\neg r}_i=\sum_{s\ne r}X_{is}\Delta\beta_{is}/(1-X_{ir})\in[-1,1]$, is a two-group population for the bounded outcome $\Delta Y$ in EGGHM's sense (2c M1(c) proof steps 1–5 with $\Delta$; only A1 and boundedness are used). Apply [EGGHM:P4, P6]. For the last identity: $E_p[X_r\Delta T]/\mu_r-E_p[(1-X_r)\Delta T]/(1-\mu_r)=\operatorname{Cov}_p(X_r,\Delta T)/(\mu_r(1-\mu_r))$. [2c:M1(c); EGGHM:P4, P6; alg] ∎
 
-*Check.* E4 (60 designs, R = C = 3: the identities from the definitions of 2c Def. 1 on random latent tables, error < $10^{-10}$). **Status: P; proof review pending.** Generalises 2d Δ4(a) (2×2) and the one-vs-rest part of 6a Lemma C1 to changes.
+*Check.* E4 (60 designs, R = C = 3: the identities from the definitions of 2c Def. 1 on random latent tables, error < $10^{-10}$). **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md).** Generalises 2d Δ4(a) (2×2) and the one-vs-rest part of 6a Lemma C1 to changes.
 
 ### 2.3 Δ4 beyond 2×2
 
@@ -132,7 +132,7 @@ with $\gamma_r=\operatorname{Var}_p(X_r)/(\mu_r(1-\mu_r))\in(0,1]$.
 4. (d): $NM^r_\Delta=\gamma_rER^r_\Delta$ with $\gamma_r\in(0,1]$ [E4(c); 2c:M3 step 5]. If $ER^r_\Delta\ge0$ then $NM^r_\Delta\le ER^r_\Delta$ and the positive branch is $[NM^r_\Delta,\min\{D^+,ER^r_\Delta\}]$, non-empty since $D^-\le NM^r_\Delta\le D^+$ [3]. The negative branch needs $ER^r_\Delta\le D\le NM^r_\Delta=\gamma_rER^r_\Delta$, which for $ER^r_\Delta>0$ forces $\gamma_r=1$. The case $ER^r_\Delta<0$ is symmetric; on the non-empty branch $D$ has the sign of $ER^r_\Delta$. [2c:M3 steps 6–8 with $Z$]
 5. (e), (f): every row named is affine in $n$ [E4(a); Def]; apply E1 [stack; 6a:R19(a) item 4 for unions]. ∎
 
-*Checks.* E5 [V] (a)–(b): closed forms = LP over the R×C two-election product (360 LPs, R = C = 3); (c)–(d) (NM in range, $NM=\gamma ER$, $\gamma<1$); (e) pairwise and joint-column rows valid and able to tighten (pairwise sign tightened 40/40; a second column's sign 2/40); (f) T = 3, CR in two pairs, union of four branch LPs contains the truth (60 designs). E5/E6/E26 [V]: brute force over integer two-election 2×2 tables for the margins, each W1 sign and CR. **Status: P; proof review pending.** This settles PD §8's R11 item "Δ4 beyond 2×2" for the one-vs-rest rows (closed form) and for all other rows (LP).
+*Checks.* E5 [V] (a)–(b): closed forms = LP over the R×C two-election product (360 LPs, R = C = 3); (c)–(d) (NM in range, $NM=\gamma ER$, $\gamma<1$); (e) pairwise and joint-column rows valid and able to tighten (pairwise sign tightened 40/40; a second column's sign 2/40); (f) T = 3, CR in two pairs, union of four branch LPs contains the truth (60 designs). E5/E6/E26 [V]: brute force over integer two-election 2×2 tables for the margins, each W1 sign and CR. **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md).** This settles PD §8's R11 item "Δ4 beyond 2×2" for the one-vs-rest rows (closed form) and for all other rows (LP).
 
 **Reading.** 2d's reading carries over to R×C. $\delta^{\Delta,r}_B$ is the $X_r(1-X_r)$-weighted average of within-unit DiDs, so signing it presupposes the answer; $\delta^{\Delta,r}_W\ge0$ says the net contextual change runs towards $c$ where group $r$ is common. Realised CR on changes is a belief about the actual voters (`object = "actual"`); model CR on changes (Prop. E11) is a different belief (NS Part 3A footnote 2).
 
@@ -150,7 +150,7 @@ with $[\bar D^-,\bar D^+]$ the margins-only range of $\bar D$; it is empty iff $
 2. (b): $\Delta\tau_b$ is observed, so $\rho=\Delta\tau_{\mathcal H}-\Delta\tau_{\mathcal L}-\lambda\bar D$ and both rows are rows on $\bar D$ alone. [1] $\bar D$ is affine with positive coefficients in $(\Delta Y_{1c}(\mathcal H),\Delta Y_{1c}(\mathcal L))$ (using $\Delta Y_{2c}(b)=\Delta Y_c(b)-\Delta Y_{1c}(b)$), whose margins-only joint range is a product of intervals with all values attained [E1; 6a:L2.1(a); sep]. So $\bar D$'s range is an interval with all values attained; intersect. [conn]
 3. (c): (b) with one row. ∎
 
-*Checks.* **E5/E6/E26 [V]** brute force (integer 2×2 tables, the identity exact, the integer set as stated); **E6 [V]** LP = closed form in 2×3 (59 designs; empty in 32, where the joint test rejects). **Status: P; proof review pending.** This is the count-layer version of NS §3.3's contrast "on changes" and of PD §7's DiD-S; it needs no linearity in either election. With $R\ge3$ only named pairs should be used (NS §3.3).
+*Checks.* **E5/E6/E26 [V]** brute force (integer 2×2 tables, the identity exact, the integer set as stated); **E6 [V]** LP = closed form in 2×3 (59 designs; empty in 32, where the joint test rejects). **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md).** This is the count-layer version of NS §3.3's contrast "on changes" and of PD §7's DiD-S; it needs no linearity in either election. With $R\ge3$ only named pairs should be used (NS §3.3).
 
 ---
 
@@ -173,7 +173,7 @@ for one pair of elections (or each pair used); **levels are unrestricted**. Writ
 2. (b): $\tilde D_c=\sum_iw_{ir}(\Delta H_cX_i)_r-\sum_iw_{is}(\Delta H_cX_i)_s$ with sample weights; substitute $\Delta H_c=\Delta Q_c+\Delta K_c$. [2a:L2; P3 §0.2; lin]
 3. (c): 2d FD1(b). (d): PD §5.2. ∎
 
-*Check.* E7 (R = 3: $\Delta Q$ recovered exactly with non-linear levels; adding an antisymmetric $\Delta K'$ leaves $E[\Delta T\mid X]$ unchanged and moves $\tilde D$ by the predicted linear amount). 2d's single-restriction results (FD2: R1, R2, R4; FD3: bounded change and breakdown) apply unchanged to each column in 2×C (checks [P2d] Δ1). **Status: P; proof review pending** for (a)–(c); (d) as in PD §8 R5.
+*Check.* E7 (R = 3: $\Delta Q$ recovered exactly with non-linear levels; adding an antisymmetric $\Delta K'$ leaves $E[\Delta T\mid X]$ unchanged and moves $\tilde D$ by the predicted linear amount). 2d's single-restriction results (FD2: R1, R2, R4; FD3: bounded change and breakdown) apply unchanged to each column in 2×C (checks [P2d] Δ1). **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md)** for (a)–(c); (d) as in PD §8 R5.
 
 ### 3.2 The sharp identified set under FD
 
@@ -203,7 +203,7 @@ an intersection of intervals in $\Delta\kappa$ (the coefficient $1-x$ is positiv
 3. (c): with $T$ degenerate given $V$ the conditional expectation of $h_S$ is $h_S$ at the conditional mean. [Def]
 4. (d): $S(x,t)$ is the segment of $\{x\beta_v+(1-x)\beta_n=t\}\cap[0,1]^2$ with $\beta_v\in[L,U]$. $S(x,t_t)\oplus(-S(x,t_u))$ is a segment on the line $x\Delta_v+(1-x)\Delta_n=t_t-t_u$ with $\Delta_v\in[L(t_t)-U(t_u),U(t_t)-L(t_u)]$. For segments $[p,q]$ on parallel lines with direction $d$, $q-p=\ell d$, $\ell\ge0$, the support function is $\langle u,p\rangle+\ell\max\{0,\langle u,d\rangle\}$; its conditional expectation is the support function of $[Ep,Ep+(E\ell)d]$. $M_{\Delta H}(x)$ lies on the mean line (its $v$- and $n$-coordinates satisfy $x\Delta m_v+(1-x)\Delta m_n=E[\Delta T\mid x]$ for every $\Delta\kappa$, E7(a)), so the condition of (a) is the stated interval for $\Delta m_v$. [1; alg] ∎
 
-*Checks.* E8 [V] (discrete design, 2×2: the sharp set contains the truth, lies inside FD4, strictly in 100/100 designs); E8 [I] (degenerate case). **Status: P; proof review pending.** Computing $\Theta^{FD}_I$ from data needs conditional expectations of the kinked functions $L(T),U(T)$ given $X$ (§6, Prop. E23(c)).
+*Checks.* E8 [V] (discrete design, 2×2: the sharp set contains the truth, lies inside FD4, strictly in 100/100 designs); E8 [I] (degenerate case). **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md).** Computing $\Theta^{FD}_I$ from data needs conditional expectations of the kinked functions $L(T),U(T)$ given $X$ (§6, Prop. E23(c)).
 
 ### 3.3 DiD-S within FD (R11a)
 
@@ -218,7 +218,7 @@ $$\tilde D\in[I-s\,q_{\min},\ I+s\,q_{\min}].$$
 2. (b): the rows restrict the parameter only. [param; E8(a)]
 3. (c): the regression's identified set for $\Delta k$ is everything [E7(a)], so with the rows it is the row set. Under the full law it is (b), which equals the row set iff the row set lies in $\Theta^{FD}_I$; for $R=2$ the target is a monotone function of $\Delta\kappa$, so the sets of $\tilde D$ coincide iff the intervals of $\Delta\kappa$ do. With finite support the conditions of E8(a) are finitely many linear inequalities after Minkowski selection variables. [2; E8] ∎
 
-*Checks.* E9 [V] (a): rows on a fine grid of the hull = closed form; (b)–(c): the truth lies in the sharp set; the closed form is sharp in most designs and strictly wider in a constructed one ($\Delta Q=(.03,0,-.03)$ and every unit at $x=.5$ starting at 0: sharp set $\{-.03\}$ against $[-.03,.03]$). **Status: P; proof review pending.** This settles PD §8's R11 item "DiD-S sharp within FD": sharp for the regression, sharp for the full law under the stated condition, and computable exactly otherwise.
+*Checks.* E9 [V] (a): rows on a fine grid of the hull = closed form; (b)–(c): the truth lies in the sharp set; the closed form is sharp in most designs and strictly wider in a constructed one ($\Delta Q=(.03,0,-.03)$ and every unit at $x=.5$ starting at 0: sharp set $\{-.03\}$ against $[-.03,.03]$). **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md).** This settles PD §8's R11 item "DiD-S sharp within FD": sharp for the regression, sharp for the full law under the stated condition, and computable exactly otherwise.
 
 ### 3.4 Contrasts on changes in the model layer
 
@@ -228,7 +228,7 @@ So the two contrast rows at a pair of compositions are the DiD-S rows at its mid
 
 *Proof.* $\Delta\tau(x_H)-\Delta\tau(x_L)=(x_H-x_L)^\top\frac{\Delta m(x_H)+\Delta m(x_L)}2+\bar x^\top(\Delta m(x_H)-\Delta m(x_L))$ (Kitagawa). By linearity of $\Delta m$ the first term is $(x_H-x_L)^\top\Delta H\bar x=\lambda O^\Delta_{rs}(\bar x)$ and the second is $\bar x^\top\Delta H(x_H-x_L)=\lambda L^\Delta_{rs}(\bar x)$. [alg; Def] ∎
 
-*Check.* E10 (200 random R = 3 cases, error < $10^{-12}$). **Status: P; proof review pending.** This is the changes version of NS N12c (R22(b)). It concerns the mean function at compositions; bin aggregates of model means are evaluated at row-specific weighted compositions and are not covered by this identity.
+*Check.* E10 (200 random R = 3 cases, error < $10^{-12}$). **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md).** This is the changes version of NS N12c (R22(b)). It concerns the mean function at compositions; bin aggregates of model means are evaluated at row-specific weighted compositions and are not covered by this identity.
 
 ### 3.5 Levels models with model signs on changes
 
@@ -238,7 +238,7 @@ with 2c M5(c)'s $a,b$ (the same in both elections under (FP)). CR on changes is 
 
 *Proof.* [param] with E3(d). The 2×2 formula: $\delta^*_W=ab_1+bw_1$ (2c M5(c), M0), $b_1=Q_{vv}-Q_{vn}-\kappa$, $w_1=Q_{vn}-\kappa-Q_{nn}$ (2d FD2 proof step 1); subtract the two elections. ∎
 
-*Check.* E11 (100 designs). **Status: P; proof review pending** (pooled rungs). Under district rungs the corresponding statement is R16 (open), as for M-SIGN. M1 with elections as groups (2d §5) is FD + R1 + R2 plus level linearity; it remains an alternative base to FD (alt), not an intersection.
+*Check.* E11 (100 designs). **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md)** (pooled rungs). Under district rungs the corresponding statement is R16 (open), as for M-SIGN. M1 with elections as groups (2d §5) is FD + R1 + R2 plus level linearity; it remains an alternative base to FD (alt), not an intersection.
 
 ---
 
@@ -254,13 +254,13 @@ For the DiD $D_c(r,s;u,t)$, $\rho_i=2(w_{ir}+w_{is})$ with $w_{ir}=a_{ir}/A_r$, 
 
 *Proof.* 6a Lemma 4.1 steps 1–5 with $Z_i=\sum_ra_{ir}\sum_t\sum_cv_{irct}\beta_{irct}$; step 1 needs $E[Z_i\mid V_i]=\tilde Z_i$, which is the mean condition (for a change target under FD, $Z_i=\sum_ra_{ir}\sum_cv_{irct}\Delta\beta_{irc}$ and $E[\Delta\beta_i\mid V_i]=M_{\Delta H}(X_i)$); for each $(r,t)$, $\beta_{ir\cdot t}$ lies in the simplex, so $\sum_cv_{irct}\beta_{irct}\in[\min_cv_{irct},\max_cv_{irct}]$; summing over $t$ and $r$, $Z_i$ lies in an interval of length $\rho_i$, whatever the dependence across elections and groups within the unit. The $Z_i$ are independent across units. [6a:L4.1; P3-S1a; simplex] For the DiD the four non-zero coefficients per unit are $\pm1/A_r$, $\pm1/A_s$. ∎
 
-*Check.* E12 (random dependent laws: ratio to the bound at most 0.40; the extreme law attains 1). **Status: P; proof review pending.** The Bhatia–Davis version proposed in 2d §11 and 1b B5 is **not** covered (6a Lemma 4.1: Popoviciu only for multi-cell targets; P3.5(c1) is for single cells); see §11.
+*Check.* E12 (random dependent laws: ratio to the bound at most 0.40; the extreme law attains 1). **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md).** The Bhatia–Davis version proposed in 2d §11 and 1b B5 is **not** covered (6a Lemma 4.1: Popoviciu only for multi-cell targets; P3.5(c1) is for single cells); see §11.
 
 **Theorem E13 (cross-layer rule on the T-election product).** Let $\mathcal C_\varphi$ be the count-layer set for an actual target $\varphi$ on the T-election tables (Lemma E1: margins and any count rows of §2), and $\mathrm{CI}_\varphi$ an actual-target model interval at level $1-\alpha$ built from any model-layer rung of §3 (FD with its rows, DiD-S, per-period LCE with model rows on changes), using Lemma E12's allowance. Then 6a R27 holds verbatim: the union bounds $(*)$; coverage at least the model interval's with **identity rows only** (margins, published totals, audited cells, in any election); with **belief rows** (realised signs, CR or contrasts on changes, orderings, boxes) coverage at least $1-\alpha-P(n^\circ\notin F)$, and only $P(\text{reject while the rows hold})\le\alpha$; the intersection is not in general the smallest valid set.
 
-*Proof.* 6a R27's proof uses only (1) that on $\{n^\circ\in F\}$ the realised target lies in $\mathcal C_\varphi$ (R19(a) item 2), (2) an actual-target interval, and (3) the union bound. (1) holds by Lemma E1; (2) by P3.5 with Lemma E12's allowance; (3) is unchanged. [E1; E13; 6a:R27] ∎
+*Proof.* 6a R27's proof uses only (1) that on $\{n^\circ\in F\}$ the realised target lies in $\mathcal C_\varphi$ (R19(a) item 2), (2) an actual-target interval, and (3) the union bound. (1) holds by Lemma E1; (2) by P3.5 with Lemma E12's allowance; (3) is unchanged. [E1; E12; 6a:R27] ∎
 
-*Check.* E13 (FD + R1, 400 units, 300 replications: coverage of the intersection equals the model interval's in every replication; disjointness rate 0.000 ≤ α). **Status: P; proof review pending**, with the model interval's status inherited (6a §4.3; §6 below). The model interval must be for the actual target: a plug-in model set is not (6a check X3).
+*Check.* E13 (FD + R1, 400 units, 300 replications: coverage of the intersection equals the model interval's in every replication; disjointness rate 0.000 ≤ α). **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md)**, with the model interval's status inherited (6a §4.3; §6 below). The model interval must be for the actual target: a plug-in model set is not (6a check X3).
 
 This resolves PD §7's open items "FD4 ∩ Δ4 (mixes mean-level and realised quantities)" and "LCE-levels ∩ sign-on-changes": the first is ∩ by Theorem E13; the second is L within the model layer (E11) when the sign is a model sign, and ∩ when it is a realised sign.
 
@@ -304,7 +304,7 @@ Other entries:
 
 *Proof.* NA gives $B_{r^*c0}=B^{(0)}_{r^*c0}$ and $B_{s^*c0}=B^{(0)}_{s^*c0}$. Then $D_t=(B_{r^*ct}-B^{(0)}_{r^*c0})-(B_{s^*ct}-B^{(0)}_{s^*c0})=\mathrm{ATT}_t+(B^{(0)}_{r^*ct}-B^{(0)}_{r^*c0})-(S_t+B^{(0)}_{s^*ct}-B^{(0)}_{s^*c0})=\mathrm{ATT}_t+b_t-S_t$. For $t<0$ also $B_{r^*ct}=B^{(0)}_{r^*ct}$ and $S_t=0$. (c) rearranges (a) with $\mathrm{ATT}_t=B_{r^*ct}-\theta_t$. The counterfactual rates are rates, and nothing else links them to the data under (FP). [PO; NA; alg] ∎
 
-*Check.* E14. **Status: P; proof review pending.**
+*Check.* E14. **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md).**
 
 ### 5.2 The labelling rule
 
@@ -324,7 +324,7 @@ $$\{B_{r^*ct}(n)-\theta:\ n\in F,\ \theta\in[0,1]\}=[B^L_{r^*ct}-1,\ B^U_{r^*ct}
 
 *Proof.* $\theta$ is free in $[0,1]$ [E14(c)] and $S_t$ does not enter $\mathrm{ATT}_t=B_{r^*ct}-\theta_t$ once $\theta_t$ is free. The set is $\{B-\theta\}$ over a product of an interval and $[0,1]$ [conn]. $B^U\ge0\ge B^L-1$. [alg] ∎
 
-*Check.* E15 (LP = closed form, 30 designs). **Status: P; proof review pending.**
+*Check.* E15 (LP = closed form, 30 designs). **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md).**
 
 ### 5.3 The joint causal LP
 
@@ -341,7 +341,7 @@ $$\mathcal A=\big\{B_{r^*ct}(n)-\theta:\ n\in F,\ (n,\theta,S)\in\Gamma,\ \theta
 3. (c): each $\Gamma_k$ with each branch of $F$ and the other constraints is a polyhedron in $(n,\theta,S)$; the ATT is linear; its image is an interval [conn]; take the union over the $K\cdot K_F$ pairs. [Def]
 4. (d): (a). With $M=\Lambda=0$, $\theta_t=\theta^{PT}_t(n)$ [E14(c)], which must lie in $[0,1]$. [E14] ∎
 
-*Checks.* E16, E18, E19, E21 (LPs). **Status: P; proof review pending.** For integer counts, $\theta A_{r^*}$ is an integer (§7, remark).
+*Checks.* E16, E18, E19, E21 (LPs). **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md).** For integer counts, $\theta A_{r^*}$ is an integer (§7, remark).
 
 ### 5.4 Form 1: the trend dial
 
@@ -352,7 +352,7 @@ $$\mathcal A=\big\{B_{r^*ct}(n)-\theta:\ n\in F,\ (n,\theta,S)\in\Gamma,\ \theta
 
 *Proof.* (a): $\mathrm{ATT}=D-b+S$ [E14(a)]. (b): $\mathrm{ATT}\le D_t(n)+M+\Lambda\le\max_FD_t+M+\Lambda$, with equality only at $n\in\arg\max D_t$, $b=-M$, $S=\Lambda$; there $\theta=\theta^{PT}_t(n)-M-\Lambda$ [E14(c)], which lies in $[0,1]$ iff $\theta^{PT}_t(n)\in[M+\Lambda,1+M+\Lambda]$, and the comparison limit is $B_{s^*ct}(n)-\Lambda\ge0$ (the upper comparison limit $B_{s^*ct}-\Lambda\le1$ holds as $\Lambda\ge0$). Symmetric at the lower end. Margins only: $D_t=B_{r^*ct}-\theta^{PT}_t$ with $\theta^{PT}_t=B_{r^*c0}+B_{s^*ct}-B_{s^*c0}$; maximising $D_t$ puts $B_{r^*ct}$ at its maximum and $B_{s^*ct}$, $B_{r^*c0}$ at their minima and $B_{s^*c0}$ at its maximum, all jointly attainable (6a Lemma 2.1(b); for the rest, $B_{\neg r^*}$ decreasing in $Y_{r^*}$), which also minimises $\theta^{PT}_t$; symmetrically for the minimum. Then $\theta^{PT}_t(n^+)\le\theta^{PT}_t(n^-)\le1-M-\Lambda\le1+M+\Lambda$ and $\theta^{PT}_t(n^-)\ge\theta^{PT}_t(n^+)\ge M+\Lambda\ge-(M+\Lambda)$. (c): the lower end is $\min\mathcal D_t-M-\Lambda$. [E14; E16; 6a:L2.1] ∎
 
-*Checks.* E16/E17 [V] (the LP lies in the Minkowski set; equal in 40 cases, rate limits bind in 80); **E17 [F]** (review issue 1: one 2×2 unit, 100 of 200 voting yes at both elections, one coupling row $3y_0-2y_1=140$: the earlier sufficient condition holds but the sharp upper end under parallel trends is $-0.800<\max D=-0.400$; the exact criterion predicts it); E17 [V] (margins only: the criterion's outer conditions are implied); **E17 [I]** NS's arithmetic: $\mathcal D=[.05,.25]$, $M=.10$ gives $[-.05,.35]$, $M=.02$ gives $[.03,.27]$, $M^*=.05$. **Status: P; proof review pending.**
+*Checks.* E16/E17 [V] (the LP lies in the Minkowski set; equal in 40 cases, rate limits bind in 80); **E17 [F]** (review issue 1: one 2×2 unit, 100 of 200 voting yes at both elections, one coupling row $3y_0-2y_1=140$: the earlier sufficient condition holds but the sharp upper end under parallel trends is $-0.800<\max D=-0.400$; the exact criterion predicts it); E17 [V] (margins only: the criterion's outer conditions are implied); **E17 [I]** NS's arithmetic: $\mathcal D=[.05,.25]$, $M=.10$ gives $[-.05,.35]$, $M=.02$ gives $[.03,.27]$, $M^*=.05$. **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md).**
 
 ### 5.5 Form 2: bounds relative to pre-period trends (R11b′)
 
@@ -372,7 +372,7 @@ a union of $2L$ polyhedra, so a union of $2L$ LP projections. Under SD it is one
 
 *Proof.* (a): $x\le\bar M\max_ky_k$ iff $x\le\bar My_k$ for some $k$; the maximum is the same for every post-period, so one $k=(s,\sigma)$ serves all $t$. Each branch is linear in $(n,\theta,S)$ ($\delta_t$ for $t\ge1$ is linear by E14, and $\lvert\cdot\rvert\le$ linear is two linear rows). [alg; E14] (b): every feasible $(n,b)$ has $D_t(n)$ in its range and $\lvert b\rvert\le\bar MA(n)\le\bar M\sup_FA$. [Def] ∎
 
-*Checks.* E18 [V] (N21 reproduced exactly; the union of LPs equals a grid brute force). **Status: P; proof review pending.**
+*Checks.* E18 [V] (N21 reproduced exactly; the union of LPs equals a grid brute force). **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md).**
 
 **Proposition E19 (degeneration; R11b′(a)–(d)).** One post-period ($t=1$), (FP), NA.
 (a) **Contained in a trend dial.** $\mathcal A_{RM}\subseteq\mathcal A_{TD}(M=\bar M\sup_FA)$ (both with the rate limits). Without the rate limits (and with $\Lambda=0$; a spillover allowance adds $\Lambda$ to each end), the upper end of $\mathcal A_{RM}$ is $\max_F(D_1+\bar MA)\le\max_FD_1+\bar M\sup_FA$, with equality **iff** some $n\in F$ attains both $\max_FD_1$ and $\sup_FA$ (compatible maximisers); likewise for the lower end with $\min_FD_1$.
@@ -389,7 +389,7 @@ a union of $2L$ polyhedra, so a union of $2L$ LP projections. Under SD it is one
 3. (c1): fewer tables, fewer feasible points. [Def] (c2): under margins only $F$ is a product over elections [E1]; for fixed base and post tables, the ATT range is centred at $D_1$ with radius $\bar MA(n)$ (cut by the rate limits), increasing in $A$, so the union over the free pre-period tables is the range with the largest $A$. The largest consecutive pre DiD touching the base is $\max\lvert g_0-g_{-1}\rvert$ over $g_{-1}\in[G^-_{-1},G^+_{-1}]$, at an end of that interval, and $\max(\lvert g_0-G^-\rvert,\lvert g_0-G^+\rvert)\ge(G^+-G^-)/2$; pairs not touching the base are free at both ends. [E3(b); sep; alg] (c3): $A(n)$ is constant on $F$. [Def]
 4. (d): Prop. E25. ∎
 
-*Checks.* E19 [V] (a) (40 designs: equal in 20, strictly inside in 20, and the "iff" agrees with an LP test for a common maximiser); (b) (the vacuity LP predicts the upper end in every design: vacuous 37, informative 2, refuted 1); (c) (margins only: the allowance formula given $g_0$, and point-identified pre-trends give standard RR); E25 for (d). **Status: P; proof review pending.**
+*Checks.* E19 [V] (a) (40 designs: equal in 20, strictly inside in 20, and the "iff" agrees with an LP test for a common maximiser); (b) (the vacuity LP predicts the upper end in every design: vacuous 37, informative 2, refuted 1); (c) (margins only: the allowance formula given $g_0$, and point-identified pre-trends give standard RR); E25 for (d). **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md).**
 
 **N21 (NS §3.2) reproduced, and corrected.** Two precincts of 100 men with 20 and 60 veterans; yes votes $(30,45)$, $(32,48)$, $(30,60)$ at elections $-1,0,1$; $\bar M=1$.
 * By LP (check E18): the pre-period DiD is in $[-1.229,1.271]$ and the post-period DiD in $[-1.083,1.417]$. Without rate limits the RM set is $[-2.354,2.646]$ jointly and $[-2.354,2.688]$ endpoint-wise: NS's numbers, now exact.
@@ -402,7 +402,7 @@ whose width exceeds the parallel-trends width $w_1+w_0$ by $w_0+w_{-1}+2M+2\Lamb
 
 *Proof.* $\delta_1=b_1$, $\delta_0=0$, $\delta_{-1}=D_{-1}$ [E14(b)], so the constraint is $\lvert b_1+D_{-1}\rvert\le M$, and $\mathrm{ATT}=D_1-b_1+S=g_1-g_0+D_{-1}+S\mp M$. The coefficients of $(g_1,g_0,g_{-1})$ are $(1,-2,1)$; the elections are independent factors with interval ranges [E3(a),(b); sep]. [alg] ∎
 
-*Check.* E20 (closed form = LP; width identity; 30 designs). **Status: P; proof review pending.** Linear extrapolation of a set-valued pre-trend counts the base election's width twice.
+*Check.* E20 (closed form = LP; width identity; 30 designs). **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md).** Linear extrapolation of a set-valued pre-trend counts the base election's width twice.
 
 ### 5.6 Form 3: MTR, ND and PS (2d Prop. CL generalised)
 
@@ -421,7 +421,7 @@ At a post-period $t$, for the indicator of outcome $c$:
 1. (a), (b): the ATT set at $(n,S)$ is $\{B_{r^*ct}(n)-\theta:\max\{B_{r^*c0},B_{s^*ct}-S\}\le\theta\le B_{r^*ct}\}=[0,\,B_{r^*ct}-\max\{\cdot\}]$, non-empty iff the stated inequality holds; all contain 0, so the union is $[0,U]$; the minimum of affine functions is concave, so $U$ is an LP in epigraph form. [E16; 2d:CL steps 1–3]
 2. (c): the base table is a free factor, so $B_{r^*c0}$ is at its minimum; at $t$ both terms of the minimum increase in $B_{r^*ct}$ and the second decreases in $B_{s^*ct}$; the maximum of the first and the minimum of the second are attained by one table (6a Lemma 2.1(b) for a named row; for the rest $B_{\neg r^*,ct}$ is a decreasing function of $Y_{r^*ct}$); $S=\Lambda$ is optimal. [E3; 6a:L2.1] ∎
 
-*Checks.* E21 [V] (closed form = LP for the rest and for a named row, R = C = 3, with $\Lambda\in\{0,.03\}$); [P2d] Δ7 (2×2). **Status: P; proof review pending.** 2d's PS uses the **observed** comparison rate; that is (c) with $\Lambda=0$, i.e. it assumes no spillover (§11 item 2). These three are bounds on $\theta$, hence on $b_t$: they are trend assumptions in a different parameterisation, and Definition 5.1 counts them as such.
+*Checks.* E21 [V] (closed form = LP for the rest and for a named row, R = C = 3, with $\Lambda\in\{0,.03\}$); [P2d] Δ7 (2×2). **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md).** 2d's PS uses the **observed** comparison rate; that is (c) with $\Lambda=0$, i.e. it assumes no spillover (§11 item 2). These three are bounds on $\theta$, hence on $b_t$: they are trend assumptions in a different parameterisation, and Definition 5.1 counts them as such.
 
 ### 5.7 Spillovers onto the comparison group
 
@@ -432,7 +432,7 @@ At a post-period $t$, for the indicator of outcome $c$:
 
 *Proof.* (a): fix $n$ and $b$; set $\theta=\theta^{PT}+b-S$ and $B^{(0)}_{s^*}=B_{s^*}-S$, and the same with $S'$ [E14(c)]; NA leaves all $t\le0$ unchanged; $\mathrm{ATT}=D-b+S$ [E14(a)]. (b): (a) with Theorem E16. (c): average the unit spillovers with the comparison group's weights; a term constant across units adds the same amount to every unit's comparison change. [Def; alg] ∎
 
-*Checks.* E22 [V] (a); **E22 [F]** (b): with pure units (every rate identified) and a true spillover of .08, the RM set with $\Lambda=0$ excludes the true ATT and the set with $\Lambda=.08$ contains it. **Status: P; proof review pending.**
+*Checks.* E22 [V] (a); **E22 [F]** (b): with pure units (every rate identified) and a true spillover of .08, the RM set with $\Lambda=0$ excludes the true ATT and the set with $\Lambda=.08$ contains it. **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md).**
 
 ---
 
@@ -447,13 +447,13 @@ At a post-period $t$, for the indicator of outcome $c$:
 
 *Proof.* (a) [OLS] under P3-S1a (independent units, bounded outcomes). (b): each row is $c(\Delta Q)+a^\top\Delta k\ge0$ with $c$ linear; P3.5(a) and (b2)(ii) use only this form, a fixed-dimensional asymptotically normal $\hat\beta$ and a consistent variance; the allowance step uses only Lemma E12's range bound. [P3.5; E12] (c): the FD4 constraints $\sum_rx_{jr}m_{u,rc}(x_j)=\tau_{uc}(x_j)$, $0\le m_u(x_j)\le1$, $0\le m_u(x_j)+M_{\Delta H}(x_j)\le1$ are linear in $(m_u,\Delta k)$ with right-hand sides linear in $(\tau$-coefficients$,\Delta Q)$. [2d:FD4; Def] ∎
 
-*Check.* E13 (FD + R1: coverage of the actual-target interval and of its intersection with Δ0). **Status: P; proof review pending** for (a), (b) and for (c) under its polynomial condition; the sharp-set inference is **O**.
+*Check.* E13 (FD + R1: coverage of the actual-target interval and of its intersection with Δ0). **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md)** for (a), (b) and for (c) under its polynomial condition; the sharp-set inference is **O**.
 
 **Proposition E24 (unions across branches and elections).** Let a model be a union of branches $k\in\mathcal K$ (sign patterns across period pairs; CR branches; RM's arg-max branches), and suppose that whenever branch $k$ holds, $P(\varphi\in\mathrm{CI}_k)\ge1-\alpha$ (asymptotically). Then $\mathrm{CI}_\cup:=\bigcup_k\mathrm{CI}_k$ has $P(\varphi\in\mathrm{CI}_\cup)\ge1-\alpha$ under the union model, with no multiplicity correction, and "$\mathrm{CI}_\cup=\emptyset$" is a level-α test of the union model. Reporting $\mathrm{CI}_{\hat k}$ for a data-selected branch $\hat k$ is not covered.
 
 *Proof.* Some branch $k^\circ$ holds; $\{\varphi\in\mathrm{CI}_{k^\circ}\}\subseteq\{\varphi\in\mathrm{CI}_\cup\}$, and $\{\mathrm{CI}_\cup=\emptyset\}\subseteq\{\varphi\notin\mathrm{CI}_{k^\circ}\}$. [union; Def] ∎
 
-*Check.* **E24 [F]** (true branch $\theta\ge0$, $\theta=.5$: the union covers at .949 ≈ .95; the plug-in branch's interval covers at .669). **Status: P; proof review pending.** This is PD §8 R10's "unions" item for DiD.
+*Check.* **E24 [F]** (true branch $\theta\ge0$, $\theta=.5$: the union covers at .949 ≈ .95; the plug-in branch's interval covers at .669). **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md).** This is PD §8 R10's "unions" item for DiD.
 
 **Proposition E25 (one joint region for model-based pre-trends; E19(d)).** Hypotheses.
 * **(H1) The model layer and its parameter.** A model-layer rung whose regression parameter $\beta$, stacked over all elections used, is fixed-dimensional with $\sqrt n(\hat\beta-\beta_0)\Rightarrow N(0,\Sigma)$ and a consistent $\hat\Sigma$, and satisfies P3.5(b2)(ii) as corrected: either (ii-a) $\Sigma$ positive definite with $q=\dim\beta$, or (ii-b) an exact reduction $\beta=L\eta+b$, $\hat\beta=L\hat\eta+b$ with $\Sigma_\eta$ positive definite. Stacking the per-election regressions, or the regressions of non-overlapping period-pair changes, satisfies (ii-a) under the rung's full-rank conditions. Stacking levels together with their changes, or overlapping changes such as $(-1,0)$, $(0,1)$ and $(-1,1)$, makes $\Sigma$ singular by an exact identity, which must be removed as in (ii-b).
@@ -467,14 +467,14 @@ At a post-period $t$, for the indicator of outcome $c$:
 
 Every constraint has the form "intercept linear in $\beta$ + design coefficients × LP variables $\ge0$", which is P3's form. Bound the target $\tilde D_t+e_{D_t}-b+S$ (equivalently $\tilde B_{r^*ct}+e_B-\theta$) by P3.5(b2)(ii), using **one** projection event for the stacked $\hat\beta$ for all branches. Take the union of the branch intervals.
 
-(a) Under (H1)–(H3), the causal assumption, NA and the rung, the union covers the actual $\mathrm{ATT}_t$ with probability at least $1-\alpha_{\rm proj}-\sum_q\alpha_q$ asymptotically (or for every $n$ with the Hoeffding radii and a finite-sample estimation event, as in P3.8). This holds simultaneously for all branches and post-periods. Without the boxes ($e\equiv0$), the same set covers the model-implied quantity defined by the same LP at $e=0$. That quantity is an ATT relative to model-implied trends, which is a different estimand from §5's, and it is reported only with that label.
-(c) Plugging in point estimates of the pre-period quantities, with an interval for the post-period DiD only, is not covered and under-covers (computed counterexample).
+(a) Under (H1)–(H3), the causal assumption, NA and the rung, the union covers the actual $\mathrm{ATT}_t$ with probability at least $1-\alpha_{\rm proj}-\sum_q\alpha_q$ asymptotically. This holds simultaneously for all branches and post-periods. Without the boxes ($e\equiv0$), the same set covers the model-implied quantity defined by the same LP at $e=0$. That quantity is an ATT relative to model-implied trends, which is a different estimand from §5's, and it is reported only with that label.
+(b) Plugging in point estimates of the pre-period quantities, with an interval for the post-period DiD only, is not covered and under-covers (computed counterexample).
 
-*Proof.* Let $\mathcal E$ be the projection event, so $\lvert g^\top(\hat\beta-\beta_0)\rvert\le\hat k\hat\sigma_g$ for all $g$ at once (P3.5(b2)(ii) step 4, under (ii-a) or (ii-b)). On $\mathcal E\cap\bigcap_q\{\lvert E_q\rvert\le t_q\}$, the true point $(k_0,\theta_t,S_t,b_t,e=E)$ is feasible in the LP of the branch that holds at the truth, evaluated at $\beta_0$. This holds because each actual $q$ equals $\tilde q(\beta_0,k_0)+E_q$ with $E_q$ in its box, the causal assumption holds for the actual quantities, the rung's constraints hold at $(\beta_0,k_0)$, and the rate limits hold for rates. [E14; E18(a); Def] At that point the target equals $\mathrm{ATT}_t$, so $\mathrm{ATT}_t$ lies between that branch LP's minimum and maximum at $\beta_0$. On $\mathcal E$, P3.5(b2)'s upper bound built from any dual-feasible points is at least the maximum at $\beta_0$, and likewise for the lower end (P3.5(b2) steps 1–2; they use only weak duality and $\mathcal E$). The bound holds for every branch on the same event. So $\mathrm{ATT}_t$ lies in that branch's interval, and hence in the union. [E24] The union bound over $\mathcal E^c$ and the box events completes the argument. [union; 6a Remark 4.2] (c): check E25. ∎
+*Proof.* Let $\mathcal E$ be the projection event, so $\lvert g^\top(\hat\beta-\beta_0)\rvert\le\hat k\hat\sigma_g$ for all $g$ at once (P3.5(b2)(ii) step 4, under (ii-a) or (ii-b)). On $\mathcal E\cap\bigcap_q\{\lvert E_q\rvert\le t_q\}$, the true point $(k_0,\theta_t,S_t,b_t,e=E)$ is feasible in the LP of the branch that holds at the truth, evaluated at $\beta_0$. This holds because each actual $q$ equals $\tilde q(\beta_0,k_0)+E_q$ with $E_q$ in its box, the causal assumption holds for the actual quantities, the rung's constraints hold at $(\beta_0,k_0)$, and the rate limits hold for rates. [E14; E18(a); Def] At that point the target equals $\mathrm{ATT}_t$, so $\mathrm{ATT}_t$ lies between that branch LP's minimum and maximum at $\beta_0$. On $\mathcal E$, P3.5(b2)'s upper bound built from any dual-feasible points is at least the maximum at $\beta_0$, and likewise for the lower end (P3.5(b2) steps 1–2; they use only weak duality and $\mathcal E$). The bound holds for every branch on the same event. So $\mathrm{ATT}_t$ lies in that branch's interval, and hence in the union. [E24] The union bound over $\mathcal E^c$ and the box events completes the argument. [union; 6a Remark 4.2] (b): check E25. ∎
 
 **Remark E25.1 (per-election intervals).** Separate confidence statements per election, each at $1-\alpha$, combine by the union bound at level $1-\sum_t\alpha_t$. Without the joint law they do not say which pre- and post-period tables go together, so the natural combination is the endpoint-wise set. This is a remark, not a theorem about all procedures.
 
-*Check.* **E25 [F]** (three Gaussian gap estimates, $\bar M=1$, ATT at the RM lower end: joint region .998, plug-in .873 at nominal .95; the review's check "E25 [V]" adds correlated estimates and the kink $D_{\rm pre}=0$). **Status: P; proof review pending** for (a) under (H1)–(H3); (c) by the computed counterexample.
+*Check.* **E25 [F]** (three Gaussian gap estimates, $\bar M=1$, ATT at the RM lower end: joint region .998, plug-in .873 at nominal .95; the review's check "E25 [V]" adds correlated estimates and the kink $D_{\rm pre}=0$). **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md)** for (a) under (H1)–(H3); (b) by the computed counterexample.
 
 ---
 
@@ -487,7 +487,7 @@ Every constraint has the form "intercept linear in $\beta$ + design coefficients
 
 *Proof.* (a): each election's $Y_{rct}(\mathcal S)$ takes every integer between its integer Duncan–Davis extremes (a sum of unit integer intervals) [6a:L2.1(a); 2c Remark M2.1 proposition], independently across elections [E1], so $Z$ takes every integer in $[Z^-,Z^+]$; $D^r_c$ is affine in $Z$ with slope $\kappa_r$ [E4(b)]. (b): the rows are half-lines in $Z$ [E4(b),(c)]. (c): the union of the two branches of (b). ∎
 
-*Checks.* E5/E6/E26 [V] (brute force over all integer two-election 2×2 tables in 59 designs: margins, each W1 sign, CR — integer CR empty with a non-empty continuous set in one design — and the contrast of E6). **Status: P; proof review pending.**
+*Checks.* E5/E6/E26 [V] (brute force over all integer two-election 2×2 tables in 59 designs: margins, each W1 sign, CR — integer CR empty with a non-empty continuous set in one design — and the contrast of E6). **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md).**
 
 **Theorem E27 (total unimodularity for change rows; R = 2).** Integer margins, $R=2$. Rows: boxes on single cells (any election), and **change rows** $\sum_{i\in U}(n_{i1ct}-n_{i1cu})\in[h^-,h^+]$ on **one** column $c$, such that (i) the period pairs $(u,t)$ used, seen as edges on the set of elections, form a graph of maximum degree 2 without cycles (a union of paths: one pair; consecutive pairs; two pairs sharing a base), and (ii) the unit sets $U$ of each pair form a laminar family. After rounding the rows (6a §1.4), $F_{\rm rd}$ is integral: the integer ends of every linear target are those of the rounded LP, attained by integer tables. (Rows on row 2 are rows on row 1 via $n_{i2ct}=b_{ict}-n_{i1ct}$.)
 
@@ -497,7 +497,7 @@ Every constraint has the form "intercept linear in $\beta$ + design coefficients
 3. **Block rows.** For a chosen block $(i,t)$ give it the sign $-\sigma_{itc}$ if $\sigma_{itc}\ne0$, else $+1$. Then $y_{itc}$ sums to 0 or $\pm1$, and every other variable of the block, which is in no change row, sums to $\pm1$ or 0. [alg]
 4. So every subset of rows has a GH split; the reduced matrix is TU [GH]; with integer right-hand sides after rounding, every vertex is integral [HK]; the affine bijection maps integer vertices to integer vertices. [6a:L1.1] ∎
 
-*Checks.* E27 [V] (LP = MILP for 540 random objectives: one pair; a consecutive path of three pairs; two pairs sharing a base; each with its own laminar family). Three pairs sharing a base (degree 3) are outside the theorem, and the review showed by exhaustive Ghouila-Houri that the matrix is then **not** TU. No integrality gap was found in 180 random objectives, but integrality for that class would need an argument other than TU: **O**. A cycle of pairs whose sign constraints are consistent (e.g. the triangle $(0,1),(1,2),(0,2)$ with laminar families) is TU as well (review check "E27 [V]"); the no-cycle hypothesis is used only to choose the signs $\varepsilon_\pi$. *Shorter proof (review).* After the substitution, every $y_{itc'}$ with $c'\ne c$ appears only in block row $(i,t)$, a unit column; deleting unit columns and then unit rows preserves TU, so TU of the reduced system is TU of the change-row matrix on the column-$c$ variables, which step 2 proves; step 3 is then unnecessary. Several columns with change rows, or change rows mixed with within-election totals of 6a's classes, are outside the theorem: LP outer, MILP exact. **Status: P; proof review pending.** The W1 one-vs-rest signs on changes over one unit set, for consecutive pairs, are change rows on one column with $U=$ all units, so they are covered.
+*Checks.* E27 [V] (LP = MILP for 540 random objectives: one pair; a consecutive path of three pairs; two pairs sharing a base; each with its own laminar family). Three pairs sharing a base (degree 3) are outside the theorem, and the review showed by exhaustive Ghouila-Houri that the matrix is then **not** TU. No integrality gap was found in 180 random objectives, but integrality for that class would need an argument other than TU: **O**. A cycle of pairs whose sign constraints are consistent (e.g. the triangle $(0,1),(1,2),(0,2)$ with laminar families) is TU as well (review check "E27 [V]"); the no-cycle hypothesis is used only to choose the signs $\varepsilon_\pi$. *Shorter proof (review).* After the substitution, every $y_{itc'}$ with $c'\ne c$ appears only in block row $(i,t)$, a unit column; deleting unit columns and then unit rows preserves TU, so TU of the reduced system is TU of the change-row matrix on the column-$c$ variables, which step 2 proves; step 3 is then unnecessary. Several columns with change rows, or change rows mixed with within-election totals of 6a's classes, are outside the theorem: LP outer, MILP exact. **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md).** The W1 one-vs-rest signs on changes over one unit set, for consecutive pairs, are change rows on one column with $U=$ all units, so they are covered.
 
 **Remark 7.1 (causal integer versions).** With integer counts the counterfactual counts are integers too, so $\theta_tA_{r^*}\in\mathbb Z$ and the ATT lies on a lattice of step $1/A_{r^*}$ inside Theorem E16's set. A general statement of how far the integer ends can lie inside the continuous ones (beyond one step for the dial with margins only) is **O**; the certified MILP of 6a C4 gives exact answers.
 
@@ -530,7 +530,7 @@ Every constraint has the form "intercept linear in $\beta$ + design coefficients
 **G5.** The interval base turns each unit's margins into $N_{it}\in[N^L_{it},N^U_{it}]$, $a_{irt}$ and $b_{ict}$ with $\sum_ra_{irt}=\sum_cb_{ict}=N_{it}$, still a polytope in cell counts with $N$ as a variable. Under (FP) the base is the same people at every election, so one interval serves all elections (as in G7).
 
 **Lemma G6 (coarsening is valid and loses information).** Merge units into blocks that are stable across elections. Every latent table of the fine units aggregates to one of the blocks with the blocks' margins, so the set of values of any target that depends on the table only through block-level counts (group rates over the electorate or over unions of blocks) computed on the blocks contains the set computed on the fine units: valid, and weakly wider.
-*Proof.* Summing a fine table over the units of a block gives a nonnegative table with the block's margins; rows stated on the blocks hold for the aggregate; the target is unchanged. So the fine feasible set maps into the coarse one. [Def; lin] ∎ **Status: P; proof review pending** (check G6).
+*Proof.* Summing a fine table over the units of a block gives a nonnegative table with the block's margins; rows stated on the blocks hold for the aggregate; the target is unchanged. So the fine feasible set maps into the coarse one. [Def; lin] ∎ **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md)** (check G6).
 
 **Proposition G7 (where a margin set enters, and what carries over).** Let the group counts be uncertain, with a set $\mathcal V$ such that $P(a^\circ\in\mathcal V)\ge1-\alpha$.
 (a) Under (FP) the same $a^\circ$ enters every election. The set $\mathcal C:=\bigcup_{a\in\mathcal V}\varphi(F(a))$ covers the actual target with probability $\ge1-\alpha$ (R25(a) on the T-election product); each $F(a)$ is the LP of Lemma E1. Using a separate set per election, $\bigcup_{(a_t)\in\mathcal V^T}$, is valid but wider, and if the sets are separately random it spends $\alpha$ once per election.
@@ -538,7 +538,7 @@ Every constraint has the form "intercept linear in $\beta$ + design coefficients
 (c) **R26 on changes.** With calibrated, independent and **nondifferential** matches, meaning $E[\Delta\beta\mid X,q]=E[\Delta\beta\mid X]$ (the match probabilities carry no information on changes given the true composition), the true composition is $X=\bar q+u$ with $E[u\mid q]=0$ and $\operatorname{Var}(u\mid q)=\Sigma_u(q)$ known, and
 $$E[\Delta T_c\mid q]=\bar q^\top\Delta Q_c\bar q+\operatorname{tr}(\Delta Q_c\Sigma_u),$$
 a known correction involving only $\Delta Q_c$. $\Delta Q_c$ is identified from the corrected regression iff the linear map $\Delta Q\mapsto\big(\bar q^\top\Delta Q\bar q+\operatorname{tr}(\Delta Q\Sigma_u(q))\big)_q$ is injective over the design. With $\Sigma_u$ constant this holds under A5 for $\bar q$: the correction is the constant $c=\operatorname{tr}(\Delta Q\Sigma_u)$, equal to $c\,\bar q^\top\mathbf 1\mathbf 1^\top\bar q$, and $\Sigma_u\mathbf 1=0$ makes $c$ recoverable; with $\Sigma_u$ varying in $q$ injectivity must be checked for the design. Under that condition FD, its single restrictions and DiD-S carry over with the corrected regression; the model DiD's weights use the true $X$ and need their own allowance (as in R26).
-*Proof.* (a): on $\{a^\circ\in\mathcal V\}$, $\varphi(n^\circ)\in\varphi(F(a^\circ))\subseteq\mathcal C$ [E1; 6a:R19(a)]; $\mathcal V\subseteq\mathcal V^T$ along the diagonal [Def]. (b): the same argument. (c): by nondifferential matching, $E[\Delta T_c\mid q]=E[X^\top\Delta Q_cX\mid q]$; $E[X^\top\Delta QX\mid q]=\bar q^\top\Delta Q\bar q+E[u^\top\Delta Qu\mid q]$ and $E[u^\top\Delta Qu\mid q]=\operatorname{tr}(\Delta Q\Sigma_u)$. [CE-lin; alg] ∎ **Status: P; proof review pending** for (a)–(c) as stated; the construction of $\mathcal V$ (Poisson-binomial or joint sets, calibration slack) is R25(b)–(c) and is deferred with the module. Checks: G7 [F] (a), G7 [V] (a) one set vs separate sets, G7 [F] (c) (exact Poisson-binomial expectation; the uncorrected fit is biased by up to $8\times10^{-3}$).
+*Proof.* (a): on $\{a^\circ\in\mathcal V\}$, $\varphi(n^\circ)\in\varphi(F(a^\circ))\subseteq\mathcal C$ [E1; 6a:R19(a)]; $\mathcal V\subseteq\mathcal V^T$ along the diagonal [Def]. (b): the same argument. (c): by nondifferential matching, $E[\Delta T_c\mid q]=E[X^\top\Delta Q_cX\mid q]$; $E[X^\top\Delta QX\mid q]=\bar q^\top\Delta Q\bar q+E[u^\top\Delta Qu\mid q]$ and $E[u^\top\Delta Qu\mid q]=\operatorname{tr}(\Delta Q\Sigma_u)$. [CE-lin; alg] ∎ **Status: P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md)** for (a)–(c) as stated; the construction of $\mathcal V$ (Poisson-binomial or joint sets, calibration slack) is R25(b)–(c) and is deferred with the module. Checks: G7 [F] (a), G7 [V] (a) one set vs separate sets, G7 [F] (c) (exact Poisson-binomial expectation; the uncorrected fit is biased by up to $8\times10^{-3}$).
 
 **G8 (covariates; low priority).** Covariates enter at three places: (i) strata published as units in the count layer (exact within strata); (ii) the causal layer, as trend assumptions within strata, aggregated with the **treated** group's stratum shares; (iii) the model layer, as CAR(Z)-δ on changes or FD with covariates in the mean (conditional parallel trends: **O**, NS Part 3A).
 
@@ -598,13 +598,13 @@ Support rose most where veterans were common. The question: by how much more did
 
 | ID | Claim | Status |
 |---|---|---|
-| R11a | Sharpness of the descriptive rungs: Δ0 for T elections (E3), Δ4 in R×C and T elections, closed forms for one-vs-rest rows, LP otherwise (E5), count contrasts on changes (E6), the sharp FD set via Lemma G′ (E8), DiD-S sharp for the regression and for the full law iff inside the sharp FD set (E9), LCE contrasts on changes (E10), per-period LCE with model rows on changes (E11) | **P; proof review pending** (2e §§2–3; `verify_phase2e.py` E1–E11). Grouped rungs with model rows: R16 (O) |
-| R11b | Validity and sharpness of the causal layer for each form: the identity ATT = D − b + S (E14), no causal content without a trend assumption (E15), the joint causal LP (E16), trend dial (E17), MTR/ND/PS with spillovers (E21), spillover dial (E22), labelling rule (Def. 5.1) | **P; proof review pending** (2e §5; E14–E17, E21, E22) |
-| R11b′ | Relative magnitudes and smoothness over the joint set of latent tables: union-of-LP form (E18); degeneration (a) inclusion in a trend dial with equality iff compatible maximisers, (b) the vacuity criterion, (c) monotonicity, the margins-only allowance $\ge\bar Mw_{-1}/2$, standard RR with point-identified pre-trends, (d) one joint region (E25); smoothness doubles the base width (E20); N21 exact and corrected | **P; proof review pending** (2e §5.5; E18–E20, E24) |
-| R11c | Inference: FD with linear rows (E23(a)–(b)); FD4 with polynomial τ (E23(c)); unions across branches and elections (E24); one joint region for model-based pre-trends (E25); two-election allowance (E12); cross-layer rule on the product (E13) | **P; proof review pending**; inference for the sharp FD set **O**; CLR versions algorithmic (P3.5(b3)) |
-| R11d | Integer versions: lattice for margins and one-vs-rest rows on changes (E26); TU for change rows on one column over paths of period pairs with laminar unit sets (E27); panel tables add nothing (E2) | **P; proof review pending**; wider classes (three pairs sharing a base: not TU; several columns; mixtures) **O**, MILP exact; causal integer ends **O** (Remark 7.1) |
-| R31 | DiD gap register (G1–G9): for each item, the result that holds without it, the closing assumption or data range, the rungs modified, and a check that the naive statement fails; Lemma G6 (coarsening) | register **complete**; Lemma G6 **P; proof review pending**; the items themselves **O** (deferred to the uncertain-totals module) |
-| R32 | Margin sets in T elections: one set for a shared composition (G7(a)), the causal and cross-layer versions (G7(b)), R26 on changes (G7(c)) | **P; proof review pending** for G7(a)–(c) as stated; R25(b)–(c) and the module **O** (deferred) |
+| R11a | Sharpness of the descriptive rungs: Δ0 for T elections (E3), Δ4 in R×C and T elections, closed forms for one-vs-rest rows, LP otherwise (E5), count contrasts on changes (E6), the sharp FD set via Lemma G′ (E8), DiD-S sharp for the regression and for the full law iff inside the sharp FD set (E9), LCE contrasts on changes (E10), per-period LCE with model rows on changes (E11) | **P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md)** (2e §§2–3; `verify_phase2e.py` E1–E11). Grouped rungs with model rows: R16 (O) |
+| R11b | Validity and sharpness of the causal layer for each form: the identity ATT = D − b + S (E14), no causal content without a trend assumption (E15), the joint causal LP (E16), trend dial (E17), MTR/ND/PS with spillovers (E21), spillover dial (E22), labelling rule (Def. 5.1) | **P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md)** (2e §5; E14–E17, E21, E22) |
+| R11b′ | Relative magnitudes and smoothness over the joint set of latent tables: union-of-LP form (E18); degeneration (a) inclusion in a trend dial with equality iff compatible maximisers, (b) the vacuity criterion, (c) monotonicity, the margins-only allowance $\ge\bar Mw_{-1}/2$, standard RR with point-identified pre-trends, (d) one joint region (E25); smoothness doubles the base width (E20); N21 exact and corrected | **P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md)** (2e §5.5; E18–E20, E24) |
+| R11c | Inference: FD with linear rows (E23(a)–(b)); FD4 with polynomial τ (E23(c)); unions across branches and elections (E24); one joint region for model-based pre-trends (E25); two-election allowance (E12); cross-layer rule on the product (E13) | **P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md)**; inference for the sharp FD set **O**; CLR versions algorithmic (P3.5(b3)) |
+| R11d | Integer versions: lattice for margins and one-vs-rest rows on changes (E26); TU for change rows on one column over paths of period pairs with laminar unit sets (E27); panel tables add nothing (E2) | **P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md)**; wider classes (three pairs sharing a base: not TU; several columns; mixtures) **O**, MILP exact; causal integer ends **O** (Remark 7.1) |
+| R31 | DiD gap register (G1–G9): for each item, the result that holds without it, the closing assumption or data range, the rungs modified, and a check that the naive statement fails; Lemma G6 (coarsening) | register **complete**; Lemma G6 **P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md)**; the items themselves **O** (deferred to the uncertain-totals module) |
+| R32 | Margin sets in T elections: one set for a shared composition (G7(a)), the causal and cross-layer versions (G7(b)), R26 on changes (G7(c)) | **P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md)** for G7(a)–(c) as stated; R25(b)–(c) and the module **O** (deferred) |
 
 ---
 
@@ -623,7 +623,7 @@ Support rose most where veterans were common. The question: by how much more did
 
 ## 12. Changes after the proof review
 
-*Review: `reviews/PHASE2e_proof_review.md` (19 issues: 3 errors, 7 gaps, 9 wording). Theory documents named in §11 are still not edited. New checks are in `verify_phase2e.py` section R.*
+*Review: `reviews/PHASE2e_proof_review.md` (19 issues: 3 errors, 7 gaps, 9 wording). Theory documents named in §11 are still not edited. New checks are in `verify_phase2e.py` section R. Round 2 of the review confirmed all 19 fixes and listed four residual items, N1–N4, fixed below.*
 
 | # | Severity | Where | Fix made |
 |---|---|---|---|
@@ -646,3 +646,7 @@ Support rose most where veterans were common. The question: by how much more did
 | 17 | error (minor) | Prop. E15; Def. 5.1 | "Without a comparison group, $D_t$, the dial, RM, SD and PS are undefined; MTR and ND alone need none"; Def. 5.1 item 1 amended |
 | 18 | gap (minor) | G1, G5, Prop. G7(c) | G1: E1 with $a_{irt}$; G5: rates linear-fractional with $N$ a variable; G7(c): nondifferential means $E[\Delta\beta\mid X,q]=E[\Delta\beta\mid X]$, identification needs injectivity of the corrected map (holds under A5 for constant $\Sigma_u$) |
 | 19 | wording | Prop. E19(a) | "with $\Lambda=0$; a spillover allowance adds $\Lambda$" |
+| N1 | wording (round 2) | Thm E13 proof | Cites Lemma E12 (the allowance), not E13 |
+| N2 | wording (round 2) | §1.4 "Rule" bullet | Matches the amended Def. 5.1: a stated population, and a comparison group only when the trend assumption uses one |
+| N3 | wording (round 2) | Prop. E25 | Relettered: (a), (b) (old (c)); the per-election statement is Remark E25.1 |
+| N4 | wording (round 2) | Prop. E25(a) | Deleted the parenthetical claiming a finite-sample version "as in P3.8" (P3.8's event relaxes each constraint row with its own δ split over all rows of all branches, and under FD the Hoeffding range doubles; not stated here) |

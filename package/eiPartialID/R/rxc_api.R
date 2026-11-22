@@ -32,6 +32,13 @@
     X <- Rc[ok, , drop = FALSE] / nr[ok]; T <- Cc[ok, , drop = FALSE] / nc[ok]; N <- nr[ok]
     if (!is.null(grp)) grp <- grp[ok]
     colnames(X) <- rows; colnames(T) <- cols
+    # raw counts for the count layer (integers only if exactly integer in the input; rescaled
+    # margins are not counts)
+    counts <- if (any(bad)) list(A = X * N, B = T * N, integer = FALSE) else
+      list(A = Rc[ok, , drop = FALSE], B = Cc[ok, , drop = FALSE], integer = TRUE)
+    counts$units <- if (!is.null(rownames(data)) && !identical(rownames(data), as.character(seq_len(nrow(data)))))
+      rownames(data)[ok] else which(ok)
+    counts$data <- data[ok, , drop = FALSE]
   } else if (!is.null(x) && !is.null(t) && !is.null(n)) {
     if (is.null(dim(x))) { X <- cbind(x, 1 - x); colnames(X) <- c("X", "notX") } else X <- as.matrix(x)
     if (is.null(dim(t))) { T <- cbind(t, 1 - t); colnames(T) <- c("T", "notT") } else T <- as.matrix(t)
@@ -40,10 +47,11 @@
     N <- as.numeric(n)
     if (any(abs(rowSums(X) - 1) > 1e-6) || any(abs(rowSums(T) - 1) > 1e-6))
       stop("rows of 'x' and 't' must be shares summing to one")
+    counts <- list(A = X * N, B = T * N, integer = FALSE, units = seq_len(nrow(X)))
   } else stop("supply a formula and data, 'data' with 'rows' and 'cols', or 'x', 't' and 'n'")
   if (any(!is.finite(X)) || any(!is.finite(T)) || any(!is.finite(N))) stop("missing or non-finite values")
   if (!is.null(grp) && length(grp) != nrow(X)) stop("'group' has the wrong length")
-  list(X = X, T = T, N = N, group = grp)
+  list(X = X, T = T, N = N, group = grp, counts = counts)
 }
 
 .rxc_index <- function(v, labels) {
@@ -213,7 +221,28 @@
 #' @param base also fit the rung alone (without the optional restrictions) and
 #'   report its estimate and CIs in the \code{base_*} columns, printed beside
 #'   the restricted result (default: when restrictions are given).
-#' @return an object of class \code{"eiRxC"}.
+#' @param target \code{"actual"} (default; decisions D1/D2 of the build plan) prints the
+#'   actual-rate block of the count layer (\code{\link{eiCounts}}) first, with the margins-only
+#'   (Duncan-Davis, exact LP) line first, then its cross-layer block (R27) and then the model
+#'   table; \code{"model"} restores the old print order and skips the cross-layer block (the
+#'   count block is still stored in \code{$counts}, and printed after the model table when
+#'   count rows are given). The model results are the same under both.
+#' @param counts optional count restrictions for the embedded count layer, as in
+#'   \code{eiCounts(restrictions = )}. \code{assoc} and \code{cr} restrictions with
+#'   \code{object = "actual"} in \code{restrictions} are moved here (one vocabulary,
+#'   6a contract C9); \code{object = c("actual", "model")} is refused.
+#' @param integer integer mode of the count layer (\code{"auto"}, \code{"lp"},
+#'   \code{"exact"}; see \code{\link{eiCounts}}).
+#' @param time_limit seconds per integer program in the count layer (see \code{\link{eiCounts}}).
+#'   If the count layer fails, \code{eiBounds()} warns and returns the model results without it.
+#' @return an object of class \code{"eiRxC"}. \code{$counts} holds the count layer (an
+#'   \code{eiCounts} object; see \code{\link{witness}}). \code{$table} has
+#'   \code{dd_exact_lower}/\code{dd_exact_upper}: the exact margins-only range (an LP).
+#'   \code{dd_lower}/\code{dd_upper} keep the cellwise interval arithmetic of earlier
+#'   versions (equal for single cells and two-row one-column contrasts, outer for other
+#'   combination targets, 6a Lemma 2.1(c)); \code{ci_actual} is intersected with them as
+#'   before. Under \code{target = "actual"} the printed \code{duncan_davis} column shows the
+#'   exact range.
 #' @references Jiang, W., King, G., Schmaltz, A. and Tanner, M. A. (2019).
 #'   Ecological Regression with Partial Identification. Political Analysis.
 #' @examples
@@ -234,8 +263,10 @@ eiBounds <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL,
                      jkst_x = seq(0, 2, by = 0.25), eta = 0, ndraw = 100, nz_draw = 4000,
                      seed = NULL, tests = TRUE, range_offset = 0,
                      mismatch = c("error", "rescale"), union = c("pieces", "hull"),
-                     diagnostics = NULL, base = NULL) {
+                     diagnostics = NULL, base = NULL, target = c("actual", "model"),
+                     counts = NULL, integer = c("auto", "lp", "exact"), time_limit = 10) {
   cl <- match.call()
+  target <- match.arg(target); integer <- match.arg(integer)
   union <- match.arg(union)
   model <- match.arg(model); range <- match.arg(range); weights <- match.arg(weights)
   vcov <- match.arg(vcov); ci <- match.arg(ci); fpc <- match.arg(fpc); mismatch <- match.arg(mismatch)
@@ -248,6 +279,10 @@ eiBounds <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL,
     if (is.null(row_constant)) stop("model \"L4\" needs 'row_constant'")
     L4row <- .rxc_index(row_constant, rl)
   }
+  # one vocabulary (contract C9): assoc / cr with object = "actual" are realised beliefs and go to
+  # the count layer; object = "model" (default) restricts the model's coefficients
+  sp <- .rxc_split_object(restrictions, counts)
+  restrictions <- sp$model; counts <- sp$counts
   extra <- .rxc_restrictions(restrictions, rl, cll, grp_levels)
   st <- .rxc_setup(dat$X, dat$T, dat$N, dat$group, model = model, delta = delta, L4row = L4row,
                    range = range, trim = trim, extrapolate = extrapolate,
@@ -361,7 +396,62 @@ eiBounds <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL,
       out$notes <- c(out$notes, if (any(b$empty)) "the rung alone also has an empty estimate" else
         paste0("the rung alone (", model, ") has a non-empty estimate (base_* columns)"))
   }
+  # the count layer (decisions D1/D2; 6a contract C1): margins-only (Duncan-Davis, exact LP) and
+  # the count rows, computed last so that nothing above changes; its cross-layer block saves and
+  # restores the random-number stream
+  out$target <- target
+  out$zdraws <- est$zdraws           # reused by the cross-layer block (code review issue 10)
+  # the count block never stops eiBounds (code review issue 3): on failure, warn and keep the model
+  out$counts <- tryCatch(.rxc_count_block(out, dat, counts, integer, target, parent.frame(), time_limit),
+                         error = function(e) {
+                           warning("the count layer could not be computed: ", conditionMessage(e), call. = FALSE)
+                           NULL })
+  if (!is.null(out$counts) && nrow(out$counts$table) == nrow(out$table)) {
+    out$table$dd_exact_lower <- out$counts$table$dd_lower
+    out$table$dd_exact_upper <- out$counts$table$dd_upper
+  }
   out
+}
+
+# split eiBounds restrictions by their object tag (contract C9)
+.rxc_split_object <- function(restrictions, counts) {
+  if (is.null(restrictions)) return(list(model = NULL, counts = counts))
+  model <- restrictions
+  for (nm in intersect(names(restrictions), c("assoc", "cr"))) {
+    keep <- list()
+    for (s in restrictions[[nm]]) {
+      obj <- if (is.null(s$object)) "model" else as.character(s$object)
+      if (length(obj) != 1 || !obj %in% c("actual", "model"))
+        stop("restriction '", nm, "': object must be \"actual\" (the realised table, count layer) or \"model\" ",
+             "(the model's coefficients); the same restriction may not be imposed under one label in both layers. ",
+             "Realised and model beliefs are two assumptions: give them as two restrictions")
+      if (obj == "actual") {
+        cnm <- if (nm == "assoc") "sign" else "cr"
+        counts[[cnm]] <- c(if (is.null(counts[[cnm]])) list() else
+          if (all(vapply(counts[[cnm]], is.list, TRUE))) counts[[cnm]] else list(counts[[cnm]]), list(s))
+      } else keep[[length(keep) + 1]] <- s
+    }
+    model[[nm]] <- if (length(keep)) keep else NULL
+  }
+  if (!length(model)) model <- NULL
+  list(model = model, counts = counts)
+}
+
+.rxc_count_block <- function(fit, dat, counts, integer, target, env, time_limit = 10) {
+  P <- .ec_problem(dat$counts$A, dat$counts$B, fit$rows, fit$cols, dat$counts$units,
+                   dat$counts$integer, data = dat$counts$data)
+  cf <- .ec_fit(P, fit$targets, counts, integer, binding = length(counts) > 0 && P$p <= 200, env, time_limit)
+  cnt <- structure(c(list(call = NULL, P = P, integer = integer, margins_integer = P$integer,
+                          shares_input = !dat$counts$integer), cf), class = "eiCounts")
+  why <- if (target != "actual" && !length(counts)) "target = \"model\"" else
+    if (identical(fit$ci, "none")) "ci = \"none\"" else
+      if (any(!fit$setup$keep)) "units trimmed (range = \"trim\")" else
+        if (isTRUE(fit$eta > 0)) "eta > 0" else NULL
+  if (is.null(why))
+    cnt$cross <- tryCatch(.ec_cross_layer(cnt, fit, "popoviciu"), error = function(e) {
+      cnt$cross_absent <<- conditionMessage(e); NULL })
+  else cnt$cross_absent <- why
+  cnt
 }
 
 .rxc_model_label <- function(model, delta = 0, row = NULL) {
@@ -397,6 +487,26 @@ eiBounds <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL,
 
 #' @export
 print.eiRxC <- function(x, digits = 3, ...) {
+  cnt <- x$counts
+  actual <- !identical(x$target, "model") && !is.null(cnt)
+  if (actual) {
+    # decision D1: the actual-rate block first, Duncan-Davis (margins only, exact LP) first
+    cat("Actual (realised) rates in these units: the count layer (eiCounts)\n")
+    .ec_print_block(cnt, digits, header = FALSE)
+    .ec_print_cross(cnt[["cross"]], digits)
+    if (!is.null(cnt$cross_absent)) cat("  Cross-layer block not computed:", cnt$cross_absent, "\n")
+    cat("\n")
+  }
+  .rxc_print_model(x, digits, dd_exact = actual)
+  if (!actual && !is.null(cnt) && !is.null(cnt$restrictions)) {
+    cat("\nActual (realised) rates in these units: the count layer (eiCounts)\n")
+    .ec_print_block(cnt, digits, header = FALSE)
+    .ec_print_cross(cnt[["cross"]], digits)
+  }
+  invisible(x)
+}
+
+.rxc_print_model <- function(x, digits = 3, dd_exact = FALSE) {
   cat("R x C ecological inference bounds\n")
   cat("Model: ", .rxc_model_label(x$model, x$delta, if (!is.null(x$setup$L4row)) x$rows[x$setup$L4row]), "\n", sep = "")
   cat(sprintf("Units: %d (%d used in the model)%s; variance: %s; %g%% intervals (%s)\n",
@@ -421,7 +531,8 @@ print.eiRxC <- function(x, digits = 3, ...) {
   out <- data.frame(target = tb$target,
                     estimate = ifelse(tb$empty, "empty", g("estimate")),
                     ci_model = g("ci_model"), ci_actual = g("ci_actual"),
-                    duncan_davis = f(tb$dd_lower, tb$dd_upper), stringsAsFactors = FALSE)
+                    duncan_davis = if (dd_exact && !is.null(tb$dd_exact_lower)) f(tb$dd_exact_lower, tb$dd_exact_upper) else
+                      f(tb$dd_lower, tb$dd_upper), stringsAsFactors = FALSE)
   has_proj <- "proj_model_lower" %in% names(tb) && any(!is.na(tb$proj_model_lower)) && identical(x$ci, "clr")
   if (has_proj) {
     out$proj_model <- f(tb$proj_model_lower, tb$proj_model_upper)
@@ -478,7 +589,10 @@ print.eiRxC <- function(x, digits = 3, ...) {
   }
   st_line <- .rxc_ci_status(x)
   if (!is.null(st_line)) cat("  status:    ", st_line, "\n", sep = "")
-  cat("  duncan_davis: model-free bounds for the actual rate\n")
+  cat("  duncan_davis: model-free bounds for the actual rate",
+      if (dd_exact) paste0("\n             (the exact margins-only LP, as in the count layer above; fit$table$dd_lower/",
+                           "dd_upper keep\n             cellwise interval arithmetic, outer for combination targets)") else "",
+      "\n", sep = "")
   if (!is.null(x$tests)) {
     if (isTRUE(x$tests$empty_rejected)) cat("\n  Emptiness test: the model is REJECTED at level", x$alpha, "\n")
     if (!is.null(x$tests$m1) && !is.na(x$tests$m1$p.value))

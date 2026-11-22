@@ -282,10 +282,20 @@
   DS <- if (length(cons$disj)) do.call(rbind, lapply(cons$disj, function(d) d$S)) else NULL
   Gall <- rbind(cons$S, DS, tg$cvec)
   se <- sqrt(pmax(rowSums((Gall %*% Zs$V) * Gall), 0))
-  W <- (Zs$draws %*% t(Gall)) / matrix(pmax(se, 1e-300), nrow(Zs$draws), length(se), byrow = TRUE)
-  W[, se == 0] <- 0
-  last <- ncol(W); W[, last] <- abs(W[, last])
-  k <- stats::quantile(apply(W, 1, max), 1 - alpha, names = FALSE)
+  # P3.5(a)'s studentised maximum is taken over the beta-dependent terms only (proof review,
+  # round 3, nit a): a term with zero standard error (e.g. the reference district's delta rows
+  # under M1(delta)) does not depend on beta, is held exactly (inflation k * 0) and must not
+  # enter the maximum as a constant 0. With no beta-dependent term, k = 0.
+  last <- length(se)
+  live <- se > 1e-12 * max(se, 0)
+  if (!any(live)) {
+    k <- 0
+  } else {
+    W <- (Zs$draws %*% t(Gall[live, , drop = FALSE])) /
+      matrix(se[live], nrow(Zs$draws), sum(live), byrow = TRUE)
+    if (live[last]) W[, ncol(W)] <- abs(W[, ncol(W)])
+    k <- stats::quantile(apply(W, 1, max), 1 - alpha, names = FALSE)
+  }
   ns <- nrow(cons$S)
   cons2 <- cons; cons2$s0 <- cons$s0 + k * se[seq_len(ns)]
   if (length(cons$disj)) {
@@ -532,7 +542,7 @@
     out[[nm]] <- as.data.frame(row, stringsAsFactors = FALSE)
   }
   res <- do.call(rbind, out); rownames(res) <- NULL
-  list(table = res, jkst = if (jkst) jk else NULL, cons = cons, pieces = pieces,
+  list(table = res, jkst = if (jkst) jk else NULL, cons = cons, pieces = pieces, zdraws = Zs,
        slack = if (point) NA_real_ else .rxc_slack(base, st$beta), proj_dropped = proj_dropped,
        bd_boundary = bd_boundary, v_rank = .rxc_vrank(st$V), p = ncol(st$V))
 }

@@ -37,7 +37,11 @@ eiBounds(
   mismatch = c("error", "rescale"),
   union = c("pieces", "hull"),
   diagnostics = NULL,
-  base = NULL
+  base = NULL,
+  target = c("actual", "model"),
+  counts = NULL,
+  integer = c("auto", "lp", "exact"),
+  time_limit = 10
 )
 }
 \arguments{
@@ -142,9 +146,34 @@ the \emph{widest} excluded gap in \code{*_gap_lower}/\code{*_gap_upper};
 \item{base}{also fit the rung alone (without the optional restrictions) and
 report its estimate and CIs in the \code{base_*} columns, printed beside
 the restricted result (default: when restrictions are given).}
+
+\item{target}{\code{"actual"} (default; decisions D1/D2 of the build plan) prints the
+actual-rate block of the count layer (\code{\link{eiCounts}}) first, with the margins-only
+(Duncan-Davis, exact LP) line first, then its cross-layer block (R27) and then the model
+table; \code{"model"} restores the old print order and skips the cross-layer block (the
+count block is still stored in \code{$counts}, and printed after the model table when
+count rows are given). The model results are the same under both.}
+
+\item{counts}{optional count restrictions for the embedded count layer, as in
+\code{eiCounts(restrictions = )}. \code{assoc} and \code{cr} restrictions with
+\code{object = "actual"} in \code{restrictions} are moved here (one vocabulary,
+6a contract C9); \code{object = c("actual", "model")} is refused.}
+
+\item{integer}{integer mode of the count layer (\code{"auto"}, \code{"lp"},
+\code{"exact"}; see \code{\link{eiCounts}}).}
+
+\item{time_limit}{seconds per integer program in the count layer (see \code{\link{eiCounts}}).
+If the count layer fails, \code{eiBounds()} warns and returns the model results without it.}
 }
 \value{
-an object of class \code{"eiRxC"}.
+an object of class \code{"eiRxC"}. \code{$counts} holds the count layer (an
+  \code{eiCounts} object; see \code{\link{witness}}). \code{$table} has
+  \code{dd_exact_lower}/\code{dd_exact_upper}: the exact margins-only range (an LP).
+  \code{dd_lower}/\code{dd_upper} keep the cellwise interval arithmetic of earlier
+  versions (equal for single cells and two-row one-column contrasts, outer for other
+  combination targets, 6a Lemma 2.1(c)); \code{ci_actual} is intersected with them as
+  before. Under \code{target = "actual"} the printed \code{duncan_davis} column shows the
+  exact range.
 }
 \description{
 \code{eiBounds()} computes partial-identification bounds and confidence

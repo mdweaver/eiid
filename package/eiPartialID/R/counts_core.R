@@ -759,6 +759,9 @@
 # integer objective: list(c = double integer vector, ok) or NULL when not scalable. The cap keeps
 # GLPK's tolerances far below the unit gap of the certificate cut c'n >= v* + 1 (round-2 review)
 .ec_obj_cap <- 1e7
+# ... and the range sum_k |c_k| u_k (u_k = min(a_ir, b_ic)) of the scaled objective over the
+# component is at most 1e12, so that every objective value is an exact double
+.ec_obj_range_cap <- 1e12
 .ec_int_obj <- function(cq) {
   nz <- which(as.double(cq) != 0)
   if (!length(nz)) return(list(c = rep(0, length(cq)), ok = TRUE))
@@ -770,12 +773,12 @@
   list(c = ci, ok = TRUE)
 }
 
-.ec_glpk <- function(nv, obj, trip, dir, rhs, sense, time_limit) {
+.ec_glpk <- function(nv, obj, trip, dir, rhs, sense, time_limit, bounds = NULL) {
   m <- slam::simple_triplet_matrix(as.integer(trip[, 1]), as.integer(trip[, 2]), as.double(trip[, 3]),
                                    nrow = max(trip[, 1]), ncol = nv)
   dir2 <- dir; dir2[dir2 == "="] <- "=="
   t0 <- proc.time()[["elapsed"]]
-  s <- Rglpk::Rglpk_solve_LP(obj, m, dir2, rhs, types = rep("I", nv), max = sense > 0,
+  s <- Rglpk::Rglpk_solve_LP(obj, m, dir2, rhs, bounds = bounds, types = rep("I", nv), max = sense > 0,
                              control = list(canonicalize_status = FALSE, tm_limit = as.integer(1000 * time_limit),
                                             presolve = TRUE))
   list(status = s$status, x = s$solution, elapsed = proc.time()[["elapsed"]] - t0)
@@ -812,6 +815,9 @@
   io <- .ec_int_obj(cq)
   if (is.null(io)) return(list(status = "unresolved", reason = "objective coefficients exceed 1e7 after scaling to integers"))
   cc <- io$c
+  ub <- as.vector(vapply(units, function(u) as.vector(t(outer(P$A[u, ], P$B[u, ], pmin))), numeric(RC)))
+  if (sum(abs(cc) * ub) > .ec_obj_range_cap)
+    return(list(status = "unresolved", reason = "objective range above 1e12 after scaling to integers"))
   exact_ok <- function(xl) {
     x <- numeric(P$nv); x[ks] <- xl
     if (any(xl < 0)) return(FALSE)
@@ -832,7 +838,11 @@
     list(status = "unresolved", reason = "time limit")
   }
   if (s$status != 5) return(infeasible_or_unresolved(s))
-  for (it in 1:5) {
+  # improve-and-certify until the certificate holds, within a budget of 3 * time_limit for
+  # this endpoint (GLPK can report OPT for a table that a c'n >= v + 1 cut then improves on)
+  t_end <- proc.time()[["elapsed"]] + 3 * time_limit; it <- 0
+  repeat {
+    if (proc.time()[["elapsed"]] > t_end) return(list(status = "unresolved", reason = "time limit (certificate)"))
     if (max(abs(s$x - round(s$x))) > 1e-6) return(list(status = "unresolved", reason = "non-integral solver output"))
     xl <- round(s$x)
     if (!exact_ok(xl)) return(list(status = "unresolved", reason = "solver tolerance (solution fails the exact check)"))
@@ -840,17 +850,32 @@
     # a zero objective on this component (rows but no target cells): any exactly checked
     # feasible table is optimal; no certificate is needed (round-2 review, R2-1)
     if (all(cc == 0)) { x <- numeric(P$nv); x[ks] <- xl; return(list(status = "optimal", x = x)) }
-    # certificate: no integer table of the (relaxed) system improves on v
-    t2 <- rbind(trip, cbind(max(trip[, 1]) + 1, seq_along(ks), sense * cc)[cc != 0, , drop = FALSE])
-    s2 <- .ec_glpk(length(ks), cc, t2, c(dir, ">="), c(rhs, sense * v + 1), sense, time_limit)
-    if (s2$status == 4 || (s2$status == 1 && lp_infeasible(t2, c(dir, ">="), c(rhs, sense * v + 1)))) {
+    # certificate: no integer table of the (relaxed) system improves on v. It is solved in the
+    # shifted variables d = n - xl (integers, d >= -xl): every row keeps its coefficients with
+    # right-hand side shifted by its activity at xl, the cut reads sense * c'd >= 1 and the
+    # objective values near the optimum are O(1). GLPK's relative tolerances (1e-7) are then far
+    # below the unit gap of the cut, whatever the size of v. A point returned by the cut solve
+    # must improve on v exactly (strict progress); otherwise the endpoint is unresolved.
+    act <- as.vector(tapply(trip[, 3] * xl[trip[, 2]], factor(trip[, 1], levels = seq_len(max(trip[, 1]))), sum))
+    act[is.na(act)] <- 0
+    jr <- max(trip[, 1]) + 1
+    t2 <- rbind(trip, cbind(jr, seq_along(ks), sense * cc)[cc != 0, , drop = FALSE])
+    rhs2 <- c(rhs - act, 1)
+    lb <- list(lower = list(ind = seq_along(ks), val = -xl))
+    s2 <- .ec_glpk(length(ks), cc, t2, c(dir, ">="), rhs2, sense, time_limit, bounds = lb)
+    if (s2$status == 4 || (s2$status == 1 &&
+                           lp_infeasible(t2, c(dir, ">="), c(rhs, sense * v + 1)))) {
       x <- numeric(P$nv); x[ks] <- xl
       return(list(status = "optimal", x = x))
     }
     if (s2$status != 5) return(list(status = "unresolved", reason = "time limit (certificate)"))
-    s <- s2                                   # a better integer table: continue from it
+    x2 <- xl + s2$x
+    if (max(abs(x2 - round(x2))) > 1e-6 || sense * sum(cc * round(x2)) < sense * v + 1 || !exact_ok(round(x2)))
+      return(list(status = "unresolved", reason = "solver tolerance (certificate)"))
+    it <- it + 1
+    if (it > 50) return(list(status = "unresolved", reason = "certificate not reached"))
+    s <- list(status = 5, x = round(x2))      # a strictly better integer table: continue from it
   }
-  list(status = "unresolved", reason = "certificate not reached")
 }
 
 # the MILP for a whole system, unit by unit when separable

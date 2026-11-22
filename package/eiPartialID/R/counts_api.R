@@ -566,11 +566,13 @@ combo <- function(..., weights, label = NULL) {
 #' crossing families) each endpoint is a mixed-integer program ("integer-exact (MILP)"),
 #' solved by GLPK (package \pkg{Rglpk}) with a time limit per program
 #' (\code{time_limit}), the objective scaled to coprime integers from the exact weights, an
-#' exact check of the solution, and a certificate of optimality (a second program with
-#' \eqn{c'n \ge v^* + 1} must be infeasible). The scaled integer objective coefficients must
-#' not exceed \eqn{10^7} in absolute value, so that GLPK's tolerances stay far below the unit
-#' gap of that cut; above the cap the endpoint is reported as unresolved. On timeout, above the
-#' cap, or when the certificate cannot be completed, the endpoint is the LP over the rounded rows, an outer
+#' exact check of the solution, and a certificate of optimality: a second program with
+#' \eqn{c'n \ge v^* + 1} must be infeasible. The certificate is solved in the shifted variables
+#' \eqn{d = n - n^*}, so the cut reads \eqn{c'd \ge 1} and GLPK's relative tolerances stay far
+#' below its unit gap; a table it returns must improve on \eqn{v^*} exactly. The scaled integer
+#' objective coefficients must not exceed \eqn{10^7} in absolute value (and the objective range
+#' \eqn{10^{12}}, so values are exact doubles); above the cap the endpoint is reported as
+#' unresolved. On timeout, above the cap, or when the certificate cannot be completed, the endpoint is the LP over the rounded rows, an outer
 #' bound, with the status "integer status unresolved (...): LP outer bound"; it is never
 #' labelled integer-exact. The rows are rounded, never the endpoints (check T5). Doubles typed
 #' by the user (bounds, coefficients, slack, \code{psi}) are rationalised: a fraction with

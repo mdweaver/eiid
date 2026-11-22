@@ -79,7 +79,10 @@ Build step 1 (M-COUNT): the count layer. Theory: `docs/extension/PHASE6a_count_l
     with binding before, 7.5 s by default and 73 s with `binding = TRUE` now).
 * Code review, round 2: a connected component with rows but no target cells no longer crashes
   the MILP certificate (R2-1; any exactly checked feasible table is optimal there); the
-  integer objective is capped at 1e7 after scaling (above it: "unresolved"); `Rglpk` and
+  integer objective coefficients are capped at 1e7 after scaling (above it: "unresolved");
+  the certificate c'n >= v* + 1 is solved in the shifted variables d = n - n* (cut c'd >= 1),
+  so GLPK's relative tolerances stay far below its unit gap, and a returned table must
+  improve exactly (strict progress); `Rglpk` and
   `slam` moved to Imports, so the integer check works out of the box.
 * P3.5(a) conservative interval (proof review round 3, nit a): the studentised maximum is
   taken over the beta-dependent terms only; terms with zero standard error (e.g. the

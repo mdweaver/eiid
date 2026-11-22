@@ -301,3 +301,25 @@ Nothing else new. I also rechecked these wording changes and found them correct:
 
 * **R27: yes.** All issues assigned to it (2, 3, 4, 10, 11) are resolved, and the restated union bounds and Lemma 4.1(b) are correct. Its status remains inherited from the model interval (the §4.3 table). (iii-b) remains a computed example, not P.
 * **R19: yes, once the one-phrase fix N1 is made in Prop. C2(b) and its proof step 3.** The fix is textual and needs no further proof review; the coordinator can confirm it by reading the two sentences. Every other R19 issue (1, 5's main sentence, 6, 7, 8, 9, 12–15) is resolved.
+
+---
+
+## 8. Round 3: the added §4.3 status rows (6a at `claude/mcount-theory` bbf8cf46)
+
+*I merged bbf8cf46 into this branch as a fast-forward. It also carries 6e0a684, the round-2 fix N1, which I checked: C2(b) and its proof step 3 now say "when every unit row (box, known cell, total) has an integer right-hand side", exactly as asked. `verify_phase6a.py` is unchanged since ed709f11 (36/36). I checked the five new §4.3 rows and the R27 register row against 2b (Thm 2, D6, D7), P3 (§0.5 table, Thm P3.5(a), Prop. P3.5(b2)(ii), Thm P3.8) and PHASE5a.*
+
+| New row | Verdict | Reasoning checked |
+|---|---|---|
+| L6, and L5 with one group (point-identified) | **correct** | $\tilde B_{rc}=\sum_iw_{ir}\alpha_{c,r}$ is one linear functional of the no-intercept Goodman regression, which has fixed dimension $R(C-1)$ (2b D7(a); with one group L5 is L6). With an empty constraint system, P3.5(a)'s event $\mathcal E$ consists of the two-sided constant term alone. So $\hat k=z_{1-\alpha_{\rm est}/2}$, and steps 4–7 add $S_\varphi$; P3.8 with $t_E(\varphi)$ works the same way. There are no districts, so the regime does not matter. The model is P3-S1a with $m$ constant. |
+| L5 with several groups | **correct, and correctly restricted to R1** | $\dim\beta=D^\star R(C-1)$ grows with the number of groups. P3.5(a) step 1 needs a fixed-dimension asymptotically normal $\hat\beta$, which holds in R1 only. In R2 each group's regression rests on a bounded number of units, so neither consistency nor HC3 variance estimation is available. The row's "R2: simulation finding only" matches P3 §0.5 for asymptotic intervals. P3.8 still gives a finite-sample guarantee in R2 (wide); see nit (b). |
+| pooled L4 | **correct, including the near-zero-width case** | 2b D7(b): $K_{c,rs}=Q_{c,rr}-Q_{c,rs}$ is affine in $\beta$ with fixed coefficients on $k$, so each equality becomes two rows $\pm(s(\beta)+Ak)\ge0$, as with R10's equalities. P3.5(a)'s proof needs only $k_0\in\hat\Theta^+$ on $\mathcal E$ (step 2). It does not need Slater or an interior point, so it holds when $\Theta$ is a single point (2×2, where L4 pins every coordinate). Since $\mathcal E$ contains both one-sided terms of each equality, the equality is in effect controlled two-sided. (b2)(ii) is one simultaneous event for all functionals. P3 §5's "width near zero" caveat applies to per-endpoint one-sided (CLR-type) intervals, not to these. The rung is pooled and fixed-dimensional, so it holds in any regime. |
+| pooled M1(δ), one group | **correct** | The rows are $\lVert k^{(d)}-\bar k-c_d\rVert_\infty\le\delta$ with $\bar k$ free (2b §1 table; D6(d)). With one group, $c_1=0$ ($\zeta_{c,1}=0$) and $\bar k$ absorbs $k^{(1)}$, so the restriction is vacuous and the rung is M0. |
+| grouped L4, M1(δ) without sign rows | **correct, R1 only** | The constraints stay of P3.5(a)'s form: $c_d$ are coordinates of $\operatorname{skew}(\zeta_{\cdot,d}\mathbf 1^\top)$ with $\zeta_{c,d}=\operatorname{diag}(Q^{(d)}_c-Q^{(1)}_c)$, affine in $\beta$. δ enters only as a constant. The dimension is fixed only with fixed groups, which matches P3's table for M1/M2 and 2c M5's scope sentence. Grouped rungs **with** sign rows remain "no theorem" (R16), and that row is unchanged. |
+
+**R27 register row:** consistent with the table. It lists pooled M0, L4 and M1(δ) in any regime; M1/M2 and grouped L4/M1(δ) in R1; L6 and one-group L5 in any regime; multi-group L5 in R1; P3.8 finite-sample; CLR algorithmic; grouped rungs with signs none.
+
+**Nits (wording; neither blocks):**
+* (a) Some constraint terms do not depend on $\beta$, for example the δ-rows of the reference district, where $c_1=0$. Their $\hat\sigma=0$, and P3.5(a)'s max of standardised terms should be taken over the $\beta$-dependent terms only, with the rest held exactly. The proof is unaffected because these rows have no estimation error. (b2)(ii) handles this automatically. A one-line note under the table, or in the code contract, would prevent a division by zero.
+* (b) The rows "L5 with several groups" and "grouped L4, M1(δ)" could add "R2: P3.8 (finite sample, wide)", so that "simulation finding only" is not read as "nothing proved in R2". The P3.8 row already covers it.
+
+**Verdict: the five rows and the R27 register update are correct. The L4 near-zero-width case is covered, and multi-group L5 is correctly restricted to R1. R27 keeps "proof reviewed".**

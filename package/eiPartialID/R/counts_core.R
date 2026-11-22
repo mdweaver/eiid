@@ -638,3 +638,152 @@
   }
   .ec_margins_ok(P, x, FALSE) && all(vapply(rows, function(rw) .ec_row_ok(rw, x, P, FALSE), TRUE))
 }
+
+# ---------------------------------------------------------------------------
+# certified MILP (code review issues 1 and 16)
+# ---------------------------------------------------------------------------
+# GLPK (package Rglpk, Suggests) with a time limit per integer program. The objective is scaled
+# to coprime integers from the exact weights; every solution is rounded only if it is integral
+# to 1e-6, then checked exactly against the margins and every original row; optimality is
+# certified by a second solve with c'n >= v* + 1 (maximisation), which must be infeasible.
+# Rows that could not be scaled to integers are passed normalised, with their bounds relaxed
+# outward, so the solver works on a superset of the integer set: an exactly feasible optimum of
+# the superset is optimal, and an infeasible superset proves infeasibility.
+# Returns list(status = "optimal" / "infeasible" / "unresolved", x, reason).
+
+.ec_have_glpk <- function() requireNamespace("Rglpk", quietly = TRUE) && requireNamespace("slam", quietly = TRUE)
+
+# exact objective coefficients (bigq) for the variables ks
+.ec_objq <- function(P, tg, ks) {
+  out <- gmp::as.bigq(rep(0, length(ks)))
+  pos <- integer(P$nv); pos[ks] <- seq_along(ks)
+  for (tm in tg$terms) {
+    kk <- as.vector(outer(outer((tm$units - 1L) * P$R * P$C, (tm$rows - 1L) * P$C, "+"), tm$cols, "+"))
+    kk <- kk[pos[kk] > 0]
+    if (length(kk)) out[pos[kk]] <- out[pos[kk]] + (if (.ec_is_q(tm$w)) tm$w else gmp::as.bigq(tm$w))
+  }
+  out
+}
+
+# integer objective: list(c = double integer vector, ok) or NULL when not scalable
+.ec_int_obj <- function(cq) {
+  nz <- which(as.double(cq) != 0)
+  if (!length(nz)) return(list(c = rep(0, length(cq)), ok = TRUE))
+  den <- gmp::denominator(cq[nz]); num <- abs(gmp::numerator(cq[nz]))
+  l <- den[1]; if (length(den) > 1) for (j in 2:length(den)) l <- gmp::lcm.bigz(l, den[j])
+  g <- num[1]; if (length(num) > 1) for (j in 2:length(num)) g <- gmp::gcd(g, num[j])
+  ci <- as.double(cq * (gmp::as.bigq(l) / gmp::as.bigq(g)))
+  if (max(abs(ci)) > 1e9) return(NULL)
+  list(c = ci, ok = TRUE)
+}
+
+.ec_glpk <- function(nv, obj, trip, dir, rhs, sense, time_limit) {
+  m <- slam::simple_triplet_matrix(as.integer(trip[, 1]), as.integer(trip[, 2]), as.double(trip[, 3]),
+                                   nrow = max(trip[, 1]), ncol = nv)
+  dir2 <- dir; dir2[dir2 == "="] <- "=="
+  t0 <- proc.time()[["elapsed"]]
+  s <- Rglpk::Rglpk_solve_LP(obj, m, dir2, rhs, types = rep("I", nv), max = sense > 0,
+                             control = list(canonicalize_status = FALSE, tm_limit = as.integer(1000 * time_limit),
+                                            presolve = TRUE))
+  list(status = s$status, x = s$solution, elapsed = proc.time()[["elapsed"]] - t0)
+}
+
+# MILP rows: rounded rows as integers; unrounded rows normalised and relaxed outward
+.ec_milp_trip <- function(rows, start, map = NULL) {
+  trip <- list(); dir <- character(0); rhs <- numeric(0); j <- start
+  for (rw in rows) {
+    idx <- if (is.null(map)) rw$idx else map[rw$idx]
+    if (isTRUE(rw$rounded)) { cf <- rw$coef_rd; lo <- rw$lo_rd; hi <- rw$hi_rd } else {
+      sc <- max(abs(rw$coef)); if (sc == 0) next
+      cf <- rw$coef / sc; lo <- rw$lo / sc; hi <- rw$hi / sc
+      d <- 1e-6 * max(1, abs(c(lo, hi)[is.finite(c(lo, hi))]))
+      lo <- lo - d; hi <- hi + d
+    }
+    if (is.finite(lo) && is.finite(hi) && lo == hi) {
+      j <- j + 1; trip[[length(trip) + 1]] <- cbind(j, idx, cf); dir <- c(dir, "="); rhs <- c(rhs, lo); next
+    }
+    if (is.finite(lo)) { j <- j + 1; trip[[length(trip) + 1]] <- cbind(j, idx, cf); dir <- c(dir, ">="); rhs <- c(rhs, lo) }
+    if (is.finite(hi)) { j <- j + 1; trip[[length(trip) + 1]] <- cbind(j, idx, cf); dir <- c(dir, "<="); rhs <- c(rhs, hi) }
+  }
+  list(trip = if (length(trip)) do.call(rbind, trip) else NULL, dir = dir, rhs = rhs, n = j)
+}
+
+# one (sub)problem: variables ks (global indices), its rows, margins of its units
+.ec_milp_sub <- function(P, units, rows, cq, sense, time_limit) {
+  RC <- P$R * P$C
+  ks <- as.vector(outer(seq_len(RC), (units - 1L) * RC, "+"))
+  map <- integer(P$nv); map[ks] <- seq_along(ks)
+  m <- .ec_margin_trip(P, units, local = TRUE)
+  ex <- .ec_milp_trip(rows, m$n, map)
+  trip <- rbind(m$trip, ex$trip); dir <- c(rep("=", m$n), ex$dir); rhs <- c(m$rhs, ex$rhs)
+  io <- .ec_int_obj(cq)
+  if (is.null(io)) return(list(status = "unresolved", reason = "objective not scalable to moderate integers"))
+  cc <- io$c
+  exact_ok <- function(xl) {
+    x <- numeric(P$nv); x[ks] <- xl
+    if (any(xl < 0)) return(FALSE)
+    for (u in units) {
+      kk <- (u - 1L) * RC + seq_len(RC); n <- matrix(x[kk], P$R, P$C, byrow = TRUE)
+      if (any(rowSums(n) != P$A[u, ]) || any(colSums(n) != P$B[u, ])) return(FALSE)
+    }
+    all(vapply(rows, function(rw) .ec_row_ok(rw, x, P, TRUE), TRUE))
+  }
+  s <- .ec_glpk(length(ks), cc, trip, dir, rhs, sense, time_limit)
+  # GLPK status 1 ("undefined"): no integer solution found; proven infeasible only if the LP
+  # relaxation of the same system is infeasible (checked with lpSolve)
+  lp_infeasible <- function(trip, dir, rhs)
+    !.ec_lp_call(length(ks), rep(0, length(ks)), trip, dir, rhs, 1, FALSE)$ok
+  infeasible_or_unresolved <- function(s) {
+    if (s$status == 4) return(list(status = "infeasible"))
+    if (s$status == 1 && lp_infeasible(trip, dir, rhs)) return(list(status = "infeasible"))
+    list(status = "unresolved", reason = "time limit")
+  }
+  if (s$status != 5) return(infeasible_or_unresolved(s))
+  for (it in 1:5) {
+    if (max(abs(s$x - round(s$x))) > 1e-6) return(list(status = "unresolved", reason = "non-integral solver output"))
+    xl <- round(s$x)
+    if (!exact_ok(xl)) return(list(status = "unresolved", reason = "solver tolerance (solution fails the exact check)"))
+    v <- sum(cc * xl)
+    # certificate: no integer table of the (relaxed) system improves on v
+    t2 <- rbind(trip, cbind(max(trip[, 1]) + 1, seq_along(ks), sense * cc)[cc != 0, , drop = FALSE])
+    s2 <- .ec_glpk(length(ks), cc, t2, c(dir, ">="), c(rhs, sense * v + 1), sense, time_limit)
+    if (s2$status == 4 || (s2$status == 1 && lp_infeasible(t2, c(dir, ">="), c(rhs, sense * v + 1)))) {
+      x <- numeric(P$nv); x[ks] <- xl
+      return(list(status = "optimal", x = x))
+    }
+    if (s2$status != 5) return(list(status = "unresolved", reason = "time limit (certificate)"))
+    s <- s2                                   # a better integer table: continue from it
+  }
+  list(status = "unresolved", reason = "certificate not reached")
+}
+
+# the MILP for a whole system, unit by unit when separable
+.ec_milp <- function(P, rows, tg, sense, time_limit) {
+  if (!.ec_have_glpk()) return(list(status = "unresolved", reason = "no MILP solver (install package Rglpk)"))
+  RC <- P$R * P$C
+  ru <- vapply(rows, function(rw) { u <- unique(.ec_unit_of(P, rw$idx)); if (length(u) == 1) u else 0L }, 0L)
+  # connected components of the unit-coupling graph
+  comp <- seq_len(P$p)
+  find <- function(i) { while (comp[i] != i) i <- comp[i]; i }
+  for (rw in rows) {
+    u <- unique(.ec_unit_of(P, rw$idx))
+    if (length(u) > 1) { r0 <- find(u[1]); for (v in u[-1]) { rv <- find(v); if (rv != r0) comp[rv] <- r0 } }
+  }
+  comp <- vapply(seq_len(P$p), find, 0L)
+  x <- numeric(P$nv)
+  rcomp <- vapply(rows, function(rw) comp[.ec_unit_of(P, rw$idx[1])], 0L)
+  for (cg in unique(comp)) {
+    units <- which(comp == cg)
+    ks <- as.vector(outer(seq_len(RC), (units - 1L) * RC, "+"))
+    rr <- rows[rcomp == cg]
+    cq <- .ec_objq(P, tg, ks)
+    if (!length(rr) && all(as.double(cq) == 0)) {
+      for (u in units) x[(u - 1L) * RC + seq_len(RC)] <- as.vector(t(.ec_nw(P$A[u, ], P$B[u, ])))
+      next
+    }
+    s <- .ec_milp_sub(P, units, rr, cq, sense, time_limit)
+    if (s$status != "optimal") return(s)
+    x[ks] <- s$x[ks]
+  }
+  list(status = "optimal", x = x)
+}

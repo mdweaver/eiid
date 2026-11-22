@@ -292,29 +292,46 @@ combo <- function(..., weights, label = NULL) {
   cls <- .ec_classify(P, rows)
   out$class <- cls$class; out$class_reason <- cls$reason
   use_milp <- mode == "exact" || is.na(cls$class)
-  sol <- list(NULL, NULL)
-  for (j in 1:2) {
-    sense <- c(-1, 1)[j]
-    s <- if (!use_milp) .ec_optimise(P, rows, tg$obj, sense, rd = TRUE) else list(ok = FALSE)
-    x <- if (isTRUE(s$ok)) round(s$x) else NULL
-    if (!use_milp && isTRUE(s$ok) && !.ec_check(P, rows, x, TRUE)) { x <- NULL; out$fallback <- TRUE }
-    if (!use_milp && !isTRUE(s$ok)) x <- NULL
-    if (is.null(x) && (use_milp || out$fallback)) {
-      s <- .ec_optimise(P, rows, tg$obj, sense, rd = TRUE, int = TRUE)
-      out$milp <- TRUE
-      x <- if (isTRUE(s$ok)) round(s$x) else NULL
-      if (!is.null(x) && !.ec_check(P, rows, x, TRUE))
-        stop("internal: the MILP solution fails the exact row check (solver tolerance); please report")
-    }
-    sol[[j]] <- x
-  }
   if (mode == "exact" && !out$cont) {
     clo <- .ec_optimise(P, rows, tg$obj, -1)
     if (clo$ok) { chi <- .ec_optimise(P, rows, tg$obj, 1); out$cont <- TRUE
       out$lp <- c(.ec_value(P, tg, clo$x), .ec_value(P, tg, chi$x)) }
   }
-  out$milp <- use_milp || out$milp
-  if (is.null(sol[[1]]) || is.null(sol[[2]])) { out$int_ok <- FALSE; return(out) }
+  # the LP over the rounded rows: an outer bound for the integer values (R19(c) item 1), exact
+  # in the TU classes (R19(b)); infeasible => no integer table (F^Z is contained in F_rd)
+  rl <- list(.ec_optimise(P, rows, tg$obj, -1, rd = TRUE), .ec_optimise(P, rows, tg$obj, 1, rd = TRUE))
+  if (!isTRUE(rl[[1]]$ok) || !isTRUE(rl[[2]]$ok)) { out$int_ok <- FALSE; return(out) }
+  out$rd <- c(.ec_value(P, tg, rl[[1]]$x), .ec_value(P, tg, rl[[2]]$x))
+  sol <- list(NULL, NULL); unres <- character(0)
+  for (j in 1:2) {
+    sense <- c(-1, 1)[j]; x <- NULL
+    if (!use_milp) {
+      # accept the vertex only if it is integral (before rounding), passes the exact check and
+      # has the LP optimum's value (code review issue 6); otherwise fall back to the MILP
+      sx <- rl[[j]]$x
+      if (max(abs(sx - round(sx))) <= 1e-6) {
+        xr <- round(sx)
+        if (.ec_check(P, rows, xr, TRUE) &&
+            abs(sum(tg$obj * xr) - rl[[j]]$value) <= 1e-9 * max(1, abs(rl[[j]]$value))) x <- xr
+      }
+      if (is.null(x)) out$fallback <- TRUE
+    }
+    if (is.null(x)) {
+      out$milp <- TRUE
+      m <- .ec_milp(P, rows, tg, sense, P$time_limit)
+      if (m$status == "infeasible") { out$int_ok <- FALSE; return(out) }
+      if (m$status == "optimal") x <- m$x else { unres <- c(unres, m$reason); x <- NULL }
+    }
+    sol[[j]] <- x
+  }
+  if (length(unres)) {
+    # integer status unresolved: report the rounded-LP outer bound at the unresolved end(s)
+    out$unresolved <- paste(unique(unres), collapse = "; ")
+    out$int_ok <- NA
+    out$x <- lapply(1:2, function(j) if (is.null(sol[[j]])) rl[[j]]$x else sol[[j]])
+    out$iv <- vapply(1:2, function(j) .ec_value(P, tg, out$x[[j]]), 0)
+    return(out)
+  }
   out$int_ok <- TRUE
   out$iv <- c(.ec_value(P, tg, sol[[1]]), .ec_value(P, tg, sol[[2]]))
   out$x <- sol
@@ -349,14 +366,17 @@ combo <- function(..., weights, label = NULL) {
   }
   feas_c <- vapply(res, function(r) r$cont, TRUE)
   integer_mode <- P$integer && mode != "lp"
-  ok <- if (integer_mode) vapply(res, function(r) isTRUE(r$int_ok), TRUE) else feas_c
+  unres <- unique(unlist(lapply(res, function(r) r$unresolved)))
+  ok <- if (integer_mode) vapply(res, function(r) isTRUE(r$int_ok) || !is.null(r$unresolved), TRUE) else feas_c
   milp <- any(vapply(res, function(r) r$milp, TRUE))
   cls <- if (integer_mode && !milp) unique(stats::na.omit(vapply(res, function(r) r$class, "")))[1] else NA_character_
-  out <- list(cont = any(feas_c), int_ok = if (integer_mode) any(ok) else NA, milp = milp, class = cls,
+  int_ok <- if (!integer_mode) NA else if (any(vapply(res, function(r) isTRUE(r$int_ok), TRUE))) TRUE else
+    if (length(unres)) NA else FALSE
+  out <- list(cont = any(feas_c), int_ok = int_ok, milp = milp, class = cls, unresolved = if (length(unres)) paste(unres, collapse = "; "),
               lp = if (any(feas_c)) c(min(vapply(res[feas_c], function(r) r$lp[1], 0)),
                                        max(vapply(res[feas_c], function(r) r$lp[2], 0))) else c(NA_real_, NA_real_),
               fallback = any(vapply(res, function(r) isTRUE(r$fallback), TRUE)))
-  out$status <- .ec_status(P, mode, milp, cls)
+  out$status <- .ec_status(P, mode, milp, cls, out$unresolved)
   if (U) out$branches <- data.frame(branch = labs, continuous = feas_c,
                                     lower = vapply(res, function(r) r$iv[1], 0),
                                     upper = vapply(res, function(r) r$iv[2], 0), stringsAsFactors = FALSE)
@@ -371,9 +391,11 @@ combo <- function(..., weights, label = NULL) {
   out
 }
 
-.ec_status <- function(P, mode, milp, cls) {
+.ec_status <- function(P, mode, milp, cls, unresolved = NULL) {
   if (!P$integer && mode != "lp") return("not applicable: non-integer margins")
   if (mode == "lp") return("continuous only")
+  if (!is.null(unresolved))
+    return(paste0("integer status unresolved (", unresolved, "): LP outer bound (R19(c) item 1)"))
   if (milp) "integer-exact (MILP)" else "integer-exact (TU class)"
 }
 
@@ -382,7 +404,23 @@ combo <- function(..., weights, label = NULL) {
 .ec_binding <- function(P, specs, built_all, tg, rg, mode, tol = 1e-9) {
   if (!length(specs) || is.na(rg$lower)) return(c("", ""))
   bl <- character(0); bu <- character(0)
+  # LP duality: a restriction whose rows are all slack at the optimal LP vertex has zero duals,
+  # so removing it leaves that vertex optimal; only active restrictions are refitted. (Not
+  # used for MILP or unresolved results, nor for CR unions.)
+  lp_path <- !isTRUE(rg$milp) && is.null(rg$unresolved) && !length(built_all$unions)
+  rd <- P$integer && mode != "lp"
+  active <- function(s, x) {
+    if (is.null(x)) return(TRUE)
+    for (rw in Filter(function(r) r$id == s$id, built_all$common)) {
+      cf <- if (rd && !is.null(rw$coef_rd)) rw$coef_rd else rw$coef
+      lo <- if (rd && !is.null(rw$lo_rd)) rw$lo_rd else rw$lo; hi <- if (rd && !is.null(rw$hi_rd)) rw$hi_rd else rw$hi
+      v <- sum(cf * x[rw$idx]); sc <- 1e-7 * max(1, sum(abs(cf * x[rw$idx])))
+      if ((is.finite(lo) && v <= lo + sc) || (is.finite(hi) && v >= hi - sc)) return(TRUE)
+    }
+    FALSE
+  }
   for (s in specs) {
+    if (lp_path && !active(s, rg$x[[1]]) && !active(s, rg$x[[2]])) next
     b <- list(common = Filter(function(r) r$id != s$id, built_all$common),
               unions = Filter(function(u) u$id != s$id, built_all$unions))
     r0 <- .ec_range(P, b, tg, mode, keep_x = FALSE)
@@ -425,7 +463,8 @@ combo <- function(..., weights, label = NULL) {
 # ---------------------------------------------------------------------------
 # the fit
 # ---------------------------------------------------------------------------
-.ec_fit <- function(P, targets, restrictions, integer, binding, env) {
+.ec_fit <- function(P, targets, restrictions, integer, binding, env, time_limit = 10) {
+  P$time_limit <- time_limit
   specs <- .ec_parse_restrictions(P, restrictions, env)
   if (integer == "exact" && !P$integer)
     stop("integer = \"exact\" needs exactly integer margins; these margins are not integers (or were given ",
@@ -438,7 +477,7 @@ combo <- function(..., weights, label = NULL) {
     tg <- tl[[j]]
     dd <- .ec_range(P, empty, tg, integer, keep_x = FALSE)
     rg <- if (length(specs)) .ec_range(P, built, tg, integer) else dd
-    bd <- if (binding) .ec_binding(P, specs, built, tg, rg, integer) else c(NA, NA)
+    bd <- if (isTRUE(binding)) .ec_binding(P, specs, built, tg, rg, integer) else c(NA, NA)
     st <- rg$status
     if (!isTRUE(rg$cont)) st <- "infeasible: the rows contradict the margins (continuous tables)"
     else if (identical(rg$int_ok, FALSE)) st <- "integer-infeasible: no whole-number table satisfies these rows"
@@ -550,7 +589,13 @@ combo <- function(..., weights, label = NULL) {
 #' @param model optional \code{eiBounds()} fit for the cross-layer block.
 #' @param allowance residual allowance for the cross-layer block: \code{"popoviciu"}
 #'   (\eqn{S_\varphi}, Lemma 4.1(a)) or \code{"hoeffding"} (\eqn{t_E(\varphi)}, Lemma 4.1(b)).
-#' @param binding compute the binding rows (drop-one test) for each endpoint.
+#' @param binding compute the binding rows (drop-one test) for each endpoint: \code{TRUE},
+#'   \code{FALSE}, or \code{"auto"} (default: on for at most 200 units, off above, with a note).
+#'   Only restrictions active at the optimal LP vertex are refitted (an inactive one has zero
+#'   duals and cannot bind); rows that bind only jointly are not shown.
+#' @param time_limit seconds allowed per integer program (MILP; solver GLPK via the suggested
+#'   package \pkg{Rglpk}). On timeout, or without \pkg{Rglpk}, the endpoint is the LP over the
+#'   rounded rows, an outer bound, with the status "integer status unresolved".
 #' @return an object of class \code{"eiCounts"}; \code{$table} has one row per target with the
 #'   margins-only range (\code{dd_*}), the range under the rows, the integer status, the
 #'   continuous LP range (\code{lp_*}) and the binding rows; \code{$cross} the cross-layer
@@ -567,12 +612,15 @@ combo <- function(..., weights, label = NULL) {
 eiCounts <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL, x = NULL, t = NULL, n = NULL,
                      unit = NULL, targets = NULL, restrictions = NULL,
                      integer = c("auto", "lp", "exact"), model = NULL,
-                     allowance = c("popoviciu", "hoeffding"), binding = TRUE) {
+                     allowance = c("popoviciu", "hoeffding"), binding = "auto", time_limit = 10) {
   integer <- match.arg(integer); allowance <- match.arg(allowance)
   inp <- .ec_input(formula, data, rows, cols, x, t, n, unit)
   P <- .ec_problem(inp$A, inp$B, inp$rows, inp$cols, inp$units, inp$integer_input, data = data)
   if (P$p == 0) stop("no units with N_i > 0")
-  f <- .ec_fit(P, targets, restrictions, integer, binding, parent.frame())
+  if (identical(binding, "auto")) binding <- if (P$p <= 200) TRUE else structure(FALSE, auto = TRUE)
+  f <- .ec_fit(P, targets, restrictions, integer, binding, parent.frame(), time_limit)
+  if (isTRUE(attr(binding, "auto")) && length(f$specs))
+    f$notes <- c(f$notes, "binding rows not computed (more than 200 units; set binding = TRUE)")
   out <- structure(c(list(call = match.call(), P = P, integer = integer, margins_integer = P$integer,
                           shares_input = !inp$integer_input), f), class = "eiCounts")
   if (!is.null(model)) out$cross <- .ec_cross_layer(out, model, allowance)

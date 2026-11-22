@@ -46,6 +46,11 @@
 
 General-user track: M-AUDIT, M-CVR (exact published-table rows ship inside step 1).
 
+**After step 11: open items from M-COUNT** (owner's decision, 22 Nov 2026; `PHASE6a_count_layer.md`). Left open until the end of this plan, in this order of priority:
+1. **A smaller valid set than the intersection** (R27(iii-b); computed example X5 only). Use the count rows when computing the model-to-actual allowance, so the combined answer can be tighter than count set ∩ model interval. Highest priority of the three: the owner considers it the most useful.
+2. **Integer theory outside the TU classes** (R15 remainder; PHASE6a §3.4). A theorem bounding the integer–continuous gap for pairwise orderings with R ≥ 3, W2 rows, totals across rows and columns, and mixtures. Lower priority: the certified MILP already gives exact answers.
+3. **Bhatia–Davis allowance for combined targets** (PHASE6a §9 item 7; P3.5(c1) covers single cells only). Lower priority: Popoviciu is valid, and the difference matters mainly with rates near 0 or 1 and small samples.
+
 ### Later or research-dependent
 * **From the Batch B review:** grouped-rung proofs for M-SIGN (R16, needed to drop "experimental" under M1/M2); integer unit tables (R15); per-group W2 restrictions (U8(a)); the drop-one display and the L5/L6 sign check; the N2 global LP only (local rows dropped, U4(a)).
 * Research only (recommendation Part 4): Avenue A (unit size, with the dispersion ceiling and the covariance route), single index (R14), KL-ball reference dial.

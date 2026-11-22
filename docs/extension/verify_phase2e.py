@@ -1221,15 +1221,16 @@ def laminar_family(p):
     return fam
 
 
-ok25, n25, gap_two_pairs, n_two = True, 0, 0, 0
+ok25, n25, gap_star, n_star = True, 0, 0, 0
 for rep in range(60):
-    p, R, C, T = 4, 2, 3, 3
+    p, R, C, T = 4, 2, 3, 4
     a, b, n = rand_margins(p, R, C, T, 4, 9)
-    for mode in ("one", "two"):
+    for mode in ("one", "path", "base2", "star3"):
         L = CountLP(a, b)
-        fam = laminar_family(p)
-        pairs = [(0, 1)] if mode == "one" else [(0, 1), (1, 2)]
+        pairs = {"one": [(0, 1)], "path": [(0, 1), (1, 2), (2, 3)], "base2": [(1, 0), (1, 2)],
+                 "star3": [(0, 1), (0, 2), (0, 3)]}[mode]
         for (t0, t1) in pairs:
+            fam = laminar_family(p)                          # each pair its own laminar family
             for U in fam:
                 v = np.zeros(L.nn)
                 for i in U:
@@ -1240,12 +1241,12 @@ for rep in range(60):
             obj = rng.normal(size=L.nn)
             cr, ir = L.range(obj), L.irange(obj)
             same = abs(cr[0] - ir[0]) < 1e-6 and abs(cr[1] - ir[1]) < 1e-6
-            if mode == "one":
+            if mode != "star3":
                 ok25 &= same; n25 += 1
             else:
-                gap_two_pairs += (not same); n_two += 1
-check("E25 [V] Theorem E27: R=2, one column, one period pair, laminar change rows: LP = MILP (integral)", ok25,
-      f"{n25} objectives; two overlapping pairs (outside the theorem): LP != MILP in {gap_two_pairs}/{n_two}")
+                gap_star += (not same); n_star += 1
+check("E25 [V] Theorem E27: R=2, change rows on one column, period pairs forming paths, laminar unit sets: LP = MILP (integral)", ok25,
+      f"{n25} objectives (one pair; consecutive path; two pairs sharing a base); three pairs sharing a base (outside the theorem): LP != MILP in {gap_star}/{n_star}")
 
 
 # =====================================================================================

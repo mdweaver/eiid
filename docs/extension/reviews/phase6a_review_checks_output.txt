@@ -1,0 +1,22 @@
+=== R19(b): total unimodularity ===
+PASS RC1 class (iii): the ORIGINAL constraint matrix is not TU, but F_rd is integral [CE]: 3 units 2x2; column 1 totals {012} on (1,1), {01} on (2,1); column 2 total {12} on (1,2) (one laminar family per column): 7x7 minor of the margins+totals matrix = 2 (odd cycle), so 'the constraint matrix ... is TU' is false here; 300 random rhs: 0 LP != MILP, 0 fractional vertices out of 600 (integrality holds via the substitution y = n_1c)
+PASS RC2 class (i) with deep laminar families and random (possibly infeasible) rhs [V]: 300 designs, 600 endpoints: feasibility LP(F_rd) vs MILP disagree 0, values disagree 0, fractional vertices 0; infeasible endpoints (both agree) 512
+PASS RC2 class (ii) with deep laminar families and random (possibly infeasible) rhs [V]: 300 designs, 600 endpoints: feasibility LP(F_rd) vs MILP disagree 0, values disagree 0, fractional vertices 0; infeasible endpoints (both agree) 502
+PASS RC2 class (iii) with deep laminar families and random (possibly infeasible) rhs [V]: 300 designs, 600 endpoints: feasibility LP(F_rd) vs MILP disagree 0, values disagree 0, fractional vertices 0; infeasible endpoints (both agree) 518
+PASS RC3 item 3 needs 'S addable': crossing target set in class (i) has integer values with a gap [B]: 3 units (N=2,V=1,yes=1), totals y0+y1=1 (family A), y1+y2=1 (family B); target y0+y2: rounded LP [0,2] (integer endpoints, as R19(b) item 2 says), integer values [0, 2]: 1 is not attained (consistent with 6a, which claims every integer only for addable S)
+PASS RC4 class boundaries: (ii) with two families on one cell, and (iii) with crossing sets on a column, can lose integrality [B]: (ii)+second family: LP -7.000 vs integer -3.0 (I=5); (iii) with crossing sets: LP -2.500 vs integer None (I=3)
+PASS RC10 'totals on cells in different rows and columns' with R = 3, C = 2 stay integral (transposed class (iii)) [CE]: 1500 designs of 6a's C1 type with C = 2: 0 fractional or LP != MILP endpoints; the breaking type needs R >= 3 and C >= 3
+=== Prop. C2 ===
+PASS RC5 C2(b): integer set is NOT 'the lattice inside the continuous interval' with fractional boxes [CE]: two units (N=5,V=1,yes=1), ordering boxes n>=0.2, between sign Y>=Y^NM=0.4: continuous Y range [0.4,2.0], integers in it [1, 2], integer values [2]; C2(b)'s formula max(Y^-_rd, ceil Y^NM) = 2 is right, the 'So ...' sentence is not
+PASS RC11 corrected C2(b): 'with integer boxes' is not enough; fractional totals also shrink the lattice [CE]: four units (N=5,V=1,yes=1), no boxes, totals y0+y1 >= 0.2 and y2+y3 >= 0.2, between sign Y >= 0.8: continuous range [0.8,4.0] contains [1, 2, 3, 4]; integer values [2, 3, 4]; condition should read 'all unit rows with integer right-hand sides'
+PASS RC5b C2: thresholds act on Y_rc(S) of the sign set, not on Y_rc of the target set [CE]: two units (N=4,V=2,yes=2), between sign over S={0}: lower end of Y_11(all) = 1, while reading C2(b) with Y^NM computed over all units gives 2; C2 must fix one sign set S and the target Y_rc(S)
+=== Lemma 2.1 / §9 item 3 ===
+PASS RC6 one-vs-rest gap D^r_c (R >= 3): cellwise interval arithmetic is outer; exact = single-cell DD [V]: 200 random designs (R = 3, 4): cellwise strictly wider in 200, max excess width 0.871; 6a §9 item 3 / contract C2 should name D^r_c (the M-SIGN default contrast) explicitly
+=== Lemma 4.1 ===
+PASS RC7 Lemma 4.1: S_phi depends on how the target is written (column-margin identity), E_phi too [CE]: R=3 one-vs-rest gap, 400 units: S_phi = 0.04646 (kappa*Y_rc - Y_c/(N-A_r)) vs 0.05549 (rest written over cells); exact sd(E) under independent Bernoulli unit rates 0.04608 vs 0.03766 (each within its own bound); in one draw E = 0.0218 vs 0.0123: they differ by (Y_c - E[Y_c|design])/(N-A_r), so E_phi, B~_phi and S_phi depend on the representation when phi_0 uses outcome margins
+=== R27 ===
+PASS RC8 R27(i)-(ii): with belief rows, 'under H_C and H_M' must be read unconditionally with + P(H_C fails) [CE]: pooled 2x2 LCE true, oracle 95% interval for B; belief row 'B >= t'. t = B~ + 1.0 sd: P(row) = 0.161, coverage of C∩CI given the row 0.838 (< .95); t = B~ + 2.4 sd: P(row) = 0.0076, rejection rate given the row 1.000 (> .05). Unconditional miss rates 0.865, 1.000 obey alpha + P(row fails) = 0.889, 1.042
+=== §1.4 rounding: numerical hazard (contract C4) ===
+PASS RC9 floating-point floor of an integer-valued threshold Y^ER can be off by one [B]: 4008 random small populations with integer Y^ER (exact rationals): floor in double precision wrong in 1281
+
+14/14 PASS

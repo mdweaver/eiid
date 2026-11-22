@@ -1,0 +1,36 @@
+[PASS] K1 T5: LP lower total 0.4, integer lower total 2 (integer-exact (TU class))
+[PASS] K2 S5: continuous [0.4, 2.0], integer [2, 2]
+[PASS] K3 RC11: continuous [0.8, 4], integer [2, 4], attained integers 2,3,4 (class (i))
+[PASS] K4 N10c: continuous feasible TRUE, status 'integer-infeasible: no whole-number table satisfies these rows'
+[PASS] K5 RC4 routing: two families on cell (1,1) + cell (2,1): integer-exact (MILP); three crossing sets on one cell: integer-exact (MILP)
+[PASS] K6 RC9 exact thresholds: 150 populations with integer Y^ER: 0 wrong integer upper ends
+[FINDING] K7 linear row 1/3 n >= 1: intended n >= 3; integer lower 4 (LP 3), status integer-exact (MILP): the double 1/3 is taken as an exact rational < 1/3
+[FINDING] K8b x/t vectors: row and column labels: rows 'x','', cols 't','' (documented X/notX, T/notT; cbind(x, 1 - x) names them 'x' and '')
+[PASS] K8 non-integer margins: 59.4: 'not applicable: non-integer margins'; note printed TRUE; exact refused TRUE; 3+1e-12: 'not applicable: non-integer margins'; shares input: 'not applicable: non-integer margins'
+[PASS] K9 DD = exact LP for cells and one-column contrasts: 42 targets on 3 reference datasets: max |cellwise DD - exact LP| = 2.2e-16; combination targets inside cellwise DD: 3/3
+[PASS] K11 single-cell model interval = eiBounds proj_actual (fpc = popoviciu): 2 endpoints not clipped by DD (1500 simulated units): max difference 1.1e-16 (alpha split 0.9 / 0.1 alpha as in eiBounds)
+[FINDING] K11b conservative interval = eiBounds ci_actual (ci = conservative, fpc = popoviciu): max difference 5.2e-04: the cross-layer block redraws the simulation draws (Zs) instead of reusing the fit's, so its model interval is not the one printed in the model table
+[PASS] K12 S_phi, t_E, representation: 7 targets (cell, gap, ovr_gap, merged rows, all columns, subset, combo): max |S_phi - independent| = 2.8e-17; Hoeffding-minus-Popoviciu width vs 2(t_E - z S): 4.4e-16; ovr_gap representation chosen: kappa (S 0.1426 vs 0.1230)
+[PASS] K13 refusals: ci = 'none' refused; a non-eiBounds object refused; share() gets the count layer only; different units refused
+[PASS] K14 C8 wording: 'given the count rows' in printed strings: 0; identity-only print uses the coverage line: TRUE; belief print has the C8 sentence verbatim: TRUE
+[FINDING] K14b a stated floor as a 'total' defaults to an identity row: total with lower = 10 only: belief wording printed: FALSE (C8 lists stated floors among belief rows)
+    M0       P (asymptotic)
+    M1       P (asymptotic) only with few, large groups (regime R1); a simulation finding with many small groups
+    M2       P (asymptotic) only with few, large groups (regime R1); a simulation finding with many small groups
+    L4       P (asymptotic)
+    L5       P (asymptotic; point-identified rung, one linear functional)
+    L6       P (asymptotic; point-identified rung, one linear functional)
+    M1+sign  no coverage theorem (R16): grouped rung with sign rows; the intersection is experimental
+[FINDING] K15 status strings follow the 6a table: M0: P (asymptotic); M1/M2: P only in R1, simulation otherwise; grouped + sign rows: no theorem (R16); L5/L6: labelled 'P (asymptotic; point-identified rung ...)' though 6a §4.3 has no row for it (developer point b)
+[FINDING] I1 MILP optimality (lpSolve): integer upper reported 0.0000 (integer-exact (MILP)); the table x with value 1/3 satisfies every row exactly: TRUE
+[FINDING] I2 known cells keep the user's unit order: unit = c('U2','U1'), value = c(4, 1): fitted U1 = 4, U2 = 1
+[FINDING] I3 eiBounds with an N = 0 unit (x, t, n input): default target: ERROR the model fit and the count layer are not on the same units and margins; target = 'model': ok
+[FINDING] I5 W2 sign with constant X_r: ERROR: division by zero
+[FINDING] I7 outcome-selected unit set gets no cross-layer interval: where = yes/(yes+no) > 0.5: design flag TRUE, model interval [0.542, 0.854] printed as covering
+[FINDING] I11 unknown numeric unit refused: accepted: box r1 -> c1 in units {U1}: [1, Inf]
+[FINDING] I13 sign row label: realised delta_W r1 >= 0 on c1 (W1, all units)
+    400 replications, 300 units, L6 (Goodman) true, alpha = 0.05; known cells in 30 design-chosen units
+    model interval coverage 1.000; identity rows: intersection coverage 1.000, rejection rate 0.000
+    belief floor (Y_11 >= 34982, false in 0.535): coverage 0.465 (bound 1 - alpha - P(false) = 0.415); P(reject and row true) = 0.000
+    belief sign delta_B >= 0: coverage 1.000, rejection rate 0.000
+[PASS] K16 R27 simulation: identity rows: coverage = the model interval's, size <= alpha; belief rows: (*) bounds hold

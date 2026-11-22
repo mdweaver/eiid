@@ -1,3 +1,98 @@
+# eiPartialID 0.4.0
+
+Build step 1 (M-COUNT): the count layer. Theory: `docs/extension/PHASE6a_count_layer.md`
+(R19, R27; proof reviewed); contract §6 (C1-C10).
+
+* New `eiCounts()`: exact bounds on actual (realised) counts and rates from the unit
+  margins and rows on the realised table. Targets: `rate()` (merged groups and sums over
+  columns allowed), `gap()` (one-column contrasts, differences over unit sets),
+  `ovr_gap()` (the one-vs-rest gap D^r_c), `share()` (outcome-margin denominator; count
+  layer only) and `combo()`, each with `where =` unit subsets. Rows: known cells,
+  structural zeros, cell boxes, published totals, general linear rows, realised unit
+  orderings (one-vs-rest = boxes; pairwise for R >= 3), the 2 x 2 odds-ratio dial,
+  realised association signs (W1 as totals; pair and W2 with unequal coefficients) and
+  realised CR (a union of two systems). Sign and CR rows print EXPERIMENTAL.
+* Integer check `integer = c("auto", "lp", "exact")`. With exactly integer margins,
+  "auto" rounds every row inward in exact rational arithmetic (new import: `gmp`), tests
+  whether the whole row set lies in one total-unimodularity class of R19(b) (two laminar
+  families by 2-colouring the crossing graph; one column or row; R = 2 or C = 2) and then
+  reports the LP over the rounded rows as "integer-exact (TU class)"; otherwise every
+  endpoint (and CR branch) is a MILP ("integer-exact (MILP)"). Integer infeasibility with
+  continuous feasibility is reported as "no whole-number table satisfies these rows".
+  Non-integer margins (estimates, or data given as shares) switch the check off with the
+  note "exact only for the stated margins".
+* `witness()`: a table attaining each endpoint, checked against every margin and row
+  (exactly for whole-number tables); a certificate of attainability, not an estimate.
+* Binding rows per endpoint (drop-one test).
+* Cross-layer block (R27): with `model =` an `eiBounds()` fit (or inside `eiBounds()`),
+  the count set is intersected with an actual-target model interval: the projection
+  interval (or the conservative one) for the model-implied value plus the residual
+  allowance of 6a Lemma 4.1 (Popoviciu S_phi, or Hoeffding t_E with
+  `allowance = "hoeffding"`), for multi-cell targets too, with the representation of the
+  target chosen from the design. Count rows and model rows never share one LP.
+  Disjointness is reported as a test, with the wording of contract C8 for identity rows
+  only and for belief rows. The status is that of the model interval (6a §4.3).
+* `eiBounds()` embeds the count layer (decisions D1/D2). New arguments `target`
+  (`"actual"`, default: the actual-rate block first, Duncan-Davis first; `"model"`: the
+  old print order), `counts` (count rows) and `integer`. `assoc`/`cr` restrictions with
+  `object = "actual"` go to the count layer; `object = c("actual", "model")` is refused.
+  `$table` gains `dd_exact_lower`/`dd_exact_upper` (the exact margins-only LP);
+  `dd_lower`/`dd_upper` and every model column are unchanged. The printed
+  `duncan_davis` column shows the exact range under `target = "actual"`; it differs from
+  the old cellwise column only for combination targets, where the old one is outer
+  (6a Lemma 2.1(c), §9 item 3).
+* Code review (`docs/extension/reviews/PHASE6a_code_review.md`), all 16 issues fixed:
+  * MILP: GLPK (package `Rglpk`, in Imports since round 2) instead of lpSolve's branch and bound, with a
+    time limit per integer program (`time_limit`, default 10 s), the objective scaled to
+    integers from the exact weights, an exact check of each solution, and a certificate
+    of optimality (a second program with c'n >= v* + 1 must be infeasible). On timeout or
+    without `Rglpk` the endpoint is the LP over the rounded rows with the status
+    "integer status unresolved (...): LP outer bound", never "integer-exact". Problems are
+    split into connected components of the unit-coupling graph. Pairwise delta_B and W2
+    rows at realistic unit sizes now finish (issues 1, 16).
+  * The TU path accepts a vertex only if it is integral before rounding and passes the
+    exact check; otherwise it falls back to the MILP (issue 6).
+  * `known` values follow the user's unit order; duplicated units and wrong value lengths
+    are refused; out-of-range row numbers and units dropped for N_i = 0 are errors with
+    clear messages (issues 2, 11).
+  * The count block can no longer stop `eiBounds()`: a failure gives a warning and the model
+    output; units with N_i = 0 on the x/t/n path are aligned (issue 3).
+  * Doubles typed by the user are rationalised (denominator <= 1e6 within 1e-12; printed),
+    and character fractions are exact (issue 4). An all-zero pairwise or W2 row is vacuous
+    and dropped with a note (issue 5).
+  * A `where =` expression that uses an outcome variable makes the target count-layer only;
+    sets given as labels or numbers print that the set must be fixed from the design (issue 7).
+  * A `total` given as a floor or interval defaults to a belief row; `value =` totals stay
+    identity rows (issue 8).
+  * Cross-layer statuses follow the 6a §4.3 rows added for L4, L5, L6 and M1(delta); for
+    point-identified rungs the model interval is the one-functional normal interval
+    (issue 9). The cross-layer block reuses the fit's simulation draws (issue 10).
+  * Labels: x/t vectors give X/notX, T/notT (issue 12); delta_B sign rows are labelled
+    delta_B (issue 13); long `known` labels are shortened, duplicate target labels are made
+    distinct, the binding line says jointly binding rows are not shown, the Lindeberg note
+    prints its value and is suppressed for the Hoeffding allowance, and `sign = ">=0"` /
+    `"<=0"` are accepted (issue 14).
+  * Regression tests: `tests/testthat/test-counts-review.R` (issue 15).
+  * Performance: `binding = "auto"` (default) is off above 200 units; only restrictions
+    active at the optimal LP vertex are refitted; joint LPs use GLPK when available; the
+    rounded LP is skipped when rounding changes nothing (500 units with 11 totals: 218 s
+    with binding before, 7.5 s by default and 73 s with `binding = TRUE` now).
+* Code review, round 2: a connected component with rows but no target cells no longer crashes
+  the MILP certificate (R2-1; any exactly checked feasible table is optimal there); the
+  integer objective coefficients are capped at 1e7 after scaling (above it: "unresolved");
+  the certificate c'n >= v* + 1 is solved in the shifted variables d = n - n* (cut c'd >= 1),
+  so GLPK's relative tolerances stay far below its unit gap, and a returned table must
+  improve exactly (strict progress); `Rglpk` and
+  `slam` moved to Imports, so the integer check works out of the box.
+* P3.5(a) conservative interval (proof review round 3, nit a): the studentised maximum is
+  taken over the beta-dependent terms only; terms with zero standard error (e.g. the
+  reference district's rows under M1(delta)) are held exactly and no longer enter the
+  maximum as a constant 0. With no beta-dependent term the critical value is 0. This can
+  narrow conservative intervals slightly where such terms exist; it changes no other output.
+* Tests: `tests/testthat/test-counts.R` (contract C10: DD reproduction, brute-force
+  enumeration per TU class, MILP rows and mixtures, T5, S5, RC11, N10c, RC9, 2c M2/M3
+  closed forms, witnesses, the C8 wording, the embedding).
+
 # eiPartialID 0.3.1
 
 Package side of the second-round referee reports (Batch B ecological-inference

@@ -1,4 +1,4 @@
-### Code Version 0.3.1
+### Code Version 0.4.0
 
 This repo includes the R package for replicating the results in:
 
@@ -11,6 +11,10 @@ The Dataverse archive also includes all of the data analyzed in the paper.
 For convenience, this repo only includes the standalone R package (eiPartialID) in the folder 'package' (which is similar to that in the Dataverse archive, with some minor differences to conform to CRAN policies). The package should be installed locally from source. An overview of usage is provided in the following HTML vignette, which can be viewed in your browser:
 
 [package/eiPartialID/vignettes/rendered_html_archive/2019_02_04/eiPartialID_usage_2019_02_04.html](package/eiPartialID/vignettes/rendered_html_archive/2019_02_04/eiPartialID_usage_2019_02_04.html)
+
+### New in 0.4.0: exact bounds on the actual counts (M-COUNT)
+
+`eiCounts()` bounds the *actual* counts and rates in the units you have, with no model: rates, gaps, one group against the rest, and subsets of units. With margins alone this is Duncan-Davis. Known cells, published totals, per-unit orderings, and realised signs and reinforcement narrow the bounds. With integer margins it respects whole people and reports whether each integer endpoint is exact (certified integer program, with a time limit) or unresolved; non-integer margins switch this off. `witness()` returns a table attaining each bound. `eiBounds()` prints this actual-count block first (`target = "model"` restores the 0.3.1 output), and intersects it with the model interval for the actual rate; disjointness is a test of the model together with any beliefs entered. Theory: `docs/extension/PHASE6a_count_layer.md`; proof and code reviews in `docs/extension/reviews/`. New dependencies: `gmp`, `Rglpk`, `slam`. See `package/eiPartialID/NEWS.md`.
 
 ### New in 0.3.1: inference status and corrections after the second review round
 

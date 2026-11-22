@@ -53,9 +53,9 @@ rates); \code{NULL} for every cell rate.}
 Only restrictions active at the optimal LP vertex are refitted (an inactive one has zero
 duals and cannot bind); rows that bind only jointly are not shown.}
 
-\item{time_limit}{seconds allowed per integer program (MILP; solver GLPK via the suggested
-package \pkg{Rglpk}). On timeout, or without \pkg{Rglpk}, the endpoint is the LP over the
-rounded rows, an outer bound, with the status "integer status unresolved".}
+\item{time_limit}{seconds allowed per integer program (MILP; solver GLPK via package
+\pkg{Rglpk}). On timeout the endpoint is the LP over the rounded rows, an outer bound,
+with the status "integer status unresolved".}
 }
 \value{
 an object of class \code{"eiCounts"}; \code{$table} has one row per target with the
@@ -91,11 +91,13 @@ endpoints with integer witnesses ("integer-exact (TU class)"); a vertex is accep
 it is integral before rounding and passes the exact check, otherwise the MILP is used.
 Otherwise (pairwise orderings or signs, W2 signs, \code{linear} rows, mixtures of classes,
 crossing families) each endpoint is a mixed-integer program ("integer-exact (MILP)"),
-solved by GLPK (suggested package \pkg{Rglpk}) with a time limit per program
-(\code{time_limit}), the objective scaled to integers from the exact weights, an exact check
-of the solution, and a certificate of optimality (a second program with
-\eqn{c'n \ge v^* + 1} must be infeasible). On timeout, without \pkg{Rglpk}, or when the
-certificate cannot be completed, the endpoint is the LP over the rounded rows, an outer
+solved by GLPK (package \pkg{Rglpk}) with a time limit per program
+(\code{time_limit}), the objective scaled to coprime integers from the exact weights, an
+exact check of the solution, and a certificate of optimality (a second program with
+\eqn{c'n \ge v^* + 1} must be infeasible). The scaled integer objective coefficients must
+not exceed \eqn{10^7} in absolute value, so that GLPK's tolerances stay far below the unit
+gap of that cut; above the cap the endpoint is reported as unresolved. On timeout, above the
+cap, or when the certificate cannot be completed, the endpoint is the LP over the rounded rows, an outer
 bound, with the status "integer status unresolved (...): LP outer bound"; it is never
 labelled integer-exact. The rows are rounded, never the endpoints (check T5). Doubles typed
 by the user (bounds, coefficients, slack, \code{psi}) are rationalised: a fraction with

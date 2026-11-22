@@ -29,12 +29,12 @@ Imports:
   stats,
   lpSolve,
   gmp,
+  Rglpk,
+  slam,
   graphics,
   grDevices
 RoxygenNote: 7.3.1
-Suggests: Rglpk,
-    slam,
-    knitr,
+Suggests: knitr,
     rmarkdown,
     eco,
     testthat (>= 3.0.0),

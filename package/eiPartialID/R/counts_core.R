@@ -756,7 +756,9 @@
   out
 }
 
-# integer objective: list(c = double integer vector, ok) or NULL when not scalable
+# integer objective: list(c = double integer vector, ok) or NULL when not scalable. The cap keeps
+# GLPK's tolerances far below the unit gap of the certificate cut c'n >= v* + 1 (round-2 review)
+.ec_obj_cap <- 1e7
 .ec_int_obj <- function(cq) {
   nz <- which(as.double(cq) != 0)
   if (!length(nz)) return(list(c = rep(0, length(cq)), ok = TRUE))
@@ -764,7 +766,7 @@
   l <- den[1]; if (length(den) > 1) for (j in 2:length(den)) l <- gmp::lcm.bigz(l, den[j])
   g <- num[1]; if (length(num) > 1) for (j in 2:length(num)) g <- gmp::gcd(g, num[j])
   ci <- as.double(cq * (gmp::as.bigq(l) / gmp::as.bigq(g)))
-  if (max(abs(ci)) > 1e9) return(NULL)
+  if (max(abs(ci)) > .ec_obj_cap) return(NULL)
   list(c = ci, ok = TRUE)
 }
 
@@ -808,7 +810,7 @@
   ex <- .ec_milp_trip(rows, m$n, map)
   trip <- rbind(m$trip, ex$trip); dir <- c(rep("=", m$n), ex$dir); rhs <- c(m$rhs, ex$rhs)
   io <- .ec_int_obj(cq)
-  if (is.null(io)) return(list(status = "unresolved", reason = "objective not scalable to moderate integers"))
+  if (is.null(io)) return(list(status = "unresolved", reason = "objective coefficients exceed 1e7 after scaling to integers"))
   cc <- io$c
   exact_ok <- function(xl) {
     x <- numeric(P$nv); x[ks] <- xl
@@ -835,6 +837,9 @@
     xl <- round(s$x)
     if (!exact_ok(xl)) return(list(status = "unresolved", reason = "solver tolerance (solution fails the exact check)"))
     v <- sum(cc * xl)
+    # a zero objective on this component (rows but no target cells): any exactly checked
+    # feasible table is optimal; no certificate is needed (round-2 review, R2-1)
+    if (all(cc == 0)) { x <- numeric(P$nv); x[ks] <- xl; return(list(status = "optimal", x = x)) }
     # certificate: no integer table of the (relaxed) system improves on v
     t2 <- rbind(trip, cbind(max(trip[, 1]) + 1, seq_along(ks), sense * cc)[cc != 0, , drop = FALSE])
     s2 <- .ec_glpk(length(ks), cc, t2, c(dir, ">="), c(rhs, sense * v + 1), sense, time_limit)

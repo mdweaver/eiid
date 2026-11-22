@@ -341,3 +341,51 @@ test_that("nit a: a beta-independent row (zero SE) does not enter the studentise
   st0 <- st; st0$V <- st$V * 0; Z0 <- Zs; Z0$V <- Zs$V * 0
   expect_equal(.rxc_ci_conservative(st0, cons, tg, 0.05, Z0)$k, 0)
 })
+
+# ---- round-2 review: R2-1 (component with rows but a zero objective), objective cap ----------
+test_that("R2-1: pairwise ordering in every unit with a target on one unit (zero-objective components)", {
+  d <- data.frame(u = c("U1", "U2"), r1 = c(2, 1), r2 = c(1, 2), r3 = c(1, 1), c1 = c(2, 2), c2 = c(2, 2))
+  f <- eiCounts(rows = c("r1", "r2", "r3"), cols = c("c1", "c2"), data = d, unit = "u",
+                targets = list(rate("r1", "c1", where = "U1")),
+                restrictions = list(order_unit = list(row = "r1", over = "r2", col = "c1")))
+  expect_equal(f$table$integer_status, "integer-exact (MILP)")
+  ok <- function(t) all(vapply(1:2, function(i) { a <- c(d$r1[i], d$r2[i]); a[2] * t[[i]][1, 1] - a[1] * t[[i]][2, 1] >= 0 }, TRUE))
+  z <- mk(lapply(1:2, function(i) matrix(0, 3, 2)))
+  A <- as.matrix(d[, c("r1", "r2", "r3")]); B <- as.matrix(d[, c("c1", "c2")])
+  br <- brute2(A, B, function(t) t[[1]][1, 1] / 2, ok)
+  expect_equal(c(f$table$lower, f$table$upper), br, tolerance = 1e-12)
+  w <- witness(f)
+  expect_true(all(vapply(w, function(z) z$margins_ok && z$rows_ok && z$integer, TRUE)))
+  # infeasible pairwise rows in the untouched unit are still reported as integer-infeasible
+  g <- eiCounts(rows = c("r1", "r2", "r3"), cols = c("c1", "c2"), data = d, unit = "u",
+                targets = list(rate("r1", "c1", where = "U1")),
+                restrictions = list(order_unit = list(row = "r1", over = "r2", col = "c1"),
+                                    linear = list(cells = data.frame(unit = 2L, row = c("r1", "r2"), col = "c1", coef = c(2, 1)),
+                                                  lower = 1.5, upper = 1.8)))
+  expect_false(isTRUE(g$table$integer_feasible))
+})
+
+test_that("R2-1: randomised MILP rows with targets that do not touch every unit", {
+  set.seed(77); nchk <- 0
+  for (k in 1:30) {
+    p <- 3; R <- 3; C <- 2
+    tabs <- lapply(1:p, function(i) { repeat { m <- matrix(sample(0:2, R * C, TRUE), R, C); if (sum(m) > 0) return(m) } })
+    z <- mk(tabs, R, C)
+    if (z$A[1, 1] == 0) next
+    rs <- list(order_unit = list(row = "r1", over = "r2", col = "c1"))
+    ok <- function(t) all(vapply(seq_along(t), function(i) z$A[i, 1] == 0 || z$A[i, 2] == 0 ||
+                                   z$A[i, 2] * t[[i]][1, 1] - z$A[i, 1] * t[[i]][2, 1] >= 0, TRUE))
+    fit <- eiCounts(rows = z$rows, cols = z$cols, data = z$d, unit = "u", binding = FALSE, restrictions = rs,
+                    targets = list(rate("r1", "c1", where = "U1")))
+    br <- brute2(z$A, z$B, function(t) t[[1]][1, 1] / z$A[1, 1], ok)
+    if (is.na(br[1])) { expect_false(isTRUE(fit$table$integer_feasible)); next }
+    expect_equal(c(fit$table$lower, fit$table$upper), br, tolerance = 1e-12)
+    nchk <- nchk + 1
+  }
+  expect_gt(nchk, 15)
+})
+
+test_that("objective cap: scaled integer objectives above 1e7 are reported as unresolved", {
+  expect_null(.ec_int_obj(gmp::as.bigq(c(1, 1), c(1, 100000007))))   # scaled: 100000007 and 1
+  expect_equal(.ec_int_obj(gmp::as.bigq(c(1, -1), c(3, 2)))$c, c(2, -3))
+})

@@ -42,7 +42,7 @@ Build step 1 (M-COUNT): the count layer. Theory: `docs/extension/PHASE6a_count_l
   the old cellwise column only for combination targets, where the old one is outer
   (6a Lemma 2.1(c), §9 item 3).
 * Code review (`docs/extension/reviews/PHASE6a_code_review.md`), all 16 issues fixed:
-  * MILP: GLPK (suggested package `Rglpk`) instead of lpSolve's branch and bound, with a
+  * MILP: GLPK (package `Rglpk`, in Imports since round 2) instead of lpSolve's branch and bound, with a
     time limit per integer program (`time_limit`, default 10 s), the objective scaled to
     integers from the exact weights, an exact check of each solution, and a certificate
     of optimality (a second program with c'n >= v* + 1 must be infeasible). On timeout or
@@ -77,6 +77,10 @@ Build step 1 (M-COUNT): the count layer. Theory: `docs/extension/PHASE6a_count_l
     active at the optimal LP vertex are refitted; joint LPs use GLPK when available; the
     rounded LP is skipped when rounding changes nothing (500 units with 11 totals: 218 s
     with binding before, 7.5 s by default and 73 s with `binding = TRUE` now).
+* Code review, round 2: a connected component with rows but no target cells no longer crashes
+  the MILP certificate (R2-1; any exactly checked feasible table is optimal there); the
+  integer objective is capped at 1e7 after scaling (above it: "unresolved"); `Rglpk` and
+  `slam` moved to Imports, so the integer check works out of the box.
 * P3.5(a) conservative interval (proof review round 3, nit a): the studentised maximum is
   taken over the beta-dependent terms only; terms with zero standard error (e.g. the
   reference district's rows under M1(delta)) are held exactly and no longer enter the

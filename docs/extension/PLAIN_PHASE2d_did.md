@@ -1,5 +1,7 @@
 # Difference-in-differences with ecological data: a plain-language version of Phase 2d
 
+*Superseded (Nov 2026): the general DiD theory (any units, groups, outcomes, T ≥ 2 elections; descriptive and causal) is `PHASE2e_did_general.md` (2e), proof reviewed (`reviews/PHASE2e_proof_review.md`). This guide is kept for the Wisconsin/Iowa application and its history; corrections from 2e §11 are marked "(Corrected after 2e, Nov 2026)" below.*
+
 *Companion to `PHASE2d_did.md`. No formulas. Bracketed references point to the formal results. The running example is veterans and the Wisconsin 1857/1865 suffrage referenda.*
 
 ---
@@ -35,7 +37,7 @@ What follows from the rules:
 
 **How much would it take to overturn the result? [FD3]** Allow R1 to fail by up to some amount. The **breakdown value** is the smallest extra spillover onto non-veterans that would erase the effect. This is your appendix Figure C1, made formal.
 
-**With no rule at all [FD4],** straight-line changes still give a bound, even though each town's levels are arbitrary.
+**With no rule at all [FD4],** straight-line changes still give a bound, even though each town's levels are arbitrary. *(Corrected after 2e, Nov 2026: this bound is outer, not the best possible; the best possible bound under straight-line changes is 2e Prop. E8, often narrower.)*
 - **What it uses:**
   1. The regression of the change in yes share on veteran share. It pins down everything about the change except **one shared number per outcome**: how the curvature of the change splits between veterans and non-veterans.
   2. Both years' average yes shares at each observed veteran share, which give each year's possible rates there.
@@ -57,7 +59,7 @@ Apply the Monotone-EI idea to the *changes* themselves. This needs only directio
 
 - **If spillovers ran toward suffrage** (towns with more veterans moved more, for both groups), then your Goodman-on-changes estimate (0.265) is an **upper bound** on the DiD.
 - **If there was backlash** (non-veterans reacting against veterans), the same estimate is a **lower bound**.
-- **If the spillover and the veteran–non-veteran gap point the same way** (contextual reinforcement), the DiD has the **same sign** as Goodman on changes. This assumption can never be rejected by the data.
+- **If the spillover and the veteran–non-veteran gap point the same way** (contextual reinforcement), the DiD has the **same sign** as Goodman on changes. This assumption can never be rejected by the data. *(Corrected after 2e, Nov 2026: true when the counts are treated as continuous and no town-level beliefs are added; with whole-ballot counts it can be rejected, and the sign statement needs at least one mixed town (2e Props E5, E26).)*
 - **The direction of the within-town veteran gap** is not a usable assumption, because it amounts to assuming the answer.
 
 ## 4. Assuming the contextual effects are identical in both years [§5]
@@ -89,7 +91,7 @@ The effect is then between **0** and an upper limit. Your script's upper limit i
 
 The three assumptions are **jointly testable**. If no configuration consistent with the data satisfies all three, they are rejected. Assumption (c) does most of the work.
 
-Alternatively, **parallel trends** (future soldiers would have changed like everyone else) makes the effect equal to the DiD.
+Alternatively, **parallel trends** (future soldiers would have changed like everyone else) makes the effect equal to the DiD. *(Corrected after 2e, Nov 2026: only if nobody changed in anticipation and service did not move the non-veterans (no spillover); assumption (c) above likewise compares with non-veterans' observed rate, which assumes no spillover (2e Lemma E14, Prop. E21).)*
 
 ## 7. Party [P2, P3]
 

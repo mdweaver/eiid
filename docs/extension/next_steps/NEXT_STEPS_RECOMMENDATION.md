@@ -326,6 +326,8 @@ You will supply data later. Implementation follows once the theory has passed it
 * **Joint object.** The latent tables of all periods determine every DiD at once. Let $\mathcal D$ be the joint set of $(D_{\text{pre}},D_1)$ they allow. It is not a box: adjacent DiDs share a period's latent table.
 * **Treatment of the pre-periods.** With no treatment before $t=1$, $D_t=b_t$ for $t\le0$. The relative-magnitude set is
   $$\{D_1-b_1:\ (D_{\text{pre}},D_1)\in\mathcal D,\ \lvert b_1\rvert\le\bar M\max_{t\le0}\lvert D_t\rvert\},$$
+
+  *(Corrected after PHASE2e, Nov 2026: Rambachan–Roth bound the post-period violation by the largest **consecutive** pre-period difference, $\max_s\lvert D_s-D_{s-1}\rvert$, not by levels relative to the base; the two coincide with one pre-period only (2e Def. 5.2). The sharp set also imposes that the counterfactual rate lies in $[0,1]$ (2e Thm E16, Prop. E19).)*
   optimised jointly. Taking each pre-period's extreme separately can pair incompatible histories, so it is weakly wider; the review insists on the joint form.
 * **Degeneration** (a proposition to prove).
   * (a) The relative-magnitude bound is contained in the trend-dial bound with $M=\bar M\cdot\sup_{\mathcal D}\lvert D_{\text{pre}}\rvert$. It equals it when the maximisers are compatible, which is the endpoint-wise case.
@@ -340,7 +342,7 @@ You will supply data later. Implementation follows once the theory has passed it
   * **[−2.35, 2.65]** jointly;
   * [−2.35, 2.69] endpoint-wise.
 
-  Both extend beyond the logical range of a DiD of rates ([−2, 2]), so the result is **no information**.
+  Both extend beyond the logical range of a DiD of rates ([−2, 2]), so the result is **no information**. *(Corrected after PHASE2e, Nov 2026: the relevant range is the ATT's own, $[B^L_{v,1}-1,B^U_{v,1}]=[-0.75,1.00]$ here (2e Prop. E15). With the counterfactual rate constrained to $[0,1]$ the joint RM set is exactly $[-0.75,1.00]$; the conclusion "no information" stands (2e §5.5, N21; `verify_phase2e.py` E18).)*
 * A plain trend dial with M = 0.10 gives [−1.18, 1.52]. This is wide too, but only because the post-period DiD itself is wide.
 * If a model rung pinned the pre-period totals to within ±2 votes, the pre-period DiD would shrink to [−0.06, 0.10]. The relative-magnitude bound becomes [−0.60, 0.90]: the allowance falls from ±1.27 to ±0.10.
 
@@ -348,7 +350,7 @@ The lesson for the plan: relative-magnitude bounds are worth computing only on t
 
 **Technical notes.**
 * **Descriptive.** The rows on changes are count-layer rows on the two-period product, with exact coverage. FD and DiD-S are LCE-layer rows on changes. They combine by intersection (Part 3A).
-* **Causal.** The ATT set is the descriptive set shifted by the trend dial's set. With relative magnitudes it is the projection of a joint LP over latent pre-trends and the post-period violation. With MTR/ND/PS it is 2d Prop. CL.
+* **Causal.** The ATT set is the descriptive set shifted by the trend dial's set. *(Corrected after PHASE2e, Nov 2026: that is the outer form; the sharp set also imposes the rate limits, and spillovers onto the comparison group need their own term, ATT = D − b + S (2e Lemma E14, Cor. E17, Prop. E22).)* With relative magnitudes it is the projection of a joint LP over latent pre-trends and the post-period violation. With MTR/ND/PS it is 2d Prop. CL.
 * **Interface** (after the reviews): `eiChange(d0, d1, unit = "township", restrictions = list(cr = list(object = "actual", on = "changes")))`; `eiATT(change_fit, trend_gap = 0.1, pre = NULL, mtr = FALSE)`.
 
 ### 3.3 Step 3: M-CONTRAST, finite comparisons between observed kinds of places (M-LOC folded in)
@@ -876,7 +878,7 @@ Target: **a** = actual rate (exact, or with the stated coverage); **m** = model-
 | **M-COUNT** | L·a·E (MILP for coupled rows) | L·a·E | L·a·E; **×** if a strict ordering and its exception version are imposed on the same pair¹ | L·a·E (two-period product) | L·a·E | L·a·coverage 1−α (R25) |
 | **CONTRAST-count** | | L·a·E | L·a·E | L·a·E (changes version) | L·a·E | L·a·R25 |
 | **M-EXCEPT** | | | L·a·E | L·a·E (exceptions to change orderings) | L·a·E | L·a·R25 |
-| **DiD descriptive** | | | | L·a·E; DiD causal is **↑** on top | L·a·E | L·a·R25 (both periods) |
+| **DiD descriptive** | | | | L·a·E; DiD causal is **↑** on top | L·a·E | L·a·R25 (both periods; one margin set for a composition shared by both elections, 2e Prop. G7(a) — corrected after PHASE2e) |
 
 **Model-layer block** (model-implied target; actual target via P3's allowance):
 
@@ -886,7 +888,7 @@ Target: **a** = actual rate (exact, or with the stated coverage); **m** = model-
 | **M1…L4** | | · | alt | L·m·**O** (R16) | L·m·O (R16-type) | **×** if z is constant within groups³; else L·m·O | L·m·O (district dummies are a Z)⁴ | alt | L·m·O | — |
 | **L5/L6** | | | · | **—** (point-identified: a sign is a check, not a restriction) | — | — | — | — | — | — |
 | **M-SIGN** | | | | L (one LP; CR a union) | pairs: L·m·P0 (non-nested). **hull: R**, hull ⇒ δ_B and, in 2×2 with C1, δ_W⁵ | L·m·O (state the sign on the full mean incl. county term)⁶ | L·m·O (same caveat) | L·m·O (outer only) | L·m·P0 | Δ signs: L (model DiD) |
-| **CONTRAST-LCE** | | | | | L | L·m·O | L·m·O | L·m·O (the midpoint identity N12c is LCE-only; secant rows stay valid) | L·m·O | DiD-S **is** the changes version: L·DiD·validity P, sharpness O (R11a) |
+| **CONTRAST-LCE** | | | | | L | L·m·O | L·m·O | L·m·O (the midpoint identity N12c is LCE-only; secant rows stay valid) | L·m·O | DiD-S **is** the changes version: L·DiD·validity P, sharpness O (R11a). *(Superseded by PHASE2e, Nov 2026: sharpness characterised (2e Prop. E9: sharp for the regression; for the full law iff inside the sharp FD set), proof reviewed.)* |
 | **B1(M)+κ** | | | | | | · | L·m·O. **×** as "two independent checks" if z ∈ Z: then CAR(Z) = B1(M=0)⁷ | L·m·O (unexamined) | L·m·O (needs Γ shared across areas) | M-CTX2-Δ: L·DiD·O |
 | **CAR(Z)-δ** | | | | | | | · | L·m·O | L·m·O | conditional parallel trends: O |
 | **M-BERN** | | | | | | | | · | O | O |

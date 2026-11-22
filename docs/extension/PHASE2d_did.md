@@ -1,5 +1,7 @@
 # Phase 2d: difference-in-differences with partial identification, derivations and proofs
 
+*Superseded (Nov 2026): the general DiD theory (any units, groups, outcomes, T ≥ 2 elections; descriptive and causal) is `PHASE2e_did_general.md` (2e), proof reviewed (`reviews/PHASE2e_proof_review.md`). This document is kept for the Wisconsin/Iowa application and its history; corrections from 2e §11 are marked "(Corrected after 2e, Nov 2026)" below.*
+
 *Builds on P1, 2a, 2b, P3, 2c and the Phase-1 proposal `PHASE1b_monotone_did.md` (1b; decisions in 1b §D). Every proof step carries a justification tag: 2a §0.3, 2b §0.3, P3 §0.3, 2c §0.3, plus §0.3 below. Checks:*
 
 *Naming (Nov 2026): the difference-in-differences rungs were called D0–D8. They are now Δ0–Δ8, so they no longer clash with Phase 2b's Propositions D0–D7 (district dummies), which the review response cites.*
@@ -126,7 +128,7 @@ $$\delta^*=\widetilde{\text{DiD}}^{R1}/s,$$
 or $\infty$ if the lower end of $\mathcal B^{FD}_O$ is already positive. In words: **the smallest differential spillover onto non-veterans (in yes-rate points per unit of veteran share) that would erase the effect.**
 *Proof.* $\widetilde{\text{DiD}}=I+s(\Delta\kappa^{R1}-\Delta w_1)$. [FD2 step 2; L FD1(b)] Intersect with the outer set. [Def] ∎ Checked: Δ1 (slope $-s$).
 
-**Proposition FD4 (outer set without any restriction on $\Delta K$).** Let $\tau_t(x):=E[T_t\mid X=x]$ and let $x_j$ be the support points. Then
+**Proposition FD4 (outer set without any restriction on $\Delta K$).** *(Corrected after 2e, Nov 2026: this set is outer, not sharp; the sharp identified set under FD is 2e Prop. E8 (via 2e Lemma G′), typically strictly narrower when outcomes vary within a composition.)* Let $\tau_t(x):=E[T_t\mid X=x]$ and let $x_j$ be the support points. Then
 $$\Theta^{FD}_O:=\{\Delta k:\ \forall j\ \exists\,m_0\in S(x_j,\tau_0(x_j))\ \text{with}\ m_0+M_{\Delta H(\Delta k)}(x_j)\in S(x_j,\tau_1(x_j))\}$$
 contains the true $\Delta k$. The DiD bound is an LP in $(\Delta k,(m_0(x_j))_j)$. Moreover:
 * per-period LCE (M2 with periods) ⊆ FD, as model classes;
@@ -153,7 +155,7 @@ Checked:
   * $\delta^\Delta_W\ge0$: $\text{DiD}\le ER_\Delta$ (empty iff $ER_\Delta<D^-_0$);
   * $\delta^\Delta_W\le0$: $\text{DiD}\ge ER_\Delta$;
   * $\delta^\Delta_B\ge0$: $\text{DiD}\ge NM_\Delta$ (never empty);
-  * CR on changes: DiD lies between $NM_\Delta$ and $ER_\Delta$. **Never empty, and $\operatorname{sign}\text{DiD}=\operatorname{sign}ER_\Delta$.**
+  * CR on changes: DiD lies between $NM_\Delta$ and $ER_\Delta$. **Never empty, and $\operatorname{sign}\text{DiD}=\operatorname{sign}ER_\Delta$.** *(Corrected after 2e, Nov 2026: "never empty" holds for continuous tables without unit-level rows; the sign statement needs $\gamma<1$ and $ER_\Delta\ne0$ (as 2c M3(d)). With whole-ballot counts CR on changes can be empty (2e Prop. E26(c)), and unit rows can remove the equal-rates witness (2c C8b). R×C version: 2e Prop. E5.)*
 (c) If $\delta^\Delta_W=0$ (realised R4), then $\text{DiD}=ER_\Delta$, with no model.
 
 *Proof.*
@@ -251,7 +253,7 @@ Checked: Δ5.
 Let $\theta$ be veterans' post-war counterfactual rate had they not served; $ATT=B_{v1}-\theta$. Assumptions:
 * **(MTR)** $\theta\le B_{v1}$: service did not lower support [MTR];
 * **(ND)** $\theta\ge B_{v0}$: absent service, no decline from the pre-war level;
-* **(PS)** $\theta\ge B_{n1}$: future soldiers would have been at least as supportive as non-veterans; a positive-selection, [MTS]-type assumption.
+* **(PS)** $\theta\ge B_{n1}$: future soldiers would have been at least as supportive as non-veterans; a positive-selection, [MTS]-type assumption. *(Corrected after 2e, Nov 2026: $B_{n1}$ is the **observed** comparison rate, which equals non-veterans' untreated rate only if service had no spillover onto non-veterans. With a spillover $S$, PS reads $\theta\ge B_{n1}-S$; 2e Prop. E21 gives the set with a spillover dial $\lvert S\rvert\le\Lambda$.)*
 
 **Proposition CL.** Let $\mathcal F$ be any rung's (convex) identified set for $(B_{v0},B_{v1},B_{n1})$.
 (a) The ATT set is non-empty iff some $b\in\mathcal F$ has $b_{v1}\ge\max\{b_{v0},b_{n1}\}$. So **MTR+ND+PS are jointly refutable.**
@@ -259,7 +261,7 @@ Let $\theta$ be veterans' post-war counterfactual rate had they not served; $ATT
 $$U=\max_{b\in\mathcal F}\min\{b_{v1}-b_{v0},\ b_{v1}-b_{n1}\},$$
 an LP in epigraph form.
 (c) With two rows and the product structure of Δ0, $U=B^U_{v1}-\max\{B^L_{v0},B_{n1}(B^U_{v1})\}$. This is the owner's script line 336, which is therefore attained.
-(d) Under parallel trends, ATT = DiD. Bounded departures give ATT ∈ DiD ⊕ [−M, M] (Rambachan & Roth 2023).
+(d) Under parallel trends, ATT = DiD. Bounded departures give ATT ∈ DiD ⊕ [−M, M] (Rambachan & Roth 2023). *(Corrected after 2e, Nov 2026: "ATT = DiD" needs no anticipation and no spillover onto the comparison group; in general ATT = DiD − b + S (2e Lemma E14). A fixed bound $\lvert b\rvert\le M$ is a bounded-variation dial in the sense of Manski & Pepper (2018), not Rambachan–Roth, whose sets are relative magnitudes and smoothness (2e Defs 5.2–5.3, Props E18–E20). DiD ⊕ [−M, M] is outer: the sharp set also imposes that the counterfactual rates lie in [0, 1] (2e Cor. E17).)*
 
 *Proof.*
 1. ATT set $=\{b_{v1}-\theta:b\in\mathcal F,\ \max\{b_{v0},b_{n1}\}\le\theta\le b_{v1}\}$. [Def]
@@ -331,4 +333,4 @@ $$\text{per-period LCE (product)}\ \subseteq\ \text{FD};\qquad \text{M1-periods}
   * CLR over the support-point constraints (P3.5: the implemented CLR is algorithmic, Conjecture (b3); the projection interval (b2) and the conservative interval (a) are proved);
   * the breakdown value δ* (FD3) with its CI.
 * **Changing counts (Δ6)** and **interval bases** (§7): inference conditional on the census-based bases, with the 1860/1870 interval treated as known.
-* **The two targets** (1b §D.3): the actual DiD for the exact rungs, and the model-implied DiD for FD and LCE rungs. The actual-DiD allowance uses $(\sqrt{m_1(1-m_1)}+\sqrt{m_0(1-m_0)})^2$.
+* **The two targets** (1b §D.3): the actual DiD for the exact rungs, and the model-implied DiD for FD and LCE rungs. The actual-DiD allowance uses $(\sqrt{m_1(1-m_1)}+\sqrt{m_0(1-m_0)})^2$. *(Corrected after 2e, Nov 2026: this Bhatia–Davis form is not proved for a DiD (P3.5(c1) covers single cells; 6a Lemma 4.1 restricts Bhatia–Davis to single cells). The proved allowance is Popoviciu's with $\rho_i=2(w_{ir}+w_{is})$, i.e. $S_D=(\sum_i(w_{ir}+w_{is})^2)^{1/2}$, which also covers dependence between the two groups' changes within a unit (2e Lemma E12).)*

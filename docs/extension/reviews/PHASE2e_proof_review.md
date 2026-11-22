@@ -227,3 +227,60 @@ All eight items are real or accurately described.
 | **R32** | issue 18 (G7(c): nondifferential, rank condition) | — |
 
 Once the required fixes are made, the rows can read "**P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md)**", with R11c's sharp-FD-set inference still **O**, CLR versions algorithmic, the degree-3 TU class **C** (and not TU, issue 16), and the gap-register items **O** as 2e already says. The author-flagged open items (inference for the sharp FD set; integer TU beyond paths of pairs; integer causal endpoints; grouped rungs R16; CLR; conditional PT with covariates) are correctly labelled open and none is claimed elsewhere in 2e.
+
+---
+
+## 6. Round 2 confirmation (2e at `claude/did-theory` head `9da2203`)
+
+*Confirmation pass on the author's fixes (2e §12, the issue-by-fix table). `9da2203` was merged into this branch first. Reruns: `verify_phase2e.py` gives **76/76 PASS**, and its output is identical to the committed `verify_phase2e_output.txt`. The new section R covers issues 1, 2, 12 and 14. My `phase2e_review_checks.py` is unchanged and gives **15/15** again. Its [CX] checks test the mathematics behind the old statements, so they now agree with the corrected text: the E17 count instance is exactly 2e's new check E17 [F], and the E6 pure-unit instance falls under the new emptiness criterion.*
+
+### 6.1 Verdict per issue
+
+| # | Fix in 2e | Verdict |
+|---|---|---|
+| 1 | E17(b) is now an exact criterion | **fixed**. The "only if" is right: ATT ≤ D(n)+M+Λ ≤ max D+M+Λ, with equality only at an argmax with b = −M and S = Λ, and $\mathcal A$ is compact, so the end is attained. The margins-only claim is right as well. Under margins only, every maximiser of $D_t$ has the same aggregates: in R = 2, $B_{s^*}$ is a decreasing function of $B_{r^*}$ in each election; for a named pair or the rest, the maximum of a sum of separately maximised terms forces each term to its extreme (6a Lemma 2.1(b)). Every maximiser therefore minimises $\theta^{PT}$ and every minimiser maximises it, and the chain $\theta^{PT}(n^+)\le\theta^{PT}(n^-)\le1-M-\Lambda$ gives the outer conditions. My check "E17 [V]" (200 margins-only designs) agrees. |
+| 2 | E6(b) emptiness: empty iff max{0, D̄⁻} > min{D̄⁺, cap}, with its three cases | **fixed** |
+| 3 | E16 is stated in vector form; the integer witness is filled greedily; the case B = 0 is handled; K·K_F | **fixed**. The greedy integer choice is valid because $\theta_tA_{r^*}\le\sum_in_{ir^*ct}$, and both sides are integers. The continuous case is stated as masses. The comparison group's unit masses are now covered. |
+| 4 | Def. 5.1 item 0 (population); NA in E20 and E21, with the remark on ND/PS | **fixed** (see new item N2) |
+| 5 | E25 restated with (H1)–(H3), allowance boxes and union bound 1 − α_proj − Σα_q; (b) moved to Remark E25.1 | **fixed for the asymptotic statement**. (H1) matches corrected P3.5(b2)(ii), including the singular stackings. Under (H2) the rate limits are dropped under FD and the set is called outer. Under (H3) every actual $q$ is written $\tilde q+E_q$, with a box variable $e_q\in[-t_q,t_q]$. The proof is correct: on $\mathcal E\cap\bigcap_q\{|E_q|\le t_q\}$ the true point is feasible in the branch that holds at the truth at $\beta_0$, and P3.5(b2) steps 1–2 (weak duality on $\mathcal E$) bound every branch on the same event. Treating correlated residuals as separate boxes is conservative and valid. Boxes are counted over all $q$ of all branches and post-periods. The level $1-\alpha_{\rm proj}-\sum_q\alpha_q$ is right. See new items N3 and N4. |
+| 6 | Lemma E12 states the FD mean condition, restricts to change targets and lists the Lindeberg condition; E23 updated | **fixed** |
+| 7 | Lemma G′: selector of $(w,z)$, $\xi=\sigma(W,\zeta)$; $V$ a function of $W$; $V=X$ in E8 | **fixed** |
+| 8 | E9(c): "iff" for the Δk set, and for $\tilde D$ only when R = 2; finite support; $q_{\min}$ over chosen points | **fixed** |
+| 9 | E3(c): T ≥ 3 and a base range of positive length | **fixed** |
+| 10 | Def. 5.2 maps RR's δ to b − S; E18 cites the vector form of E16 | **fixed** |
+| 11 | "Fragile/worse" replaced by "the base width counts twice" | **fixed** |
+| 12 | §9.2 row: CR on both changes; the pre-only value [−0.416, 0.732] added | **fixed** |
+| 13 | N21 centre stated (DD midpoint) | **fixed** |
+| 14 | §8.1 counts are now 53/300 and 36/200; check G [V] compares the note with the run | **fixed** |
+| 15 | Renumbered: Lemma E12, Theorem E13; checks retagged; E21 comment corrected | **fixed**, apart from one stale citation (N1) |
+| 16 | E27: shorter proof added; consistent cycles noted; degree-3 star downgraded from C to **O** | **fixed**. The consistent-cycle remark holds in general by step 2's argument: each election lies in exactly two pairs with opposite contributions. Downgrading to O is right, because no-gap evidence on 180 objectives cannot support a conjecture whose natural proof route (TU) fails. |
+| 17 | E15's last sentence corrected; Def. 5.1 item 1 now conditional | **fixed** |
+| 18 | G1 uses E1 with $a_{irt}$; G5 linear-fractional; G7(c) "nondifferential" defined, with injectivity | **fixed**. The injectivity argument is correct. With $\Sigma_u$ constant, the regression identifies $\Delta Q'=\Delta Q+c\mathbf 1\mathbf 1^\top$ under A5 for $\bar q$ (since $\bar q^\top\mathbf 1=1$). Because $u$ sums to zero, $\Sigma_u\mathbf 1=0$, so $\operatorname{tr}(\Delta Q'\Sigma_u)=c$, which recovers $c$ and hence $\Delta Q$. |
+| 19 | E19(a): "with Λ = 0; a spillover allowance adds Λ" | **fixed** |
+
+### 6.2 Items introduced or left by the fixes (all wording-level or one sentence)
+
+* **N1 (wording).** The proof of Theorem E13 still cites "[E1; E13; 6a:R27]". It should read "[E1; E12; 6a:R27]" (the lemma).
+* **N2 (wording).** The summary bullet in §1.4 ("Rule (Definition 5.1 below)") still says that a causal label requires "a stated treated group and comparison group" and does not mention the population. Align it with the amended Def. 5.1 (items 0 and 1).
+* **N3 (wording).** E25 now has items (a) and (c) but no (b) (it became Remark E25.1). Reletter (c) as (b), or say "(b) removed".
+* **N4 (gap, one sentence).** E25(a)'s parenthetical says "(or for every $n$ with the Hoeffding radii and a finite-sample estimation event, as in P3.8)". P3.8's event is not a projection event. It relaxes each constraint row and the target, with δ = α_s/(J+2). Two things are therefore needed:
+  * The finite-sample version must relax every constraint row of every branch, with $J$ the total number of rows across branches, in place of the projection step.
+  * P3.8's Hoeffding radius uses $T_i$ in the simplex; for an FD rung the regressand $\Delta T_i$ lies in a difference of simplices, and the per-unit range doubles.
+
+  *Fix:* state the finite-sample version in those terms, or delete the parenthetical. The asymptotic statement does not depend on it.
+
+None of N1–N4 changes a result.
+
+### 6.3 Register rows: move to "P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md)"?
+
+| Row | Move? | Conditions and carried labels |
+|---|---|---|
+| **R11a** | **yes** | Grouped rungs with model rows stay R16 (O). |
+| **R11b** | **yes** | — (apply N2 when convenient) |
+| **R11b′** | **yes** | Includes (d) through E25's asymptotic statement. |
+| **R11c** | **yes, once N4 is applied** (one sentence, either way; no further review needed) | Inference for the sharp FD set stays **O**; CLR versions are algorithmic (P3.5(b3)). |
+| **R11d** | **yes** | The degree-3 class and several columns stay **O**/MILP; causal integer ends stay **O** (Remark 7.1). |
+| **R31** | **yes** for the register and Lemma G6 | The items themselves stay **O** (deferred to the uncertain-totals module). |
+| **R32** | **yes** for G7(a)–(c) as stated | R25(b)–(c) and the module stay **O**. |
+
+N1 and N3 are labelling fixes and do not block any row.

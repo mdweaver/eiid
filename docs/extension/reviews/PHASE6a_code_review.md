@@ -406,3 +406,86 @@ timeout 120 Rscript docs/extension/reviews/phase6a_code_review_checks.R hang pai
 # 0.3.1 comparison: install 9f575dd's package into LIB031, then
 Rscript docs/extension/reviews/phase6a_code_review_k10.R LIB031 OUT TESTDIR; Rscript ... default OUT TESTDIR; Rscript ... compare OUT
 ```
+
+---
+
+## Round 2 confirmation (claude/mcount-code at ef47982)
+
+*This pass reviews the developer's fixes on `claude/mcount-code` at ef47982 (fast-forwarded into this branch). That commit merges this review and theory bbf8cf4. Rglpk 0.6-5.1 and slam 0.1-56 are installed from CRAN (the same Rglpk version as Ubuntu's `r-cran-rglpk`).*
+
+### R2.1 What was rerun
+
+| Check | Result |
+|---|---|
+| R CMD check (`C.UTF-8`) | Status: 1 NOTE (`ei.Datasets`); tests **1866 pass / 0 fail / 3 skip** |
+| Oracle, small (420 instances), unpatched | 1,612 integer endpoints agree; **17 pairwise-ordering instances crash** with Rglpk "not conformable" (R2-1); 1 refusal (δ_W with Var 0, as specified) |
+| Oracle, MILP suite (1,200 instances), unpatched | **136 crashes** (R2-1: pairwise, linear, crossing-triple rows); every non-crashing endpoint agrees |
+| Oracle, large (24 instances), unpatched | 13 crashes (R2-1) |
+| All three suites with a review-only workaround for R2-1 (`phase6a_code_review_patch_zero.R`) | small: 1,753 integer + 1,957 continuous endpoints, **0 mismatches**; MILP suite: 6,029 + 6,403, **0 mismatches**, including the 4 instances of issue 1; large: 118 of 120 agree, and the other 2 are reported as "integer status unresolved (certificate not reached): LP outer bound". Both are outer and correctly labelled. All witnesses are valid; the 7 flagged by the checker are the LP tables of unresolved endpoints, as documented. |
+| K1–K16, I1–I13 | all PASS (K15 updated to the new §4.3 strings) |
+| K10 vs 0.3.1 (10 configurations) | still identical: `$table`, every other component, the print and the RNG stream (new components: `zdraws`, `counts`, `target`) |
+| `hang pair`, `hang W2` (5 units, N_i 200–1,500) | 0.1 s, integer-exact (MILP) |
+| Realistic scale (3×3, N_i 200–1,500, 2 targets, no binding) | pair δ_B: 0.4 s at 100 units, 9.4 s at 500; W2: 11.1 s at 100 (one endpoint "unresolved (time limit): LP outer bound"), 52.5 s at 500; mixture of totals: 0.3 s / 1.6 s; pairwise orderings: 1.1 s / 4.7 s |
+| `round2` mode | R2-1 reproduction; Rglpk-absent behaviour; the 200-unit switch; pruned vs full drop-one binding |
+
+### R2.2 Verdict per issue
+
+| Issue | Verdict | Evidence |
+|---|---|---|
+| 1 MILP optimality | **resolved**, apart from R2-1 | Integer objective from bigq. Second MILP certificate c'n ≥ v*+1, or ≤ v*−1 for minimisation (checked: for minimisation the row is −c'n ≥ −v*+1, which is right because c'n is an integer). 0 mismatches over 7,900 endpoints once R2-1 is worked around; I1 gives 1/3. |
+| 2 known-cell order | **resolved** | I2: U1 = 1, U2 = 4. Duplicates and wrong lengths are refused. |
+| 3 N_i = 0 regression | **resolved** | I3 ok under both targets |
+| 4 double coefficients | **resolved** | K7: 1/3 means 1/3 (convergent with q ≤ 1e6, tolerance 1e-12, printed). "1/3" as a string is exact. |
+| 5 all-zero W2 row | **resolved** | I5: dropped as vacuous, with a note |
+| 6 vacuous integrality check | **resolved** | integral to 1e-6 *before* rounding, plus value = LP optimum, otherwise MILP |
+| 7 outcome `where` | **resolved** | I7: `design = FALSE`, count layer only |
+| 8 floor totals | **resolved** | K14b: lower/upper totals are belief rows, `value =` totals identity |
+| 9 statuses | **resolved** | strings follow the new §4.3 rows of bbf8cf4 (K15) |
+| 10 Monte Carlo draws | **resolved** | K11b: 2.2e-16 (the fit's `zdraws` are reused) |
+| 11 unit selections | **resolved** | I11: out-of-range numbers and dropped units are clear errors |
+| 12 x/t labels | **resolved** | K8b: X/notX, T/notT |
+| 13 sign label | **resolved** | I13: "delta_B … (W1 vs rest …)" |
+| 14 wording | **resolved** | binding note; known label "50 values"; subset labels "[U1]"/"[U2]"; no Lindeberg note under Hoeffding; `sign = ">=0"` accepted |
+| 15 tests | **resolved as listed**, with one gap | `test-counts-review.R`, 17 tests. Its randomised MILP test uses a target that touches every unit, so it never reaches R2-1. |
+| 16 pair/W2 hang | **resolved** | terminates at realistic sizes; on the time limit the status is "unresolved: LP outer bound", never integer-exact |
+| nit (a) (proof review) | **correct; no reference output changes** | §R2.4 |
+
+### R2.3 New issue
+
+**R2-1 (bug, high; blocks release): a connected component with rows but a zero objective crashes the MILP certificate.**
+
+* **What.** `.ec_milp()` splits the problem into connected components and skips a component only when it has *no rows and* a zero objective. A component with rows but a zero objective goes to `.ec_milp_sub()`. There `cc` is all zero, and the certificate row `cbind(..., sense * cc)[cc != 0, ]` has no triplets. So `max(trip[, 1])` is one less than `length(dir)`, and `Rglpk_solve_LP` stops with "Arguments 'mat', 'dir', and/or 'rhs' not conformable."
+* **Why it is common.** It happens whenever a non-TU row lives in units that the target does not touch, which is the common case. Examples: pairwise orderings `order_unit(over = )` in every unit with a target over a county; a pair or W2 sign over a different unit set; a linear row elsewhere. The NS interface sketch has exactly this pattern.
+* **How often.** 17 of 30 small pairwise instances, 136 of 1,200 MILP-suite instances, and 13 of 24 large ones.
+* **Reproduction:** `Rscript phase6a_code_review_checks.R round2`, line `[R2-1]`. It uses 2 units, 3×2, `order_unit = list(row = "r1", over = "r2", col = "c1")` and `targets = list(rate("r1", "c1", where = "U1"))`.
+* **Fix.** In `.ec_milp_sub()`, if `all(cc == 0)` return `optimal` with the first exactly checked feasible solution, since any feasible point is optimal (or skip the certificate). Alternatively, in `.ec_milp()`, solve zero-objective components only for feasibility. Add a test with a pairwise ordering in all units and a target on one unit.
+* **Effect of a fix.** With a workaround that treats the empty certificate row as infeasible, all three oracle suites agree exactly (R2.1). So this one-line fix is the only thing left between the code and a clean pass.
+
+### R2.4 The points the coordinator asked about
+
+* **Certificate logic.** Sound.
+  * It certifies only a solution that is integral to 1e-6, passes the exact rational check against the original rows and margins, and admits no strictly better integer table in the (outward-relaxed) system.
+  * A better table found by the certificate MILP becomes the next incumbent, for up to 5 rounds; after that the status is "unresolved (certificate not reached)", which is sound and appeared twice in the large suite.
+  * Remaining risk, low: the scaled integer objective may reach 1e9. With n in the thousands, GLPK's relative tolerances could in principle misjudge a cut c'n ≥ v*+1. A false "feasible" only costs a round, but a false "infeasible" (status 4) would certify a non-optimum. Not seen in 7,900 endpoints. Lowering the cap, or checking the certificate cut's slack, would close it.
+* **GLPK status 1.** Handled correctly. Status 1 (undefined: presolve found the relaxation infeasible, or the time limit hit with no incumbent) counts as infeasibility only when lpSolve confirms the LP relaxation is infeasible; otherwise "unresolved (time limit)". Status 2 (time limit with an incumbent) is never certified. N10c is reported integer-infeasible (K4).
+* **Outward relaxation.**
+  * Rows with integer coefficients over 2^40 are normalised to unit max-norm and widened by 1e-6·max(1,|bound|).
+  * The MILP therefore solves a superset of the integer set: an infeasible superset proves infeasibility, and a superset optimum is certified only if it passes the exact check on the original rows.
+  * Correct. Optimum tables lying in the 1e-6 band come back "unresolved (solver tolerance)", never wrong.
+* **Without Rglpk.**
+  * Every MILP endpoint becomes "integer status unresolved (no MILP solver (install package Rglpk)): LP outer bound", for example [−1, 0.444] instead of [−1, 1/3]. It is outer and labelled.
+  * TU-class systems are unaffected (T5 still integer-exact), and the joint LPs fall back to lpSolve.
+  * Acceptable. But since the advertised integer check needs Rglpk, consider moving Rglpk and slam to Imports, or printing the install hint once at load.
+* **The 200-unit binding switch.**
+  * `binding = "auto"` computes binding rows at 200 units and prints "binding rows not computed (more than 200 units; set binding = TRUE)" at 201.
+  * The pruning is correct: by complementary slackness, a restriction that is slack at the optimal LP vertex has a zero dual in every optimal dual solution, so removing it leaves the vertex optimal. The test uses a conservative 1e-7 activity tolerance, and pruning applies only to the LP or TU path, without CR or MILP.
+  * Pruned and full drop-one agree on 114 random endpoint pairs.
+* **Nit (a)**, the studentised maximum over terms with se > 1e-12·max(se). Correct:
+  * A term with se = 0 does not depend on β, so its row holds exactly with any k ≥ 0.
+  * k̂ ≥ 0 because the maximum includes |Z_target|, or else the (1−α)-quantile of a maximum of normals, which is ≥ 0 for α ≤ ½.
+  * Moreover quantile_{1−α}(max(0, M)) = max(0, quantile_{1−α}(M)), so dropping exact zeros changes nothing at α ≤ ½. Only terms with 0 < se ≤ 1e-12·max(se), which are numerical zeros that the old code studentised as noise, can change k̂, and then only downward.
+  * Reference outputs that change: **none found**. All 10 K10 configurations, plus M0, M1, M1(δ) with δ = 0.05, M2 and L4 under both `ci = "conservative"` and `"clr"` on `rxc_example_3x3.csv`, are numerically identical to 0.3.1 (max |diff| = 0). So the "can narrow slightly" in the developer's note applies only to inputs whose zero-SE rows come out as floating-point noise, not to the shipped reference data.
+
+### R2.5 Release readiness for step 1
+
+**No, not yet.** Everything from round 1 is resolved and verified, but R2-1 crashes the default call in a common configuration: a non-TU row in units the target does not touch. With the one-line fix in R2.3, and a test for it, I would expect a clean pass: the oracle suites already agree exactly with a workaround in place. If the fix lands as described, rerun `phase6a_code_review_checks.R round2` and the three oracle suites unpatched. If those pass, step 1 is ready to release.

@@ -322,10 +322,10 @@ fs <- eiBounds(cbind(o1, o2, o3) ~ cbind(g1, g2, g3), data = dd3, group = dd3$gr
                restrictions = list(assoc = list(list(type = "dW", row = 1, col = 1, sign = 1))))
 st[["M1+sign"]] <- fs$counts$cross$table$status
 for (m in names(st)) cat(sprintf("    %-8s %s\n", m, st[[m]]))
-report("K15 status strings follow the 6a table", grepl("^P \\(asymptotic\\)$", st$M0) && grepl("R16", st[["M1+sign"]]) &&
-         grepl("regime R1", st$M1) && grepl("point-identified", st$L6),
-       "M0: P (asymptotic); M1/M2: P only in R1, simulation otherwise; grouped + sign rows: no theorem (R16); L5/L6: labelled 'P (asymptotic; point-identified rung ...)' though 6a §4.3 has no row for it (developer point b)",
-       finding = TRUE)
+ok15 <- grepl("asymptotic", st$M0) && grepl("R16", st[["M1+sign"]]) && grepl("R1", st$M1) &&
+  grepl("point-identified", st$L6) && grepl("R1", st$L5) && grepl("L4", st$L4)
+report("K15 status strings follow the 6a Sec. 4.3 table (rows added in bbf8cf4)", ok15,
+       "M0, pooled L4, L6: asymptotic; M1/M2, L5 with groups: R1 only; grouped + sign rows: R16", finding = !ok15)
 }
 
 if (length(args) && args[1] %in% c("sim")) {
@@ -457,4 +457,55 @@ for (p in c(3, 5)) {
   f <- eiCounts(cbind(o1, o2, o3) ~ cbind(g1, g2, g3), data = d, targets = list(rate("g1", "o1")), binding = FALSE, restrictions = rs)
   cat(sprintf("p = %d (%s): %.1f s, %s\n", p, kind, proc.time()[3] - t0, f$table$integer_status))
 }
+}
+
+if (length(args) && args[1] == "round2") {
+# R2-1: a component with rows but a zero objective crashes the certificate (Rglpk "not conformable")
+d <- data.frame(u = c("U1", "U2"), r1 = c(2, 3), r2 = c(3, 2), r3 = c(1, 1), c1 = c(3, 3), c2 = c(3, 3))
+f <- tryCatch(eiCounts(rows = c("r1", "r2", "r3"), cols = c("c1", "c2"), data = d, unit = "u",
+                       targets = list(rate("r1", "c1", where = "U1")),
+                       restrictions = list(order_unit = list(row = "r1", over = "r2", col = "c1"))),
+              error = function(e) conditionMessage(e))
+cat("[R2-1] ", if (is.character(f)) paste("CRASH:", f) else "ok", "\n"); invisible(if (is.character(f)) f else f$table[, c("lower", "upper", "integer_status")])
+# (1) Rglpk absent
+d <- data.frame(r1=c(2,1,1), r2=c(3,1,2), c1=c(1,2,1), c2=c(3,0,1), c3=c(1,0,1))
+run <- function() eiCounts(rows=c("r1","r2"), cols=c("c1","c2","c3"), data=d, binding=FALSE,
+  targets=list(gap("r1","r1","c2", where=1:2, where2=3L), rate("r1","c1")),
+  restrictions=list(linear=list(cells=data.frame(unit=c(1L,3L), row="r1", col=c("c3","c2"), coef=c(3,0.5)), lower=1.65)))
+f1 <- run()
+unlockBinding(".ec_have_glpk", ns); assign(".ec_have_glpk", function() FALSE, envir = ns)
+f0 <- run()
+cat("Rglpk present:", f1$table$integer_status[1], sprintf("[%.4f, %.4f]", f1$table$lower[1], f1$table$upper[1]), "\n")
+cat("Rglpk absent: ", f0$table$integer_status[1], sprintf("[%.4f, %.4f]", f0$table$lower[1], f0$table$upper[1]), "\n")
+A5 <- rbind(c(1,4), c(1,4)); dd <- data.frame(r1=A5[,1], r2=A5[,2], c1=A5[,1], c2=A5[,2])
+g0 <- eiCounts(rows=c("r1","r2"), cols=c("c1","c2"), data=dd, targets=list(rate("r1","c1")), restrictions=list(order_unit=list(row="r1", col="c1")))
+cat("Rglpk absent, TU class (T5):", g0$table$integer_status, g0$table$lower * 2, "\n")
+assign(".ec_have_glpk", function() requireNamespace("Rglpk", quietly = TRUE), envir = ns)
+# (2) binding = "auto" switch at 200 units
+set.seed(3)
+mk <- function(p) { N <- sample(20:60, p, TRUE); a <- rbinom(p, N, .4); y <- rbinom(p, N, .5)
+  data.frame(u = paste0("U", 1:p), r1 = a, r2 = N - a, c1 = y, c2 = N - y) }
+for (p in c(200, 201)) { dp <- mk(p)
+  f <- eiCounts(rows=c("r1","r2"), cols=c("c1","c2"), data=dp, unit="u", targets=list(rate("r1","c1")),
+                restrictions=list(box=list(units="U1", row="r1", col="c1", lower=min(dp$r1[1], dp$c1[1]))))
+  o <- capture.output(print(f)); cat(sprintf("p = %d: binding_lower = '%s'; print mentions binding: %s\n", p, f$table$binding_lower,
+     paste(grep("inding", o, value = TRUE), collapse = " | "))) }
+# (3) pruning vs full drop-one agree (random TU instances)
+set.seed(11); nd <- 0; nt <- 0
+for (k in 1:40) { dp <- mk(sample(4:12, 1)); p <- nrow(dp)
+  rs <- list(box = list(list(units = sample(dp$u, 1), row = "r1", col = "c1", lower = 1.3), list(units = sample(dp$u, 1), row = "r1", col = "c2", upper = 5.7)),
+             total = list(units = dp$u[1:ceiling(p/2)], row = "r1", col = "c1", lower = sum(pmax(0, dp$r1 + dp$c1 - dp$r1 - dp$r2)[1:ceiling(p/2)]) + 2.2),
+             order_unit = list(row = "r1", col = "c1", units = dp$u[2:3]))
+  f <- tryCatch(eiCounts(rows=c("r1","r2"), cols=c("c1","c2"), data=dp, unit="u", targets=list(rate("r1","c1"), rate("r2","c2"), gap("r1","r2","c1")), restrictions=rs, binding=TRUE), error=function(e) NULL)
+  if (is.null(f) || any(is.na(f$table$lower))) next
+  # full drop-one by hand
+  ids <- f$restrictions$id
+  for (j in seq_len(nrow(f$table))) { nt <- nt + 1
+    full <- c(character(0)); fullu <- character(0)
+    for (s in seq_along(ids)) { b <- f$built; b$common <- Filter(function(r) r$id != ids[s], b$common)
+      r0 <- ns$.ec_range(f$P, b, f$targets[[j]], "auto", keep_x = FALSE)
+      if (!is.na(r0$lower) && r0$lower < f$table$lower[j] - 1e-9) full <- c(full, ids[s])
+      if (!is.na(r0$upper) && r0$upper > f$table$upper[j] + 1e-9) fullu <- c(fullu, ids[s]) }
+    if (paste(full, collapse = ", ") != f$table$binding_lower[j] || paste(fullu, collapse = ", ") != f$table$binding_upper[j]) nd <- nd + 1 } }
+cat(sprintf("binding pruning vs full drop-one: %d endpoints pairs compared, %d disagree\n", nt, nd))
 }

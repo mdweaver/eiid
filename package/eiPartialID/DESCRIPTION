@@ -1,7 +1,7 @@
 Package: eiPartialID
 Type: Package
 Title: Ecological Regression with Partial Identification
-Version: 0.3.1
+Version: 0.4.0
 Author: Wenxin Jiang, Gary King, Allen Schmaltz, Martin A. Tanner
 Maintainer: Allen Schmaltz <schmaltz@fas.harvard.edu>
 Contact: <wjiang@northwestern.edu,king@harvard.edu,schmaltz@fas.harvard.edu,mat132@northwestern.edu>
@@ -17,7 +17,10 @@ Description: Estimate district-level bounds for 2x2 ecological inference based o
     analysis. Version 0.3.0 adds signs on mean associations and contextual reinforcement
     (experimental), projection intervals with a rank guard, and a bootstrap pooling test.
     Version 0.3.1 prints which result covers each fit's confidence intervals and bases the
-    projection intervals and their variance bound on proved results only.
+    projection intervals and their variance bound on proved results only. Version 0.4.0 adds
+    the count layer: exact bounds on actual counts and rates from the unit margins and rows on
+    the realised table, with an integer check and witness tables, and its combination with the
+    model layer.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

@@ -1,3 +1,50 @@
+# eiPartialID 0.4.0
+
+Build step 1 (M-COUNT): the count layer. Theory: `docs/extension/PHASE6a_count_layer.md`
+(R19, R27; proof reviewed); contract §6 (C1-C10).
+
+* New `eiCounts()`: exact bounds on actual (realised) counts and rates from the unit
+  margins and rows on the realised table. Targets: `rate()` (merged groups and sums over
+  columns allowed), `gap()` (one-column contrasts, differences over unit sets),
+  `ovr_gap()` (the one-vs-rest gap D^r_c), `share()` (outcome-margin denominator; count
+  layer only) and `combo()`, each with `where =` unit subsets. Rows: known cells,
+  structural zeros, cell boxes, published totals, general linear rows, realised unit
+  orderings (one-vs-rest = boxes; pairwise for R >= 3), the 2 x 2 odds-ratio dial,
+  realised association signs (W1 as totals; pair and W2 with unequal coefficients) and
+  realised CR (a union of two systems). Sign and CR rows print EXPERIMENTAL.
+* Integer check `integer = c("auto", "lp", "exact")`. With exactly integer margins,
+  "auto" rounds every row inward in exact rational arithmetic (new import: `gmp`), tests
+  whether the whole row set lies in one total-unimodularity class of R19(b) (two laminar
+  families by 2-colouring the crossing graph; one column or row; R = 2 or C = 2) and then
+  reports the LP over the rounded rows as "integer-exact (TU class)"; otherwise every
+  endpoint (and CR branch) is a MILP ("integer-exact (MILP)"). Integer infeasibility with
+  continuous feasibility is reported as "no whole-number table satisfies these rows".
+  Non-integer margins (estimates, or data given as shares) switch the check off with the
+  note "exact only for the stated margins".
+* `witness()`: a table attaining each endpoint, checked against every margin and row
+  (exactly for whole-number tables); a certificate of attainability, not an estimate.
+* Binding rows per endpoint (drop-one test).
+* Cross-layer block (R27): with `model =` an `eiBounds()` fit (or inside `eiBounds()`),
+  the count set is intersected with an actual-target model interval: the projection
+  interval (or the conservative one) for the model-implied value plus the residual
+  allowance of 6a Lemma 4.1 (Popoviciu S_phi, or Hoeffding t_E with
+  `allowance = "hoeffding"`), for multi-cell targets too, with the representation of the
+  target chosen from the design. Count rows and model rows never share one LP.
+  Disjointness is reported as a test, with the wording of contract C8 for identity rows
+  only and for belief rows. The status is that of the model interval (6a §4.3).
+* `eiBounds()` embeds the count layer (decisions D1/D2). New arguments `target`
+  (`"actual"`, default: the actual-rate block first, Duncan-Davis first; `"model"`: the
+  old print order), `counts` (count rows) and `integer`. `assoc`/`cr` restrictions with
+  `object = "actual"` go to the count layer; `object = c("actual", "model")` is refused.
+  `$table` gains `dd_exact_lower`/`dd_exact_upper` (the exact margins-only LP);
+  `dd_lower`/`dd_upper` and every model column are unchanged. The printed
+  `duncan_davis` column shows the exact range under `target = "actual"`; it differs from
+  the old cellwise column only for combination targets, where the old one is outer
+  (6a Lemma 2.1(c), §9 item 3).
+* Tests: `tests/testthat/test-counts.R` (contract C10: DD reproduction, brute-force
+  enumeration per TU class, MILP rows and mixtures, T5, S5, RC11, N10c, RC9, 2c M2/M3
+  closed forms, witnesses, the C8 wording, the embedding).
+
 # eiPartialID 0.3.1
 
 Package side of the second-round referee reports (Batch B ecological-inference

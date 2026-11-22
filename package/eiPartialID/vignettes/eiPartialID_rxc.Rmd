@@ -25,6 +25,7 @@ Version 0.3.0 adds signs on mean associations and contextual reinforcement
 (experimental; see below), a rank guard for the projection intervals and a
 bootstrap pooling test. Version 0.3.1 prints, for each fit, which result covers its
 confidence intervals (see "What is reported"); `NEWS.md` lists the changes.
+Version 0.4.0 adds the count layer, `eiCounts()` (see "Actual counts" below).
 
 ## What is reported
 
@@ -340,6 +341,64 @@ How to read and report these:
 
 `ladder()` takes sign and CR rungs through `sign_rungs`, e.g.
 `sign_rungs = list("M0 + CR" = list(restrictions = list(cr = list(list(row = 1, col = 1)))))`.
+
+## Actual counts: the count layer (`eiCounts()`)
+
+Version 0.4.0 adds a layer with no model at all. `eiCounts()` bounds the *actual*
+counts and rates in these units, using only the unit margins and statements about
+the realised table (PHASE6a). With two precincts (100 men each; 20 and 60 veterans;
+30 and 50 yes votes), the margins alone give the Duncan–Davis range for the
+veterans' yes rate. The belief "in each precinct veterans voted yes at least as
+often as the other men" raises the floors to 6 and 30 veteran yes votes:
+
+```{r counts}
+d <- data.frame(precinct = c("P1", "P2"), vet = c(20, 60), other = c(80, 40),
+                yes = c(30, 50), no = c(70, 50))
+fit <- eiCounts(cbind(yes, no) ~ cbind(vet, other), data = d, unit = "precinct",
+                targets = list(rate("vet", "yes"), gap("vet", "other", "yes"),
+                               rate("vet", "yes", where = precinct == "P2")),
+                restrictions = list(order_unit = list(row = "vet", col = "yes"),
+                                    total = list(units = c("P1", "P2"), row = "vet",
+                                                 col = "yes", lower = 40)))
+fit
+witness(fit, 1)
+```
+
+* The first column is always the margins-only range, computed as an exact LP. For
+  a single cell or a gap between two groups on one outcome it equals the
+  Duncan–Davis bounds; for targets that add several cells (merged groups, the
+  one-vs-rest gap `ovr_gap()` with three or more groups) it is narrower than
+  adding up the cell ranges.
+* Rows: `known`, `zero`, `box`, `total`, `linear`, `order_unit`, `odds` (2 x 2),
+  `sign` and `cr` (realised associations; experimental). Each is a belief or a
+  fact about the realised table (`object = "actual"`); model rows belong to
+  `eiBounds(restrictions = )`.
+* The integer status says whether whole-number tables were checked:
+  "integer-exact (TU class)" (the rows were rounded in exact arithmetic and the LP
+  is exact for whole numbers), "integer-exact (MILP)" (rows that need an integer
+  program, such as pairwise orderings), "continuous only" (`integer = "lp"`) or
+  "not applicable: non-integer margins". Estimated counts (e.g. matched veteran
+  counts) are not integers; the range is then exact only for the stated margins.
+* `witness()` gives a table reaching each end: a certificate that the end is
+  attained, not an estimate.
+
+`eiBounds()` now prints this block first (`target = "model"` restores the old
+order). With a model fit, the count set is intersected with an interval for the
+*actual* rate (the model interval plus the residual allowance of PHASE6a
+Lemma 4.1); the two layers are never mixed in one LP. If the two are disjoint, the
+printout says what is rejected: the model with its rows when the count rows are
+facts (margins, published totals, audited cells), and "the model or a belief row"
+when they include beliefs.
+
+```{r counts-cross, eval = has_eco}
+data("census", package = "eco")   # counts rounded from the shares, for illustration only
+cen <- data.frame(black = round(census$N * census$X), white = census$N - round(census$N * census$X),
+                  lit = round(census$N * census$Y), illit = census$N - round(census$N * census$Y))
+m <- eiBounds(cbind(lit, illit) ~ cbind(black, white), data = cen, model = "M0", seed = 1,
+              tests = FALSE, target = "model")
+eiCounts(cbind(lit, illit) ~ cbind(black, white), data = cen, model = m,
+         targets = list(rate("black", "lit"), gap("black", "white", "lit")), binding = FALSE)
+```
 
 ## Sensitivity and breakdown
 

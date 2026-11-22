@@ -33,6 +33,12 @@
   if (any(!is.finite(A)) || any(!is.finite(B))) stop("missing or non-finite counts")
   if (any(A < 0) || any(B < 0)) stop("counts must be nonnegative")
   NA_ <- rowSums(A); NB <- rowSums(B)
+  if (!isTRUE(integer_input)) {
+    # shares or rescaled margins: equalise the column totals to the row totals (rounding noise)
+    if (any(abs(NA_ - NB) > 1e-6 * pmax(NA_, NB, 1))) stop("row and column totals differ in some units")
+    B <- B * ifelse(NB > 0, NA_ / NB, 0); NB <- rowSums(B)
+    tol <- 1e-9
+  }
   if (any(abs(NA_ - NB) > tol * pmax(NA_, NB, 1)))
     stop("row and column totals differ in some units: the count layer needs the same population in both margins")
   keep <- NA_ > 0
@@ -233,6 +239,7 @@
     min(max(rts[1], L), U)
   }
   lo <- NULL; hi <- NULL
+  out <- list(lo = if (psiL > 0) root(psiL) else NULL, hi = if (is.finite(psiU)) root(psiU) else NULL)
   if (P$integer) {
     gq <- function(k, psi) { k <- gmp::as.bigq(k); kq <- k * (gmp::as.bigq(N - a - b) + k) -
       psi * (gmp::as.bigq(a) - k) * (gmp::as.bigq(b) - k); kq }
@@ -248,11 +255,9 @@
       while (k + 1 <= U && gq(k + 1, ps) <= 0) k <- k + 1
       hi <- k
     }
-  } else {
-    if (psiL > 0) lo <- root(psiL)
-    if (is.finite(psiU)) hi <- root(psiU)
+    out$lo_int <- lo; out$hi_int <- hi
   }
-  list(lo = lo, hi = hi)
+  out
 }
 
 # ---------------------------------------------------------------------------
@@ -292,9 +297,10 @@
 # ---------------------------------------------------------------------------
 # restrictions -> rows (common rows, and CR unions)
 # ---------------------------------------------------------------------------
-.ec_types <- c("known", "zero", "box", "total", "order_unit", "odds", "sign", "cr")
+.ec_types <- c("known", "zero", "box", "total", "order_unit", "odds", "sign", "cr", "linear")
 .ec_default_role <- c(known = "identity", total = "identity", zero = "belief", box = "belief",
-                      order_unit = "belief", odds = "belief", sign = "belief", cr = "belief")
+                      order_unit = "belief", odds = "belief", sign = "belief", cr = "belief",
+                      linear = "belief")
 
 .ec_label_of <- function(P, s, type) {
   rr <- function(r) paste(P$rows[r], collapse = "+"); cc <- function(c) paste(P$cols[c], collapse = "+")
@@ -312,6 +318,7 @@
                               if (s$sign > 0) ">=" else "<=",
                               if (is.null(s$over)) "rest" else rr(s$over), cc(s$col),
                               if (s$slack > 0) sprintf(" (slack %g)", s$slack) else ""),
+         linear = sprintf("linear row on %d cells in [%s, %s]", length(s$idx), format(s$lower), format(s$upper)),
          odds = sprintf("odds-ratio dial [%g, %g] in %s", s$psi[1], s$psi[2], us(s$units)),
          sign = sprintf("realised %s %s %s on %s (%s%s, %s)%s",
                         if (s$type == "dB") "delta_B" else "delta_W",
@@ -371,6 +378,17 @@
     if (!is.null(out$over) && out$over == out$row) stop("order_unit: 'over' must differ from 'row'")
     if (!is.null(out$over) && P$R == 2) out$over <- NULL           # R = 2: the other row is the rest
     out$sign <- sign(if (is.null(s$sign)) 1 else as.numeric(s$sign))
+  } else if (type == "linear") {
+    cl <- s$cells
+    if (is.null(cl) || !all(c("unit", "row", "col", "coef") %in% names(cl)))
+      stop("linear: 'cells' must be a data frame with columns unit, row, col, coef")
+    ui <- .ec_units(P, units = cl$unit, env = env, what = "linear")
+    if (length(ui) != length(unique(cl$unit))) stop("linear: some units are unknown or have N_i = 0")
+    um <- if (is.character(cl$unit) || is.factor(cl$unit)) match(as.character(cl$unit), P$units) else match(as.integer(cl$unit), P$orig)
+    out$idx <- .ec_vix(P, um, .ec_idx(cl$row, P$rows, "row"), .ec_idx(cl$col, P$cols, "col"))
+    out$coef <- as.numeric(cl$coef)
+    out$lower <- if (is.null(s$lower)) -Inf else as.numeric(s$lower)
+    out$upper <- if (is.null(s$upper)) Inf else as.numeric(s$upper)
   } else if (type == "odds") {
     if (P$R != 2 || P$C != 2) stop("odds: the odds-ratio dial is defined for 2 x 2 tables only")
     ps <- as.numeric(s$psi)
@@ -432,11 +450,23 @@
                     -nm(s$slack) * a * aq, NULL))
       }
     }
+  } else if (s$type == "linear") {
+    # merge duplicate cells; coefficients are taken as exact rationals of the given doubles
+    u <- sort(unique(s$idx)); cf <- vapply(u, function(k) sum(s$coef[s$idx == k]), 0)
+    add(.ec_row(P, id, "gen", u, cf, if (is.finite(s$lower)) s$lower else NULL,
+                if (is.finite(s$upper)) s$upper else NULL))
   } else if (s$type == "odds") {
     for (i in s$units) {
       bx <- .ec_odds_box(P, i, s$psi[1], s$psi[2])
       if (is.null(bx) || (is.null(bx$lo) && is.null(bx$hi))) next
-      bnd(i, 1, 1, bx$lo, bx$hi)
+      # the continuous LP uses the (irrational) roots; with integer margins the exact checks and
+      # the rounded row use the integer bounds found in exact arithmetic (same integer points)
+      row <- .ec_row(P, id, "bound", .ec_vix(P, i, 1, 1), 1, bx$lo, bx$hi, cell = c(1, 1), units = i)
+      if (P$integer) {
+        row$loq <- if (is.null(bx$lo_int)) NULL else gmp::as.bigq(bx$lo_int)
+        row$hiq <- if (is.null(bx$hi_int)) NULL else gmp::as.bigq(bx$hi_int)
+      }
+      add(row)
     }
   } else if (s$type == "sign") {
     S <- s$units; r <- s$row; c <- s$col

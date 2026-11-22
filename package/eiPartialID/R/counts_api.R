@@ -219,7 +219,7 @@ combo <- function(..., weights, label = NULL) {
     type <- names(restrictions)[j]
     if (type %in% names(.ec_aliases)) type <- .ec_aliases[[type]]
     v <- restrictions[[j]]
-    if (is.null(v)) next
+    if (is.null(v) || !length(v)) next
     specs <- if (is.list(v) && length(v) && all(vapply(v, is.list, TRUE))) v else list(v)
     for (s in specs) {
       ps <- .ec_parse_spec(P, type, s, env)
@@ -836,7 +836,7 @@ eiCounts <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL, x = 
 #' @export
 print.eiCounts <- function(x, digits = 3, ...) {
   .ec_print_block(x, digits)
-  .ec_print_cross(x$cross, digits)
+  .ec_print_cross(x[["cross"]], digits)
   cat("  witness(fit) gives a table attaining each endpoint (a certificate of attainability, not an estimate)\n")
   invisible(x)
 }

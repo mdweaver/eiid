@@ -193,7 +193,7 @@ Target: the veterans' yes rate across both precincts (80 veterans).
   * the realised association signs $\delta_B,\delta_W$ of 2c M1 (rows in $n$);
   * CR as a union of two LPs;
   * slack dials, as in 2c M2(d);
-  * the odds-ratio dial of NEW_AVENUES §12.3(c) for 2×2 and pairwise 2×C: each unit's group-by-outcome odds ratio in $[\psi_L,\psi_U]$, a unit-level interval because the cell is monotone in the odds ratio. Ordering is $\psi_L=1$. In P2 of the example, an odds ratio between 1 and 4 gives the veteran rate [0.500, 0.633] instead of [0.500, 0.833] (N17). Label it untestable when the dial contains 1.
+  * the odds-ratio dial of NEW_AVENUES §12.3(c) for 2×2 and pairwise 2×C: each unit's group-by-outcome odds ratio in $[\psi_L,\psi_U]$, a unit-level interval because the cell is monotone in the odds ratio. Ordering is $\psi_L=1$. In P2 of the example, an odds ratio between 1 and 4 gives the veteran rate [0.500, 0.633] for continuous tables (0.617 = 37/60 with whole people, since an odds ratio of 4 falls between integer tables) instead of [0.500, 0.833] (N17). Label it untestable when the dial contains 1.
 * **Proof items.**
   * Proposed **R19**:
     * (a) the bound is the LP over the product of unit transportation polytopes, intersected with the rows. This is standard.
@@ -1140,7 +1140,7 @@ The ladder shows how quickly the LCE answer gives way as curvature is allowed.
 * **Example** (new, N17). Precinct P2's veteran yes rate:
   * DD: [0.167, 0.833];
   * odds ratio ≥ 1: [0.500, 0.833];
-  * odds ratio between 1 and 4: [0.500, 0.633].
+  * odds ratio between 1 and 4: [0.500, 0.633] (continuous; [0.500, 0.617] with whole people).
 * **Verdict: build now, inside Step 1**, as a unit-level restriction type, for 2×2 and pairwise 2×C. It serves yours and others' data. Label it as untestable when the dial contains 1.
 
 *(d) Outcome nesting with slack.* Count layer, in **Step 2's** party work (§4.3).
@@ -1368,7 +1368,7 @@ So the data cannot sign the correlation. Without the module, A2 must *assume* it
 | N12a–c | Kitagawa identity; contrast example [0, 0.20]; under LCE the secant terms equal the P-S objects at the midpoint | max diff 2.5e-16 |
 | N13, N14 | Exception-mass and misclassification examples | confirmed |
 | N16 | Polynomial-ladder example: straight lines [0.436, 0.779] ⊂ quadratic [0.419, 0.796] ⊂ cubic [0.359, 0.820] ⊂ DD [0.324, 0.834] | confirmed |
-| N17 | Odds-ratio dial example: OR ≥ 1 gives [0.500, 0.833]; 1 ≤ OR ≤ 4 gives [0.500, 0.633] | confirmed |
+| N17 | Odds-ratio dial example: OR ≥ 1 gives [0.500, 0.833]; 1 ≤ OR ≤ 4 gives [0.500, 0.633] (continuous; 0.617 integer, per the M-COUNT code review) | confirmed |
 | N18 | Hull contrasts (O_rs ≥ 0 at every support point) imply the model between sign δ_B(r,s) ≥ 0 | 0 violations |
 | N19 | Berkson correction for matched composition: E[T \| q] = q̄'Qq̄ + Var(u)·(Q_vv − 2Q_vn + Q_nn) | max error 3e−5 against simulation |
 | N20 | Estimated margin: expected count 60 treated as exact gives [0.167, 0.833]; true count in its 95% Poisson-binomial set [56, 64] gives [0.107, 0.893] | confirmed |

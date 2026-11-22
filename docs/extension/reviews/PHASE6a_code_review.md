@@ -489,3 +489,55 @@ Rscript docs/extension/reviews/phase6a_code_review_k10.R LIB031 OUT TESTDIR; Rsc
 ### R2.5 Release readiness for step 1
 
 **No, not yet.** Everything from round 1 is resolved and verified, but R2-1 crashes the default call in a common configuration: a non-TU row in units the target does not touch. With the one-line fix in R2.3, and a test for it, I would expect a clean pass: the oracle suites already agree exactly with a workaround in place. If the fix lands as described, rerun `phase6a_code_review_checks.R round2` and the three oracle suites unpatched. If those pass, step 1 is ready to release.
+
+---
+
+## Round 3 (final): claude/mcount-code at 81dc21d
+
+*This pass reviews 81dc21d (merged into this branch; it includes 9301fab). Rglpk and slam are now in Imports. scipy here is 1.18.1. The oracle now calls `scipy.optimize.milp` with `options = {"mip_rel_gap": 0}`.*
+
+### R3.1 Results
+
+| Check | Result |
+|---|---|
+| R CMD check (`C.UTF-8`) | Status: 1 NOTE (`ei.Datasets`); tests **1897 pass / 0 fail / 3 skip** |
+| Oracle, small (420), **unpatched** | 1,753 integer + 1,957 continuous endpoints, **0 mismatches**; 3,506 witnesses valid; 1 refusal (δ_W with Var 0, as specified) |
+| Oracle, MILP suite (1,200), **unpatched** | 6,029 integer + 6,403 continuous endpoints, **0 mismatches**; 12,058 witnesses valid |
+| Oracle, large (24), **unpatched**, regenerated with `mip_rel_gap = 0` | 120 + 120 endpoints, **0 mismatches**; 240 witnesses valid. The two endpoints that were "unresolved (certificate not reached)" in round 2 are now certified. |
+| `round2` mode | `[R2-1] ok`. Rglpk absent: labelled LP outer bound. 200/201-unit binding switch as documented. Pruned and full drop-one agree on 114 endpoint pairs. |
+| K1–K16, I1–I13 (mode `all`) | 24/24 PASS |
+| K10 vs 0.3.1 (10 configurations) | still identical: tables, other components, print, RNG stream |
+| Realistic scale, 500 units, N_i 200–1,500 | pair δ_B 10.9 s; W2 49.5 s; both integer-exact (MILP) |
+
+### R3.2 Instance 3 of the large suite (target 2)
+
+* **The disagreement.** The developer's run of the oracle reported a lower end of −0.43198 from scipy, against the package's certified −0.432002.
+* **Rerun here.** With `mip_rel_gap = 0`, the oracle gives **−0.43200196830001**, equal to the package's value (−0.43200196830001) to all printed digits. The default gap gives the same value in this scipy version.
+* **The witness.** The package's integer witness at this endpoint passes the oracle's exact rational check (margins, every row, value).
+* **Verdict: the package is right.** The developer's −0.43198 is a scipy/HiGHS early stop. The relative difference is 5e-5, inside HiGHS's default relative gap of 1e-4, so their scipy build evidently stopped at that gap. The oracle now pins the gap to 0.
+
+### R3.3 The shifted certificate and the strict-progress rule
+
+**Correct.** At the incumbent n*, the certificate solves for integers d = n − n* with:
+* every row and margin rewritten as A d ⋈ rhs − A n* (the activity at n*);
+* bounds d ≥ −n*, the shifted n ≥ 0, with no upper bounds, as in the unshifted problem;
+* the cut sense·c'd ≥ 1, which is the same as sense·c'n ≥ sense·c'n* + 1 because c is an integer vector.
+
+The feasible set is the unshifted one translated by n*, so its infeasibility (status 4, or status 1 with the unshifted LP relaxation infeasible) certifies that no integer table improves on n*. Values near the optimum are now O(1), so GLPK's relative tolerances are far below the unit gap of the cut. That removes the round-2 residual risk, together with the caps: coefficients ≤ 1e7, and Σ|c|u ≤ 1e12 so every objective value is an exact double.
+
+A point returned by the cut solve is accepted only if all three hold:
+* n* + d is integral to 1e-6;
+* its exact integer objective improves by at least 1;
+* it passes the exact rational check.
+
+Otherwise the endpoint is "unresolved (solver tolerance)". Iterations are bounded: at most 50, and at most 3 × `time_limit` seconds per endpoint. So a reported integer-exact endpoint is always an exactly feasible table with a certified optimum, and every failure mode is labelled. The zero-objective fix for R2-1 returns the first exactly checked table, which is right: any feasible table is optimal when the objective is zero.
+
+### R3.4 Release readiness
+
+**Yes.** Step 1 (M-COUNT) is ready to release:
+* all 16 round-1 issues and R2-1 are resolved;
+* the three independent oracle suites agree exactly, unpatched;
+* R CMD check is clean apart from the `ei.Datasets` NOTE;
+* model outputs are unchanged from 0.3.1 under `target = "model"`.
+
+One non-blocking suggestion: keep the review's oracle instances, or a sample of them, as a periodic regression check, since the integer path now depends on GLPK's behaviour across versions.

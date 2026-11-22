@@ -369,7 +369,8 @@ def lp_range(D, rows, co, integer=False):
         else:
             cons = [LinearConstraint(np.array(Aeq), beq, beq)]
             if Aub: cons.append(LinearConstraint(np.array(Aub), -np.inf, bub))
-            r = milp(sgn * c, constraints=cons, integrality=np.ones(D.nv), bounds=Bounds(0, np.inf))
+            r = milp(sgn * c, constraints=cons, integrality=np.ones(D.nv), bounds=Bounds(0, np.inf),
+                     options={"mip_rel_gap": 0.0})
             if r.status != 0:
                 return None
             res.append(sgn * r.fun)

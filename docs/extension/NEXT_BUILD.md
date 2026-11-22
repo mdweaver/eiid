@@ -32,7 +32,7 @@
 
 0. **Housekeeping:** printout fixes; the planned batches D and E become the proof and code reviews of existing modules.
 1. **M-COUNT / `eiCounts()`**: exact bounds on actual counts and rates (Duncan–Davis first), realised ordering, sign and CR rows, known cells and published totals, integer check ("auto"; off for non-integer margins), witness tables. `eiBounds()` prints it first (`target = "model"` restores the old order). Combination rule: count rows and model rows never share one LP; the actual-rate answer intersects the two, and disjointness is a test of the model. Proof items R19, R27: **theory done and proof reviewed** (`PHASE6a_count_layer.md`, `reviews/PHASE6a_proof_review.md`; `verify_phase6a.py` 36/36). Note for the code: the package's `duncan_davis` column is outer for combination targets (PHASE6a §9 item 3). **Code done and code reviewed (Nov 2026; 0.4.0):** `eiCounts()`, `witness()`, the count block in `eiBounds()` (actual-rate block first; `target = "model"` unchanged from 0.3.1), certified GLPK integer programs with a time limit and an "unresolved" status, exact rational rounding (`reviews/PHASE6a_code_review.md`, three rounds; 1897 tests pass). Suggested follow-up: keep a sample of the review oracle instances as a periodic regression check of the GLPK integer path.
-1b. **Estimated margins**: margins from probabilistic matching enter as sets (calibration slack as user input); a Berkson correction on the model side. R25, R26.
+1b. *Moved to the end of the plan (owner, 22 Nov 2026): see "Uncertain totals and compositions" after step 11.*
 2. **DiD theory track** (general; T ≥ 2 with pre-periods): descriptive and causal (trend dial, bounds relative to set-valued pre-trends, MTR/ND/PS), with a register of where changing populations need assumptions or data-based bounds. Implementation (`eiChange()`, `eiATT()`) after its proof review. R11a–d, R11b′.
 3. **M-CONTRAST**: finite comparisons between prespecified kinds of places, in levels and changes; M-LOC becomes its `at = "hull"` option. R22.
 4. **B1(M) + κ**: context at a second scale, per column, with κ-annotated endpoints. R8.
@@ -45,6 +45,8 @@
 11. **E4 table transfer** (NZ leave-one-out), last.
 
 General-user track: M-AUDIT, M-CVR (exact published-table rows ship inside step 1).
+
+**After step 11: uncertain totals and compositions** (owner's decision, 22 Nov 2026; replaces step 1b). One general module for margins and compositions that are not known exactly but lie in a set with stated confidence: match probabilities (the former step 1b, R25/R26: Poisson-binomial margin sets, calibration slack, the Berkson correction in the LCE layer), survey-based margins, and changes in composition between elections (entry, exit, aging-in, from the DiD gap register). Placed late so that the needs found along the way (above all in the DiD theory's gap register) feed its specification. Until then, non-integer margins switch the integer check off and `print()` says the bounds are exact only for the stated margins.
 
 **After step 11: open items from M-COUNT** (owner's decision, 22 Nov 2026; `PHASE6a_count_layer.md`). Left open until the end of this plan, in this order of priority:
 1. **A smaller valid set than the intersection** (R27(iii-b); computed example X5 only). Use the count rows when computing the model-to-actual allowance, so the combined answer can be tighter than count set ∩ model interval. Highest priority of the three: the owner considers it the most useful.

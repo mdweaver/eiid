@@ -18,7 +18,8 @@ eiCounts(
   integer = c("auto", "lp", "exact"),
   model = NULL,
   allowance = c("popoviciu", "hoeffding"),
-  binding = TRUE
+  binding = "auto",
+  time_limit = 10
 )
 }
 \arguments{
@@ -47,7 +48,14 @@ rates); \code{NULL} for every cell rate.}
 \item{allowance}{residual allowance for the cross-layer block: \code{"popoviciu"}
 (\eqn{S_\varphi}, Lemma 4.1(a)) or \code{"hoeffding"} (\eqn{t_E(\varphi)}, Lemma 4.1(b)).}
 
-\item{binding}{compute the binding rows (drop-one test) for each endpoint.}
+\item{binding}{compute the binding rows (drop-one test) for each endpoint: \code{TRUE},
+\code{FALSE}, or \code{"auto"} (default: on for at most 200 units, off above, with a note).
+Only restrictions active at the optimal LP vertex are refitted (an inactive one has zero
+duals and cannot bind); rows that bind only jointly are not shown.}
+
+\item{time_limit}{seconds allowed per integer program (MILP; solver GLPK via the suggested
+package \pkg{Rglpk}). On timeout, or without \pkg{Rglpk}, the endpoint is the LP over the
+rounded rows, an outer bound, with the status "integer status unresolved".}
 }
 \value{
 an object of class \code{"eiCounts"}; \code{$table} has one row per target with the

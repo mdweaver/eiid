@@ -40,7 +40,8 @@ eiBounds(
   base = NULL,
   target = c("actual", "model"),
   counts = NULL,
-  integer = c("auto", "lp", "exact")
+  integer = c("auto", "lp", "exact"),
+  time_limit = 10
 )
 }
 \arguments{
@@ -160,6 +161,9 @@ count rows are given). The model results are the same under both.}
 
 \item{integer}{integer mode of the count layer (\code{"auto"}, \code{"lp"},
 \code{"exact"}; see \code{\link{eiCounts}}).}
+
+\item{time_limit}{seconds per integer program in the count layer (see \code{\link{eiCounts}}).
+If the count layer fails, \code{eiBounds()} warns and returns the model results without it.}
 }
 \value{
 an object of class \code{"eiRxC"}. \code{$counts} holds the count layer (an

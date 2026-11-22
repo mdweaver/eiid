@@ -72,14 +72,27 @@ combo <- function(..., weights, label = NULL) {
 }
 
 # where-expressions are evaluated in the data with the constructor's environment
+# where-expressions are evaluated in the data with the constructor's environment. The result
+# carries attr "wkind": "all", "design" (an expression using no outcome variable), "outcome" (an
+# expression using an outcome (column) variable: not design-measurable, 6a Lemma 4.1, C2) or
+# "given" (a vector, labels or row numbers: the package cannot tell how it was chosen).
 .ec_where <- function(P, w, env, what) {
-  if (is.null(w)) return(seq_len(P$p))
-  if (is.language(w) && !is.symbol(w)) return(.ec_units(P, where = w, env = env, what = what))
+  tagged <- function(u, k) structure(u, wkind = k)
+  if (is.null(w)) return(tagged(seq_len(P$p), "all"))
+  if (inherits(w, "formula")) w <- w[[length(w)]]
+  if (is.language(w) && !is.symbol(w)) {
+    if (any(all.vars(w) %in% P$cols)) return(tagged(.ec_units(P, where = w, env = env, what = what), "outcome"))
+    v <- if (is.null(P$data)) eval(w, env) else eval(w, P$data, env)
+    # a predicate on design variables is a design set; an expression that yields labels or row
+    # numbers is a given set (how it was chosen is unknown)
+    return(tagged(.ec_units(P, units = v, env = env, what = what), if (is.logical(v)) "design" else "given"))
+  }
   v <- if (is.symbol(w)) {
     if (!is.null(P$data) && as.character(w) %in% names(P$data)) eval(w, P$data, env) else eval(w, env)
   } else w
-  if (is.language(v) || inherits(v, "formula")) return(.ec_units(P, where = v, env = env, what = what))
-  .ec_units(P, units = v, env = env, what = what)
+  if (inherits(v, "formula")) v <- v[[length(v)]]
+  if (is.language(v)) return(.ec_where(P, v, env, what))
+  tagged(.ec_units(P, units = v, env = env, what = what), "given")
 }
 
 # resolve a target: terms (units, rows, cols, weight), constant, design-measurability and the
@@ -88,7 +101,8 @@ combo <- function(..., weights, label = NULL) {
   nm <- P$num
   ri <- function(v) .ec_idx(v, P$rows, "row"); ci <- function(v) .ec_idx(v, P$cols, "col")
   rr <- function(r) paste(P$rows[r], collapse = "+"); cc <- function(c) paste(P$cols[c], collapse = "+")
-  us <- function(S) if (length(S) == P$p) "" else sprintf(" [%d units]", length(S))
+  us <- function(S) if (length(S) == P$p) "" else if (length(S) <= 3) sprintf(" [%s]", paste(P$units[S], collapse = ", ")) else
+    sprintf(" [%d units: %s, ...]", length(S), paste(P$units[S][1:2], collapse = ", "))
   A_of <- function(S, rws) sum(nm(P$A[S, rws, drop = FALSE]))
   term <- function(S, rws, cls, w) list(units = S, rows = rws, cols = cls, w = w, wd = as.double(w))
   a <- ts$args; out <- NULL
@@ -140,6 +154,13 @@ combo <- function(..., weights, label = NULL) {
                 den = "combination")
     out$reps <- list(list(terms = terms, const = const))
   } else stop("unknown target kind")
+  # design-measurability of the unit sets (code review issue 7)
+  kinds <- if (ts$kind == "combo") unlist(lapply(subs, function(s) s$wkinds)) else
+    unlist(lapply(out$terms, function(tm) attr(tm$units, "wkind")))
+  out$wkinds <- unique(kinds)
+  if ("outcome" %in% out$wkinds) { out$design <- FALSE; out$design_reason <- "outcome_set" }
+  else if (!out$design && is.null(out$design_reason)) out$design_reason <- "outcome_margin"
+  out$given_set <- "given" %in% out$wkinds
   if (!is.null(ts$label)) out$label <- ts$label else if (!is.null(name) && nzchar(name)) out$label <- name
   out$obj <- .ec_obj(P, out$terms)
   out
@@ -186,6 +207,7 @@ combo <- function(..., weights, label = NULL) {
   if (is.null(targets)) {
     out <- list()
     for (r in seq_len(P$R)) for (c in seq_len(P$C)) {
+      if (sum(P$A[, r]) == 0) next                  # a row with no members has no rate
       a <- matrix(0, P$R, P$C); a[r, c] <- 1
       out[[length(out) + 1]] <- .ec_from_matrix(P, a, paste0(P$rows[r], " -> ", P$cols[c]))
     }
@@ -193,7 +215,7 @@ combo <- function(..., weights, label = NULL) {
   }
   if (inherits(targets, "ecTarget")) targets <- list(targets)
   nms <- names(targets); if (is.null(nms)) nms <- rep("", length(targets))
-  lapply(seq_along(targets), function(j) {
+  out <- lapply(seq_along(targets), function(j) {
     tg <- targets[[j]]
     if (inherits(tg, "ecTarget")) return(.ec_resolve(P, tg, nms[j]))
     if (is.matrix(tg)) {
@@ -203,6 +225,10 @@ combo <- function(..., weights, label = NULL) {
     a <- matrix(0, P$R, P$C); a[.ec_idx(tg[1], P$rows, "row"), .ec_idx(tg[2], P$cols, "col")] <- 1
     .ec_from_matrix(P, a, if (nzchar(nms[j])) nms[j] else paste0(P$rows[a != 0][1], " -> ", tg[2]))
   })
+  # distinct labels (witness(target = label) must be able to tell targets apart; issue 14)
+  labs <- make.unique(vapply(out, function(t) t$label, ""), sep = " #")
+  for (j in seq_along(out)) out[[j]]$label <- labs[j]
+  out
 }
 
 # ---------------------------------------------------------------------------
@@ -225,7 +251,8 @@ combo <- function(..., weights, label = NULL) {
       ps <- .ec_parse_spec(P, type, s, env)
       k <- sum(vapply(out, function(o) o$type == type, TRUE)) + 1
       ps$id <- paste0(type, "[", k, "]")
-      ps$label <- .ec_label_of(P, if (type == "sign") c(ps, list(type = ps$type_a)) else ps, type)
+      ps2 <- ps; if (type == "sign") ps2$type <- ps$type_a       # label needs dB / dW (issue 13)
+      ps$label <- .ec_label_of(P, ps2, type)
       ps$experimental <- type %in% c("sign", "cr")
       out[[length(out) + 1]] <- ps
     }
@@ -322,7 +349,7 @@ combo <- function(..., weights, label = NULL) {
       if (m$status == "infeasible") { out$int_ok <- FALSE; return(out) }
       if (m$status == "optimal") x <- m$x else { unres <- c(unres, m$reason); x <- NULL }
     }
-    sol[[j]] <- x
+    sol[j] <- list(x)
   }
   if (length(unres)) {
     # integer status unresolved: report the rounded-LP outer bound at the unresolved end(s)
@@ -447,8 +474,8 @@ combo <- function(..., weights, label = NULL) {
     A <- as.matrix(data[, rows, drop = FALSE]); B <- as.matrix(data[, cols, drop = FALSE])
     int_in <- TRUE
   } else if (!is.null(x) && !is.null(t) && !is.null(n)) {
-    X <- if (is.null(dim(x))) cbind(x, 1 - x) else as.matrix(x)
-    T <- if (is.null(dim(t))) cbind(t, 1 - t) else as.matrix(t)
+    X <- if (is.null(dim(x))) { m <- cbind(x, 1 - x); colnames(m) <- c("X", "notX"); m } else as.matrix(x)
+    T <- if (is.null(dim(t))) { m <- cbind(t, 1 - t); colnames(m) <- c("T", "notT"); m } else as.matrix(t)
     rows <- if (is.null(colnames(X))) { if (is.null(dim(x))) c("X", "notX") else paste0("row", seq_len(ncol(X))) } else colnames(X)
     cols <- if (is.null(colnames(T))) { if (is.null(dim(t))) c("T", "notT") else paste0("col", seq_len(ncol(T))) } else colnames(T)
     A <- X * as.numeric(n); B <- T * as.numeric(n)
@@ -646,14 +673,31 @@ eiCounts <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL, x = 
                         "see estimated margins (Step 1b)"))
 }
 
+# status of the model interval (6a Sec. 4.3, with the rows added for L4, L5, L6 and M1(delta) on
+# claude/mcount-theory, bbf8cf46; strings as given by the coordinating session, in the format of
+# .rxc_ci_status). {what} names the interval used here; {thm} its theorem.
 .ec_model_status <- function(fit) {
   st <- fit$setup
   msign <- length(st$extra$assoc) > 0 || length(st$extra$cr) > 0
-  if (st$nz == 0) return("P (asymptotic; point-identified rung, one linear functional)")
-  if (identical(st$type, "pooled"))
-    return(paste0("P (asymptotic)", if (msign) "; pooled M-SIGN rows: PHASE5a R10(a)" else ""))
-  if (msign) return("no coverage theorem (R16): grouped rung with sign rows; the intersection is experimental")
-  "P (asymptotic) only with few, large groups (regime R1); a simulation finding with many small groups"
+  pooled <- identical(st$type, "pooled") || st$G == 1
+  thm <- if (identical(fit$ci, "conservative")) "P3.5(a)" else "P3.5(b2)(ii)"
+  what <- if (st$nz == 0) "normal interval" else if (identical(fit$ci, "clr")) "proj_*" else "ci_* (conservative)"
+  r1 <- paste0(what, ": asymptotic guarantee only with few, large groups (P3 regime R1); with many small ",
+               "groups a simulation finding")
+  if (st$nz == 0) {
+    pt <- "P3.5(a) with no free k: point-identified rung, one linear functional"
+    if (fit$model == "L6" || st$G == 1) return(paste0(what, ": asymptotic guarantee (", pt, "), pooled model"))
+    return(paste0(what, ": asymptotic guarantee (", pt, ") only with few, large groups (P3 regime R1); ",
+                  "with many small groups a simulation finding"))
+  }
+  if (!pooled && msign) return(paste0(what, ": no coverage theorem for sign/CR restrictions under grouped rungs (R16 open)"))
+  if (pooled && fit$model == "L4")
+    return(paste0(what, ": asymptotic guarantee (", thm, "; L4 equalities as rows, as in PHASE5a R10), pooled model"))
+  if (pooled && fit$model == "M1delta")
+    return(paste0(what, ": asymptotic guarantee (", thm, "; M1(delta) with one group is M0), pooled model"))
+  if (pooled) return(paste0(what, ": asymptotic guarantee (", thm, if (msign) "; with sign/CR rows PHASE5a R10, pooled M0" else "",
+                            "), pooled model"))
+  r1
 }
 
 .ec_check_model <- function(cnt, fit) {
@@ -667,14 +711,17 @@ eiCounts <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL, x = 
   st <- fit$setup; P <- cnt$P
   if (any(!st$keep)) stop("the cross-layer block needs the model fitted on all units (range = \"trim\" is not supported)")
   if (isTRUE(fit$eta > 0)) stop("the cross-layer block is not available with eta > 0")
-  if (nrow(st$X_all) != P$p || max(abs(st$X_all - P$A / P$N)) > 1e-8 || max(abs(st$N_all - P$N)) > 1e-8 * max(P$N))
+  # align on the units with N_i > 0, in order (the x/t/n path of eiBounds keeps N_i = 0 units)
+  pos <- which(st$N_all > 0)
+  if (length(pos) != P$p || max(abs(st$X_all[pos, , drop = FALSE] - P$A / P$N)) > 1e-8 ||
+      max(abs(st$N_all[pos] - P$N)) > 1e-8 * max(P$N))
     stop("the model fit and the count layer are not on the same units and margins")
-  invisible(TRUE)
+  invisible(pos)
 }
 
 # actual-target model interval for one count target: model interval for the model-implied
 # value (projection or conservative, at level a_est) plus the residual allowance (Lemma 4.1)
-.ec_model_interval <- function(P, fit, tg, allowance) {
+.ec_model_interval <- function(P, fit, tg, allowance, pos = seq_len(P$p)) {
   st <- fit$setup; alpha <- fit$alpha
   a_est <- alpha * 0.9; a_E <- alpha * 0.1          # as eiBounds with fpc = "popoviciu" (0.045 / 0.005)
   # representation fixed from the design alone: the one with the smallest S_phi (Remark 4.1a)
@@ -695,7 +742,7 @@ eiCounts <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL, x = 
   for (tm in rep$terms) {
     a <- matrix(0, st$R, st$C); a[tm$rows, tm$cols] <- 1
     W <- matrix(0, nrow(st$X), st$R)
-    W[tm$units, tm$rows] <- tm$wd * (st$N * st$X)[tm$units, tm$rows]
+    W[pos[tm$units], tm$rows] <- tm$wd * (st$N * st$X)[pos[tm$units], tm$rows]
     t1 <- .rxc_target(st, a, w = W)
     tgm$cvec <- tgm$cvec + t1$cvec; tgm$c0 <- tgm$c0 + t1$c0; tgm$gamma <- tgm$gamma + t1$gamma
   }
@@ -710,7 +757,7 @@ eiCounts <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL, x = 
     ivs[[1]] <- pl + c(-1, 1) * stats::qnorm(1 - a_est / 2) * se
     type <- "normal interval (point-identified rung)"
   } else {
-    Zs <- .rxc_zdraws(st$V, fit$settings$nz_draw)
+    Zs <- if (!is.null(fit$zdraws)) fit$zdraws else .rxc_zdraws(st$V, fit$settings$nz_draw)
     if (identical(fit$ci, "clr")) {
       for (sy in .rxc_systems(cons, "branch"))
         ivs[[length(ivs) + 1]] <- attr(.rxc_ci_clr(st, sy, tgm, a_est / 2, a_est / 2, Zs, fit$settings$ndraw,
@@ -739,7 +786,7 @@ eiCounts <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL, x = 
 }
 
 .ec_cross_layer <- function(cnt, fit, allowance) {
-  .ec_check_model(cnt, fit)
+  pos <- .ec_check_model(cnt, fit)
   P <- cnt$P
   belief <- !is.null(cnt$restrictions) && any(cnt$restrictions$role == "belief")
   rows <- list()
@@ -751,10 +798,15 @@ eiCounts <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL, x = 
                        status = NA_character_, allowance = NA_character_, S_phi = NA_real_, lindeberg = NA_real_,
                        note = "", stringsAsFactors = FALSE)
     if (!tg$design) {
-      base$note <- "count layer only: the coefficients use outcome margins (6a Lemma 4.1 does not apply)"
+      base$note <- if (identical(tg$design_reason, "outcome_set"))
+        "count layer only: the unit set is selected using the outcomes, so the coefficients are not functions of the design (6a Lemma 4.1, C2)" else
+        "count layer only: the coefficients use outcome margins (6a Lemma 4.1 does not apply)"
       rows[[j]] <- base; next
     }
-    mi <- .ec_model_interval(P, fit, tg, allowance)
+    if (isTRUE(tg$given_set))
+      base$note <- paste("the unit set must be fixed from the design (6a Lemma 4.1); a set chosen using",
+                         "the outcomes voids the cross-layer interval")
+    mi <- .ec_model_interval(P, fit, tg, allowance, pos)
     base$model_type <- mi$type; base$status <- .ec_model_status(fit); base$allowance <- mi$allowance_type
     base$S_phi <- mi$S_phi; base$lindeberg <- mi$lindeberg
     if (is.null(mi$pieces)) {
@@ -816,7 +868,7 @@ eiCounts <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL, x = 
       cat(sprintf("  %-14s %s [%s row]%s\n", rt$id[k], rt$restriction[k], rt$role[k],
                   if (rt$experimental[k]) " EXPERIMENTAL (2c M2; review batch B comment 1 open)" else ""))
     if (any(!is.na(tb$binding_lower))) {
-      cat("Binding rows (drop-one face test: removing the row moves the endpoint):\n")
+      cat("Binding rows (drop-one face test: removing the row moves the endpoint; rows that bind only together are not shown):\n")
       for (j in seq_len(nrow(tb)))
         cat(sprintf("  %s: lower %s; upper %s\n", tb$target[j],
                     if (nzchar(tb$binding_lower[j])) tb$binding_lower[j] else "none",
@@ -844,6 +896,14 @@ eiCounts <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL, x = 
   if (any(grepl("integer-infeasible", tb$integer_status)))
     cat("  integer-infeasible: continuous tables satisfy the rows, but no whole-number table does (R19(c))\n")
   if (!P$integer) cat("  Note:", .ec_txt("nonint"), "\n")
+  if (length(P$log$rat))
+    cat(sprintf("  Note: values given as doubles were rationalised (tolerance %g, denominators <= 1e6): %s\n",
+                .ec_rat_tol, paste(utils::head(unique(P$log$rat), 5), collapse = "; ")))
+  for (nt in unique(P$log$notes)) cat("  Note:", nt, "\n")
+  if (any(grepl("unresolved", tb$integer_status)))
+    cat("  integer status unresolved: the MILP hit the time limit (or no MILP solver is installed); the range shown is\n",
+        "  the LP over the rounded rows, an outer bound for whole-number tables (R19(c) item 1); never integer-exact\n", sep = "")
+  for (nt in x$notes) cat("  Note:", nt, "\n")
   if (any(!is.na(tb$lp_lower) & !is.na(tb$lower) & (abs(tb$lp_lower - tb$lower) > 1e-12 | abs(tb$lp_upper - tb$upper) > 1e-12)))
     cat("  Continuous LP range (lp_lower/lp_upper in $table) differs from the integer range for some targets\n")
 }
@@ -877,8 +937,12 @@ eiCounts <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL, x = 
       if (any(dm)) cat("  ", .ec_txt("rej_id"), sprintf(" with the margins-only (identity) count set too: %s", paste(tb$target[dm], collapse = ", ")), "\n", sep = "")
     }
   }
-  if (any(tb$lindeberg > 0.1, na.rm = TRUE))
-    cat("  Note: the asymptotic allowance needs no unit to dominate (max rho_i^2 / sum rho_i^2 is above 0.1 for some target)\n")
+  hoef <- grepl("Hoeffding", tb$allowance)
+  if (any(hoef)) cat("  Hoeffding allowance: the model part is asymptotic; the allowance holds in finite samples\n")
+  big <- !hoef & !is.na(tb$lindeberg) & tb$lindeberg > 0.1
+  if (any(big))
+    cat(sprintf("  Note (heuristic): Lemma 4.1(a) needs no unit to dominate; max rho_i^2 / sum rho_i^2 = %s (%s)\n",
+                paste(sprintf("%.3f", tb$lindeberg[big]), collapse = ", "), paste(tb$target[big], collapse = ", ")))
   cat("  Realised beliefs (object = \"actual\", count layer):", if (length(cr$belief_rows) + length(cr$identity_rows) > 1)
     paste(c(cr$identity_rows[-1], cr$belief_rows), collapse = "; ") else "none", "\n")
   cat("  Model beliefs (object = \"model\", model layer):", if (length(cr$model_rows)) paste(cr$model_rows, collapse = "; ") else "none", "\n")

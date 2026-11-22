@@ -21,6 +21,39 @@
 .ec_dbl <- function(x) if (is.null(x)) NULL else as.double(x)
 .ec_is_q <- function(x) inherits(x, c("bigq", "bigz"))
 
+# Doubles given by the user (bounds, coefficients, slack, psi) are rationalised (code review
+# issue 4): the continued-fraction convergent p/q with q <= 1e6 and |x - p/q| <= 1e-12 max(1, |x|)
+# is used when one exists (so 1/3 typed as a double means 1/3), otherwise the exact rational of the
+# double. Each value changed this way is logged and printed. Character fractions ("1/3") and gmp
+# bigq values are taken exactly.
+.ec_rat_tol <- 1e-12
+.ec_rat <- function(x, log = NULL) {
+  if (.ec_is_q(x)) return(gmp::as.bigq(x))
+  if (is.character(x)) return(gmp::as.bigq(x))
+  out <- gmp::as.bigq(x)
+  for (j in seq_along(x)) {
+    v <- x[j]
+    if (!is.finite(v) || v == round(v)) next
+    a <- abs(v); h0 <- 0; h1 <- 1; k0 <- 1; k1 <- 0; y <- a; best <- NULL
+    for (it in 1:40) {
+      ai <- floor(y); h2 <- ai * h1 + h0; k2 <- ai * k1 + k0
+      if (k2 > 1e6) break
+      if (abs(a - h2 / k2) <= .ec_rat_tol * max(1, a)) { best <- c(h2, k2); break }
+      h0 <- h1; h1 <- h2; k0 <- k1; k1 <- k2
+      fr <- y - ai; if (fr <= 0) break
+      y <- 1 / fr
+    }
+    if (!is.null(best)) {
+      q <- gmp::as.bigq(sign(v) * best[1], best[2])
+      if (q != gmp::as.bigq(v)) {
+        out[j] <- q
+        if (!is.null(log)) log$rat <- c(log$rat, sprintf("%.17g -> %s", v, as.character(q)))
+      }
+    }
+  }
+  out
+}
+
 .ec_vix <- function(P, i, r, c) (i - 1L) * P$R * P$C + (r - 1L) * P$C + c
 .ec_unit_of <- function(P, k) (k - 1L) %/% (P$R * P$C) + 1L
 
@@ -51,8 +84,10 @@
   p <- nrow(A); R <- ncol(A); C <- ncol(B)
   P <- list(A = A, B = B, N = N, p = p, R = R, C = C, nv = p * R * C, rows = rl, cols = cl,
             units = as.character(units)[keep], orig = orig, n_orig = length(keep),
+            units_all = as.character(units), N_all = NA_,
             n_dropped = sum(!keep), integer = int, data = data)
-  P$num <- if (int) gmp::as.bigq else identity
+  P$log <- new.env()
+  P$num <- if (int) function(x) .ec_rat(x, P$log) else function(x) if (is.character(x)) as.double(gmp::as.bigq(x)) else x
   P$margin_all <- .ec_margin_trip(P)
   P
 }
@@ -63,7 +98,7 @@
   trip <- vector("list", length(units) * (R + C)); rhs <- numeric(length(units) * (R + C)); j <- 0
   for (u in seq_along(units)) {
     i <- units[u]
-    base <- if (local) 0L else (i - 1L) * R * C
+    base <- if (local) (u - 1L) * R * C else (i - 1L) * R * C
     for (r in seq_len(R)) {
       j <- j + 1; ks <- base + (r - 1L) * C + seq_len(C)
       trip[[j]] <- cbind(j, ks, 1); rhs[j] <- P$A[i, r]
@@ -83,9 +118,9 @@
 .ec_row <- function(P, id, kind, idx, coef, lo = NULL, hi = NULL, cell = NULL, units = NULL,
                     label = NULL) {
   o <- order(idx); idx <- as.integer(idx[o])
-  coefq <- if (.ec_is_q(coef)) coef[o] else if (P$integer) gmp::as.bigq(coef[o]) else NULL
-  coefd <- as.double(if (.ec_is_q(coef)) coef[o] else coef[o])
-  q <- function(x) if (is.null(x)) NULL else if (P$integer) gmp::as.bigq(x) else as.double(x)
+  coefq <- if (.ec_is_q(coef)) coef[o] else if (P$integer) .ec_rat(coef[o], P$log) else NULL
+  coefd <- if (.ec_is_q(coef) || is.character(coef)) as.double(gmp::as.bigq(coef[o])) else as.double(coef[o])
+  q <- function(x) if (is.null(x)) NULL else if (P$integer) .ec_rat(x, P$log) else as.double(if (is.character(x)) gmp::as.bigq(x) else x)
   list(id = id, kind = kind, idx = idx, coef = coefd, coefq = coefq,
        loq = q(lo), hiq = q(hi),
        lo = if (is.null(lo)) -Inf else as.double(lo), hi = if (is.null(hi)) Inf else as.double(hi),
@@ -97,6 +132,12 @@
 .ec_round_row <- function(row) {
   if (is.null(row$coefq)) return(row)
   cq <- row$coefq
+  if (all(as.double(cq) == 0)) {             # an all-zero row: 0 in [lo, hi] or infeasible
+    row$rounded <- TRUE; row$coef_rd <- rep(0, length(cq))
+    row$lo_rd <- if (is.null(row$loq)) -Inf else as.double(.ec_ceil(row$loq))
+    row$hi_rd <- if (is.null(row$hiq)) Inf else as.double(floor(row$hiq))
+    return(row)
+  }
   if (row$kind %in% c("bound", "total")) s <- gmp::as.bigq(1) else {
     den <- gmp::denominator(cq); num <- abs(gmp::numerator(cq))
     l <- den[1]; if (length(den) > 1) for (j in 2:length(den)) l <- gmp::lcm.bigz(l, den[j])
@@ -264,7 +305,11 @@
 # unit sets
 # ---------------------------------------------------------------------------
 # returns indices into the kept units
-.ec_units <- function(P, units = NULL, where = NULL, env = parent.frame(), what = "units") {
+# Policy (code review issues 2 and 11): an explicit label or row number that is unknown, out of
+# range, or names a unit dropped for N_i = 0 is an error; logical selections and expressions are
+# sets, from which dropped units are simply absent. 'ordered = TRUE' keeps the user's order and
+# refuses duplicates (for per-unit values such as known cells); otherwise a sorted set is returned.
+.ec_units <- function(P, units = NULL, where = NULL, env = parent.frame(), what = "units", ordered = FALSE) {
   if (!is.null(where)) {
     if (inherits(where, "formula")) where <- where[[length(where)]]
     if (is.language(where)) {
@@ -280,18 +325,24 @@
     return(sort(unique(stats::na.omit(match(sel, P$orig)))))
   }
   if (is.character(units) || is.factor(units)) {
-    m <- match(as.character(units), P$units)
+    u <- as.character(units)
+    m <- match(u, P$units)
     if (any(is.na(m))) {
-      # dropped (N = 0) units are silently out; unknown labels are an error
-      stop(what, ": unknown unit label(s): ", paste(units[is.na(m)], collapse = ", "))
+      dropped <- u[is.na(m) & u %in% P$units_all[P$N_all == 0]]
+      if (length(dropped)) stop(what, ": unit(s) ", paste(dropped, collapse = ", "), " have N_i = 0 and were dropped")
+      stop(what, ": unknown unit label(s): ", paste(u[is.na(m)], collapse = ", "))
     }
-    return(sort(unique(m)))
-  }
-  if (is.numeric(units)) {
+  } else if (is.numeric(units)) {
+    if (any(units != round(units)) || any(units < 1 | units > P$n_orig))
+      stop(what, ": unit row number(s) out of range: ", paste(units[units != round(units) | units < 1 | units > P$n_orig], collapse = ", "))
     m <- match(as.integer(units), P$orig)
-    return(sort(unique(stats::na.omit(m))))
+    if (any(is.na(m))) stop(what, ": unit(s) in row(s) ", paste(units[is.na(m)], collapse = ", "), " have N_i = 0 and were dropped")
+  } else stop(what, ": units must be labels, row numbers, a logical vector or an expression")
+  if (ordered) {
+    if (anyDuplicated(m)) stop(what, ": a unit is named twice")
+    return(m)
   }
-  stop(what, ": units must be labels, row numbers, a logical vector or an expression")
+  sort(unique(m))
 }
 
 # ---------------------------------------------------------------------------
@@ -308,7 +359,7 @@
     paste0("units {", paste(P$units[S], collapse = ", "), "}") else sprintf("%d units", length(S))
   switch(type,
          known = sprintf("known cell %s -> %s in %s = %s", rr(s$row), cc(s$col), us(s$units),
-                         paste(format(s$value), collapse = ",")),
+                         if (length(s$value) <= 3) paste(format(s$value), collapse = ",") else sprintf("%d values", length(s$value))),
          zero = sprintf("structural zero %s -> %s in %s", rr(s$row), cc(s$col), us(s$units)),
          box = sprintf("box %s -> %s in %s: [%s, %s]", rr(s$row), cc(s$col), us(s$units),
                        format(s$lower), format(s$upper)),
@@ -350,9 +401,12 @@
   if (obj == "model")
     stop("restriction '", type, "' has object = \"model\": rows on the model's coefficients belong to ",
          "eiBounds(restrictions = ...), never to the count layer (6a Remark 4.1)")
-  role <- if (is.null(s$role)) .ec_default_role[[type]] else match.arg(s$role, c("identity", "belief"))
+  # identity rows have the realised value as right-hand side (6a Sec. 4.1, C8): a total given by
+  # 'value' is identity by default, a total given as a floor or interval is a belief (issue 8)
+  role <- if (!is.null(s$role)) match.arg(s$role, c("identity", "belief")) else
+    if (type == "total") { if (!is.null(s$value)) "identity" else "belief" } else .ec_default_role[[type]]
   ri <- function(v, w = "row") .ec_idx(v, P$rows, w); ci <- function(v, w = "col") .ec_idx(v, P$cols, w)
-  units <- .ec_units(P, if (!is.null(s$units)) s$units else s$unit, s$where, env, type)
+  units <- .ec_units(P, if (!is.null(s$units)) s$units else s$unit, s$where, env, type, ordered = type == "known")
   sl <- if (is.null(s$slack)) 0 else as.numeric(s$slack)
   if (length(sl) != 1 || !is.finite(sl) || sl < 0) stop(type, ": 'slack' must be a nonnegative number")
   out <- list(type = type, object = obj, role = role, units = units, slack = sl)
@@ -363,6 +417,8 @@
   if (type == "known") {
     if (is.null(s$value)) stop("known: 'value' is required")
     if (is.null(s$units) && is.null(s$unit) && is.null(s$where)) stop("known: 'unit' is required")
+    if (!length(s$value) %in% c(1, length(units)))
+      stop("known: 'value' must have length 1 or one value per unit (", length(units), ")")
     out$value <- rep_len(as.numeric(s$value), length(units))
   } else if (type == "box") {
     out$lower <- if (is.null(s$lower)) -Inf else as.numeric(s$lower)
@@ -386,9 +442,9 @@
     if (length(ui) != length(unique(cl$unit))) stop("linear: some units are unknown or have N_i = 0")
     um <- if (is.character(cl$unit) || is.factor(cl$unit)) match(as.character(cl$unit), P$units) else match(as.integer(cl$unit), P$orig)
     out$idx <- .ec_vix(P, um, .ec_idx(cl$row, P$rows, "row"), .ec_idx(cl$col, P$cols, "col"))
-    out$coef <- as.numeric(cl$coef)
-    out$lower <- if (is.null(s$lower)) -Inf else as.numeric(s$lower)
-    out$upper <- if (is.null(s$upper)) Inf else as.numeric(s$upper)
+    out$coef <- if (is.character(cl$coef)) cl$coef else as.numeric(cl$coef)
+    out$lower <- if (is.null(s$lower)) -Inf else s$lower
+    out$upper <- if (is.null(s$upper)) Inf else s$upper
   } else if (type == "odds") {
     if (P$R != 2 || P$C != 2) stop("odds: the odds-ratio dial is defined for 2 x 2 tables only")
     ps <- as.numeric(s$psi)
@@ -398,8 +454,11 @@
     if (type == "sign") {
       out$type_a <- as.character(if (is.null(s$type)) "dB" else s$type)
       if (!out$type_a %in% c("dB", "dW")) stop("sign: type must be \"dB\" or \"dW\"")
-      out$sign <- sign(if (is.null(s$sign)) 1 else as.numeric(s$sign))
-      if (out$sign == 0) stop("sign: sign must be +1 or -1")
+      sg <- if (is.null(s$sign)) 1 else s$sign
+      if (is.character(sg)) sg <- switch(gsub(" ", "", sg), ">=0" = 1, ">0" = 1, "+" = 1, "<=0" = -1, "<0" = -1, "-" = -1,
+                                         stop("sign: sign must be +1 or -1 (or \">=0\" / \"<=0\")"))
+      out$sign <- sign(as.numeric(sg))
+      if (length(out$sign) != 1 || is.na(out$sign) || out$sign == 0) stop("sign: sign must be +1 or -1")
       allowed <- if (out$type_a == "dB") c("W1", "pair") else c("W1", "W2")
     } else allowed <- c("W1", "W2", "pair")
     out$version <- if (is.null(s$version)) "W1" else as.character(s$version)
@@ -411,6 +470,15 @@
     if (length(units) < 2) stop(type, ": the unit set needs at least two units")
   }
   out
+}
+
+# a pairwise or W2 association with all-zero coefficients (e.g. X_r constant over the unit
+# set) reads 0 >= -slack * scale: vacuous; it is dropped with a logged note (code review issue 5)
+.ec_vacuous <- function(P, g, id) {
+  if (length(g$coef) && any(as.double(g$coef) != 0)) return(FALSE)
+  P$log$notes <- c(P$log$notes, paste0(id, ": the association has all-zero coefficients over its unit set ",
+                                       "(e.g. X_r constant there); the row is vacuous and was dropped"))
+  TRUE
 }
 
 # rows of one parsed spec: list(rows = list(...), union = NULL or list(plus = rows, minus = rows))
@@ -452,9 +520,13 @@
     }
   } else if (s$type == "linear") {
     # merge duplicate cells; coefficients are taken as exact rationals of the given doubles
-    u <- sort(unique(s$idx)); cf <- vapply(u, function(k) sum(s$coef[s$idx == k]), 0)
-    add(.ec_row(P, id, "gen", u, cf, if (is.finite(s$lower)) s$lower else NULL,
-                if (is.finite(s$upper)) s$upper else NULL))
+    u <- sort(unique(s$idx))
+    cfq <- .ec_rat(if (is.character(s$coef)) s$coef else as.numeric(s$coef), P$log)
+    cf <- gmp::as.bigq(rep(0, length(u)))
+    for (j in seq_along(u)) cf[j] <- sum(cfq[s$idx == u[j]])
+    if (!P$integer) cf <- as.double(cf)
+    fin <- function(b) !(is.numeric(b) && !is.finite(b))
+    add(.ec_row(P, id, "gen", u, cf, if (fin(s$lower)) s$lower else NULL, if (fin(s$upper)) s$upper else NULL))
   } else if (s$type == "odds") {
     for (i in s$units) {
       bx <- .ec_odds_box(P, i, s$psi[1], s$psi[2])
@@ -483,6 +555,7 @@
                   cell = c(r, c), units = S))
     } else {
       g <- .ec_assoc_gen(P, S, s$type_a, s$version, r, c, s$other)
+      if (.ec_vacuous(P, g, id)) return(list(rows = list(), union = NULL))
       cf <- if (s$sign > 0) g$coef else -g$coef
       add(.ec_row(P, id, "gen", g$idx, cf, -nm(s$slack) * g$scale, NULL))
     }
@@ -499,12 +572,13 @@
                 cell = c(r, c), units = S)
       } else {
         g <- .ec_assoc_gen(P, S, tp, ver, r, c, s$other)
+        if (.ec_vacuous(P, g, id)) return(NULL)
         .ec_row(P, id, "gen", g$idx, if (sg > 0) g$coef else -g$coef, -nm(s$slack) * g$scale, NULL)
       }
     }
     vB <- if (s$version == "pair") "pair" else "W1"; vW <- if (s$version == "W1") "W1" else "W2"
-    return(list(rows = list(), union = list(plus = list(mk("dB", vB, 1), mk("dW", vW, 1)),
-                                           minus = list(mk("dB", vB, -1), mk("dW", vW, -1)))))
+    return(list(rows = list(), union = list(plus = Filter(Negate(is.null), list(mk("dB", vB, 1), mk("dW", vW, 1))),
+                                           minus = Filter(Negate(is.null), list(mk("dB", vB, -1), mk("dW", vW, -1))))))
   }
   list(rows = rows, union = NULL)
 }

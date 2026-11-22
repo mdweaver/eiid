@@ -233,6 +233,8 @@
 #'   6a contract C9); \code{object = c("actual", "model")} is refused.
 #' @param integer integer mode of the count layer (\code{"auto"}, \code{"lp"},
 #'   \code{"exact"}; see \code{\link{eiCounts}}).
+#' @param time_limit seconds per integer program in the count layer (see \code{\link{eiCounts}}).
+#'   If the count layer fails, \code{eiBounds()} warns and returns the model results without it.
 #' @return an object of class \code{"eiRxC"}. \code{$counts} holds the count layer (an
 #'   \code{eiCounts} object; see \code{\link{witness}}). \code{$table} has
 #'   \code{dd_exact_lower}/\code{dd_exact_upper}: the exact margins-only range (an LP).
@@ -262,7 +264,7 @@ eiBounds <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL,
                      seed = NULL, tests = TRUE, range_offset = 0,
                      mismatch = c("error", "rescale"), union = c("pieces", "hull"),
                      diagnostics = NULL, base = NULL, target = c("actual", "model"),
-                     counts = NULL, integer = c("auto", "lp", "exact")) {
+                     counts = NULL, integer = c("auto", "lp", "exact"), time_limit = 10) {
   cl <- match.call()
   target <- match.arg(target); integer <- match.arg(integer)
   union <- match.arg(union)
@@ -398,9 +400,16 @@ eiBounds <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL,
   # the count rows, computed last so that nothing above changes; its cross-layer block saves and
   # restores the random-number stream
   out$target <- target
-  out$counts <- .rxc_count_block(out, dat, counts, integer, target, parent.frame())
-  out$table$dd_exact_lower <- out$counts$table$dd_lower
-  out$table$dd_exact_upper <- out$counts$table$dd_upper
+  out$zdraws <- est$zdraws           # reused by the cross-layer block (code review issue 10)
+  # the count block never stops eiBounds (code review issue 3): on failure, warn and keep the model
+  out$counts <- tryCatch(.rxc_count_block(out, dat, counts, integer, target, parent.frame(), time_limit),
+                         error = function(e) {
+                           warning("the count layer could not be computed: ", conditionMessage(e), call. = FALSE)
+                           NULL })
+  if (!is.null(out$counts) && nrow(out$counts$table) == nrow(out$table)) {
+    out$table$dd_exact_lower <- out$counts$table$dd_lower
+    out$table$dd_exact_upper <- out$counts$table$dd_upper
+  }
   out
 }
 
@@ -428,17 +437,20 @@ eiBounds <- function(formula = NULL, data = NULL, rows = NULL, cols = NULL,
   list(model = model, counts = counts)
 }
 
-.rxc_count_block <- function(fit, dat, counts, integer, target, env) {
+.rxc_count_block <- function(fit, dat, counts, integer, target, env, time_limit = 10) {
   P <- .ec_problem(dat$counts$A, dat$counts$B, fit$rows, fit$cols, dat$counts$units,
                    dat$counts$integer, data = dat$counts$data)
-  cf <- .ec_fit(P, fit$targets, counts, integer, binding = length(counts) > 0, env)
+  cf <- .ec_fit(P, fit$targets, counts, integer, binding = length(counts) > 0 && P$p <= 200, env, time_limit)
   cnt <- structure(c(list(call = NULL, P = P, integer = integer, margins_integer = P$integer,
                           shares_input = !dat$counts$integer), cf), class = "eiCounts")
   why <- if (target != "actual" && !length(counts)) "target = \"model\"" else
     if (identical(fit$ci, "none")) "ci = \"none\"" else
       if (any(!fit$setup$keep)) "units trimmed (range = \"trim\")" else
         if (isTRUE(fit$eta > 0)) "eta > 0" else NULL
-  if (is.null(why)) cnt$cross <- .ec_cross_layer(cnt, fit, "popoviciu") else cnt$cross_absent <- why
+  if (is.null(why))
+    cnt$cross <- tryCatch(.ec_cross_layer(cnt, fit, "popoviciu"), error = function(e) {
+      cnt$cross_absent <<- conditionMessage(e); NULL })
+  else cnt$cross_absent <- why
   cnt
 }
 

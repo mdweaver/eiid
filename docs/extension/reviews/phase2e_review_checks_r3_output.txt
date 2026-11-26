@@ -1,0 +1,9 @@
+PASS  E30(c) [V] six LCE combinations by an independent LP; eps* = 1/600 by one LP; eps = 1/2 = change-only
+      none [-58.00,27.33]; change [-49.33,7.33]; base+change [2.67,7.33]; base+post [2.67,7.33]; post+change [2.67,7.33]; all three [2.67,7.33]; eps* = 0.001667
+PASS  E31/E29(b) [V] coverage >= .95 under precinct-wide shocks, unequal weights, non-identical laws
+      empirical Bernstein 1.0000 (mean radius 4.023); Hoeffding 1.0000 (radius 1.066); n_eff 26.0
+PASS  E31(c) [V] additive term 7*4*log(80)/(3*29) = 1.41; Hoeffding radius for 30 equal weights 0.992
+PASS  E32 [V] the simultaneous moment event (J rows, two-sided Hoeffding + union) holds with probability >= .95 under shocks shared across elections
+      J = 12, P(event) = 1.0000
+
+4/4 PASS

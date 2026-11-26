@@ -320,7 +320,9 @@ combo <- function(..., weights, label = NULL) {
     out$lp <- c(.ec_value(P, tg, clo$x), .ec_value(P, tg, chi$x))
     if (!integer_mode) { out$iv <- out$lp; out$x <- list(clo$x, chi$x); return(out) }
   }
-  cls <- .ec_classify(P, rows)
+  # a stacked T-election problem (eiChange, 2e Lemma E1) brings its own classifier, which adds
+  # the change-row class of 2e Theorem E27; plain eiCounts problems have none
+  cls <- if (is.function(P$classify)) P$classify(P, rows) else .ec_classify(P, rows)
   out$class <- cls$class; out$class_reason <- cls$reason
   use_milp <- mode == "exact" || is.na(cls$class)
   if (mode == "exact" && !out$cont) {

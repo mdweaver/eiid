@@ -28,7 +28,7 @@
   com <- base; crs <- list()
   for (s in specs) {
     if (length(s$rows)) for (rw in s$rows) com <- cut(com, rw)
-    if (!is.null(s$union)) crs[[length(crs) + 1]] <- s$union
+    if (!is.null(s$union)) crs[[length(crs) + 1]] <- c(s$union, list(id = s$id))
   }
   combos <- if (length(crs)) as.matrix(expand.grid(rep(list(1:2), length(crs)))) else matrix(0L, 1, 0)
   br <- list()
@@ -171,9 +171,9 @@
   eq <- lapply(seq_along(tgs), function(j) {
     tg <- tgs[[j]]; idx <- which(tg$obj != 0)
     v <- values[j] - as.double(tg$const); sc <- tol * max(1, abs(v))
-    rw <- .ec_row(P, "joint", "gen", idx, tg$obj[idx], v - sc, v + sc)
-    rw$coefq <- NULL; rw$loq <- NULL; rw$hiq <- NULL
-    rw
+    # a double row built directly (no exact rationals: a feasibility test with tolerance)
+    list(id = "joint", kind = "gen", idx = idx, coef = tg$obj[idx], coefq = NULL, loq = NULL, hiq = NULL,
+         lo = v - sc, hi = v + sc)
   })
   U <- length(built$unions)
   combos <- if (U) as.matrix(expand.grid(rep(list(1:2), U))) else matrix(0L, 1, 0)

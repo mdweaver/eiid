@@ -229,7 +229,7 @@ bin_did <- function(col, from, to, low, high, label = NULL)
   if (identical(versus, "rest")) return(if (P$R == 2) setdiff(1:2, r) else NULL)
   s <- .ed_rowidx(P, versus, "versus")
   if (length(s) != 1 || s == r) stop("'versus' must be one other group, or \"rest\"")
-  if (P$R > 2 || TRUE) return(s)
+  s
 }
 
 .ed_resolve <- function(P, ts, name = NULL) {
@@ -358,7 +358,9 @@ bin_did <- function(col, from, to, low, high, label = NULL)
     for (s in specs) {
       k <- sum(vapply(out, function(o) o$type == type, TRUE)) + 1
       id <- paste0(type, "[", k, "]")
-      ps <- if (type %in% .ed_change_types) .ed_parse_change(P, type, s, env, id) else .ed_parse_within(P, type, s, env, id)
+      ps <- if (type %in% .ed_change_types) .ed_parse_change(P, type, s, env, id) else
+        if (type == "linear" && !is.null(s$cells) && "election" %in% names(s$cells)) .ed_parse_linear_multi(P, s, env, id) else
+          .ed_parse_within(P, type, s, env, id)
       ps$id <- id
       out[[length(out) + 1]] <- ps
     }
@@ -403,6 +405,32 @@ bin_did <- function(col, from, to, low, high, label = NULL)
   un <- if (is.null(rs$union)) NULL else list(plus = lapply(rs$union$plus, mp), minus = lapply(rs$union$minus, mp))
   list(type = type, scope = "within", election = t, role = ps$role, label = lab, rows = rows, union = un,
        experimental = type %in% c("sign", "cr"), tuple = NULL)
+}
+
+# a general linear row on cells of several elections (a row on the product, Lemma E1 / E5(e)):
+# cells = data.frame(unit, row, col, election, coef); lower / upper bounds
+.ed_parse_linear_multi <- function(P, s, env, id) {
+  .ed_object_check(s, "linear")
+  cl <- s$cells
+  if (!all(c("unit", "row", "col", "election", "coef") %in% names(cl)))
+    stop("linear: 'cells' must have columns unit, row, col, election, coef")
+  ui <- .ec_units(P$Pt[[1]], units = cl$unit, env = env, what = "linear", ordered = FALSE)
+  um <- if (is.character(cl$unit) || is.factor(cl$unit)) match(as.character(cl$unit), P$units0) else match(as.integer(cl$unit), P$Pt[[1]]$orig)
+  if (any(is.na(um))) stop("linear: unknown units")
+  el <- vapply(seq_len(nrow(cl)), function(j) .ed_elec(P, cl$election[j], "linear (election)"), 0L)
+  idx <- .ed_vix(P, um, el, .ed_rowidx(P, cl$row, "row"), .ed_colidx(P, cl$col, "col"))
+  u <- sort(unique(idx))
+  cfq <- .ec_rat(if (is.character(cl$coef)) cl$coef else as.numeric(cl$coef), P$log)
+  cf <- gmp::as.bigq(rep(0, length(u)))
+  for (j in seq_along(u)) cf[j] <- sum(cfq[idx == u[j]])
+  if (!P$integer) cf <- as.double(cf)
+  lo <- if (is.null(s$lower) || !is.finite(as.numeric(s$lower))) NULL else s$lower
+  hi <- if (is.null(s$upper) || !is.finite(as.numeric(s$upper))) NULL else s$upper
+  if (!is.null(s$value)) lo <- hi <- s$value
+  role <- if (is.null(s$role)) "belief" else match.arg(s$role, c("identity", "belief"))
+  list(type = "linear", scope = "change", role = role,
+       label = sprintf("linear row on %d cells across elections in [%s, %s]", length(u), format(if (is.null(lo)) -Inf else lo), format(if (is.null(hi)) Inf else hi)),
+       rows = list(.ec_row(P, id, "gen", u, cf, lo, hi)), union = NULL, experimental = FALSE, tuple = NULL)
 }
 
 .ed_sign_arg <- function(sg, what) {

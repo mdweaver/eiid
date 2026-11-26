@@ -151,7 +151,7 @@
   R <- st$R; C <- st$C; m <- st$m; p <- st$p
   M <- st$mono
   if (c == C) {
-    coef <- numeric(st$nbeta); const <- sum(v)
+    coef <- numeric(st$nbeta); const <- if (isTRUE(st$change)) 0 else sum(v)   # changes: sum_c Delta H_c = 0 (2e Sec. 3)
     for (cc in seq_len(C - 1)) {
       pc <- .rxc_idlin(st, g, cc, r, v)
       coef <- coef - pc$coef; const <- const - pc$const

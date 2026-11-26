@@ -361,7 +361,7 @@ eiATT <- function(fit, treated, comparison, col = NULL, post = NULL, population,
     pre_el <- pe
   }
   pre_pairs <- if (length(pre_el)) lapply(pre_el, function(e) c(e, e + 1L)) else list()
-  cs <- list(r = r, s = s, base = b0, posts = posts, pre_pairs = pre_pairs, has_comp = has_comp)
+  cs <- list(r = r, s = s, base = b0, posts = posts, pre_pairs = pre_pairs, has_comp = has_comp, cc = cc)
   out <- list(call = match.call(), fit = fit, treated = P$rows[r], comparison = if (!has_comp) NA_character_ else if (is.null(s)) "rest" else P$rows[s],
               col = P$cols[cc], base = P$elections[b0], posts = P$elections[tgt], population = population,
               trend = trend, Lambda = Lambda, pretrends = pretrends, alpha = alpha)
@@ -488,8 +488,10 @@ print.eiATT <- function(x, digits = 3, ...) {
   cat(sprintf("  trend assumption: %s\n  spillover onto the comparison group: |S_t| <= %g%s\n  no anticipation: assumed\n",
               .att_trend_label(x$trend), x$Lambda, if (x$Lambda == 0) " (no spillover, stated explicitly)" else ""))
   fit <- x$fit
-  cat(sprintf("  descriptive basis: %s\n", if (is.null(fit$restrictions)) "margins only (Delta-0)" else
-    paste(fit$restrictions$id, collapse = ", ")))
+  cat(sprintf("  descriptive basis: %s%s\n", if (is.null(fit$restrictions)) "count layer, margins only (Delta-0)" else
+    paste("count rows", paste(fit$restrictions$id, collapse = ", ")),
+    if (x$pretrends == "model") sprintf("; model rung %s%s", fit$model$rung,
+      if (length(fit$model$row_labels)) paste0(" with ", paste(fit$model$row_labels, collapse = "; ")) else "") else ""))
   if (x$pretrends == "model") { .att_print_model(x, digits); return(invisible(x)) }
   if (isFALSE(x$rate_limits))
     cat("  OUTER: the rate limits theta_t in [0,1], B_s,t - S_t in [0,1] are dropped (the sharp set imposes them; Thm E16)\n")

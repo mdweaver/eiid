@@ -15,7 +15,8 @@ eiATT(
   spillover,
   no_anticipation,
   pretrends = c("counts", "model"),
-  alpha = 0.05
+  alpha = 0.05,
+  rate_limits = TRUE
 )
 }
 \arguments{
@@ -40,6 +41,10 @@ eiATT(
 \item{pretrends}{\code{"counts"} (count layer, default) or \code{"model"} (Prop. E25).}
 
 \item{alpha}{level for \code{pretrends = "model"}.}
+
+\item{rate_limits}{\code{TRUE} (default) imposes \eqn{\theta_t \in [0,1]} and
+\eqn{B_{s^*ct} - S_t \in [0,1]} (the sharp set). \code{FALSE} drops them: an OUTER set,
+printed as such (used to reproduce NS N21's numbers; 2e N21 correction).}
 }
 \value{
 an object of class \code{"eiATT"}.

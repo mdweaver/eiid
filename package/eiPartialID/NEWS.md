@@ -1,3 +1,54 @@
+# eiPartialID 0.5.0
+
+Build step 2 (DiD): changes and difference-in-differences for T >= 2 elections on the same
+units. Theory: `docs/extension/PHASE2e_did_general.md` (2e; proof reviewed).
+
+* New `eiChange()`, the descriptive layer. Under a fixed population the T elections stack into
+  one count-layer problem over the unit-elections (Lemma E1), so the machinery of `eiCounts()`
+  (exact rationals, inward rounding, TU classes, certified GLPK MILP with `time_limit`,
+  witnesses, CR unions) applies to rows that couple elections.
+  * Targets `did()`, `gap_at()`, `rate_at()`, `bin_did()`; default: the event-study DiDs
+    relative to `base`. Margins-only ranges (Prop. E3) and the joint event-study set: the
+    printout says whether the corner of the box of separate ranges is attainable (E3(c));
+    `eiJoint()` tests any vector of values.
+  * Count rows on changes: `sign_change` (W1 one-vs-rest = a half-line in
+    Z = Y_rct - Y_rcu with the closed form of Prop. E5(b); pair and W2 as LP rows),
+    `cr_change` (a union, E5(d), (f)), `order_change`, `contrast_change` (Prop. E6, with the
+    corrected emptiness criterion including Dbar+ < 0, review issue 2), `linear` rows across
+    elections, and every `eiCounts()` row at one election (`election =`). Closed forms are
+    printed beside the LP and cross-checked.
+  * Integer handling: the lattice of Prop. E26 for one-vs-rest DiDs with W1 rows on the same
+    changes ("integer-exact (E26 lattice)", any R); the TU class of Thm E27 (R = 2, change rows
+    on one column, paths of period pairs, laminar unit sets; class "E27"); 6a's classes on the
+    unit-elections; otherwise the certified MILP. Non-integer margins switch the check off.
+  * Model layer `model = fd(...)` (FD, Lemma E7; rows R1, R2, R4, delta for R = 2, DiD-S with the
+    E9(a) closed form, model signs on changes; plug-in sharp set of E8(d) for 2 x 2) or
+    `lce_periods(...)` (per-period pooled LCE with model signs and CR on changes, E11; grouped
+    rungs flagged R16). Actual-target intervals: projection interval (P3.5(b2)(ii)) for the
+    model DiD plus the two-election allowance of Lemma E12 (rho_i = 2(w_ir + w_is) for a DiD),
+    intersected with the count set (Thm E13). Unions are reported whole (Prop. E24).
+  * Gap register (2e Sec. 8): different group counts across elections (G1-G3, G5, G9),
+    outcome totals that differ from the group totals, and different unit sets (G6) are refused
+    with a message; `margins = "estimated"` (G7) warns and switches the integer check off.
+* New `eiATT()`, the causal layer, on an `eiChange()` fit.
+  * Labelling rule (Def. 5.1): refuses a causal label unless the population, the treated group,
+    the comparison group (when the trend assumption uses one), the trend assumption, the
+    spillover allowance and no anticipation are stated.
+  * Joint causal LP over the realised tables and (theta_t, S_t, b_t) (Thm E16) with the rate
+    limits; trend assumptions `no_trend()` (E15), `trend_dial()`/`parallel_trends()` (E17:
+    outer form, the exact E17(b) criterion, breakdown value), `rel_mag()` (E18: union of 2L LPs;
+    implied M = Mbar sup|D_pre| always printed; degeneration report of E19: collapse to a dial,
+    no information, the vacuity criterion, the margins-only artefact), `smoothness()` (Def. 5.3;
+    E20 closed form checked), `mtr_nd_ps()` (E21 with the spillover dial; closed form E21(c)).
+    `rate_limits = FALSE` gives the outer set (to reproduce NS N21).
+  * Spillover dial Lambda; the printout notes that pre-periods carry no information on it (E22).
+  * `pretrends = "model"` (Prop. E25): one joint projection region for the stacked parameter,
+    box variables with Lemma E12 radii for every actual quantity, the union bound; under FD
+    alone the rate limits are dropped and the set is labelled OUTER.
+* Internal: `.ec_system()` accepts a problem-specific integer classifier (unused by
+  `eiCounts()`); `.rxc_idlin()` takes a `change` flag (sum over columns of Delta H is 0).
+  Existing outputs are unchanged.
+
 # eiPartialID 0.4.0
 
 Build step 1 (M-COUNT): the count layer. Theory: `docs/extension/PHASE6a_count_layer.md`

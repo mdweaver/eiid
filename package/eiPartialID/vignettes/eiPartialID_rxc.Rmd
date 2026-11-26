@@ -26,6 +26,8 @@ Version 0.3.0 adds signs on mean associations and contextual reinforcement
 bootstrap pooling test. Version 0.3.1 prints, for each fit, which result covers its
 confidence intervals (see "What is reported"); `NEWS.md` lists the changes.
 Version 0.4.0 adds the count layer, `eiCounts()` (see "Actual counts" below).
+Version 0.5.0 adds changes and difference-in-differences, `eiChange()` and `eiATT()`
+(see "Changes and DiD" below).
 
 ## What is reported
 
@@ -399,6 +401,94 @@ m <- eiBounds(cbind(lit, illit) ~ cbind(black, white), data = cen, model = "M0",
 eiCounts(cbind(lit, illit) ~ cbind(black, white), data = cen, model = m,
          targets = list(rate("black", "lit"), gap("black", "white", "lit")), binding = FALSE)
 ```
+
+## Changes and DiD
+
+Version 0.5.0 adds difference-in-differences for several elections on the same
+units (theory: `docs/extension/PHASE2e_did_general.md`). It has two layers, which
+are printed and labelled separately:
+
+* **Descriptive** (`eiChange()`): how much more did one group's support change than
+  another's, among the same people? Under a fixed population (the same people, with
+  the same group, at every election) the elections stack into one count-layer
+  problem, so the bounds are exact given the margins and the rows.
+* **Causal** (`eiATT()`): what did the treatment do to the treated group? That needs a
+  stated trend assumption on top of a descriptive set.
+
+The example has four precincts of 200 men (10, 50, 150 and 190 veterans) and three
+elections: an early pre-war election, the last pre-war election (the base) and a
+post-war election.
+
+```{r did-data}
+aW <- cbind(c(10, 50, 150, 190), c(190, 150, 50, 10))
+yes <- rbind(c(60, 62, 61, 56), c(62, 66, 63, 61), c(74, 86, 113, 120))
+mk <- function(t) data.frame(p = paste0("P", 1:4), vet = aW[, 1], oth = aW[, 2],
+                             yes = yes[t, ], no = 200 - yes[t, ])
+elec <- list(early = mk(1), base = mk(2), post = mk(3))
+ch <- eiChange(elec, cbind(yes, no) ~ cbind(vet, oth), unit = "p", base = "base",
+               row = "vet", col = "yes")
+ch
+```
+
+The default targets are the event-study DiDs relative to the base election. With the
+margins alone the post-war DiD lies between −0.41 and 0.79. The two DiDs share the
+base election's table, so their joint set is not the box of the two ranges:
+`eiJoint()` tests whether a pair of values can occur together.
+
+Beliefs about the actual voters' changes narrow the DiD exactly. Contextual
+reinforcement on the changes (the within-precinct gap in changes and the pattern
+across precincts point the same way) is a union of two row systems:
+
+```{r did-cr}
+cr <- function(a, b) list(row = "vet", col = "yes", from = a, to = b)
+ch_cr <- eiChange(elec, cbind(yes, no) ~ cbind(vet, oth), unit = "p", base = "base",
+                  row = "vet", col = "yes", integer = "lp",
+                  restrictions = list(cr_change = list(cr("base", "post"), cr("early", "base"))))
+ch_cr$table[, c("target", "lower", "upper")]
+```
+
+Other rows on changes are `sign_change` (realised association signs on changes),
+`order_change` (orderings of changes within each unit) and `contrast_change` (the
+count contrast between two prespecified kinds of places), plus every `eiCounts()` row
+at one election (`election = `). With whole-number margins the integer status is
+reported as for `eiCounts()`; one-vs-rest signs on changes use the exact lattice of
+Prop. E26.
+
+**Causal statements.** `eiATT()` refuses a causal label unless the population, the
+treated group, the comparison group (when the trend assumption uses one), a trend
+assumption, a spillover allowance and no anticipation are all stated:
+
+```{r did-att}
+eiATT(ch_cr, treated = "vet", comparison = "oth", population = "fixed",
+      trend = trend_dial(0.05), spillover = 0.02, no_anticipation = TRUE)
+```
+
+Trend assumptions: `no_trend()` (the data alone never sign the effect),
+`parallel_trends()`, `trend_dial(M)`, `rel_mag(Mbar)` (relative magnitudes over the
+joint set of latent pre-trends), `smoothness(M)` and `mtr_nd_ps()`. Relative
+magnitudes help only when something narrows the pre-period DiD. On the margins alone
+they collapse to no information, and the printout says so, together with the implied
+M = Mbar · sup|pre-period DiD|:
+
+```{r did-rm}
+eiATT(ch, treated = "vet", comparison = "oth", population = "fixed",
+      trend = rel_mag(1), spillover = 0, no_anticipation = TRUE)
+```
+
+With reinforcement on both changes the same assumption gives 0.135 to 0.278
+(`eiATT(ch_cr, ...)`).
+
+**Model layer.** `eiChange(..., model = fd(...))` adds the first-difference LCE
+(rows R1, R2, R4, a bounded change, DiD-S, model signs on changes), and
+`lce_periods(...)` adds per-period LCE with model rows on changes. Each DiD gets an
+interval for the *actual* DiD (a projection interval plus the two-election residual
+allowance), which is intersected with the count set. `eiATT(..., pretrends = "model")`
+uses one joint confidence region for model-based pre-trends. Under FD alone the levels
+are free, so the result is labelled outer.
+
+**Not covered** (the gap register; refused or flagged): people entering, leaving or
+aging in, census bases that disagree, changing boundaries, estimated margins and
+time-varying group membership.
 
 ## Sensitivity and breakdown
 

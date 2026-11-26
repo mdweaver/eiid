@@ -91,5 +91,37 @@ PASS  E17 [V] review issue 1: margins only, a maximiser of D minimises thetaPT a
 PASS  E6 [F] review issue 2: the emptiness criterion needs 'or Dbar+ < 0': here dtau_H > dtau_L and cap >= Dbar-, yet the set is empty  [Dbar in [-0.150,-0.150], lambda 0.60, dtau_H - dtau_L 0.46, cap 0.767]
 PASS  W [I] review issue 12: RM(1) with CR on the pre-war change alone gives [-0.4155, 0.7325]; on both changes [0.1352, 0.2783]  [pre only (-0.4155, 0.7325)]
 PASS  G [V] review issue 14: the gap-register counts quoted in PHASE2e (G1, G5, G6, G7) match this run  [G1 200/200, G5 300/300, G6 53/300, G7 36/200]
+PASS  E18 [F] finding 1: at horizon 2 RM(1) holds but ATT_2 = -.30 lies outside the first-post endpoint-wise set D_2 +/- A; inside D_2 +/- 2A  [A = 0.15, D_2 = 0.00]
+PASS  E23 [F] finding 2: fitted change = mean of 20 signed ones; P3.8 radius with one election's range covers .884682 < .95; doubled range .997423  [radius 0.3037]
+PASS  E25 [F] finding 3: RM(1) holds at every realisation, mean programme effect -.10; RM on the mean pre-DiD (= 0) forces b = 0 and effect 0
+PASS  E16 [F] finding 4: theta A_r integer and continuous rate limits hold, but one comparison person cannot have untreated rate 1/2
+PASS  Remark 7.1 [F] finding 5: no one-step integer guarantee: integer ATT set {0}, continuous [-1, 1] (m = 2, 3, 5, 10)
+PASS  E27 [F] finding 6: degree-3 star with one change row per edge: LP maximum 3/2, integer maximum 1 (strict gap)
+PASS  E27 [V] finding 6: a 4-cycle of period pairs (chronological orientation mixed) with laminar families: LP = MILP  [30 objectives]
+PASS  E7 [F] finding 7: every common-composition contrast for pair (1,2) is zero, yet the electorate DiD loads .0075 (full-rank quadratic design)
+PASS  E8 [F] finding 8: each of two successive change pairs is feasible at x = .4, .5, .6, the three-election path is not
+PASS  E16 [F] finding 9: comparison post rates s1 + s2 = 1.2; PT feasible at each post-period separately, refuted jointly
+PASS  E17 [V] finding 9: sharp breakdown of 'ATT > 0' = min M s.t. joint feasibility and ATT <= 0 (one LP) >= Minkowski value  [sharp 0.1432, Minkowski 0.1432]
+PASS  E19 [F] finding 10: counts alone, no pure precinct, RM(1): ATT in [.12, .28] (no-assumption [-.31, .71]); no pre-period model needed  [RM [0.1200,0.2800]]
+PASS  G6 [F] finding 11: a 50/50 split of a merged baseline gives gap [-.2, .2]; the true gap .8 is excluded
+PASS  E18 [F] finding 12: sharp RM projection [-.90,-.70] U [-.30,0] with one polytope of tables; the envelope wrongly contains -.50
+PASS  E18 [V] finding 12: N21 and the worked-example RM sets are single intervals after merging branch intervals (no hole)
+PASS  E3 [V] finding 12: consecutive DiDs are a box when no interior election is uncertain; base-relative (base 0) is a segment
+      PT  five precincts, rare, within mean PT: [+10.39, +12.25]
+      PT  five precincts, rare, pooled mean PT: [-3.96, -2.22]
+      PT  five precincts, ordinary, within mean PT: [-67.33, +43.78]
+      PT  five precincts, ordinary, pooled mean PT: [-80.56, +52.13]
+PASS  E28 [V] five-precinct table reproduced (FD-LCE on changes): rare [+10.39,+12.25] within vs [-3.96,-2.22] pooled; ordinary [-67.33,+43.78] vs [-80.56,+52.13]
+      PT  three precincts, LCE on nothing: [-58.00, +27.33]
+      PT  three precincts, LCE on change: [-49.33, +7.33]
+      PT  three precincts, LCE on pre + change: [+2.67, +7.33]
+      PT  three precincts, LCE on pre + post: [+2.67, +7.33]
+      PT  three precincts, LCE on post + change: [+2.67, +7.33]
+      PT  three precincts, LCE on pre + post + change: [+2.67, +7.33]
+PASS  E30 [V] three-precinct check: no LCE [-58.00,27.33]; change only [-49.33,7.33]; any two of pre/post/change, or all three, [2.67,7.33]
+PASS  E30 [I] baseline-curvature allowance: intervals widen monotonically in eps from [2.67,7.33] to change-only; breakdown eps* by one LP  [eps* = 0.1667 points; at eps* [-0.00,7.33]]
+PASS  E28 [V] unsupported precinct (all veterans): ATT interval = supported part + w_V B_V1 - [pi_U, 0], pi_U = share of veterans affected  [pi_U = 0.400; [-65.60,8.40]]
+PASS  E28 [I] four-precinct example, margins only: D_W in [-93.87, +144.72], pooled DiD in [-40.75, +79.25]; precinct 4 weight 47.5% vs 2.5%  [D_W [-93.87,144.72]]
+PASS  E29 [F] realised-table D_W (cells known, L = U) is not a confidence set for the expected ATT; [L - r, U + r] covers (Hoeffding: rho_i = 4 w_Vi, or person-level)  [point 0.000; any within-precinct dependence r = 1.087, cover 1.000; independent persons r = 0.118, cover 1.000]
 
-76/76 PASS
+98/98 PASS

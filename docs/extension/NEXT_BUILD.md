@@ -37,7 +37,7 @@
 3. **M-CONTRAST**: finite comparisons between prespecified kinds of places, in levels and changes; M-LOC becomes its `at = "hull"` option. R22.
 4. **B1(M) + κ**: context at a second scale, per column, with κ-annotated endpoints. R8.
 5. **M1(δ) with named neighbours**: adjacency or distance matrix (Lipschitz default δ_de = λ·d_de). R30.
-6. **CAR(Z)-δ**, then **covariate-benchmarked κ/δ** with three diagnostics (benchmark size, composition R², overlap factor). R28.
+6. **CAR(Z)-δ**, then **covariate-benchmarked κ/δ** with three diagnostics (benchmark size, composition R², overlap factor). R28. **Widened (owner, 26 Nov 2026) to covariates in both ordinary EI and DiD:** conditional parallel trends (PHASE2e gap item G8) and the age adjustments proposed in `reviews/PHASE2e_independent_review.md` (option 1, an age-gap sensitivity slope; option 2, parallel trends within precinct × age band), designed once for both layers.
 7. **M-EXCEPT**: exception-mass frontiers. R23.
 8. **M-SHARP diagnostic** (kink mass, (X,N) conditioning); the estimator only if polarised precincts are found. R24, R9′.
 9. **M-BERN** polynomial robustness ladder, with L1′.

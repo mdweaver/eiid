@@ -323,3 +323,9 @@ Nothing else new. I also rechecked these wording changes and found them correct:
 * (b) The rows "L5 with several groups" and "grouped L4, M1(δ)" could add "R2: P3.8 (finite sample, wide)", so that "simulation finding only" is not read as "nothing proved in R2". The P3.8 row already covers it.
 
 **Verdict: the five rows and the R27 register update are correct. The L4 near-zero-width case is covered, and multi-group L5 is correctly restricted to R1. R27 keeps "proof reviewed".**
+
+*Addendum (6a at `claude/mcount-theory` 79e735b, merged here).* Both round-3 nits are fixed correctly.
+* (a) A note under the §4.3 table now says that $\beta$-free constraint terms are held exactly, and that $\hat k$'s maximum is taken over the $\beta$-dependent terms and the constant only.
+* (b) The multi-group L5, grouped L4/M1(δ) and grouped-R2 rows now cite P3.8 (finite sample, wide) for R2. That use is valid under P3.8's own hypotheses (P3-S1a, a correct mean model, a full-rank regression design).
+
+Nothing else changed. **R19 and R27 remain "proof reviewed".**

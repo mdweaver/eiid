@@ -601,7 +601,8 @@ lce_periods <- function(rows = list(), model = c("M0", "M2", "M1"), group = NULL
       iv <- .ed_with_seed(spec$seed, as.vector(attr(.rxc_ci_clr(stJ, sy$cons, tgm, a_proj / 2, a_proj / 2, Zs, spec$ndraw, proj_alpha = a_proj), "projection")))
       ivs[[length(ivs) + 1]] <- iv; labs <- c(labs, paste(c(g$label, sy$label)[nzchar(c(g$label, sy$label))], collapse = "; "))
     }
-    pcs <- .rxc_union(ivs, tol = 0)
+    # an ATT of a rate lies in [-1, 1]: clipping the projection interval there is valid
+    pcs <- .rxc_union(lapply(ivs, function(v) if (any(is.na(v)) || v[1] > 1 || v[2] < -1) v else pmin(pmax(v, -1), 1)), tol = 0)
     res[[length(res) + 1]] <- list(post = P$elections[t], pieces = pcs, lower = if (is.null(pcs)) NA_real_ else min(pcs[, 1]),
                                    upper = if (is.null(pcs)) NA_real_ else max(pcs[, 2]),
                                    branches = data.frame(branch = labs, lower = vapply(ivs, `[`, 0, 1), upper = vapply(ivs, `[`, 0, 2)))
@@ -617,7 +618,7 @@ lce_periods <- function(rows = list(), model = c("M0", "M2", "M1"), group = NULL
   cat(sprintf("  model-based pre-trends (Prop. E25): rung %s; one joint projection region (P3.5(b2)(ii)) for the stacked beta;\n", m$rung))
   cat(sprintf("  box variables for the residual of each actual quantity (radii %s; Lemma E12, %s)\n",
               paste(sprintf("%s %.3g", names(m$radii), m$radii), collapse = ", "), x$fit$model$spec$allowance))
-  cat("  inference:", m$status, "\n")
+  cat("  inference:", m$status, "\n  (intervals clipped to [-1, 1], the logical range of an ATT of a rate)\n")
   if (m$outer) cat("  OUTER: under FD alone the levels are free, so the rate limits are dropped (Prop. E25 (H2))\n")
   for (e in m$results) {
     cat(sprintf("\nPost-election %s\n  CAUSAL  ATT set%s: %s\n", e$post, if (m$outer) " (outer)" else "",

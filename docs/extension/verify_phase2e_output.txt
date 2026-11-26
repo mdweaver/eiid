@@ -119,9 +119,15 @@ PASS  E28 [V] five-precinct table reproduced (FD-LCE on changes): rare [+10.39,+
       PT  three precincts, LCE on post + change: [+2.67, +7.33]
       PT  three precincts, LCE on pre + post + change: [+2.67, +7.33]
 PASS  E30 [V] three-precinct check: no LCE [-58.00,27.33]; change only [-49.33,7.33]; any two of pre/post/change, or all three, [2.67,7.33]
-PASS  E30 [I] baseline-curvature allowance: intervals widen monotonically in eps from [2.67,7.33] to change-only; breakdown eps* by one LP  [eps* = 0.1667 points; at eps* [-0.00,7.33]]
+PASS  E30 [I] baseline-curvature allowance: monotone in eps; positive for eps < 1/600, zero feasible at eps* = 1/600 (one LP); eps = 1/2 already gives change-only  [eps* = 0.1667 points; at eps* [-0.00,7.33]]
 PASS  E28 [V] unsupported precinct (all veterans): ATT interval = supported part + w_V B_V1 - [pi_U, 0], pi_U = share of veterans affected  [pi_U = 0.400; [-65.60,8.40]]
 PASS  E28 [I] four-precinct example, margins only: D_W in [-93.87, +144.72], pooled DiD in [-40.75, +79.25]; precinct 4 weight 47.5% vs 2.5%  [D_W [-93.87,144.72]]
-PASS  E29 [F] realised-table D_W (cells known, L = U) is not a confidence set for the expected ATT; [L - r, U + r] covers (Hoeffding: rho_i = 4 w_Vi, or person-level)  [point 0.000; any within-precinct dependence r = 1.087, cover 1.000; independent persons r = 0.118, cover 1.000]
+PASS  E29 [F] realised-table D_W (cells known, L = U) is not a confidence set for the expected ATT; [L - r, U + r] covers (Hoeffding: rho_i = 4 w_Vi, or person-level)  [point 0.000; n_eff = 25.0 (unequal weights); any within-precinct dependence r = 1.087 (equal weights: 0.992), cover 1.000; independent persons r = 0.118, cover 1.000]
+PASS  E28 [F] round 2: under PPT the local imputation m_V0 + d_N = (-.2, 1.2) is not a rate; the pooled witness p0 = .5 in every precinct is valid
+PASS  E29 [F] round 2: RM on increments |b_t - b_(t-1)| <= Mbar A holds (Mbar = 1), the cap on levels |b_t| <= Mbar A fails at the second post-election
+      R2  spillover 0.01: joint LP [-50.3333,8.3333] vs dilation [-50.3333,8.3333]
+      R2  spillover 0.05: joint LP [-54.3333,12.3333] vs dilation [-54.3333,12.3333]
+PASS  E28 [I] round 2: WPT spillover sensitivity by one joint LP in (fit, S_i) with local rate limits; reported beside the pi_S*Lam dilation (no sharpness claimed for the dilation)
+PASS  E34 [V] round 2: exact within-precinct RM with an affine pre-increment profile: split-and-orientation enumeration (<= 2(|S|+1) LPs) = exhaustive 2^|S| sign enumeration  [10 six-precinct cases, both extrema]
 
-98/98 PASS
+102/102 PASS

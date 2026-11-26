@@ -1784,19 +1784,21 @@ check("E3 [V] finding 12: consecutive DiDs are a box when no interior election i
 #     a precinct's aggregate law is a finite list of equally likely totals, and the feasible set of its
 #     expected group rates is the Aumann expectation (per-state Duncan-Davis ends averaged).
 # =====================================================================================
-def mean_pt_lp(size, vets, pre, post, comparison, lce=("change",), eps=0.0, eps_var=False):
+def mean_pt_lp(size, vets, pre, post, comparison, lce=("change",), eps=0.0, eps_var=False, Lam=0.0):
     vets = np.asarray(vets, float); size = np.broadcast_to(np.asarray(size, float), vets.shape)
     ctl = size - vets; x = vets / size; p = len(x)
     pre = np.asarray(pre, float).reshape(p, -1); post = np.asarray(post, float).reshape(p, -1)
     sup = ctl > 0
     # variables: v0, c0, v1, c1 (p each), theta_U (p), affine params 2 per (group, period) x 6, eps
-    nv = 5 * p + 12 + 1
+    nv = 5 * p + 12 + 1 + p                                       # + spillover S_i (WPT sensitivity)
     V0, C0, V1, C1, TH = (np.arange(p) + k * p for k in range(5))
     par = lambda g, per: 5 * p + 2 * (2 * per + g)                 # g 0 = V, 1 = C; per 0 pre, 1 post, 2 change
-    EPS = nv - 1
+    EPS = 5 * p + 12
+    SS = 5 * p + 13 + np.arange(p)
     Aeq, beq, Aub, bub = [], [], [], []
     bnds = [(0, 1)] * (4 * p) + [(0, 1) if not sup[i] else (0, 0) for i in range(p)] + [(None, None)] * 12
     bnds += [(0, None) if eps_var else (eps, eps)]
+    bnds += [(-Lam, Lam) if (sup[i] and comparison == "within") else (0, 0) for i in range(p)]
     for (tot, Vt, Ct) in ((pre, V0, C0), (post, V1, C1)):
         lo = np.maximum(0, tot - ctl[:, None]).mean(1) / vets
         hi = np.minimum(vets[:, None], tot).mean(1) / vets
@@ -1826,8 +1828,10 @@ def mean_pt_lp(size, vets, pre, post, comparison, lce=("change",), eps=0.0, eps_
     if comparison == "within":
         for i in range(p):
             if sup[i]:
-                obj[V1[i]] += wv[i]; obj[V0[i]] -= wv[i]; obj[C1[i]] -= wv[i]; obj[C0[i]] += wv[i]
-                v = np.zeros(nv); v[V0[i]] = 1; v[C1[i]] = 1; v[C0[i]] = -1     # 0 <= m_V0 + d_N <= 1
+                obj[V1[i]] += wv[i]; obj[V0[i]] -= wv[i]; obj[C1[i]] -= wv[i]; obj[C0[i]] += wv[i]; obj[SS[i]] += wv[i]
+                v = np.zeros(nv); v[V0[i]] = 1; v[C1[i]] = 1; v[C0[i]] = -1; v[SS[i]] = -1   # 0 <= m_V0 + d_N - S_i <= 1
+                Aub += [v, -v]; bub += [1, 0]
+                v = np.zeros(nv); v[C1[i]] = 1; v[SS[i]] = -1                         # 0 <= m_Nt - S_i <= 1
                 Aub += [v, -v]; bub += [1, 0]
             else:
                 obj[V1[i]] += wv[i]; obj[TH[i]] -= wv[i]
@@ -1874,7 +1878,7 @@ check("E30 [V] three-precinct check: no LCE [-58.00,27.33]; change only [-49.33,
       all(np.allclose(got3[k], exp3[k], atol=0.0051) for k in exp3))
 # baseline-curvature allowance eps: monotone, eps = 0 recovers two-election LCE, large eps recovers change-only;
 # breakdown eps* = min eps s.t. ATT <= 0 is one LP (eps a variable).
-epsr = [lp_range(mean_pt_lp(*three, comparison="within", lce=("pre", "change"), eps=e)) for e in (0.0, .005, .02, .05, 1.0)]
+epsr = [lp_range(mean_pt_lp(*three, comparison="within", lce=("pre", "change"), eps=e)) for e in (0.0, .001, 1 / 600, .005, .02, .05, .5, 1.0)]
 mono = all(epsr[j + 1][0] <= epsr[j][0] + 1e-7 and epsr[j + 1][1] >= epsr[j][1] - 1e-7 for j in range(len(epsr) - 1))
 Pb = mean_pt_lp(*three, comparison="within", lce=("pre", "change"), eps_var=True)
 cE = np.zeros(Pb["nv"]); cE[Pb["EPS"]] = 1
@@ -1882,8 +1886,8 @@ rb = linprog(cE, A_eq=Pb["Aeq"], b_eq=Pb["beq"], A_ub=np.vstack([Pb["Aub"], Pb["
              bounds=Pb["bnds"], method="highs")
 eps_star = rb.fun
 at_star = lp_range(mean_pt_lp(*three, comparison="within", lce=("pre", "change"), eps=eps_star))
-check("E30 [I] baseline-curvature allowance: intervals widen monotonically in eps from [2.67,7.33] to change-only; breakdown eps* by one LP",
-      mono and np.allclose(epsr[0], exp3[("pre", "change")], atol=.0051) and np.allclose(epsr[-1], exp3[("change",)], atol=.0051)
+check("E30 [I] baseline-curvature allowance: monotone in eps; positive for eps < 1/600, zero feasible at eps* = 1/600 (one LP); eps = 1/2 already gives change-only",
+      mono and np.allclose(epsr[0], exp3[("pre", "change")], atol=.0051) and np.allclose(epsr[-1], exp3[("change",)], atol=.0051) and np.allclose(epsr[-2], epsr[-1]) and epsr[1][0] > 1e-6
       and abs(at_star[0]) < 1e-6, f"eps* = {100 * eps_star:.4f} points; at eps* [{at_star[0]:.2f},{at_star[1]:.2f}]")
 # unsupported precincts (no comparison voters): full veteran target, no-assumption bound on that part.
 four = (800, [200, 400, 600, 800], [4, 164, 324, 720], [[204], [124], [4], [80]])   # precinct 4: veterans only
@@ -1916,6 +1920,7 @@ pV1, pN1 = pV0 + trend + tau, pN0 + trend
 wS = AV / AV.sum()
 att_mean = np.sum(wS * ((pV1 - pV0) - (pN1 - pN0)))
 rS = np.sqrt(.5 * np.log(2 / .05) * np.sum((4 * wS) ** 2))
+neffS = 1 / np.sum(wS ** 2)                        # r = sqrt(8 log(2/alpha) / n_eff); 0.992 for 30 equal weights
 rP = np.sqrt(.5 * np.log(2 / .05) * np.sum(4 * wS ** 2 * (1 / AV + 1 / AN)))   # persons independent: range 2 w/A per person
 cov_pt, cov_int, cov_p = 0, 0, 0
 for rep in range(400):
@@ -1925,7 +1930,70 @@ for rep in range(400):
     cov_int += dw - rS <= att_mean <= dw + rS
     cov_p += dw - rP <= att_mean <= dw + rP
 check("E29 [F] realised-table D_W (cells known, L = U) is not a confidence set for the expected ATT; [L - r, U + r] covers (Hoeffding: rho_i = 4 w_Vi, or person-level)",
-      cov_pt / 400 < .05 and cov_int / 400 >= .95 and cov_p / 400 >= .95,
-      f"point {cov_pt / 400:.3f}; any within-precinct dependence r = {rS:.3f}, cover {cov_int / 400:.3f}; independent persons r = {rP:.3f}, cover {cov_p / 400:.3f}")
+      cov_pt / 400 < .05 and cov_int / 400 >= .95 and cov_p / 400 >= .95
+      and np.isclose(rS, np.sqrt(8 * np.log(2 / .05) / neffS)) and round(np.sqrt(8 * np.log(40) / 30), 3) == 0.992,
+      f"point {cov_pt / 400:.3f}; n_eff = {neffS:.1f} (unequal weights); any within-precinct dependence r = {rS:.3f} (equal weights: 0.992), cover {cov_int / 400:.3f}; independent persons r = {rP:.3f}, cover {cov_p / 400:.3f}")
+
+
+# =====================================================================================
+# R2. Checks added after the independent review's round 2 on sections 5.8-5.9
+#     (reviews/PHASE2e_independent_review_round2_WPT.md).
+# =====================================================================================
+# A1 (E28(c), PPT witness): veteran baselines (.1, .9), comparison changes (-.3, +.3), equal weights.
+m0r, dNr, wr = np.array([.1, .9]), np.array([-.3, .3]), np.array([.5, .5])
+local = m0r + dNr; p0 = wr @ m0r + wr @ dNr
+check("E28 [F] round 2: under PPT the local imputation m_V0 + d_N = (-.2, 1.2) is not a rate; the pooled witness p0 = .5 in every precinct is valid",
+      np.allclose(local, (-.2, 1.2)) and np.isclose(p0, .5) and 0 <= p0 <= 1 and not np.all((local >= 0) & (local <= 1)))
+# A2 (E29(d), RM on increments): pre maximum .10, post gaps .10, .20 (relative to the base).
+bpost = np.array([0, .10, .20]); preA = .10
+inc_ok = all(abs(bpost[t] - bpost[t - 1]) <= preA + 1e-12 for t in (1, 2))
+lvl_ok = all(abs(bpost[t]) <= preA + 1e-12 for t in (1, 2))
+check("E29 [F] round 2: RM on increments |b_t - b_(t-1)| <= Mbar A holds (Mbar = 1), the cap on levels |b_t| <= Mbar A fails at the second post-election",
+      inc_ok and not lvl_ok)
+# A4 (spillover sensitivity under WPT): joint LP with S_i vs dilation of the zero-spillover interval by pi_S Lam.
+for LamS in (.01, .05):
+    jt = lp_range(mean_pt_lp(*three, comparison="within", lce=("change",), Lam=LamS))
+    z0 = lp_range(mean_pt_lp(*three, comparison="within", lce=("change",)))
+    dil = (z0[0] - 100 * LamS, z0[1] + 100 * LamS)          # pi_S = 1 here
+    print(f"      R2  spillover {LamS}: joint LP [{jt[0]:.4f},{jt[1]:.4f}] vs dilation [{dil[0]:.4f},{dil[1]:.4f}]")
+spill_rows = [(lp_range(mean_pt_lp(*three, comparison="within", lce=("change",), Lam=L_)),
+               lp_range(mean_pt_lp(*three, comparison="within", lce=("change",)))) for L_ in (.01, .05)]
+check("E28 [I] round 2: WPT spillover sensitivity by one joint LP in (fit, S_i) with local rate limits; reported beside the pi_S*Lam dilation (no sharpness claimed for the dilation)",
+      all(j is not None and j[0] <= z[0] + 1e-9 and j[1] >= z[1] - 1e-9 for j, z in spill_rows))
+
+# B10 (Prop. E34): one pre transition, two-group FD-LCE: pre increment q(x_i) = alpha + beta x_i (affine);
+# exact local RM |db_i| <= Mbar |q(x_i)|. Split-and-orientation enumeration (<= 2(|S|+1) LPs) equals
+# exhaustive enumeration of 2^|S| sign patterns on both extrema.
+def rm_affine(xs, lo, hi, base, w, Mbar, patterns):
+    pS = len(xs); nv_ = 2 + pS                      # alpha, beta, db_1..db_p
+    out = []
+    for sg in patterns:
+        A, b = [], []
+        for i in range(pS):
+            q = np.zeros(nv_); q[0] = 1; q[1] = xs[i]
+            A += [q, -q]; b += [hi[i], -lo[i]]                     # data: q(x_i) in [lo_i, hi_i]
+            A.append(-sg[i] * q); b.append(0.0)                    # sign pattern sg_i q(x_i) >= 0
+            e = np.zeros(nv_); e[2 + i] = 1
+            A += [e - Mbar * sg[i] * q, -e - Mbar * sg[i] * q]; b += [0.0, 0.0]   # |db_i| <= Mbar sg_i q_i
+            A += [e, -e]; b += [1 - base[i], base[i]]              # local rate limit: base_i + db_i in [0, 1]
+        obj = np.zeros(nv_); obj[2:] = -w                          # ATT part: -sum w_i db_i
+        r1 = linprog(obj, A_ub=A, b_ub=b, bounds=[(None, None)] * nv_, method="highs")
+        r2 = linprog(-obj, A_ub=A, b_ub=b, bounds=[(None, None)] * nv_, method="highs")
+        if r1.status == 0 and r2.status == 0:
+            out.append((r1.fun, -r2.fun))
+    return (min(o[0] for o in out), max(o[1] for o in out)) if out else None
+ok34, n34 = True, 0
+for rep in range(10):
+    pS = 6
+    xs = np.sort(rng.uniform(.1, .9, pS)); a_, b_ = rng.uniform(-.2, .2), rng.uniform(-.4, .4)
+    tru = a_ + b_ * xs; sl = rng.uniform(.01, .08, pS)
+    lo, hi = tru - sl, tru + sl
+    base = rng.uniform(.2, .8, pS); w = rng.dirichlet(np.ones(pS)); Mbar = rng.uniform(.5, 2)
+    split = [tuple(s_ * (1 if i < k else -1) for i in range(pS)) for k in range(pS + 1) for s_ in (1, -1)]
+    allp = list(itertools.product((1, -1), repeat=pS))
+    e1, e2 = rm_affine(xs, lo, hi, base, w, Mbar, split), rm_affine(xs, lo, hi, base, w, Mbar, allp)
+    ok34 &= e1 is not None and np.allclose(e1, e2, atol=1e-8); n34 += 1
+check("E34 [V] round 2: exact within-precinct RM with an affine pre-increment profile: split-and-orientation enumeration (<= 2(|S|+1) LPs) = exhaustive 2^|S| sign enumeration",
+      ok34, f"{n34} six-precinct cases, both extrema")
 
 print(f"\n{sum(results)}/{len(results)} PASS")

@@ -975,8 +975,8 @@ for rr in pins:
 nD0 = Lp.range(did_vec(Lp, 0, 1, 0, 0, 1))
 narrow_nl = rm_range(a21, b21, 1.0, 1, 2, [(0, 1)], logical=False, extra=pins)
 narrow_l = rm_range(a21, b21, 1.0, 1, 2, [(0, 1)], logical=True, extra=pins)
-check("E18 [I] N21 narrow pre-trends (pre totals pinned to +/-2): D_pre [-0.06,0.10]; RM(1) [-0.60,0.90] (with rate limits: shown)",
-      np.allclose(np.round(nD0, 2), (-0.06, 0.10)) and np.allclose(np.round(narrow_nl, 2), (-0.60, 0.90)),
+check("E18 [I] N21 narrow pre-trends (pre totals pinned to +/-2): D_pre [-1/16, 5/48]; RM(1) [-29/48, 43/48], identical with and without rate limits",
+      np.allclose(nD0, (-1 / 16, 5 / 48)) and np.allclose(narrow_nl, (-29 / 48, 43 / 48)) and np.allclose(narrow_l, narrow_nl),
       f"with rate limits [{narrow_l[0]:.3f},{narrow_l[1]:.3f}]")
 # RM union-of-LPs equals a grid brute force (N21 coordinates s_t = veteran yes totals)
 cf21 = 1 / 80 + 1 / 120
@@ -1475,7 +1475,9 @@ aW = np.array([[10, 190], [50, 150], [150, 50], [190, 10]])
 yesW = np.array([[60, 62, 61, 56], [62, 66, 63, 61], [74, 86, 113, 120]])
 bW = np.stack([np.column_stack([yesW[t], aW.sum(1) - yesW[t]]) for t in range(3)])
 LW = CountLP(aW, bW)
-rW = lambda v, L=LW: tuple(round(z, 3) for z in L.range(v))
+from decimal import Decimal, ROUND_HALF_UP
+r4 = lambda z: float(Decimal(repr(float(z) + (1e-12 if z >= 0 else -1e-12))).quantize(Decimal('0.0001'), ROUND_HALF_UP))
+rW = lambda v, L=LW: tuple(r4(z) for z in L.range(v))
 NW = aW.sum(1); pwW = NW / NW.sum(); xW = aW[:, 0] / NW; muW = np.sum(pwW * xW); vxW = np.sum(pwW * xW * xW) - muW ** 2
 def er_nm(t0, t1):
     dT = (bW[t1, :, 0] - bW[t0, :, 0]) / NW
@@ -1492,7 +1494,7 @@ def attW(M=None, Lam=0.0, rows=None, cl=False):
         Br1 = Lc.pad(rate_vec(Lc, 0, 0, 2)); Br0 = Lc.pad(rate_vec(Lc, 0, 0, 1)); Bc1 = Lc.pad(rate_vec(Lc, 1, 0, 2))
         Lc.add_le(e(th) - Br1, 0); Lc.add_ge(e(th) - Br0, 0); Lc.add_ge(e(th) - Bc1 + e(S), 0)
     x = Lc.range(attv)
-    return tuple(round(z, 3) for z in x)
+    return tuple(r4(z) for z in x)
 crP, crQ = cr_rowsW(1, 2), cr_rowsW(0, 1)
 LWc = CountLP(aW, bW)
 for rr in crP:
@@ -1504,8 +1506,8 @@ W = {
     "B_v,post": rW(rate_vec(LW, 0, 0, 2)),
     "D_post (margins)": rW(did_vec(LW, 0, 1, 0, 1, 2)),
     "D_pre (margins)": rW(did_vec(LW, 0, 1, 0, 0, 1)),
-    "ER, NM on post changes": tuple(round(z, 3) for z in er_nm(1, 2)),
-    "ER, NM on pre changes": tuple(round(z, 3) for z in er_nm(0, 1)),
+    "ER, NM on post changes": tuple(r4(z) for z in er_nm(1, 2)),
+    "ER, NM on pre changes": tuple(r4(z) for z in er_nm(0, 1)),
     "D_post (CR on changes)": rW(did_vec(LWc, 0, 1, 0, 1, 2), LWc),
     "D_pre (CR on pre changes)": rW(did_vec(LWq, 0, 1, 0, 0, 1), LWq),
     "ATT, no assumption": attW(),
@@ -1513,14 +1515,14 @@ W = {
     "ATT, PT + CR": attW(0.0, rows=crP),
     "ATT, dial M=.05 + CR": attW(0.05, rows=crP),
     "ATT, dial M=.05, spillover .02 + CR": attW(0.05, 0.02, rows=crP),
-    "ATT, RM(1), margins only": tuple(round(z, 3) for z in rm_range(aW, bW, 1.0, 1, 2, [(0, 1)])),
-    "ATT, RM(1), CR post only": tuple(round(z, 3) for z in rm_range(aW, bW, 1.0, 1, 2, [(0, 1)], extra=crP)),
-    "ATT, RM(1), CR post and pre": tuple(round(z, 3) for z in rm_range(aW, bW, 1.0, 1, 2, [(0, 1)], extra=crP + crQ)),
+    "ATT, RM(1), margins only": tuple(r4(z) for z in rm_range(aW, bW, 1.0, 1, 2, [(0, 1)])),
+    "ATT, RM(1), CR post only": tuple(r4(z) for z in rm_range(aW, bW, 1.0, 1, 2, [(0, 1)], extra=crP)),
+    "ATT, RM(1), CR post and pre": tuple(r4(z) for z in rm_range(aW, bW, 1.0, 1, 2, [(0, 1)], extra=crP + crQ)),
     "ATT, MTR+ND+PS, margins only": attW(cl=True),
     "ATT, MTR+ND+PS + CR": attW(cl=True, rows=crP),
 }
 for k, v in W.items():
-    print(f"      W  {k}: [{v[0]:.3f}, {v[1]:.3f}]")
+    print(f"      W  {k}: [{v[0]:.4f}, {v[1]:.4f}]")
 check("W [I] worked example (§9): numbers as printed above, each rung narrows or reports no information as stated",
       W["ATT, RM(1), margins only"] == W["ATT, no assumption"] and W["ATT, PT + CR"] == W["D_post (CR on changes)"]
       and W["ATT, RM(1), CR post and pre"][0] > 0)
@@ -1589,9 +1591,9 @@ check("E6 [F] review issue 2: the emptiness criterion needs 'or Dbar+ < 0': here
       f"Dbar in [{rgE[0]:.3f},{rgE[1]:.3f}], lambda {lamE:.2f}, dtau_H - dtau_L {dtauE:.2f}, cap {capE:.3f}")
 
 # Issue 12 (§9.2): RM(1) with CR on the pre-war change only vs on both changes.
-pre_only = tuple(round(z, 3) for z in rm_range(aW, bW, 1.0, 1, 2, [(0, 1)], extra=crQ))
-check("W [I] review issue 12: RM(1) with CR on the pre-war change alone gives [-0.416, 0.732]; on both changes [0.135, 0.278]",
-      pre_only == (-0.416, 0.732) and W["ATT, RM(1), CR post and pre"] == (0.135, 0.278), f"pre only {pre_only}")
+pre_only = tuple(r4(z) for z in rm_range(aW, bW, 1.0, 1, 2, [(0, 1)], extra=crQ))
+check("W [I] review issue 12: RM(1) with CR on the pre-war change alone gives [-0.4155, 0.7325]; on both changes [0.1352, 0.2783]",
+      pre_only == (-0.4155, 0.7325) and W["ATT, RM(1), CR post and pre"] == (0.1352, 0.2783), f"pre only {pre_only}")
 
 # Issue 14: the counts quoted in the note's gap-register table match this run.
 doc = open(os.path.join(here, "PHASE2e_did_general.md")).read()

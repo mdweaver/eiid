@@ -312,7 +312,7 @@ Other entries:
 0. the population for which the ATT is defined: the fixed population (FP), or the stayers with fixed group membership when (FP) fails (§8, G1–G4, G9);
 1. the treated group $r^*$, and the comparison group $s^*$ when the trend assumption uses one (MTR and ND alone do not);
 2. a trend assumption: a dial $\lvert b_t\rvert\le M$; relative magnitudes $\bar M$ with the pre-periods used; smoothness $M$; or MTR/ND/PS;
-3. a spillover assumption $\lvert S_t\rvert\le\Lambda$, with $\Lambda=0$ stated explicitly if assumed;
+3. a spillover assumption $\lvert S_t\rvert\le\Lambda$, with $\Lambda=0$ stated explicitly if assumed, whenever the trend assumption uses a comparison group (PT, the dial, RM, SD, PS); MTR and ND alone need none;
 4. no anticipation;
 5. the descriptive information it rests on (the count rows and/or model rung).
 
@@ -394,7 +394,7 @@ a union of $2L$ polyhedra, so a union of $2L$ LP projections. Under SD it is one
 **N21 (NS §3.2) reproduced, and corrected.** Two precincts of 100 men with 20 and 60 veterans; yes votes $(30,45)$, $(32,48)$, $(30,60)$ at elections $-1,0,1$; $\bar M=1$.
 * By LP (check E18): the pre-period DiD is in $[-1.229,1.271]$ and the post-period DiD in $[-1.083,1.417]$. Without rate limits the RM set is $[-2.354,2.646]$ jointly and $[-2.354,2.688]$ endpoint-wise: NS's numbers, now exact.
 * **Correction.** The ATT of a rate lies in $[B^L_{v,1}-1,B^U_{v,1}]=[-0.75,1.00]$ (Prop. E15), not in the DiD's logical range $[-2,2]$. With the rate limits the joint RM set is exactly $[-0.75,1.00]$: the no-assumption set. NS's conclusion ("no information") stands, but the comparison must be with the ATT's own logical range. By (b): at the tables that put $B_{v,1}$ at its ends, the pre-period DiD can be large enough ($\lvert\theta^{PT}\rvert\le A$ and $\lvert1-\theta^{PT}\rvert\le A$).
-* With each pre-period veterans' yes total pinned to $\pm2$ votes around the midpoint of its Duncan–Davis interval (NS's illustration; the centre is the script's), the pre-period DiD is in $[-0.06,0.10]$ and the RM set is $[-0.60,0.90]$ without rate limits, $[-0.604,0.896]$ with them (check E18 [I]).
+* With each pre-period veterans' yes total pinned to $\pm2$ votes around the midpoint of its Duncan–Davis interval (NS's illustration; the centre is the script's), the pre-period DiD is in $[-1/16,5/48]\approx[-0.0625,0.1042]$ and the RM set is $[-29/48,43/48]\approx[-0.6042,0.8958]$ both without and with the rate limits (they do not bind here); NS's $[-0.60,0.90]$ is the same set rounded to two decimals (check E18 [I]).
 
 **Proposition E20 (smoothness with set-valued pre-trends).** (FP), NA; one pre-pair ($L=1$) and one post-period. SD($M$) reads $\lvert b_1+D_{-1}\rvert\le M$ with $D_{-1}=g_{-1}-g_0$, so $\mathrm{ATT}_1\in\{g_1-2g_0+g_{-1}+S\pm M\}$. Under margins only, without rate limits,
 $$\mathcal A_{SD}=\big[G^-_1-2G^+_0+G^-_{-1}-M-\Lambda,\ \ G^+_1-2G^-_0+G^+_{-1}+M+\Lambda\big],$$
@@ -568,18 +568,18 @@ The two must be reported separately. A causal number needs four things stated: *
 | 3 (150) | 61 | 63 | 113 |
 | 4 (190) | 56 | 61 | 120 |
 
-Support rose most where veterans were common. The question: by how much more did veterans' support rise than others', and how much of it did service cause?
+Interval ends below are rounded to four decimals, half away from zero (several exact ends, such as $-0.5675$ and $0.7325$, are halves of $10^{-3}$, which is why three-decimal rounding was inconsistent). Support rose most where veterans were common. The question: by how much more did veterans' support rise than others', and how much of it did service cause?
 
 | What you assume | What you can say (veterans' change minus others', or the effect of service) | Result |
 |---|---|---|
-| **Nothing** beyond the counts | *Descriptive*: veterans' support changed by anywhere from 41 points less to 79 points more than others'. *Causal*: the effect of service is anywhere in the logical range; the data alone never sign it (Prop. E15) | DiD in $[-0.407,0.792]$; effect in $[-0.568,0.732]$ |
-| **Contextual reinforcement on the changes**, a belief about these voters: the within-precinct gap in changes and the pattern across precincts point the same way (Prop. E5(d)) | *Descriptive*: veterans' support rose 14 to 27 points more than others' | DiD in $[0.143,0.270]$ |
-| + **parallel trends**, no spillovers, no anticipation | *Causal*: service raised veterans' support by 14 to 27 points | effect in $[0.143,0.270]$ |
-| + instead a **trend dial**: untreated trends could differ by up to 5 points (Cor. E17) | 9 to 32 points | $[0.093,0.320]$ |
-| + a **spillover allowance**: service could have moved others by up to 2 points (Prop. E22) | 7 to 34 points | $[0.073,0.340]$ |
-| **Relative magnitudes** ($\bar M=1$: the post-war violation is no larger than the largest pre-war one) with the counts alone for the pre-war elections (Prop. E19) | nothing: the pre-war DiD is itself a range from $-0.60$ to $0.60$, so the allowance swamps everything | $[-0.568,0.732]$ (no information) |
-| Relative magnitudes with contextual reinforcement imposed on **both** changes (pre-war and post-war); with it on the pre-war change alone the set is $[-0.416,0.732]$ | the pre-war DiD is pinned to $[0.004,0.008]$, so the allowance is tiny: 14 to 28 points | $[0.135,0.278]$ |
-| **Monotone response + no decline + positive selection**, no parallel trends (Prop. E21) | service did not lower support, and raised it by at most 48 points (31 with reinforcement) | $[0,0.482]$; with reinforcement $[0,0.311]$ |
+| **Nothing** beyond the counts | *Descriptive*: veterans' support changed by anywhere from 41 points less to 79 points more than others'. *Causal*: the effect of service is anywhere in the logical range; the data alone never sign it (Prop. E15) | DiD in $[-0.4075,0.7925]$; effect in $[-0.5675,0.7325]$ |
+| **Contextual reinforcement on the changes**, a belief about these voters: the within-precinct gap in changes and the pattern across precincts point the same way (Prop. E5(d)) | *Descriptive*: veterans' support rose 14 to 27 points more than others' | DiD in $[0.1433,0.2703]$ |
+| + **parallel trends**, no spillovers, no anticipation | *Causal*: service raised veterans' support by 14 to 27 points | effect in $[0.1433,0.2703]$ |
+| + instead a **trend dial**: untreated trends could differ by up to 5 points (Cor. E17) | 9 to 32 points | $[0.0933,0.3203]$ |
+| + a **spillover allowance**: service could have moved others by up to 2 points (Prop. E22) | 7 to 34 points | $[0.0733,0.3403]$ |
+| **Relative magnitudes** ($\bar M=1$: the post-war violation is no larger than the largest pre-war one) with the counts alone for the pre-war elections (Prop. E19) | nothing: the pre-war DiD is itself a range from $-0.5975$ to $0.6025$, so the allowance swamps everything | $[-0.5675,0.7325]$ (no information) |
+| Relative magnitudes with contextual reinforcement imposed on **both** changes (pre-war and post-war); with it on the pre-war change alone the set is $[-0.4155,0.7325]$ | the pre-war DiD is pinned to $[0.0043,0.0080]$, so the allowance is tiny: 14 to 28 points | $[0.1352,0.2783]$ |
+| **Monotone response + no decline + positive selection**, no parallel trends (Prop. E21) | service did not lower support, and raised it by at most 48 points (31 with reinforcement) | $[0,0.4825]$; with reinforcement $[0,0.3114]$ |
 
 ### 9.3 What the theory says, in eight sentences
 
@@ -650,3 +650,5 @@ Support rose most where veterans were common. The question: by how much more did
 | N2 | wording (round 2) | §1.4 "Rule" bullet | Matches the amended Def. 5.1: a stated population, and a comparison group only when the trend assumption uses one |
 | N3 | wording (round 2) | Prop. E25 | Relettered: (a), (b) (old (c)); the per-election statement is Remark E25.1 |
 | N4 | wording (round 2) | Prop. E25(a) | Deleted the parenthetical claiming a finite-sample version "as in P3.8" (P3.8's event relaxes each constraint row with its own δ split over all rows of all branches, and under FD the Hoeffding range doubles; not stated here) |
+| C1 | wording (code review) | Def. 5.1 item 3 | A spillover assumption is required only when the trend assumption uses a comparison group (PT, the dial, RM, SD, PS), mirroring item 1; MTR and ND alone need none |
+| C2 | wording (code review) | §9.2 table; N21 narrow variant | Table ends now rounded consistently to four decimals (half away from zero); the exact ends are halves of $10^{-3}$, so the earlier three-decimal values mixed rounding directions. N21 narrow variant: the RM set is $[-29/48,43/48]\approx[-0.6042,0.8958]$ with and without the rate limits (identical; earlier text gave $[-0.60,0.90]$ vs $[-0.604,0.896]$, which are the same set at two and three decimals). Checks W and E18 [I] updated |

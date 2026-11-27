@@ -1996,4 +1996,77 @@ for rep in range(10):
 check("E34 [V] round 2: exact within-precinct RM with an affine pre-increment profile: split-and-orientation enumeration (<= 2(|S|+1) LPs) = exhaustive 2^|S| sign enumeration",
       ok34, f"{n34} six-precinct cases, both extrema")
 
+
+# =====================================================================================
+# E35. Realised within-precinct parallel trends with tolerance tau_i = M sqrt(1/a_iV + 1/a_iN)
+#      (owner's default reading of WPT). Worked example: the four precincts of section 9.2, base -> post.
+# =====================================================================================
+def rwpt_lp(a, b, t0, t1, M=0.0, Mvar=False, Lam=0.0, rows=None, amin=1, tau=None):
+    """E35: realised within-precinct PT with tolerance tau_i = M sqrt(1/a_iV + 1/a_iN) (or given tau).
+    Variables: n, theta_i (realised untreated veteran rate at t1, every precinct with veterans),
+    S_i (realised spillover on local non-veterans), M (optional variable). Treated row 0, comparison row 1."""
+    L = CountLP(a, b)
+    for coef, rhs in (rows or []):
+        L.add_ge(coef, rhs)
+    p = L.p; A = L.a
+    wV = A[:, 0] / A[:, 0].sum()
+    sup = A[:, 1] >= amin
+    th = [L.add_var(0.0, 1.0) for i in range(p)]
+    Sv = [L.add_var(-Lam, Lam) if sup[i] else L.add_var(0.0, 0.0) for i in range(p)]
+    Mv = L.add_var(0.0, None) if Mvar else None
+    e = lambda j: np.eye(L.nvar())[j]
+    att = np.zeros(L.nvar())
+    for i in range(p):
+        if A[i, 0] == 0:
+            continue
+        bV = lambda t: L.pad(np.eye(L.nn)[L.ix(t, i, 0, 0)] / A[i, 0])
+        att += wV[i] * (bV(t1) - e(th[i]))
+        if sup[i]:
+            bN = lambda t: L.pad(np.eye(L.nn)[L.ix(t, i, 1, 0)] / A[i, 1])
+            gap = e(th[i]) - bV(t0) - (bN(t1) - e(Sv[i]) - bN(t0))     # untreated V change - untreated N change
+            c = np.sqrt(1 / A[i, 0] + 1 / A[i, 1]) if tau is None else tau[i]
+            if Mvar:
+                L.add_le(gap - c * e(Mv), 0.0); L.add_ge(gap + c * e(Mv), 0.0)
+            else:
+                L.add_le(gap, c * M); L.add_ge(gap, -c * M)
+            L.add_ge(bN(t1) - e(Sv[i]), 0.0); L.add_le(bN(t1) - e(Sv[i]), 1.0)
+    return L, att, Mv, e
+
+
+def audit_rows(L, cells):
+    out = []
+    for (t, i, r, val) in cells:
+        v = np.zeros(L.nn); v[L.ix(t, i, r, 0)] = 1
+        out += [(v, val), (-v, -val)]
+    return out
+
+L35 = CountLP(aW, bW)
+aud35 = audit_rows(L35, [(1, 2, 1, 20), (2, 2, 1, 22), (1, 3, 1, 4), (2, 3, 1, 5)])   # hypothetical audited non-veteran cells
+Lm, attm, _, _ = rwpt_lp(aW, bW, 1, 2, 0.0); mo35 = Lm.range(attm)
+r35 = {}
+for M in (0.0, 0.1, 0.2):
+    Lx, ax, _, _ = rwpt_lp(aW, bW, 1, 2, M, rows=aud35); r35[M] = Lx.range(ax)
+Lb35, ab35, Mv35, eb35 = rwpt_lp(aW, bW, 1, 2, Mvar=True, rows=aud35); Lb35.add_le(ab35, 0.0)
+Mstar35 = Lb35.opt(eb35(Mv35), 1)[0]
+Ls35, as35, _, _ = rwpt_lp(aW, bW, 1, 2, Mstar35, rows=aud35); at_star35 = Ls35.range(as35)
+for k, v in r35.items():
+    print(f"      E35  audited cells, M = {k}: [{v[0]:.4f}, {v[1]:.4f}]")
+print(f"      E35  margins only, M = 0: [{mo35[0]:.4f}, {mo35[1]:.4f}];  breakdown M* = {Mstar35:.4f}")
+check("E35 [V] realised WPT: intervals nested in M; breakdown M* of 'ATT > 0' by one LP (lower end 0 at M*, positive below)",
+      r35[0.0][0] >= r35[0.1][0] >= r35[0.2][0] > 0 and r35[0.0][1] <= r35[0.1][1] <= r35[0.2][1]
+      and abs(at_star35[0]) < 1e-7 and Mstar35 > 0.2, f"M* = {Mstar35:.4f}")
+# M = 0, no spillover, full support: realised ATT = D_W, so the causal set lies in D_W's count set (equal if rate limits slack)
+LD35 = CountLP(aW, bW)
+for rr in aud35:
+    LD35.add_ge(*rr)
+DW35 = np.zeros(LD35.nn)
+for i in range(4):
+    for r, sg in ((0, 1), (1, -1)):
+        DW35[LD35.ix(2, i, r, 0)] += sg * wvW[i] / aW[i, r]; DW35[LD35.ix(1, i, r, 0)] -= sg * wvW[i] / aW[i, r]
+dw35 = LD35.range(DW35)
+check("E35 [V] at M = 0 (exact realised WPT, no spillover, all precincts supported) the causal set lies in the count set of D_W; equal when the rate limits are slack",
+      r35[0.0][0] >= dw35[0] - 1e-9 and r35[0.0][1] <= dw35[1] + 1e-9, f"ATT [{r35[0.0][0]:.4f},{r35[0.0][1]:.4f}], D_W [{dw35[0]:.4f},{dw35[1]:.4f}]")
+check("E35 [I] margins only, realised WPT does not sign the effect even at M = 0 (each precinct's non-veteran change is free): close to the no-assumption set [-0.5675, 0.7325]",
+      mo35[0] < 0 < mo35[1] and abs(mo35[0] + 0.5675) < 1e-6, f"[{mo35[0]:.4f},{mo35[1]:.4f}]")
+
 print(f"\n{sum(results)}/{len(results)} PASS")

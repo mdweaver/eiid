@@ -129,5 +129,12 @@ PASS  E29 [F] round 2: RM on increments |b_t - b_(t-1)| <= Mbar A holds (Mbar = 
       R2  spillover 0.05: joint LP [-54.3333,12.3333] vs dilation [-54.3333,12.3333]
 PASS  E28 [I] round 2: WPT spillover sensitivity by one joint LP in (fit, S_i) with local rate limits; reported beside the pi_S*Lam dilation (no sharpness claimed for the dilation)
 PASS  E34 [V] round 2: exact within-precinct RM with an affine pre-increment profile: split-and-orientation enumeration (<= 2(|S|+1) LPs) = exhaustive 2^|S| sign enumeration  [10 six-precinct cases, both extrema]
+      E35  audited cells, M = 0.0: [0.0525, 0.3522]
+      E35  audited cells, M = 0.1: [0.0310, 0.3740]
+      E35  audited cells, M = 0.2: [0.0094, 0.3956]
+      E35  margins only, M = 0: [-0.5675, 0.7322];  breakdown M* = 0.2438
+PASS  E35 [V] realised WPT: intervals nested in M; breakdown M* of 'ATT > 0' by one LP (lower end 0 at M*, positive below)  [M* = 0.2438]
+PASS  E35 [V] at M = 0 (exact realised WPT, no spillover, all precincts supported) the causal set lies in the count set of D_W; equal when the rate limits are slack  [ATT [0.0525,0.3522], D_W [-0.0087,0.3772]]
+PASS  E35 [I] margins only, realised WPT does not sign the effect even at M = 0 (each precinct's non-veteran change is free): close to the no-assumption set [-0.5675, 0.7325]  [[-0.5675,0.7322]]
 
-102/102 PASS
+105/105 PASS

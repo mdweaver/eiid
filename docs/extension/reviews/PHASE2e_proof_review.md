@@ -418,3 +418,30 @@ None of R3-1 to R3-3 changes a result. I found no error in the new results.
 | **R32** | **yes** (G7(a)–(c) as revised) | R25(b)–(c), the support of the true compositions and the module **O** |
 
 R3-1 to R3-3 can be applied with the status change; none needs further review.
+
+## 8. Round 4: E35 (realised within-precinct parallel trends with tolerance)
+
+Scope: only the new material on `claude/did-theory-r3` at daecc5c, compared with 481c47f. That is Prop. E35, §9.4, the R11b rows in §10 and PD §8, §12 O-1, and checks E35 ×3. `verify_phase2e.py` passes 105/105, with output identical to the committed file. My checks are in `phase2e_review_checks_r4.py` (output `phase2e_review_checks_r4_output.txt`), which pass 5/5. They use their own LP in the veterans' yes counts and find M* by bisection, not by the note's LP with M as a variable.
+
+### 8.1 Line-by-line
+
+- **(a) Validity and sharpness, continuous tables.** Correct. The rows are linear in (n, θ, S). The true realised (n°, θ°, S°) satisfies them, because under NA, B⁽⁰⁾_iN0 = B_iN0, so the row's middle term is the untreated non-veteran change. Sharpness reduces to E16(b) precinct by precinct. Given any feasible (n, θ_i, S_i), put veteran counterfactual mass θ_i·a_iV and non-veteran counterfactual mass (B_iNt − S_i)·a_iN in precinct i. Both lie in their rate limits by the rows. With one post-period, E16's joint-post quantifier is vacuous. With continuous tables, the finite-person condition is not needed. The objective is linear on a polytope, so the set is an interval.
+- **(b) Nesting and breakdown.** Correct. The rows |gap_i| ≤ M·c_i are linear in (n, θ, S, M), and the feasible set grows with M. My grid over M ∈ [0, 1] and Λ ∈ {0, .02, .05} confirms nesting in M and in Λ (R4.3). M* = min{M : feasible, ATT ≤ 0} is one LP. Bisection on the lower end gives 0.24379 (R4.2). The separate refutation report is needed, because at an M where the rows are infeasible "ATT > 0" holds vacuously.
+- **(c) M = 0 and D_W.** Correct. With τ_i = 0, θ_i = B_iV0 + ΔB_iN − S_i. With Λ = 0 and every veteran precinct supported, ATT = Σ w_Vi(ΔB_iV − ΔB_iN) = D_W. The extra constraints are θ_i ∈ [0, 1] (the untreated non-veteran post rate is automatic at S = 0), so the set is D_W over a sub-polytope, which is the stated inclusion. In the example these limits bind: [0.0525, 0.3522] against [−0.0087, 0.3772]. The Remark 7.1 caveat is correctly placed.
+- **(d) LCE by E13.** Correct. D_W^S(n) ∈ CI is a linear row in n alone, so it stays valid when M > 0 or Λ > 0, where ATT ≠ D_W^S. ρ_i = 4w_Vi is E12's 2(w_ir + w_is) with both groups weighted by w_Vi, and it matches E29(b)'s allowance on supported precincts. On {D_W^S(n°) ∈ CI} ∩ {n° ∈ F}, the true configuration is feasible, which gives 1 − α (identity rows) and 1 − α − P(n° ∉ F) (belief rows). At M = 0, Λ = 0 the cut ATT set equals the cut D_W set (R4.4).
+- **Per-precinct spillover S_i.** Correct and consistent with E28's joint spillover LP: |S_i| ≤ Λ, with the untreated non-veteran post rate kept in [0, 1]. Unsupported precincts carry no S_i and no row, and θ_i is free there, giving the no-assumption bound with π_U reported.
+- **Worked example.** Reproduced independently to four decimals (R4.1). Margins only at M = 0 give [−0.5675, 0.7322], against the no-assumption set [−0.5675, 0.7325]: the M = 0 rows cut only 0.0003 from the upper end. With the hypothetical audited cells, M = 0 gives [0.0525, 0.3522], M = 0.1 gives [0.0310, 0.3740], M = 0.2 gives [0.0094, 0.3956], and M* = 0.2438.
+- **§9.4, §10 R11b, PD §8 R11b, §12 O-1.** These are consistent with E35. The "pending" status markers are right until this round is merged.
+
+### 8.2 Issues
+
+| # | Severity | Where | Issue and fix |
+|---|---|---|---|
+| R4-1 | guidance (no result changes) | E35 default τ_i, §9.4 | M is a tolerance that must hold **in every supported precinct at once**. √(1/a_iV + 1/a_iN) bounds the gap's standard deviation if persons' untreated changes are independent (each change has variance ≤ 1). So a user who reads M as "a number of noise SDs" will choose M too small once there are many precincts. In R4.5 expected WPT holds exactly and the only deviation is binomial noise. The share of draws in which RWPT-τ holds everywhere is 0.23 (K = 10) and 0.00 (K = 100) at M = 1, 0.97 and 0.73 at M = 2, and 1.00 at M = 3. Fix: add one sentence by the default saying that M is not a confidence level and that a noise-based choice must grow with the number of supported precincts, roughly like √(2 log K). For example, M ≈ 3 for 100 precincts of this size. Otherwise the set can be empty, or valid only under an assumption the noise alone violates. |
+| R4-2 | wording | E35(d) | Say "under (FP), NA, RWPT-τ and \|S_i\| ≤ Λ" in the coverage sentence. The probability is over the LCE part only, and coverage of the ATT holds only when the rows are true. |
+
+### 8.3 Verdict
+
+E35(a)–(d), the worked example and the edits in §9.4, §10, PD §8 and §12 O-1 are **accepted**. There are no errors and no gaps, only R4-1 (guidance) and R4-2 (wording).
+
+**E35 may move to "P; proof reviewed": yes.** It does not need to wait for R4-1 or R4-2. The R11b row stays yes.

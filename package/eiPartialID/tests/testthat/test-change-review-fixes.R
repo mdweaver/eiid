@@ -199,3 +199,25 @@ test_that("R = 3 rows on changes: integer ends equal a brute force (pair dB, W2 
   }
   expect_gt(n_ok, 10)
 })
+
+test_that("code review round 2: R2-1 E29 CI widened by pi_S (h M + Lambda); N2-N3 wording", {
+  set.seed(11); p <- 12
+  aV <- sample(5:60, p, TRUE); aN <- sample(5:60, p, TRUE); N <- aV + aN
+  y0 <- round(N * runif(p, .3, .6)); y1 <- pmin(N, y0 + round(N * runif(p, 0, .1)))
+  mk <- function(y) data.frame(u = seq_len(p), v = aV, o = aN, yes = y, no = N - y)
+  f <- eiChange(list(b = mk(y0), p = mk(y1)), cbind(yes, no) ~ cbind(v, o), unit = "u", base = "b", row = "v", col = "yes", integer = "lp")
+  A <- function(M, L) eiATT(f, treated = "v", comparison = "o", population = "fixed", trend = within_pt(M = M, target = "expected"),
+                            spillover = L, no_anticipation = TRUE, alpha = 0.1)
+  d0 <- A(0, 0)$results[[1]]$dw; a1 <- A(0.03, 0.02); d1 <- a1$results[[1]]$dw
+  piS <- 1 - a1$wpt$design$pi_U
+  expect_equal(d1$widen, piS * (1 * 0.03 + 0.02), tolerance = 1e-12)
+  expect_equal(d1$ci, c(max(-1, d0$ci[1] - d1$widen), min(1, d0$ci[2] + d1$widen)), tolerance = 1e-12)
+  expect_equal(d0$widen, 0)
+  out <- capture.output(print(a1))
+  expect_true(any(grepl("E29(d) widening w = pi_S (h M + Lambda)", out, fixed = TRUE)))
+  # N2: no "tau_i = 0 sqrt" for the realised reading at M = 0
+  o2 <- capture.output(print(eiATT(f, treated = "v", comparison = "o", population = "fixed", trend = within_pt(),
+                                   spillover = 0, no_anticipation = TRUE)))
+  expect_false(any(grepl("0 sqrt", o2, fixed = TRUE)))
+  expect_true(any(grepl("tau_i = 0", o2, fixed = TRUE)))
+})

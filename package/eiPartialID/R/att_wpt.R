@@ -251,7 +251,7 @@ lce_mean <- function(base = FALSE, post = FALSE, change = TRUE, epsilon = 0) {
 }
 
 # E29: realised target D_W (count layer) and the Hoeffding allowance
-.wpt_dw <- function(P, fb, cs, des, k, alpha, independence, roles) {
+.wpt_dw <- function(P, fb, cs, des, k, alpha, independence, roles, M = 0, Lambda = 0) {
   t <- cs$posts[k]; b0 <- cs$base; cc <- cs$cc; r <- cs$r
   nrows <- if (is.null(cs$s)) setdiff(seq_len(P$R), r) else cs$s
   terms <- list()
@@ -267,8 +267,11 @@ lce_mean <- function(base = FALSE, post = FALSE, change = TRUE, epsilon = 0) {
   rho2 <- if (independence == "precincts") sum((4 * des$wV[sV])^2) + sum(des$wV[uV]^2) else
     sum(4 * des$wV[sV]^2 * (1 / des$aV[sV] + 1 / des$aN[sV])) + sum(des$wV[uV]^2 / des$aV[uV])
   ra <- sqrt(0.5 * log(2 / alpha) * rho2)
-  ci <- if (anyNA(LU)) c(NA_real_, NA_real_) else c(max(-1, LU[1] - des$pi_U - ra), min(1, LU[2] + ra))
-  list(LU = LU, r_alpha = ra, ci = ci, belief = any(roles == "belief"))
+  # E29(d): the local dial |b_it - b_i,t-1| <= M (so |b_ik| <= k M) and |S| <= Lambda restrict means, not
+  # the realised [L, U]; they widen both ends by pi_S (h M + Lambda) at horizon h = k (code review R2-1)
+  wd <- (1 - des$pi_U) * (k * M + Lambda)
+  ci <- if (anyNA(LU)) c(NA_real_, NA_real_) else c(max(-1, LU[1] - des$pi_U - ra - wd), min(1, LU[2] + ra + wd))
+  list(LU = LU, r_alpha = ra, ci = ci, belief = any(roles == "belief"), widen = wd, h = k)
 }
 
 .wpt_run <- function(fit, P, fb, cs, trend, Lambda, lce, law, alpha, independence, tgt) {
@@ -287,7 +290,7 @@ lce_mean <- function(base = FALSE, post = FALSE, change = TRUE, epsilon = 0) {
     e$breakdown_eps <- if (lce$base) .wpt_breakdown(lp, k, iv, "eps") else NA_real_
     if (trend$kind == "ppt" && !is.null(lo)) e$p0 <- c(lo$p0, hi$p0)
     if (lce$change) e$e28e <- .wpt_e28e(des, k)
-    if (trend$kind == "wpt") e$dw <- .wpt_dw(P, fb, cs, des, k, alpha, independence, roles)
+    if (trend$kind == "wpt") e$dw <- .wpt_dw(P, fb, cs, des, k, alpha, independence, roles, trend$M, Lambda)
     else e$D <- .att_nrange(P, fb, .att_rate(P, t, cs$r) - .att_rate_s(P, t, cs$r, cs$s) -
                                      (.att_rate(P, cs$base, cs$r) - .att_rate_s(P, cs$base, cs$r, cs$s)))
     res[[length(res) + 1]] <- e
@@ -320,7 +323,7 @@ lce_mean <- function(base = FALSE, post = FALSE, change = TRUE, epsilon = 0) {
   for (e in w$results) {
     cat(sprintf("\nPost-election %s\n", e$post))
     cat(sprintf("  [IDENTIFICATION BOUND, mean model (E28/E30)] ATT^mean: %s%s\n", f(c(e$lower, e$upper)),
-                if (e$empty) sprintf(" -- refutes the mean model with %s and its rate limits", if (wpt) "WPT" else "PPT") else ""))
+                if (e$empty) sprintf(" -- refutes the mean model %s, with %s and its rate limits", if (w$law_given) "under the supplied law" else "at the observed returns taken as the law", if (wpt) "WPT" else "PPT") else ""))
     if (!e$empty) {
       bd <- function(v, nm) if (is.na(v)) "none (the interval contains 0)" else if (!is.finite(v)) "infinite (no setting reaches 0)" else
         sprintf("%s* = %.4g (the sign holds strictly below %s*; at %s* zero first becomes feasible)", nm, v, nm, nm)
@@ -337,8 +340,10 @@ lce_mean <- function(base = FALSE, post = FALSE, change = TRUE, epsilon = 0) {
     if (!is.null(e$dw)) {
       d <- e$dw
       cat(sprintf("  [DESCRIPTIVE, realised counts] D_W (E29), count layer with the fit's rows: %s\n", f(d$LU)))
-      cat(sprintf("  [CONFIDENCE INTERVAL, one observed election pair (E29(c))] ATT^mean: %s at level %g (r_alpha = %.4g; [L - pi_U - r, U + r], clipped to [-1, 1])\n",
+      cat(sprintf("  [CONFIDENCE INTERVAL, one observed election pair (E29(c))] ATT^mean: %s at level %g (r_alpha = %.4g; [L - pi_U - r - w, U + r + w], clipped to [-1, 1])\n",
                   f(d$ci), 1 - w$alpha, d$r_alpha))
+      cat(sprintf("    E29(d) widening w = pi_S (h M + Lambda) = %.4g x (%d x %g + %g) = %.4g (local dial and spillover restrict means, not the realised [L, U])\n",
+                  1 - des$pi_U, d$h, x$trend$M, x$Lambda, d$widen))
       cat(sprintf("    coverage >= %s; E29 covers the realised-count route only: it does not make the identification bound above a confidence interval\n",
                   if (d$belief) sprintf("1 - %g - P(the belief rows are false) (belief rows in the count layer, E13)", w$alpha) else sprintf("1 - %g (identity rows only)", w$alpha)))
     }
@@ -468,7 +473,7 @@ lce_mean <- function(base = FALSE, post = FALSE, change = TRUE, epsilon = 0) {
   w <- x$rwpt; des <- w$design
   f <- function(v) if (is.null(v) || anyNA(v)) "EMPTY" else sprintf(paste0("[%.", digits, "f, %.", digits, "f]"), v[1], v[2])
   cat(sprintf("  tolerance: %s\n", if (w$tau_given) "user tau_i (M* below scales the whole vector)" else
-    sprintf("tau_i = M sqrt(1/a_iV + 1/a_iN) with M = %g", w$M)))
+    if (w$M == 0) "tau_i = 0 (M = 0: exact realised WPT, Prop. E35(c))" else sprintf("tau_i = M sqrt(1/a_iV + 1/a_iN) with M = %g", w$M)))
   cat("  note (R4-1): M is a tolerance that must hold in every supported precinct at once, not a confidence level\n")
   cat(sprintf("  support: a_iN >= a_min = %g; pi_U = %.4g (treated share in unsupported precincts, theta_i in [0,1], no assumption); n_eff = %.4g\n",
               x$trend$a_min, des$pi_U, des$n_eff))
@@ -480,7 +485,8 @@ lce_mean <- function(base = FALSE, post = FALSE, change = TRUE, epsilon = 0) {
     cat(sprintf("\nPost-election %s\n", e$post))
     lab <- if (w$lce) "CONFIDENCE SET, realised ATT (E35 + E13)" else "IDENTIFICATION SET, realised ATT, count layer (E35)"
     cat(sprintf("  [%s] ATT: %s%s\n", lab, if (e$empty) "EMPTY" else paste(apply(e$pieces, 1, f), collapse = " U "),
-                if (e$empty) " -- refutes (FP) + NA + count rows + RWPT-tau + the spillover limit" else ""))
+                if (e$empty) paste0(" -- refutes (FP) + NA + count rows + RWPT-tau + the spillover limit",
+                                     if (w$lce) " + the E13 LCE row D_W^S(n) in CI (with probability at most alpha when the other assumptions hold)" else "") else ""))
     if (!e$empty) cat(sprintf("    breakdown of the sign (one LP, M a variable): %s\n",
       if (is.na(e$breakdown_M)) "none (the set contains 0)" else if (!is.finite(e$breakdown_M)) "infinite (no table puts the ATT on the other side of 0)" else
         sprintf("M* = %.4g", e$breakdown_M)))

@@ -72,7 +72,7 @@ mtr_nd_ps <- function(mtr = TRUE, nd = TRUE, ps = TRUE) {
   sd = sprintf("smoothness, M = %g (Def. 5.3)", tr$M),
   mtr = paste0(paste(c(if (tr$mtr) "MTR", if (tr$nd) "ND", if (tr$ps) "PS"), collapse = " + "), " (Prop. E21)"),
   wpt = if (!identical(tr$target, "expected")) sprintf("realised within-precinct parallel trends with tolerance tau_i (RWPT-tau, Prop. E35), %s, support a_iN >= %g",
-                if (!is.null(tr$tau)) "user tau_i" else sprintf("tau_i = %g sqrt(1/a_iV + 1/a_iN)", tr$M), tr$a_min) else
+                if (!is.null(tr$tau)) "user tau_i" else if (tr$M == 0) "tau_i = 0 (exact)" else sprintf("tau_i = %g sqrt(1/a_iV + 1/a_iN)", tr$M), tr$a_min) else
     sprintf("within-precinct parallel trends in expectation (WPT, Prop. E28)%s, support a_iN >= %g",
                 if (tr$M > 0) sprintf(" relaxed by the local dial |b_it - b_i,t-1| <= %g (Prop. E33(a))", tr$M) else "", tr$a_min),
   ppt = sprintf("pooled parallel trends in expectation (PPT, Prop. E28)%s",
@@ -391,6 +391,9 @@ mtr_nd_ps <- function(mtr = TRUE, nd = TRUE, ps = TRUE) {
 #' @param independence the independence unit of E29(b): \code{"precincts"} (any dependence within a
 #'   precinct; default) or \code{"persons"}.
 #' @return an object of class \code{"eiATT"}.
+#'   \code{$results} has one entry per post-period: \code{$pieces} is the set (a matrix of disjoint
+#'   intervals; holes between pieces are part of the answer), while \code{$lower} and \code{$upper} are
+#'   only the envelope ends, \code{min(pieces)} and \code{max(pieces)}.
 #' @examples
 #' d0 <- data.frame(p = c("A", "B"), vet = c(20, 60), oth = c(80, 40), yes = c(30, 45), no = c(70, 55))
 #' d1 <- data.frame(p = c("A", "B"), vet = c(20, 60), oth = c(80, 40), yes = c(32, 48), no = c(68, 52))

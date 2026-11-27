@@ -62,6 +62,9 @@ precinct; default) or \code{"persons"}.}
 }
 \value{
 an object of class \code{"eiATT"}.
+  \code{$results} has one entry per post-period: \code{$pieces} is the set (a matrix of disjoint
+  intervals; holes between pieces are part of the answer), while \code{$lower} and \code{$upper} are
+  only the envelope ends, \code{min(pieces)} and \code{max(pieces)}.
 }
 \description{
 \code{eiATT()} is the causal layer of DiD with ecological data (2e Sec. 5). The estimand is

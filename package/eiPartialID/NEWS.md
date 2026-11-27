@@ -12,6 +12,10 @@ units. Theory: `docs/extension/PHASE2e_did_general.md` (2e; proof reviewed).
   interval, E12 allowance `rho_i = 4 w_Vi`) and the result is labelled a CONFIDENCE SET with its
   coverage assumptions. The printout notes that `M` is a tolerance holding in every precinct at
   once, not a confidence level. The expected-rate version is `within_pt(target = "expected")`.
+* The E29 confidence interval of `within_pt(target = "expected")` is widened by
+  `pi_S (h M + Lambda)` when the local dial `M` or the spillover limit is positive (E29(d)), and
+  the printout states the widening. `eiATT()` documents that `$pieces` is the set and
+  `$lower`/`$upper` are its envelope ends.
 * New `eiChange()`, the descriptive layer. Under a fixed population the T elections stack into
   one count-layer problem over the unit-elections (Lemma E1), so the machinery of `eiCounts()`
   (exact rationals, inward rounding, TU classes, certified GLPK MILP with `time_limit`,

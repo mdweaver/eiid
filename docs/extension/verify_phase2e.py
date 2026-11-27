@@ -2069,4 +2069,121 @@ check("E35 [V] at M = 0 (exact realised WPT, no spillover, all precincts support
 check("E35 [I] margins only, realised WPT does not sign the effect even at M = 0 (each precinct's non-veteran change is free): close to the no-assumption set [-0.5675, 0.7325]",
       mo35[0] < 0 < mo35[1] and abs(mo35[0] + 0.5675) < 1e-6, f"[{mo35[0]:.4f},{mo35[1]:.4f}]")
 
+# ---------------------------------------------------------------- E36
+print("\n[E36] baseline-curvature allowance on the realised route (E35 + E13)")
+
+
+def add_lce_eps(L, x, wV, bhat, h, base="eps", eps=0.0, epsv=None, link=True):
+    """E36 model layer, two groups (row 0 = V, 1 = N): change LCE exact (FD), base level means m_g0(x_i) within
+    eps of a_g + b_g x_i; beta = (gamma: base-level quadratic, delta: change quadratic) in the box bhat +- h
+    (a polyhedral projection region). base: 'eps' (rows with eps or variable epsv) or 'none' (no baseline rows).
+    link: the base-level regression identity gamma = P (x m_V0 + (1 - x) m_N0). Returns a function giving the
+    model-implied D_W coefficient vector."""
+    K = len(x); Z = np.column_stack([np.ones(K), x, x ** 2]); P = np.linalg.pinv(Z)
+    m = [[L.add_var(0.0, 1.0) for i in range(K)] for g in range(2)]
+    ab = [(L.add_var(), L.add_var()) for g in range(2)]
+    ce = [(L.add_var(), L.add_var()) for g in range(2)]
+    gam = [L.add_var(bhat[j] - h, bhat[j] + h) for j in range(3)]
+    dl = [L.add_var(bhat[3 + j] - h, bhat[3 + j] + h) for j in range(3)]
+
+    def v(d):
+        out = np.zeros(L.nvar())
+        for k, c in d.items():
+            out[k] += c
+        return out
+    for g in range(2):
+        for i in range(K):
+            dev = {m[g][i]: 1.0, ab[g][0]: -1.0, ab[g][1]: -x[i]}
+            if base == "eps":
+                if epsv is None:
+                    L.add_le(v(dev), eps); L.add_ge(v(dev), -eps)
+                else:
+                    L.add_le(v({**dev, epsv: -1.0}), 0.0); L.add_ge(v({**dev, epsv: 1.0}), 0.0)
+            L.add_ge(v({m[g][i]: 1.0, ce[g][0]: 1.0, ce[g][1]: x[i]}), 0.0)
+            L.add_le(v({m[g][i]: 1.0, ce[g][0]: 1.0, ce[g][1]: x[i]}), 1.0)
+    if link:
+        for j in range(3):
+            d = {gam[j]: -1.0}
+            for i in range(K):
+                d[m[0][i]] = d.get(m[0][i], 0) + P[j, i] * x[i]; d[m[1][i]] = d.get(m[1][i], 0) + P[j, i] * (1 - x[i])
+            L.add_eq(v(d), 0.0)
+    (cV, eV), (cN, eN) = ce
+    L.add_eq(v({dl[0]: 1.0, cN: -1.0}), 0.0)
+    L.add_eq(v({dl[1]: 1.0, cV: -1.0, cN: 1.0, eN: -1.0}), 0.0)
+    L.add_eq(v({dl[2]: 1.0, eV: -1.0, eN: 1.0}), 0.0)
+    tgt = {cV: float(np.sum(wV)), eV: float(wV @ x), cN: -float(np.sum(wV)), eN: -float(wV @ x)}
+    return lambda: L.pad(v(tgt))
+
+
+x36 = np.array([0.25, 0.5, 0.75]); wV36 = x36 / x36.sum()
+Z36 = np.column_stack([np.ones(3), x36, x36 ** 2])
+T0_36 = np.array([0.005, 0.205, 0.405]); T1_36 = np.array([0.255, 0.155, 0.005])
+bh36 = np.concatenate([np.linalg.solve(Z36, T0_36), np.linalg.solve(Z36, T1_36 - T0_36)])
+
+
+def ci36(eps, h=0.0, base="eps", link=True):
+    L = CountLP(np.array([[1, 0]]), np.array([[[1, 0]]]))
+    tg = add_lce_eps(L, x36, wV36, bh36, h, base, eps, link=link)
+    return L.range(tg())
+
+
+a36 = np.array([[50, 150], [100, 100], [150, 50]])
+yes36 = [np.array([1, 41, 81]), np.array([51, 31, 1])]
+b36 = np.stack([np.column_stack([yes36[t], a36.sum(1) - yes36[t]]) for t in range(2)])
+
+
+def dw_vec(L, a, t0, t1):
+    w = a[:, 0] / a[:, 0].sum(); D = np.zeros(L.nn)
+    for i in range(len(a)):
+        for r, sg in ((0, 1), (1, -1)):
+            D[L.ix(t1, i, r, 0)] += sg * w[i] / a[i, r]; D[L.ix(t0, i, r, 0)] -= sg * w[i] / a[i, r]
+    return D
+
+
+def comb36(eps, h=0.0, M=0.0):
+    ci = ci36(eps, h)
+    L, att, _, _ = rwpt_lp(a36, b36, 0, 1, M)
+    D = dw_vec(L, a36, 0, 1); L.add_ge(D, ci[0]); L.add_le(D, ci[1])
+    return ci, L.range(att)
+
+
+def estar36_joint(h=0.0, M=0.0):
+    """One LP: minimise eps s.t. E35 rows, two model witnesses (lower, upper end of CI_LCE(eps)) sharing eps,
+    D_W(n) between them, ATT <= 0. Valid with a polyhedral projection region (here a box)."""
+    L, att, _, _ = rwpt_lp(a36, b36, 0, 1, M)
+    ev = L.add_var(0.0, None)
+    t_lo = add_lce_eps(L, x36, wV36, bh36, h, epsv=ev); t_hi = add_lce_eps(L, x36, wV36, bh36, h, epsv=ev)
+    D = L.pad(dw_vec(L, a36, 0, 1))
+    L.add_le(t_lo() - D, 0.0); L.add_ge(t_hi() - D, 0.0); L.add_le(L.pad(att), 0.0)
+    return L.opt(np.eye(L.nvar())[ev], 1)[0]
+
+
+def estar36_bisect(h=0.0, M=0.0, lo=0.0, hi=0.5, it=60):
+    for _ in range(it):
+        mid = (lo + hi) / 2
+        if comb36(mid, h, M)[1][0] > 1e-12:
+            lo = mid
+        else:
+            hi = mid
+    return hi
+
+
+res36 = {e: comb36(e) for e in (0.0, 0.001, 0.01, 0.5)}
+for e, (ci, r) in res36.items():
+    print(f"      E36  eps = {e}: CI_LCE [{ci[0]:.4f}, {ci[1]:.4f}];  realised ATT (E35, M = 0) [{r[0]:.4f}, {r[1]:.4f}]")
+ci_none = ci36(0.5, base="none"); ci_fd = ci36(0.5, base="none", link=False)
+es_j = estar36_joint(); es_b = estar36_bisect()
+es_jh = estar36_joint(h=0.0002); es_bh = estar36_bisect(h=0.0002)
+print(f"      E36  change-only with base-level link {ci_none};  without link (fd) {ci_fd}")
+print(f"      E36  eps* joint LP {es_j:.6f}, bisection {es_b:.6f};  box h = 0.0002: {es_jh:.6f}, {es_bh:.6f}")
+check("E36 [V] nested in eps; eps = 1/2 equals change-only with the base-level link and lies inside fd() without it",
+      all(res36[e1][0][0] >= res36[e2][0][0] - 1e-9 and res36[e1][0][1] <= res36[e2][0][1] + 1e-9
+          and res36[e1][1][0] >= res36[e2][1][0] - 1e-9 and res36[e1][1][1] <= res36[e2][1][1] + 1e-9
+          for e1, e2 in ((0.0, 0.001), (0.001, 0.01), (0.01, 0.5)))
+      and np.allclose(res36[0.5][0], ci_none, atol=1e-8) and ci_fd[0] <= ci_none[0] + 1e-9 and ci_fd[1] >= ci_none[1] - 1e-9,
+      f"eps=1/2 {res36[0.5][0]}, change-only+link {ci_none}, fd {ci_fd}")
+check("E36 [V] breakdown eps* of 'ATT > 0' on the realised route: one LP (polyhedral projection) equals monotone bisection",
+      res36[0.0][1][0] > 0 and abs(es_j - es_b) < 1e-7 and abs(es_jh - es_bh) < 1e-7 and es_jh < es_j,
+      f"eps* {es_j:.6f} vs {es_b:.6f}; h=0.0002: {es_jh:.6f} vs {es_bh:.6f}")
+
 print(f"\n{sum(results)}/{len(results)} PASS")

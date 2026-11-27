@@ -71,7 +71,9 @@ mtr_nd_ps <- function(mtr = TRUE, nd = TRUE, ps = TRUE) {
   rm = sprintf("relative magnitudes, Mbar = %g (Def. 5.2, Prop. E18)", tr$Mbar),
   sd = sprintf("smoothness, M = %g (Def. 5.3)", tr$M),
   mtr = paste0(paste(c(if (tr$mtr) "MTR", if (tr$nd) "ND", if (tr$ps) "PS"), collapse = " + "), " (Prop. E21)"),
-  wpt = sprintf("within-precinct parallel trends in expectation (WPT, Prop. E28)%s, support a_iN >= %g",
+  wpt = if (!identical(tr$target, "expected")) sprintf("realised within-precinct parallel trends with tolerance tau_i (RWPT-tau, Prop. E35), %s, support a_iN >= %g",
+                if (!is.null(tr$tau)) "user tau_i" else sprintf("tau_i = %g sqrt(1/a_iV + 1/a_iN)", tr$M), tr$a_min) else
+    sprintf("within-precinct parallel trends in expectation (WPT, Prop. E28)%s, support a_iN >= %g",
                 if (tr$M > 0) sprintf(" relaxed by the local dial |b_it - b_i,t-1| <= %g (Prop. E33(a))", tr$M) else "", tr$a_min),
   ppt = sprintf("pooled parallel trends in expectation (PPT, Prop. E28)%s",
                 if (tr$M > 0) sprintf(" relaxed by the aggregate dial |b_t - b_t-1| <= %g", tr$M) else ""))
@@ -335,7 +337,7 @@ mtr_nd_ps <- function(mtr = TRUE, nd = TRUE, ps = TRUE) {
 #' \code{smoothness(M)}: Def. 5.3, one LP. \code{mtr_nd_ps()}: Prop. E21 (with the
 #' spillover dial; closed form E21(c) shown under margins only).
 #'
-#' \strong{Parallel trends in expectation} (\code{within_pt()}, \code{pooled_pt()}; 2e Sec. 5.8-5.9).
+#' \strong{Parallel trends in expectation} (\code{within_pt(target = "expected")}, \code{pooled_pt()}; 2e Sec. 5.8-5.9); \code{within_pt()} by default is the realised reading of Prop. E35.
 #' The estimand is the expected effect \eqn{ATT^{mean}_t}. Three kinds of interval are printed, each
 #' labelled: an IDENTIFICATION BOUND under the mean model (Props E28, E30: the LP over expected rates,
 #' with LCE rows from \code{lce}, the local dial of E33(a), the rate limits and, for WPT, unsupported
@@ -380,8 +382,10 @@ mtr_nd_ps <- function(mtr = TRUE, nd = TRUE, ps = TRUE) {
 #' @param rate_limits \code{TRUE} (default) imposes \eqn{\theta_t \in [0,1]} and
 #'   \eqn{B_{s^*ct} - S_t \in [0,1]} (the sharp set). \code{FALSE} drops them: an OUTER set,
 #'   printed as such (used to reproduce NS N21's numbers; 2e N21 correction).
-#' @param lce LCE rows on expected rates for \code{within_pt()}/\code{pooled_pt()}
-#'   (\code{\link{lce_mean}}); default none.
+#' @param lce for \code{within_pt(target = "expected")}/\code{pooled_pt()}: LCE rows on expected rates
+#'   (\code{lce_mean()}); for the realised \code{within_pt()} (E35): \code{TRUE} adds the fit's model
+#'   layer through E13 (a row \eqn{D_W^S(n) \in CI}), giving a confidence set
+#'   (default none).
 #' @param law optional known aggregate law for the mean model: a list named by election, each a matrix
 #'   with one row per unit of equally likely outcome counts (E28(c)); default: the observed returns.
 #' @param independence the independence unit of E29(b): \code{"precincts"} (any dependence within a
@@ -396,7 +400,7 @@ mtr_nd_ps <- function(mtr = TRUE, nd = TRUE, ps = TRUE) {
 #' eiATT(fit, treated = "vet", comparison = "oth", population = "fixed",
 #'       trend = rel_mag(1), spillover = 0, no_anticipation = TRUE)
 #' eiATT(fit, treated = "vet", comparison = "oth", population = "fixed",
-#'       trend = within_pt(a_min = 1), spillover = 0, no_anticipation = TRUE)
+#'       trend = within_pt(a_min = 1, M = 0.1), spillover = 0, no_anticipation = TRUE)
 #' @export
 eiATT <- function(fit, treated, comparison, col = NULL, post = NULL, population, trend, spillover,
                   no_anticipation, pretrends = c("counts", "model"), alpha = 0.05, rate_limits = TRUE,
@@ -439,6 +443,16 @@ eiATT <- function(fit, treated, comparison, col = NULL, post = NULL, population,
   out <- list(call = match.call(), fit = fit, treated = P$rows[r], comparison = if (!has_comp) NA_character_ else if (is.null(s)) "rest" else P$rows[s],
               col = P$cols[cc], base = P$elections[b0], posts = P$elections[tgt], population = population,
               trend = trend, Lambda = Lambda, pretrends = pretrends, alpha = alpha)
+  if (trend$kind == "wpt" && !identical(trend$target, "expected")) {
+    if (!is.null(law)) stop("'law' belongs to the expected-rate reading: within_pt(target = \"expected\")")
+    if (!is.null(lce) && !is.logical(lce)) stop("realised within_pt() (Prop. E35): lce = TRUE uses the fit's model layer through E13; lce_mean() is for target = \"expected\"")
+    if (pretrends == "model") stop("realised within_pt(): LCE enters through lce = TRUE (E13), not pretrends = \"model\"")
+    if (!isTRUE(rate_limits)) stop("within_pt(): the rate limits are part of the sharp set (Prop. E35(a)) and are always imposed")
+    if (!is.numeric(alpha) || length(alpha) != 1 || alpha <= 0 || alpha >= 1) stop("alpha must be in (0, 1)")
+    out$rwpt <- .rwpt_run(fit, P, .att_fbranches(fit), cs, trend, Lambda, isTRUE(lce), alpha, tgt)
+    out$results <- out$rwpt$results
+    return(structure(out, class = "eiATT"))
+  }
   mean_kind <- trend$kind %in% c("wpt", "ppt")
   if (!mean_kind && (!is.null(lce) || !is.null(law)))
     stop("'lce' and 'law' belong to the mean model: use them with within_pt() or pooled_pt()")
@@ -621,6 +635,7 @@ print.eiATT <- function(x, digits = 3, ...) {
     paste("count rows", paste(fit$restrictions$id, collapse = ", ")),
     if (x$pretrends == "model") sprintf("; model rung %s%s", fit$model$rung,
       if (length(fit$model$row_labels)) paste0(" with ", paste(fit$model$row_labels, collapse = "; ")) else "") else ""))
+  if (!is.null(x$rwpt)) { .rwpt_print(x, digits); return(invisible(x)) }
   if (!is.null(x$wpt)) { .wpt_print(x, digits); return(invisible(x)) }
   if (x$pretrends == "model") { .att_print_model(x, digits); return(invisible(x)) }
   if (isFALSE(x$rate_limits))

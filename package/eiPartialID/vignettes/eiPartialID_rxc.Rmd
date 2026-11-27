@@ -484,16 +484,27 @@ With reinforcement on both changes the same assumption gives 0.135 to 0.278
 
 **Which comparison? Electorate-wide or within each precinct.** `parallel_trends()` compares
 veterans with all other men in the electorate (realised tables, Thm E16). `within_pt()` compares
-each veteran with the non-veterans of their own precinct, in expected rates (Prop. E28);
-`pooled_pt()` is the electorate-wide comparison in expected rates. There is no default: the
+each veteran with the non-veterans of their own precinct: by default in this election's realised
+rates, up to a tolerance `tau_i = M sqrt(1/a_iV + 1/a_iN)` that grows for small groups (Prop. E35),
+or with `target = "expected"` in expected rates (Prop. E28); `pooled_pt()` is the electorate-wide
+comparison in expected rates. There is no default: the
 choice is part of the stated assumption. Under `within_pt()` a precinct's weight in the
 comparison trend is its share of veterans, so precinct 4 (190 veterans, 10 non-veterans) carries
 47.5% of it; precincts with fewer than `a_min` comparison persons are bounded with no assumption,
 and their share `pi_U` is always printed, together with `n_eff` and the local comparison counts.
 
+```{r did-rwpt}
+eiATT(ch, treated = "vet", comparison = "oth", population = "fixed",
+      trend = within_pt(M = 0), spillover = 0, no_anticipation = TRUE)
+```
+
+With margins only the realised reading does not sign the effect: each precinct's non-veteran
+change is free within its Duncan-Davis range. `M` must hold in every precinct at once, so it is
+a tolerance, not a confidence level. The expected-rate reading:
+
 ```{r did-wpt}
 eiATT(ch, treated = "vet", comparison = "oth", population = "fixed",
-      trend = within_pt(a_min = 1), spillover = 0, no_anticipation = TRUE,
+      trend = within_pt(a_min = 1, target = "expected"), spillover = 0, no_anticipation = TRUE,
       lce = lce_mean(base = TRUE, change = TRUE))
 ```
 

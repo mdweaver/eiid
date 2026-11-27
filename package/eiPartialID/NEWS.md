@@ -3,6 +3,15 @@
 Build step 2 (DiD): changes and difference-in-differences for T >= 2 elections on the same
 units. Theory: `docs/extension/PHASE2e_did_general.md` (2e; proof reviewed).
 
+* `within_pt()` now defaults to the realised reading (Prop. E35, RWPT-tau): in every supported
+  precinct the veterans' untreated change equals the local non-veterans' realised change up to
+  `tau_i = M sqrt(1/a_iV + 1/a_iN)` (or a user `tau`), with one spillover `|S_i| <= Lambda` per
+  precinct; unsupported precincts get `theta_i` in [0, 1] and `pi_U` is printed. Identification
+  set of the count layer (continuous tables), nested in `M`, with the breakdown value `M*` from one
+  LP. `lce = TRUE` adds the fit's model layer only through E13 (a row `D_W^S(n)` in the FD-LCE
+  interval, E12 allowance `rho_i = 4 w_Vi`) and the result is labelled a CONFIDENCE SET with its
+  coverage assumptions. The printout notes that `M` is a tolerance holding in every precinct at
+  once, not a confidence level. The expected-rate version is `within_pt(target = "expected")`.
 * New `eiChange()`, the descriptive layer. Under a fixed population the T elections stack into
   one count-layer problem over the unit-elections (Lemma E1), so the machinery of `eiCounts()`
   (exact rationals, inward rounding, TU classes, certified GLPK MILP with `time_limit`,

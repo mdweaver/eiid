@@ -42,7 +42,7 @@ test_that("2e Sec. 9.2 worked example: every row of the ladder", {
   near(att(f0, mtr_nd_ps()), c(0, 0.4825))
   near(att(fP, mtr_nd_ps()), c(0, 0.3114))
   # the within-precinct comparison, descriptive: D_W (Prop. E29)
-  a <- eiATT(f0, treated = "vet", comparison = "oth", population = "fixed", trend = within_pt(), spillover = 0, no_anticipation = TRUE)
+  a <- eiATT(f0, treated = "vet", comparison = "oth", population = "fixed", trend = within_pt(target = "expected"), spillover = 0, no_anticipation = TRUE)
   near(a$results[[1]]$dw$LU, c(-0.9387, 1.4472))
 })
 

@@ -49,8 +49,10 @@ eiATT(
 \eqn{B_{s^*ct} - S_t \in [0,1]} (the sharp set). \code{FALSE} drops them: an OUTER set,
 printed as such (used to reproduce NS N21's numbers; 2e N21 correction).}
 
-\item{lce}{LCE rows on expected rates for \code{within_pt()}/\code{pooled_pt()}
-(\code{\link{lce_mean}}); default none.}
+\item{lce}{for \code{within_pt(target = "expected")}/\code{pooled_pt()}: LCE rows on expected rates
+(\code{lce_mean()}); for the realised \code{within_pt()} (E35): \code{TRUE} adds the fit's model
+layer through E13 (a row \eqn{D_W^S(n) \in CI}), giving a confidence set
+(default none).}
 
 \item{law}{optional known aggregate law for the mean model: a list named by election, each a matrix
 with one row per unit of equally likely outcome counts (E28(c)); default: the observed returns.}
@@ -94,7 +96,7 @@ the vacuity criterion E19(b) (these two with one post-period only), and the marg
 \code{smoothness(M)}: Def. 5.3, one LP. \code{mtr_nd_ps()}: Prop. E21 (with the
 spillover dial; closed form E21(c) shown under margins only).
 
-\strong{Parallel trends in expectation} (\code{within_pt()}, \code{pooled_pt()}; 2e Sec. 5.8-5.9).
+\strong{Parallel trends in expectation} (\code{within_pt(target = "expected")}, \code{pooled_pt()}; 2e Sec. 5.8-5.9); \code{within_pt()} by default is the realised reading of Prop. E35.
 The estimand is the expected effect \eqn{ATT^{mean}_t}. Three kinds of interval are printed, each
 labelled: an IDENTIFICATION BOUND under the mean model (Props E28, E30: the LP over expected rates,
 with LCE rows from \code{lce}, the local dial of E33(a), the rate limits and, for WPT, unsupported
@@ -134,5 +136,5 @@ fit <- eiChange(list(early = d0, base = d1, post = d2), cbind(yes, no) ~ cbind(v
 eiATT(fit, treated = "vet", comparison = "oth", population = "fixed",
       trend = rel_mag(1), spillover = 0, no_anticipation = TRUE)
 eiATT(fit, treated = "vet", comparison = "oth", population = "fixed",
-      trend = within_pt(a_min = 1), spillover = 0, no_anticipation = TRUE)
+      trend = within_pt(a_min = 1, M = 0.1), spillover = 0, no_anticipation = TRUE)
 }

@@ -5,7 +5,7 @@
 \alias{pooled_pt}
 \title{Parallel trends in expectation: within each precinct, or pooled}
 \usage{
-within_pt(a_min = 1, M = 0)
+within_pt(a_min = 1, M = 0, target = c("realised", "expected"), tau = NULL)
 
 pooled_pt(M = 0)
 }
@@ -13,16 +13,35 @@ pooled_pt(M = 0)
 \item{a_min}{support threshold: a precinct is supported when it has at least \code{a_min}
 comparison persons (\eqn{a_{min} \ge 1}).}
 
-\item{M}{nonnegative local (WPT) or aggregate (PPT) dial on the increments of the expected trend gap.}
+\item{M}{nonnegative tolerance scale: realised WPT, \eqn{\tau_i = M\sqrt{1/a_{iV}+1/a_{iN}}} (E35);
+expected WPT/PPT, the local or aggregate dial on the increments of the expected trend gap (E33(a)).}
+
+\item{target}{\code{"realised"} (default, Prop. E35) or \code{"expected"} (Props. E28-E30).}
+
+\item{tau}{optional nonnegative tolerance per unit (or one number) for the realised reading; replaces
+the default \eqn{\tau_i}, and the breakdown value then scales the whole vector.}
 }
 \value{
 an object of class \code{"edTrend"}.
 }
 \description{
-Trend assumptions for \code{\link{eiATT}} stated for \emph{expected} rates (2e Sec. 5.8). The
-estimand is the expected programme effect on the same treated persons,
-\eqn{ATT^{mean}_t = \sum_i w_{Vi}(m_{iVt} - m^{(0)}_{iVt})}. Neither is a default: the user chooses
-(Def. 5.1 item 2).
+Trend assumptions for \code{\link{eiATT}}. Neither is a default: the user chooses (Def. 5.1 item 2).
+}
+\details{
+\strong{Realised reading (default of \code{within_pt()}, Prop. E35).} The target is the realised
+\eqn{ATT_t = \sum_i w_{Vi}(B_{iVt} - \theta_i)} on the actual treated persons. In every supported
+precinct the treated group's untreated change equals the comparison group's realised change up to
+\eqn{\tau_i}: \eqn{|(\theta_i - B_{iV0}) - (B_{iNt} - S_i - B_{iN0})| \le \tau_i}, with default
+\eqn{\tau_i = M\sqrt{1/a_{iV} + 1/a_{iN}}} (or a user vector \code{tau}), one spillover \eqn{|S_i| \le \Lambda}
+per supported precinct, and \eqn{\theta_i \in [0,1]} on unsupported precincts (share \eqn{\pi_U} reported).
+The set is an identification set of the count layer (continuous tables), with the breakdown value
+\eqn{M^*} of its sign from one LP. \eqn{M} must hold in every precinct at once: it is a tolerance, not a
+confidence level. With \code{lce = TRUE} in \code{eiATT()} the fit's model layer enters only through
+E13 (a row \eqn{D_W^S(n) \in CI}), and the result is a confidence set.
+
+\strong{Expected-rate reading} (\code{within_pt(target = "expected")}, \code{pooled_pt()}; 2e Sec. 5.8):
+the estimand is the expected programme effect on the same treated persons,
+\eqn{ATT^{mean}_t = \sum_i w_{Vi}(m_{iVt} - m^{(0)}_{iVt})}.
 \itemize{
   \item \code{within_pt(a_min, M)}: within-precinct parallel trends (WPT) on the supported precincts
     \eqn{\{i: a_{iN} \ge a_{min}\}}; a precinct's weight in the comparison trend is its share of the

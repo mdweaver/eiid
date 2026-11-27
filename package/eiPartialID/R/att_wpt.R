@@ -18,10 +18,22 @@
 
 #' Parallel trends in expectation: within each precinct, or pooled
 #'
-#' Trend assumptions for \code{\link{eiATT}} stated for \emph{expected} rates (2e Sec. 5.8). The
-#' estimand is the expected programme effect on the same treated persons,
-#' \eqn{ATT^{mean}_t = \sum_i w_{Vi}(m_{iVt} - m^{(0)}_{iVt})}. Neither is a default: the user chooses
-#' (Def. 5.1 item 2).
+#' Trend assumptions for \code{\link{eiATT}}. Neither is a default: the user chooses (Def. 5.1 item 2).
+#'
+#' \strong{Realised reading (default of \code{within_pt()}, Prop. E35).} The target is the realised
+#' \eqn{ATT_t = \sum_i w_{Vi}(B_{iVt} - \theta_i)} on the actual treated persons. In every supported
+#' precinct the treated group's untreated change equals the comparison group's realised change up to
+#' \eqn{\tau_i}: \eqn{|(\theta_i - B_{iV0}) - (B_{iNt} - S_i - B_{iN0})| \le \tau_i}, with default
+#' \eqn{\tau_i = M\sqrt{1/a_{iV} + 1/a_{iN}}} (or a user vector \code{tau}), one spillover \eqn{|S_i| \le \Lambda}
+#' per supported precinct, and \eqn{\theta_i \in [0,1]} on unsupported precincts (share \eqn{\pi_U} reported).
+#' The set is an identification set of the count layer (continuous tables), with the breakdown value
+#' \eqn{M^*} of its sign from one LP. \eqn{M} must hold in every precinct at once: it is a tolerance, not a
+#' confidence level. With \code{lce = TRUE} in \code{eiATT()} the fit's model layer enters only through
+#' E13 (a row \eqn{D_W^S(n) \in CI}), and the result is a confidence set.
+#'
+#' \strong{Expected-rate reading} (\code{within_pt(target = "expected")}, \code{pooled_pt()}; 2e Sec. 5.8):
+#' the estimand is the expected programme effect on the same treated persons,
+#' \eqn{ATT^{mean}_t = \sum_i w_{Vi}(m_{iVt} - m^{(0)}_{iVt})}.
 #' \itemize{
 #'   \item \code{within_pt(a_min, M)}: within-precinct parallel trends (WPT) on the supported precincts
 #'     \eqn{\{i: a_{iN} \ge a_{min}\}}; a precinct's weight in the comparison trend is its share of the
@@ -35,12 +47,18 @@
 #' stays available under its own label.
 #' @param a_min support threshold: a precinct is supported when it has at least \code{a_min}
 #'   comparison persons (\eqn{a_{min} \ge 1}).
-#' @param M nonnegative local (WPT) or aggregate (PPT) dial on the increments of the expected trend gap.
+#' @param M nonnegative tolerance scale: realised WPT, \eqn{\tau_i = M\sqrt{1/a_{iV}+1/a_{iN}}} (E35);
+#'   expected WPT/PPT, the local or aggregate dial on the increments of the expected trend gap (E33(a)).
+#' @param target \code{"realised"} (default, Prop. E35) or \code{"expected"} (Props. E28-E30).
+#' @param tau optional nonnegative tolerance per unit (or one number) for the realised reading; replaces
+#'   the default \eqn{\tau_i}, and the breakdown value then scales the whole vector.
 #' @return an object of class \code{"edTrend"}.
 #' @export
-within_pt <- function(a_min = 1, M = 0) {
+within_pt <- function(a_min = 1, M = 0, target = c("realised", "expected"), tau = NULL) {
+  target <- match.arg(target)
   if (length(a_min) != 1 || !is.numeric(a_min) || !is.finite(a_min) || a_min < 1) stop("within_pt(a_min): one number >= 1")
-  .att_trend("wpt", a_min = as.numeric(a_min), M = .att_nonneg(M, "within_pt(M)"))
+  if (!is.null(tau) && (target != "realised" || !is.numeric(tau))) stop("within_pt(tau): a numeric tolerance vector for target = \"realised\" (Prop. E35)")
+  .att_trend("wpt", a_min = as.numeric(a_min), M = .att_nonneg(M, "within_pt(M)"), target = target, tau = tau)
 }
 #' @rdname within_pt
 #' @export
@@ -327,4 +345,154 @@ lce_mean <- function(base = FALSE, post = FALSE, change = TRUE, epsilon = 0) {
     if (!is.null(e$D)) cat(sprintf("  [DESCRIPTIVE, realised counts] pooled DiD D_t: %s (no confidence interval for PPT is implemented; E29 is for WPT)\n", f(e$D)))
   }
   cat(sprintf("\n  spillover: %s\n", if (x$Lambda == 0) "zero mean spillover" else sprintf("|S| <= %g, optimised jointly (E28(f))", x$Lambda)))
+}
+
+# ---------------------------------------------------------------------------
+# Prop. E35: realised within-precinct parallel trends with tolerance tau_i (RWPT-tau), the default
+# reading of within_pt(). Rows in Theorem E16's joint LP over (n, theta_i, S_i, M), per post-period k:
+#   |(theta_ik - B_iV,base(n)) - (B_iN,t(n) - S_ik - B_iN,base(n))| <= c_i M   (i supported),
+#   B_iN,t(n) - S_ik in [0, 1], |S_ik| <= Lambda (supported), theta_ik in [0, 1] (every precinct with
+#   treated persons; free on unsupported ones). c_i = sqrt(1/a_iV + 1/a_iN), or the user's tau_i with M = 1.
+# Target: ATT_t = sum_i w_Vi (B_iV,t(n) - theta_i). LCE only through E13: a row D_W^S(n) in CI.
+# ---------------------------------------------------------------------------
+.rwpt_lp <- function(P, cs, des, tau) {
+  p <- des$p; K <- length(cs$posts); r <- cs$r; cc <- cs$cc; b0 <- cs$base
+  nrows <- if (is.null(cs$s)) setdiff(seq_len(P$R), r) else cs$s
+  nx <- 2 * p * K + 1; iM <- nx
+  ith <- function(k, i) (k - 1) * 2 * p + i; iS <- function(k, i) (k - 1) * 2 * p + p + i
+  BV <- function(t, i) .ec_obj(P, list(.ed_term(P, t, i, r, cc, 1 / des$aV[i])))
+  BN <- function(t, i) .ec_obj(P, list(.ed_term(P, t, i, nrows, cc, 1 / des$aN[i])))
+  cf <- if (is.null(tau)) sqrt(1 / des$aV + 1 / pmax(des$aN, 1e-300)) else tau
+  xv <- function(...) { v <- numeric(nx); a <- list(...); for (q in a) v[q[1]] <- v[q[1]] + q[2]; v }
+  lower <- numeric(nx); upper <- numeric(nx)
+  rows <- list()
+  for (k in seq_len(K)) {
+    t <- cs$posts[k]
+    for (i in seq_len(p)) {
+      if (des$aV[i] > 0) upper[ith(k, i)] <- 1
+      if (!(des$sup[i] && des$aV[i] > 0)) next
+      lower[iS(k, i)] <- -des$Lambda; upper[iS(k, i)] <- des$Lambda
+      gn <- -BV(b0, i) - BN(t, i) + BN(b0, i)                        # gap = theta + S + gn(n)
+      rows[[length(rows) + 1]] <- list(n = gn, x = xv(c(ith(k, i), 1), c(iS(k, i), 1), c(iM, -cf[i])), lo = -Inf, hi = 0)
+      rows[[length(rows) + 1]] <- list(n = gn, x = xv(c(ith(k, i), 1), c(iS(k, i), 1), c(iM, cf[i])), lo = 0, hi = Inf)
+      rows[[length(rows) + 1]] <- list(n = BN(t, i), x = xv(c(iS(k, i), -1)), lo = 0, hi = 1)
+    }
+  }
+  att <- function(k) {
+    t <- cs$posts[k]; on <- numeric(P$nv); ox <- numeric(nx)
+    for (i in which(des$aV > 0)) { on <- on + des$wV[i] * BV(t, i); ox[ith(k, i)] <- -des$wV[i] }
+    list(n = on, x = ox)
+  }
+  list(nx = nx, iM = iM, rows = rows, lower = lower, upper = upper, att = att, cf = cf)
+}
+
+# FD-LCE interval for the realised supported target D_W^S (E13 with E12's allowance, rho_i = 4 w_Vi)
+.rwpt_lce_ci <- function(fit, P, cs, des, k, alpha) {
+  m <- fit$model
+  if (is.null(m)) stop("within_pt(): lce = TRUE needs an eiChange fit with a model layer (model = fd() or lce_periods()); LCE enters only by E13")
+  t <- cs$posts[k]; b0 <- cs$base; r <- cs$r; cc <- cs$cc
+  nrows <- if (is.null(cs$s)) setdiff(seq_len(P$R), r) else cs$s
+  sv <- which(des$sup & des$aV > 0)
+  W <- matrix(0, P$p0, P$R); terms <- list()
+  for (i in sv) {
+    w <- des$wV[i]; W[i, r] <- w
+    for (q in nrows) W[i, q] <- -w * as.double(P$A0[i, q]) / des$aN[i]
+    terms <- c(terms, list(.ed_term(P, t, i, r, cc, w / des$aV[i]), .ed_term(P, b0, i, r, cc, -w / des$aV[i]),
+                           .ed_term(P, t, i, nrows, cc, -w / des$aN[i]), .ed_term(P, b0, i, nrows, cc, w / des$aN[i])))
+  }
+  mb <- m$mb; spec <- m$spec
+  f <- .ed_model_change(mb, b0, t, cc, W)
+  tgm <- list(cvec = f$coef, c0 = f$const, gamma = f$a)
+  a_est <- 0.9 * alpha; a_E <- 0.1 * alpha
+  al <- .ed_allowance(P, list(list(terms = terms)), spec$allowance, a_E)
+  Zs <- .ed_with_seed(spec$seed, .rxc_zdraws(mb$V, 4000))
+  ivs <- lapply(.ed_mb_systems(m$base, m$unions), function(sy)
+    .ed_with_seed(spec$seed, .ed_proj(mb, sy$cons, tgm, a_est, spec$ci, Zs, spec$ndraw)) + c(-1, 1) * al$value)
+  list(pieces = .rxc_union(ivs, tol = 0), allowance = al$value, rho = al$rho, obj = .ec_obj(P, terms), rung = mb$rung)
+}
+
+.rwpt_run <- function(fit, P, fb, cs, trend, Lambda, lce, alpha, tgt) {
+  if (!cs$has_comp) stop("internal: comparison required")
+  des <- .wpt_design(P, cs, trend, NULL); des$Lambda <- Lambda
+  tau <- trend$tau
+  if (!is.null(tau)) {
+    if (length(tau) == 1) tau <- rep(tau, des$p)
+    if (length(tau) != des$p || any(!is.finite(tau)) || any(tau < 0)) stop("within_pt(tau): one nonnegative number per unit (", des$p, ") or one number")
+  }
+  lp <- .rwpt_lp(P, cs, des, tau)
+  Mfix <- if (is.null(tau)) trend$M else 1
+  roles <- if (is.null(fit$restrictions)) character(0) else fit$restrictions$role
+  res <- list()
+  for (t in tgt) {
+    k <- match(t, cs$posts); a <- lp$att(k)
+    lc <- if (isTRUE(lce)) .rwpt_lce_ci(fit, P, cs, des, k, alpha) else NULL
+    lrows <- if (is.null(lc)) list(list()) else if (is.null(lc$pieces)) list() else
+      lapply(seq_len(nrow(lc$pieces)), function(j) list(list(n = lc$obj, x = numeric(lp$nx), lo = lc$pieces[j, 1], hi = lc$pieces[j, 2])))
+    solve_all <- function(Mlo, Mhi, extra, obj_n, obj_x, sense) {
+      best <- NULL
+      for (lr in lrows) for (b in fb) {
+        lo <- lp$lower; hi <- lp$upper; lo[lp$iM] <- Mlo; hi[lp$iM] <- Mhi
+        s <- .att_lp(P, b$rows, c(lp$rows, lr, extra), lp$nx, list(lower = lo, upper = hi), obj_n, obj_x, sense)
+        if (!is.null(s) && (is.null(best) || sense * s$value > sense * best)) best <- s$value
+      }
+      best
+    }
+    ivs <- list()
+    for (lr in lrows) for (b in fb) {
+      lo <- lp$lower; hi <- lp$upper; lo[lp$iM] <- Mfix; hi[lp$iM] <- Mfix
+      l <- .att_lp(P, b$rows, c(lp$rows, lr), lp$nx, list(lower = lo, upper = hi), a$n, a$x, -1)
+      h <- if (is.null(l)) NULL else .att_lp(P, b$rows, c(lp$rows, lr), lp$nx, list(lower = lo, upper = hi), a$n, a$x, 1)
+      ivs[[length(ivs) + 1]] <- if (is.null(l) || is.null(h)) c(NA_real_, NA_real_) else c(l$value, h$value)
+    }
+    pcs <- .rxc_union(ivs, tol = 1e-10)
+    e <- list(post = P$elections[t], pieces = pcs, lower = if (is.null(pcs)) NA_real_ else min(pcs[, 1]),
+              upper = if (is.null(pcs)) NA_real_ else max(pcs[, 2]), empty = is.null(pcs), lce = lc)
+    # E35(b): breakdown of the sign, one LP with M a variable (the ATT row on the other side of 0)
+    e$breakdown_M <- NA_real_
+    if (!e$empty && (e$lower > 0 || e$upper < 0)) {
+      side <- if (e$lower > 0) list(n = a$n, x = a$x, lo = -Inf, hi = 0) else list(n = a$n, x = a$x, lo = 0, hi = Inf)
+      ox <- numeric(lp$nx); ox[lp$iM] <- 1
+      v <- solve_all(0, Inf, list(side), numeric(P$nv), ox, -1)
+      e$breakdown_M <- if (is.null(v)) Inf else v
+    }
+    e$dw <- .wpt_dw(P, fb, cs, des, k, alpha, "precincts", roles)$LU
+    res[[length(res) + 1]] <- e
+  }
+  list(results = res, design = des, tau_given = !is.null(tau), M = trend$M, lce = isTRUE(lce), alpha = alpha,
+       belief = any(roles == "belief"),
+       support = data.frame(unit = des$units, a_treated = des$aV, a_comparison = des$aN, w_treated = des$wV,
+                            supported = des$sup, stringsAsFactors = FALSE))
+}
+
+.rwpt_print <- function(x, digits = 3) {
+  w <- x$rwpt; des <- w$design
+  f <- function(v) if (is.null(v) || anyNA(v)) "EMPTY" else sprintf(paste0("[%.", digits, "f, %.", digits, "f]"), v[1], v[2])
+  cat(sprintf("  tolerance: %s\n", if (w$tau_given) "user tau_i (M* below scales the whole vector)" else
+    sprintf("tau_i = M sqrt(1/a_iV + 1/a_iN) with M = %g", w$M)))
+  cat("  note (R4-1): M is a tolerance that must hold in every supported precinct at once, not a confidence level\n")
+  cat(sprintf("  support: a_iN >= a_min = %g; pi_U = %.4g (treated share in unsupported precincts, theta_i in [0,1], no assumption); n_eff = %.4g\n",
+              x$trend$a_min, des$pi_U, des$n_eff))
+  sp <- w$support[w$support$a_treated > 0, ]
+  cat("  local comparison counts a_iN (treated precincts): ",
+      paste(sprintf("%s %s%s", sp$unit, format(sp$a_comparison, trim = TRUE), ifelse(sp$supported, "", " (unsupported)")), collapse = ", "), "\n", sep = "")
+  cat("  continuous tables (Prop. E35(c): the integer check is optional and not applied; whole-person ends may be narrower, Remark 7.1)\n")
+  for (e in w$results) {
+    cat(sprintf("\nPost-election %s\n", e$post))
+    lab <- if (w$lce) "CONFIDENCE SET, realised ATT (E35 + E13)" else "IDENTIFICATION SET, realised ATT, count layer (E35)"
+    cat(sprintf("  [%s] ATT: %s%s\n", lab, if (e$empty) "EMPTY" else paste(apply(e$pieces, 1, f), collapse = " U "),
+                if (e$empty) " -- refutes (FP) + NA + count rows + RWPT-tau + the spillover limit" else ""))
+    if (!e$empty) cat(sprintf("    breakdown of the sign (one LP, M a variable): %s\n",
+      if (is.na(e$breakdown_M)) "none (the set contains 0)" else if (!is.finite(e$breakdown_M)) "infinite (no table puts the ATT on the other side of 0)" else
+        sprintf("M* = %.4g", e$breakdown_M)))
+    cat(sprintf("  [DESCRIPTIVE, realised counts] D_W (E29), count layer: %s\n", f(e$dw)))
+    if (w$lce) {
+      l <- e$lce
+      cat(sprintf("    E13 row: D_W^S(n) in the %s interval %s at level %g (E12 allowance %.4g, rho_i = 4 w_Vi)\n", l$rung,
+                  if (is.null(l$pieces)) "EMPTY" else paste(apply(l$pieces, 1, f), collapse = " U "), 1 - w$alpha, l$allowance))
+      cat(sprintf("    coverage >= %s under FP, NA, RWPT-tau, |S_i| <= Lambda%s; the confidence level comes only from the LCE part\n",
+                  if (w$belief) sprintf("1 - %g - P(the belief rows are false)", w$alpha) else sprintf("1 - %g", w$alpha),
+                  if (w$belief) " and the belief rows" else " (identity rows only)"))
+    }
+  }
+  cat(sprintf("\n  spillover: |S_i| <= %g per supported precinct%s\n", x$Lambda, if (x$Lambda == 0) " (no spillover, stated explicitly)" else ""))
 }

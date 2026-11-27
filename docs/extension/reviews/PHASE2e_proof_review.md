@@ -284,3 +284,137 @@ None of N1–N4 changes a result.
 | **R32** | **yes** for G7(a)–(c) as stated | R25(b)–(c) and the module stay **O**. |
 
 N1 and N3 are labelling fixes and do not block any row.
+
+---
+
+## 7. Round 3: independent-review revisions (2e at `claude/did-theory-r3` head `481c47f`)
+
+*Scope. This round reviews:*
+* *the independent econometric review, `PHASE2e_independent_review.md` (findings 1–12 and its Follow-up section), and its round 2, `PHASE2e_independent_review_round2_WPT.md`;*
+* *the author's reply;*
+* *the revised note: §12 rows IR1–IR12, IR-F/L/A/P/S and R2-1–R2-10, R2-P; the new §§5.8–5.10 (E28–E34); and the revised §9.*
+
+*Branch `481c47f` was merged into this branch first (fast-forward).*
+
+*Reruns.*
+* *`verify_phase2e.py`: **102/102 PASS**, output identical to the committed file.*
+* *`phase2e_independent_checks.py` and `phase2e_independent_checks_pt.py`: both run to completion, and their printed intervals match the note (four-precinct RM rows, N21, the (99,1)/(1,99) case [.12, .28], the integer RM endpoints, and the six three-precinct LCE fits).*
+* *My round-1 script: 15/15 still.*
+* *New: `phase2e_review_checks_r3.py` (output `phase2e_review_checks_r3_output.txt`, **4/4 PASS**). It checks only what no passing check already covers:*
+  * *E30(c) and ε\* by an independent LP;*
+  * *coverage of the E29(b) Hoeffding and E31 empirical-Bernstein radii under precinct-wide shocks, unequal weights and non-identical laws;*
+  * *the probability of E32's simultaneous moment event under shocks shared across elections;*
+  * *E31(c)'s arithmetic.*
+
+*Maurer–Pontil.* I checked the statement against the paper's text (arXiv 0907.3740, extracted locally):
+* Theorem 11 is the non-identically distributed version: independent variables with values in $[0,1]$, bounding $E[P_n(X)]$, the mean of the means.
+* $V_n=\frac1{n(n-1)}\sum_{i<j}(X_i-X_j)^2$, the usual divisor $n-1$.
+* Theorem 4 is its i.i.d. special case.
+
+E31's use is correct: the common deterministic range is rescaled to $[0,1]$, which multiplies the deviation term by $R$ and $V$ by $R^2$, so $\sqrt{2V(Y)\log(2/\delta)/K}$ and $7R\log(2/\delta)/(3(K-1))$; the reflection $1-X$ has the same sample variance; and $\delta=\alpha/2$ per side gives $\log(4/\alpha)$.
+
+### 7.1 Where the earlier rounds of this review were wrong
+
+The independent review found errors that rounds 1–2 of this review missed or accepted, and in two cases one of my fixes was incomplete. I agree with each of these and say so plainly:
+* **E18(b), later horizons** (their finding 1). I accepted the endpoint-wise set for every post-period. Violations accumulate: $|b_h|\le h\bar MA$. Their counterexample has $\mathrm{ATT}_2=-.30$ outside $\pm.15$; it is correct.
+* **E23(b), finite sample** (finding 2). I caught the doubled range only for a parenthetical in E25 (my N4) and missed that E23 itself invokes P3.8 with one election's range. The exact coverage .884682 against .997423 is correct.
+* **E23(a) and E25 (H1), asymptotic conditions** (finding 3). I accepted "full-rank design" as enough. It does not give the CLT or a nonsingular stacked covariance.
+* **E16(b), whole-person witness** (finding 4). My issue 3 fix required integrality for the treated group only. The comparison counterfactual also needs $(B_{s^*}-S)A_{s^*}\in\mathbb Z$ (one treated and one comparison person, $S=1/2$).
+* **E16(d), several post-periods** (finding 9). I did not check the joint quantifier; one table must serve every post-period.
+* **Remark 7.1** (finding 5). I accepted "beyond one step for the dial" as an open item. Their example (integer set $\{0\}$ against continuous $[-1,1]$, margins only, $M=0$) is correct; I verified the algebra, including feasibility of $y_0=m^2/(2m+1)$.
+* **E27, degree-3 star** (finding 6). I showed the matrix is not TU but left integrality conjectural. Their three-row instance ($x_1+x_2\le1$, $x_2+x_3\le1$, $x_1+x_3\le1$: $3/2$ against $1$) is a genuine integrality gap.
+* **E7(d)** (finding 7). I accepted the common-composition contrast as the loading. The electorate DiD uses own-group weights; the loading .0075 with all pair contrasts zero is correct.
+* **E8, joint stacking** (finding 8). I did not consider several pairs sharing an election. Pairwise sharp sets are only outer for a path; their $x=.4,.5,.6$, $\Delta\kappa=1.25$ example is correct.
+* **E19 and §9.3, "only when"** (finding 10). I accepted the applied conclusion that RM helps only when something narrows the pre-trend. The (99,1)/(1,99) case gives $[.12,.28]$ with the counts alone.
+* **E3(c), consecutive DiDs** (finding 12). My issue 9 fix ("whatever the other ranges") is right for the base-relative vector, but I left the sentence about consecutive DiDs, which needs an uncertain shared interior election.
+* **E21's proof** (finding 9). In round 1 I noticed that $S=\Lambda$ can violate $B_{s^*}-S\ge0$, judged it harmless because the formula survives, and recorded no issue. The proof step was wrong; $S=\min(\Lambda,B_s)$ is the right repair.
+* **G5 and G7(a)** (finding 11). My issue 18 said rates over an unknown $N$ are linear-fractional (Charnes–Cooper). A DiD is a *difference* of ratios with different denominators, so a single Charnes–Cooper transformation does not apply; a joint denominator scan is needed. G7(a) also needs the rows to be true.
+* **Holes in RM sets** (finding 12). E18(a) always said "union", but I did not flag that endpoint envelopes can include a hole even with one polytope of tables. Their example $[-.90,-.70]\cup[-.30,0]$ is correct.
+
+### 7.2 The fixes to the independent review (IR1–IR12, R2-1–R2-10)
+
+Each fix in §12 is present in the text and is correct. I checked:
+* E18(b): the first-post-period form with $\Lambda=0$, the horizon form $\mathcal D_h\oplus[\pm(h\bar M\sup A+\Lambda)]$, and the proof by telescoping.
+* E23(a)–(c): design-sequence, leverage and covariance conditions; the doubled range; E12 as a separate event.
+* E25 (H1): failures of full rank, and redundant contrasts.
+* E16(b), (d).
+* Remark 7.1.
+* E27: the cycle extension, which holds for every simple cycle by the same signing; the star gap.
+* E7(d): the weighted loading; the tree-rank argument under full-dimensional support, which is correct (vanishing edge contrasts force equal rows, and antisymmetry forces them to be zero).
+* E8(e): Lemma G′ on levels with an incidence matrix.
+* E15: the disconnected-$F$ proof.
+* E17(c): the sharp breakdown LP. It is linear, with $|b|\le M$ and $M$ a variable, and it is at least $M^*$ because the sharp set lies inside the Minkowski set.
+* E21: $S=\min(\Lambda,B_s)$, with (e) for a shared table.
+* E22: scope.
+* E19(a): $\bar M>0$; (c1) weak nesting; (c3); (c4); (d).
+* E3(c); E6 (both groups in each bin); E10 (density); E12; E24 (fixed true branch).
+* G5 and G6 (clean witness); G7(a) ($\varphi_a$, row truth, not a single LP).
+* R2-1: the PPT witness $p^0$ is valid. It meets PPT, lies in $[0,1]$ by (b), and the non-veterans' counterfactual equals their factual rate in aggregate.
+* R2-2: increments.
+* R2-3 to R2-6.
+
+### 7.3 New results, line by line
+
+* **E28.**
+  * (a): the identity, the support split and the weights. Correct.
+  * (b): rate limits. Correct.
+  * (c): the Aumann expectation of the product is the product of the expectations, because the support function of a product is the sum of the support functions. The WPT witness uses constant counterfactual masses; the PPT witness is $p^0$. Both are correct. The set is sharp for continuous masses given a known per-precinct law.
+  * (d): correct. It is a special case that needs $a_{iN}=0$ on all of $\mathcal U$; otherwise use the LP.
+  * (e): $\Delta m_V-\Delta m_N=q^\Delta(x)+\Delta\kappa$. Correct.
+  * (f): one joint LP, with at most $\pi_S\Lambda$ for a fixed fit. Correct.
+* **E29.**
+  * (a): $E[D_W]-\mathrm{ATT}^{\rm mean}=\sum_{\mathcal U}w_{Vi}\theta_i\in[0,\pi_U]$. Correct.
+  * (b): the precinct term has range $4w_{Vi}$ on $\mathcal S$ and $w_{Vi}$ on $\mathcal U$. Independence is across precincts, with any dependence within a precinct. The Hoeffding radius and $\sqrt{8\log(2/\alpha)/n_{\rm eff}}$ (0.992 for 30 equal weights) are correct. The independent-persons version is correct: $a_{ig}$ persons, each with range $2w/a_{ig}$.
+  * (c): the event is $\{n^\circ\in F\}\cap\{|D_W-ED_W|\le r_\alpha\}$, with the union bound for belief rows. Correct.
+  * (d): RM on increments, within precinct ($(2L)^{|\mathcal S|}$ branches) or after aggregation ($2L$). The zero-box version of E25 is the right one here, since the target and the restriction are both means.
+  * (e). Correct.
+  * My simulation with precinct-wide shocks: Hoeffding coverage 1.000 at radius 1.07 ($n_{\rm eff}=26$).
+* **E30.** (a) is trivial (affine functions form a vector space). In (b), nesting holds and $\epsilon\ge1/2$ makes the rows slack. The breakdown value is one LP and is attained, so strict positivity holds for $\epsilon<\epsilon^*$. (c) is reproduced exactly by my independent LP, including $\epsilon^*=1/600$ and $\epsilon=1/2$ equal to the change-only set.
+* **E31.**
+  * (a): the event, the independence unit (the precinct), the common deterministic range ($Z_i\in[-2w,2w]$ on $\mathcal S$ and $[0,w]$ on $\mathcal U$, both inside $[-2K\max w,2K\max w]/K$), the rescaling, the two-sided union and the projection over $F$ on $\{n^\circ\in F\}$ are all correct. See issue R3-1 on computation and width.
+  * (b): $\sum(Y_i-\bar Y)^2\le\sum Y_i^2$, and $r$ is monotone in $s^2$. Correct.
+  * (c): arithmetic 1.41. Correct.
+* **E32.** Step 1: $L_{it}\le B_{iVt}\le U_{it}$ a.s., so every element of the identified set has $EL\le m\le EU$ (E8(d)), and $ET=p$. Step 2: the terms $h_iH_{it}\in[0,h_i]$ are independent across precincts, with any dependence across elections; $2\exp(-2c_h^2/\sum h_i^2)=\alpha/J$; union over $J$ rows. Step 3: containment of the identified set, which contains the truth. All correct, and no sharpness is claimed. My simulation with shocks shared across elections gives $P(\text{event})=1.000$ with $J=12$.
+* **E33.** (a) and (b) are correct (triangle inequality; opposite violations for the converse). For (c), see issue R3-2.
+* **E34.** An affine function has at most one sign change along sorted compositions. Ties and zeros fit either side, and patterns that split a tie are harmless because they force a zero. Exactness holds both ways. The count is $2(|\mathcal S|+1)$. Correct.
+
+### 7.4 Issues (round 3)
+
+* **R3-1 (wording, E31).** E31(a) needs $\inf_F(D_W-r)$ and $\sup_F(D_W+r)$ with $r(n)$ convex in $n$ (a norm of an affine map plus a constant). Both are concave-minimisation problems, not LPs; they need global optimisation (vertex enumeration or a MIQP), or (b) as the practical outer version. Also, $R=4K\max_iw_{Vi}$ grows with the largest weight: with concentrated veterans, E31 is far wider than Hoeffding. In my simulation (unequal weights, $n_{\rm eff}=26$, $K=40$) the mean E31 radius is 4.02, against 1.07 for Hoeffding. *Fix:* one sentence on computation in (a), and one in (c) saying that with unequal weights the additive term scales with $K\max_iw_{Vi}$.
+* **R3-2 (gap, minor; E33(c)).** "At $\bar M=0$ … implies aggregated RM at $\bar M=0$" needs the strata to **partition** $\mathcal S$; otherwise the aggregate is not a weighted sum of stratum averages. *Fix:* state that the strata partition $\mathcal S$.
+* **R3-3 (wording, §9.3 item 5).** "Without a trend assumption the data say nothing about the effect" overstates E15. The set $[B^L-1,B^U]$ always contains 0, so the sign is never identified, but its width can be well below 2 (in §9.2 it is $[-0.5675,0.7325]$). *Fix:* "…the data cannot sign the effect; they only bound it by the observed post-war rate."
+
+None of R3-1 to R3-3 changes a result. I found no error in the new results.
+
+### 7.5 Verdict per result (this round)
+
+| Result | Verdict |
+|---|---|
+| E3(c) (consecutive), E6, E7(d), E8(e), E9, E10, E12 | accept |
+| E15, E16(b), (d), E17(c), E21, E22, Def. 5.1 | accept |
+| E18(a), (b); E19 (a)–(d), (c4) | accept |
+| E23(a)–(c), E24 (scope), E25 (H1)–(H3), zero-box clause | accept |
+| Remark 7.1, E27 (cycles; star gap) | accept |
+| E28 (a)–(f) | accept |
+| E29 (a)–(e) | accept |
+| E30 (a)–(c) | accept |
+| E31 (a)–(c) | accept with fixes (R3-1, wording) |
+| E32 (a)–(b) | accept |
+| E33 (a)–(b) | accept; (c) accept with fixes (R3-2) |
+| E34 | accept |
+| G5, G6, G7(a)–(c), register entries G1–G9 | accept |
+| §9 (9.1–9.4) | accept with fixes (R3-3); otherwise consistent with the results: the realised/expected labels, the 47.5%/2.5% weights, $n_{\rm eff}$ and the 0.992 allowance, RM on increments and accumulating with the horizon, and the E30 numbers |
+
+### 7.6 Register rows: move to "P; proof reviewed (docs/extension/reviews/PHASE2e_proof_review.md)"?
+
+| Row | Move? | Carried labels |
+|---|---|---|
+| **R11a** | **yes** | Grouped rungs: R16 (O) |
+| **R11b** | **yes**, including E28 | — |
+| **R11b′** | **yes**, including E29(d), E33 (after R3-2), E34 | — |
+| **R11c** | **yes**, including E29(b)–(c), E31 (R3-1 is wording), E32 | Sharp-FD-set inference **O**; CLR algorithmic; E31/E32 width and coverage simulations remain future work, not a proof gap |
+| **R11d** | **yes**, including the cycle extension, the star gap (a negative result) and Remark 7.1 | Causal integer ends: MILP |
+| **R31** | **yes** (register and Lemma G6) | Items **O** (deferred) |
+| **R32** | **yes** (G7(a)–(c) as revised) | R25(b)–(c), the support of the true compositions and the module **O** |
+
+R3-1 to R3-3 can be applied with the status change; none needs further review.

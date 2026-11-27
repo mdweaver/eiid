@@ -43,7 +43,7 @@ PASS  E16/E17 [V] Theorem E16 / Cor. E17: trend-dial ATT set (joint LP) lies in 
 PASS  E17 [I] Cor. E17: NS worked example: D in [.05,.25]; M=.10 -> [-.05,.35]; M=.02 -> [.03,.27]; breakdown M* = .05
 PASS  E18 [V] N21 reproduced exactly by LP: D_pre [-1.23,1.27], D_post [-1.08,1.42]; RM(1) joint [-2.35,2.65], endpoint-wise [-2.35,2.69]  [joint -2.3542,2.6458; endpoint-wise -2.3542,2.6875]
 PASS  E18 [F] N21 corrected: with theta in [0,1] the RM set is [B^L-1, B^U] = the no-assumption set, not [-2.35,2.65]  [RM(1) with rate limits [-0.750,1.000] = no assumption [-0.750,1.000]]
-PASS  E18 [I] N21 narrow pre-trends (pre totals pinned to +/-2): D_pre [-0.06,0.10]; RM(1) [-0.60,0.90] (with rate limits: shown)  [with rate limits [-0.604,0.896]]
+PASS  E18 [I] N21 narrow pre-trends (pre totals pinned to +/-2): D_pre [-1/16, 5/48]; RM(1) [-29/48, 43/48], identical with and without rate limits  [with rate limits [-0.604,0.896]]
 PASS  E18 [V] Prop. E18(b): RM set = union of 2 x (pre pairs) LPs; equals grid brute force on N21  [grid -2.3542,2.6458]
 PASS  E19 [V] Prop. E19(a): RM set in trend-dial set with M = Mbar sup|D_pre|; upper ends equal iff a common maximiser exists  [equal 20, strictly inside 20]
 PASS  E19 [V] Prop. E19(b): RM upper end equals the no-assumption upper end iff the vacuity LP is feasible  [vacuous 37, informative 2, refuted 1]
@@ -68,28 +68,66 @@ PASS  G7 [V] uncertain margins: a composition common to both periods enters once
 PASS  G7 [F] R26 on changes: E[Delta T|q] = qbar'dQ qbar + Var(X|q)(dQvv - 2dQvn + dQnn) exactly; ignoring it is biased  [max bias of the uncorrected fit 7.29e-03]
 PASS  G8 [F] covariates: conditional PT within strata, unconditional DiD != ATT; treated-weighted stratum DiD = ATT  [unconditional 0.010, conditional 0.050, ATT 0.050]
 PASS  G9 [F] time-varying groups: DiD of period-specific group rates != within-person DiD of group stayers  [period groups 0.450, stayers 0.503]
-      W  B_v,post: [0.432, 0.732]
-      W  D_post (margins): [-0.407, 0.792]
-      W  D_pre (margins): [-0.598, 0.603]
-      W  ER, NM on post changes: [0.270, 0.143]
-      W  ER, NM on pre changes: [0.008, 0.004]
-      W  D_post (CR on changes): [0.143, 0.270]
-      W  D_pre (CR on pre changes): [0.004, 0.008]
-      W  ATT, no assumption: [-0.568, 0.732]
-      W  ATT, PT, margins only: [-0.407, 0.732]
-      W  ATT, PT + CR: [0.143, 0.270]
-      W  ATT, dial M=.05 + CR: [0.093, 0.320]
-      W  ATT, dial M=.05, spillover .02 + CR: [0.073, 0.340]
-      W  ATT, RM(1), margins only: [-0.568, 0.732]
-      W  ATT, RM(1), CR post only: [-0.405, 0.732]
-      W  ATT, RM(1), CR post and pre: [0.135, 0.278]
-      W  ATT, MTR+ND+PS, margins only: [0.000, 0.482]
-      W  ATT, MTR+ND+PS + CR: [0.000, 0.311]
+      W  B_v,post: [0.4325, 0.7325]
+      W  D_post (margins): [-0.4075, 0.7925]
+      W  D_pre (margins): [-0.5975, 0.6025]
+      W  ER, NM on post changes: [0.2703, 0.1433]
+      W  ER, NM on pre changes: [0.0080, 0.0043]
+      W  D_post (CR on changes): [0.1433, 0.2703]
+      W  D_pre (CR on pre changes): [0.0043, 0.0080]
+      W  ATT, no assumption: [-0.5675, 0.7325]
+      W  ATT, PT, margins only: [-0.4075, 0.7325]
+      W  ATT, PT + CR: [0.1433, 0.2703]
+      W  ATT, dial M=.05 + CR: [0.0933, 0.3203]
+      W  ATT, dial M=.05, spillover .02 + CR: [0.0733, 0.3403]
+      W  ATT, RM(1), margins only: [-0.5675, 0.7325]
+      W  ATT, RM(1), CR post only: [-0.4050, 0.7325]
+      W  ATT, RM(1), CR post and pre: [0.1352, 0.2783]
+      W  ATT, MTR+ND+PS, margins only: [0.0000, 0.4825]
+      W  ATT, MTR+ND+PS + CR: [0.0000, 0.3114]
 PASS  W [I] worked example (§9): numbers as printed above, each rung narrows or reports no information as stated
 PASS  E17 [F] review issue 1: E17(b) as first stated (one-sided rate limits) fails with a coupling row; the exact criterion holds  [max D -0.400, thetaPT at argmax 1.200..1.200, sharp PT set [-0.933,-0.800]]
 PASS  E17 [V] review issue 1: margins only, a maximiser of D minimises thetaPT and a minimiser maximises it (named row and rest)  [120 cases]
 PASS  E6 [F] review issue 2: the emptiness criterion needs 'or Dbar+ < 0': here dtau_H > dtau_L and cap >= Dbar-, yet the set is empty  [Dbar in [-0.150,-0.150], lambda 0.60, dtau_H - dtau_L 0.46, cap 0.767]
-PASS  W [I] review issue 12: RM(1) with CR on the pre-war change alone gives [-0.416, 0.732]; on both changes [0.135, 0.278]  [pre only (-0.416, 0.732)]
+PASS  W [I] review issue 12: RM(1) with CR on the pre-war change alone gives [-0.4155, 0.7325]; on both changes [0.1352, 0.2783]  [pre only (-0.4155, 0.7325)]
 PASS  G [V] review issue 14: the gap-register counts quoted in PHASE2e (G1, G5, G6, G7) match this run  [G1 200/200, G5 300/300, G6 53/300, G7 36/200]
+PASS  E18 [F] finding 1: at horizon 2 RM(1) holds but ATT_2 = -.30 lies outside the first-post endpoint-wise set D_2 +/- A; inside D_2 +/- 2A  [A = 0.15, D_2 = 0.00]
+PASS  E23 [F] finding 2: fitted change = mean of 20 signed ones; P3.8 radius with one election's range covers .884682 < .95; doubled range .997423  [radius 0.3037]
+PASS  E25 [F] finding 3: RM(1) holds at every realisation, mean programme effect -.10; RM on the mean pre-DiD (= 0) forces b = 0 and effect 0
+PASS  E16 [F] finding 4: theta A_r integer and continuous rate limits hold, but one comparison person cannot have untreated rate 1/2
+PASS  Remark 7.1 [F] finding 5: no one-step integer guarantee: integer ATT set {0}, continuous [-1, 1] (m = 2, 3, 5, 10)
+PASS  E27 [F] finding 6: degree-3 star with one change row per edge: LP maximum 3/2, integer maximum 1 (strict gap)
+PASS  E27 [V] finding 6: a 4-cycle of period pairs (chronological orientation mixed) with laminar families: LP = MILP  [30 objectives]
+PASS  E7 [F] finding 7: every common-composition contrast for pair (1,2) is zero, yet the electorate DiD loads .0075 (full-rank quadratic design)
+PASS  E8 [F] finding 8: each of two successive change pairs is feasible at x = .4, .5, .6, the three-election path is not
+PASS  E16 [F] finding 9: comparison post rates s1 + s2 = 1.2; PT feasible at each post-period separately, refuted jointly
+PASS  E17 [V] finding 9: sharp breakdown of 'ATT > 0' = min M s.t. joint feasibility and ATT <= 0 (one LP) >= Minkowski value  [sharp 0.1432, Minkowski 0.1432]
+PASS  E19 [F] finding 10: counts alone, no pure precinct, RM(1): ATT in [.12, .28] (no-assumption [-.31, .71]); no pre-period model needed  [RM [0.1200,0.2800]]
+PASS  G6 [F] finding 11: a 50/50 split of a merged baseline gives gap [-.2, .2]; the true gap .8 is excluded
+PASS  E18 [F] finding 12: sharp RM projection [-.90,-.70] U [-.30,0] with one polytope of tables; the envelope wrongly contains -.50
+PASS  E18 [V] finding 12: N21 and the worked-example RM sets are single intervals after merging branch intervals (no hole)
+PASS  E3 [V] finding 12: consecutive DiDs are a box when no interior election is uncertain; base-relative (base 0) is a segment
+      PT  five precincts, rare, within mean PT: [+10.39, +12.25]
+      PT  five precincts, rare, pooled mean PT: [-3.96, -2.22]
+      PT  five precincts, ordinary, within mean PT: [-67.33, +43.78]
+      PT  five precincts, ordinary, pooled mean PT: [-80.56, +52.13]
+PASS  E28 [V] five-precinct table reproduced (FD-LCE on changes): rare [+10.39,+12.25] within vs [-3.96,-2.22] pooled; ordinary [-67.33,+43.78] vs [-80.56,+52.13]
+      PT  three precincts, LCE on nothing: [-58.00, +27.33]
+      PT  three precincts, LCE on change: [-49.33, +7.33]
+      PT  three precincts, LCE on pre + change: [+2.67, +7.33]
+      PT  three precincts, LCE on pre + post: [+2.67, +7.33]
+      PT  three precincts, LCE on post + change: [+2.67, +7.33]
+      PT  three precincts, LCE on pre + post + change: [+2.67, +7.33]
+PASS  E30 [V] three-precinct check: no LCE [-58.00,27.33]; change only [-49.33,7.33]; any two of pre/post/change, or all three, [2.67,7.33]
+PASS  E30 [I] baseline-curvature allowance: monotone in eps; positive for eps < 1/600, zero feasible at eps* = 1/600 (one LP); eps = 1/2 already gives change-only  [eps* = 0.1667 points; at eps* [-0.00,7.33]]
+PASS  E28 [V] unsupported precinct (all veterans): ATT interval = supported part + w_V B_V1 - [pi_U, 0], pi_U = share of veterans affected  [pi_U = 0.400; [-65.60,8.40]]
+PASS  E28 [I] four-precinct example, margins only: D_W in [-93.87, +144.72], pooled DiD in [-40.75, +79.25]; precinct 4 weight 47.5% vs 2.5%  [D_W [-93.87,144.72]]
+PASS  E29 [F] realised-table D_W (cells known, L = U) is not a confidence set for the expected ATT; [L - r, U + r] covers (Hoeffding: rho_i = 4 w_Vi, or person-level)  [point 0.000; n_eff = 25.0 (unequal weights); any within-precinct dependence r = 1.087 (equal weights: 0.992), cover 1.000; independent persons r = 0.118, cover 1.000]
+PASS  E28 [F] round 2: under PPT the local imputation m_V0 + d_N = (-.2, 1.2) is not a rate; the pooled witness p0 = .5 in every precinct is valid
+PASS  E29 [F] round 2: RM on increments |b_t - b_(t-1)| <= Mbar A holds (Mbar = 1), the cap on levels |b_t| <= Mbar A fails at the second post-election
+      R2  spillover 0.01: joint LP [-50.3333,8.3333] vs dilation [-50.3333,8.3333]
+      R2  spillover 0.05: joint LP [-54.3333,12.3333] vs dilation [-54.3333,12.3333]
+PASS  E28 [I] round 2: WPT spillover sensitivity by one joint LP in (fit, S_i) with local rate limits; reported beside the pi_S*Lam dilation (no sharpness claimed for the dilation)
+PASS  E34 [V] round 2: exact within-precinct RM with an affine pre-increment profile: split-and-orientation enumeration (<= 2(|S|+1) LPs) = exhaustive 2^|S| sign enumeration  [10 six-precinct cases, both extrema]
 
-76/76 PASS
+102/102 PASS

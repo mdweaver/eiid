@@ -5,7 +5,9 @@ Run:  python3 -I verify_phase2e.py > verify_phase2e_output.txt
 Tags (as in 2c, 5a, 6a): [F] fails on an earlier or tempting ("naive") statement and passes on the one
 made in PHASE2e; [V] verifies a statement of PHASE2e; [I] illustrates; [P2d] a check of PHASE2d, run
 unchanged. Every check prints PASS or FAIL. Check names start with the result they concern (E1, ...,
-G1, ..., W for the worked example).
+G1, ..., W for the worked example). Sections IR and PT were added after the independent review
+(reviews/PHASE2e_independent_review.md); they port the cases of reviews/phase2e_independent_checks.py and
+reviews/phase2e_independent_checks_pt.py.
 
 Conventions: periods t = 0..T-1 in code (event time in the document: base period t0 is the last
 pre-period); rows r (groups), columns c (outcomes); n[t, i, r, c] = latent count; a[i, r] = group
@@ -975,8 +977,8 @@ for rr in pins:
 nD0 = Lp.range(did_vec(Lp, 0, 1, 0, 0, 1))
 narrow_nl = rm_range(a21, b21, 1.0, 1, 2, [(0, 1)], logical=False, extra=pins)
 narrow_l = rm_range(a21, b21, 1.0, 1, 2, [(0, 1)], logical=True, extra=pins)
-check("E18 [I] N21 narrow pre-trends (pre totals pinned to +/-2): D_pre [-0.06,0.10]; RM(1) [-0.60,0.90] (with rate limits: shown)",
-      np.allclose(np.round(nD0, 2), (-0.06, 0.10)) and np.allclose(np.round(narrow_nl, 2), (-0.60, 0.90)),
+check("E18 [I] N21 narrow pre-trends (pre totals pinned to +/-2): D_pre [-1/16, 5/48]; RM(1) [-29/48, 43/48], identical with and without rate limits",
+      np.allclose(nD0, (-1 / 16, 5 / 48)) and np.allclose(narrow_nl, (-29 / 48, 43 / 48)) and np.allclose(narrow_l, narrow_nl),
       f"with rate limits [{narrow_l[0]:.3f},{narrow_l[1]:.3f}]")
 # RM union-of-LPs equals a grid brute force (N21 coordinates s_t = veteran yes totals)
 cf21 = 1 / 80 + 1 / 120
@@ -1475,7 +1477,9 @@ aW = np.array([[10, 190], [50, 150], [150, 50], [190, 10]])
 yesW = np.array([[60, 62, 61, 56], [62, 66, 63, 61], [74, 86, 113, 120]])
 bW = np.stack([np.column_stack([yesW[t], aW.sum(1) - yesW[t]]) for t in range(3)])
 LW = CountLP(aW, bW)
-rW = lambda v, L=LW: tuple(round(z, 3) for z in L.range(v))
+from decimal import Decimal, ROUND_HALF_UP
+r4 = lambda z: float(Decimal(repr(float(z) + (1e-12 if z >= 0 else -1e-12))).quantize(Decimal('0.0001'), ROUND_HALF_UP))
+rW = lambda v, L=LW: tuple(r4(z) for z in L.range(v))
 NW = aW.sum(1); pwW = NW / NW.sum(); xW = aW[:, 0] / NW; muW = np.sum(pwW * xW); vxW = np.sum(pwW * xW * xW) - muW ** 2
 def er_nm(t0, t1):
     dT = (bW[t1, :, 0] - bW[t0, :, 0]) / NW
@@ -1492,7 +1496,7 @@ def attW(M=None, Lam=0.0, rows=None, cl=False):
         Br1 = Lc.pad(rate_vec(Lc, 0, 0, 2)); Br0 = Lc.pad(rate_vec(Lc, 0, 0, 1)); Bc1 = Lc.pad(rate_vec(Lc, 1, 0, 2))
         Lc.add_le(e(th) - Br1, 0); Lc.add_ge(e(th) - Br0, 0); Lc.add_ge(e(th) - Bc1 + e(S), 0)
     x = Lc.range(attv)
-    return tuple(round(z, 3) for z in x)
+    return tuple(r4(z) for z in x)
 crP, crQ = cr_rowsW(1, 2), cr_rowsW(0, 1)
 LWc = CountLP(aW, bW)
 for rr in crP:
@@ -1504,8 +1508,8 @@ W = {
     "B_v,post": rW(rate_vec(LW, 0, 0, 2)),
     "D_post (margins)": rW(did_vec(LW, 0, 1, 0, 1, 2)),
     "D_pre (margins)": rW(did_vec(LW, 0, 1, 0, 0, 1)),
-    "ER, NM on post changes": tuple(round(z, 3) for z in er_nm(1, 2)),
-    "ER, NM on pre changes": tuple(round(z, 3) for z in er_nm(0, 1)),
+    "ER, NM on post changes": tuple(r4(z) for z in er_nm(1, 2)),
+    "ER, NM on pre changes": tuple(r4(z) for z in er_nm(0, 1)),
     "D_post (CR on changes)": rW(did_vec(LWc, 0, 1, 0, 1, 2), LWc),
     "D_pre (CR on pre changes)": rW(did_vec(LWq, 0, 1, 0, 0, 1), LWq),
     "ATT, no assumption": attW(),
@@ -1513,14 +1517,14 @@ W = {
     "ATT, PT + CR": attW(0.0, rows=crP),
     "ATT, dial M=.05 + CR": attW(0.05, rows=crP),
     "ATT, dial M=.05, spillover .02 + CR": attW(0.05, 0.02, rows=crP),
-    "ATT, RM(1), margins only": tuple(round(z, 3) for z in rm_range(aW, bW, 1.0, 1, 2, [(0, 1)])),
-    "ATT, RM(1), CR post only": tuple(round(z, 3) for z in rm_range(aW, bW, 1.0, 1, 2, [(0, 1)], extra=crP)),
-    "ATT, RM(1), CR post and pre": tuple(round(z, 3) for z in rm_range(aW, bW, 1.0, 1, 2, [(0, 1)], extra=crP + crQ)),
+    "ATT, RM(1), margins only": tuple(r4(z) for z in rm_range(aW, bW, 1.0, 1, 2, [(0, 1)])),
+    "ATT, RM(1), CR post only": tuple(r4(z) for z in rm_range(aW, bW, 1.0, 1, 2, [(0, 1)], extra=crP)),
+    "ATT, RM(1), CR post and pre": tuple(r4(z) for z in rm_range(aW, bW, 1.0, 1, 2, [(0, 1)], extra=crP + crQ)),
     "ATT, MTR+ND+PS, margins only": attW(cl=True),
     "ATT, MTR+ND+PS + CR": attW(cl=True, rows=crP),
 }
 for k, v in W.items():
-    print(f"      W  {k}: [{v[0]:.3f}, {v[1]:.3f}]")
+    print(f"      W  {k}: [{v[0]:.4f}, {v[1]:.4f}]")
 check("W [I] worked example (§9): numbers as printed above, each rung narrows or reports no information as stated",
       W["ATT, RM(1), margins only"] == W["ATT, no assumption"] and W["ATT, PT + CR"] == W["D_post (CR on changes)"]
       and W["ATT, RM(1), CR post and pre"][0] > 0)
@@ -1589,14 +1593,407 @@ check("E6 [F] review issue 2: the emptiness criterion needs 'or Dbar+ < 0': here
       f"Dbar in [{rgE[0]:.3f},{rgE[1]:.3f}], lambda {lamE:.2f}, dtau_H - dtau_L {dtauE:.2f}, cap {capE:.3f}")
 
 # Issue 12 (§9.2): RM(1) with CR on the pre-war change only vs on both changes.
-pre_only = tuple(round(z, 3) for z in rm_range(aW, bW, 1.0, 1, 2, [(0, 1)], extra=crQ))
-check("W [I] review issue 12: RM(1) with CR on the pre-war change alone gives [-0.416, 0.732]; on both changes [0.135, 0.278]",
-      pre_only == (-0.416, 0.732) and W["ATT, RM(1), CR post and pre"] == (0.135, 0.278), f"pre only {pre_only}")
+pre_only = tuple(r4(z) for z in rm_range(aW, bW, 1.0, 1, 2, [(0, 1)], extra=crQ))
+check("W [I] review issue 12: RM(1) with CR on the pre-war change alone gives [-0.4155, 0.7325]; on both changes [0.1352, 0.2783]",
+      pre_only == (-0.4155, 0.7325) and W["ATT, RM(1), CR post and pre"] == (0.1352, 0.2783), f"pre only {pre_only}")
 
 # Issue 14: the counts quoted in the note's gap-register table match this run.
 doc = open(os.path.join(here, "PHASE2e_did_general.md")).read()
 check("G [V] review issue 14: the gap-register counts quoted in PHASE2e (G1, G5, G6, G7) match this run",
       f"{fail1}/{n1}" in doc and f"{fail5}/{n5}" in doc and f"{fail6}/{n6}" in doc and f"{fail7}/{n7}" in doc,
       f"G1 {fail1}/{n1}, G5 {fail5}/{n5}, G6 {fail6}/{n6}, G7 {fail7}/{n7}")
+
+
+# =====================================================================================
+# IR. Checks added after the independent review (reviews/PHASE2e_independent_review.md, findings 1-12).
+#     Cases are ported from reviews/phase2e_independent_checks.py (reproduction targets).
+# =====================================================================================
+from fractions import Fraction
+from math import comb
+
+
+def merged_union(ranges, tol=1e-9):
+    """Union of branch intervals, overlaps merged; NOT the envelope (finding 12)."""
+    out = []
+    for lo, hi in sorted(r for r in ranges if r is not None):
+        if out and lo <= out[-1][1] + tol:
+            out[-1] = (out[-1][0], max(out[-1][1], hi))
+        else:
+            out.append((lo, hi))
+    return out
+
+
+def rm_branches(a, b, Mbar, base, post, pre_pairs, Lam=0.0, comp=1, extra=None):
+    """As rm_range (with rate limits) but returns the list of branch intervals."""
+    outs = []
+    for (s0, s1) in pre_pairs:
+        for sg in (1, -1):
+            L, att, bvec, e, th, S = causal_lp(a, b, base, post, Lam=Lam, comp=comp, int_rows=extra)
+            Dpre = L.pad(did_vec(L, 0, comp, 0, s0, s1))
+            L.add_le(bvec - Mbar * sg * Dpre, 0.0)
+            L.add_ge(bvec + Mbar * sg * Dpre, 0.0)
+            outs.append(L.range(att))
+    return outs
+
+
+# Finding 1 (Prop. E18(b)): later RM horizons accumulate. Pure units, rates at elections -1, 0, 1, 2.
+r_, s_, r0_ = np.array([.35, .5, .5, .5]), np.full(4, .5), np.array([.35, .5, .65, .80])
+b_path = (r0_ - s_) - (r0_ - s_)[1]
+A_ = abs(b_path[1] - b_path[0]); D2 = (r_[3] - r_[1]) - (s_[3] - s_[1]); att2 = r_[3] - r0_[3]
+rm_ok = all(abs(b_path[t] - b_path[t - 1]) <= A_ + 1e-12 for t in (2, 3))
+check("E18 [F] finding 1: at horizon 2 RM(1) holds but ATT_2 = -.30 lies outside the first-post endpoint-wise set D_2 +/- A; inside D_2 +/- 2A",
+      rm_ok and np.isclose(att2, -.30) and not (D2 - A_ - 1e-12 <= att2 <= D2 + A_ + 1e-12) and (D2 - 2 * A_ - 1e-12 <= att2 <= D2 + 2 * A_ + 1e-12),
+      f"A = {A_:.2f}, D_2 = {D2:.2f}")
+
+# Finding 2 (Prop. E23(b)): finite-sample FD regression; P3.8's single-election range under-covers, the doubled range covers.
+n_ = 20
+rad = np.sqrt(np.log(1 / .025) / (2 * n_))
+vals = 2 * np.arange(n_ + 1) / n_ - 1
+wts = np.array([comb(n_, i) / 2 ** n_ for i in range(n_ + 1)])
+cov1, cov2 = wts[np.abs(vals) <= rad].sum(), wts[np.abs(vals) <= 2 * rad].sum()
+check("E23 [F] finding 2: fitted change = mean of 20 signed ones; P3.8 radius with one election's range covers .884682 < .95; doubled range .997423",
+      round(cov1, 6) == 0.884682 and round(cov2, 6) == 0.997423, f"radius {rad:.4f}")
+
+# Finding 3 (Prop. E25(a), zero-box clause): RM on actual quantities does not transfer to means.
+atts, oks = [], True
+for pre_r in (.40, .60):                       # treated pre rate; comparison .50 throughout; base .50, post .50
+    Dpre = (.5 - pre_r) - 0.0                  # gap change pre -> base
+    b1 = (.60 - .50) - 0.0                     # untreated treated post .60
+    oks &= abs(b1) <= abs(Dpre) + 1e-12        # RM(1) at this realisation
+    atts.append(.50 - .60)
+mean_pre = np.mean([.5 - .40, .5 - .60])
+check("E25 [F] finding 3: RM(1) holds at every realisation, mean programme effect -.10; RM on the mean pre-DiD (= 0) forces b = 0 and effect 0",
+      oks and np.allclose(atts, -.10) and mean_pre == 0)
+
+# Finding 4 (Thm E16(b)): integer witness needs (B_s - S) A_s integer as well as A_r theta.
+Ar_, As_, Br_, Bs_, th_, S_4 = 1, 1, 1.0, 1.0, 0.0, 0.5
+old_ok = (A_r_th := Ar_ * th_) == int(A_r_th) and 0 <= th_ <= Br_ and 0 <= Bs_ - S_4 <= 1
+check("E16 [F] finding 4: theta A_r integer and continuous rate limits hold, but one comparison person cannot have untreated rate 1/2",
+      old_ok and Fraction(Bs_ - S_4) * As_ != int(Fraction(Bs_ - S_4) * As_))
+
+# Finding 5 (Remark 7.1): margins-only PT, m treated, m+1 comparison, m yes at both elections: integer {0}, continuous [-1, 1].
+ok5 = True
+for m in (2, 3, 5, 10):
+    poss = set()
+    for y0, y1 in itertools.product(range(m + 1), repeat=2):
+        th = Fraction(y0, m) - Fraction(y1 - y0, m + 1)
+        if 0 <= th <= 1 and (m * th).denominator == 1:
+            poss.add(Fraction(y1, m) - th)
+    row = [-(1 / m + 1 / (m + 1)), 1 / (m + 1), 1]; obj = np.array([0, 1 / m, -1])
+    ends = [s * linprog(s * obj, A_eq=[row], b_eq=[0], bounds=[(0, m), (0, m), (0, 1)]).fun for s in (1, -1)]
+    ok5 &= poss == {0} and np.allclose(ends, (-1, 1))
+check("Remark 7.1 [F] finding 5: no one-step integer guarantee: integer ATT set {0}, continuous [-1, 1] (m = 2, 3, 5, 10)", ok5)
+
+# Finding 6 (Thm E27): three pairs sharing a base: strict LP-integer gap (3/2 vs 1).
+P6 = np.array([[1, 1, 0], [0, 1, 1], [1, 0, 1]])
+lp6 = -linprog(-np.ones(3), A_ub=P6, b_ub=np.ones(3), bounds=(0, 1)).fun
+ip6 = max(sum(v) for v in itertools.product(range(2), repeat=3) if np.all(P6 @ v <= 1))
+check("E27 [F] finding 6: degree-3 star with one change row per edge: LP maximum 3/2, integer maximum 1 (strict gap)",
+      np.isclose(lp6, 1.5) and ip6 == 1)
+# cycles: a 4-cycle of period pairs, each with its own laminar family, is TU (LP = MILP)
+ok_cyc, n_cyc = True, 0
+for rep in range(15):
+    a, b, n = rand_margins(4, 2, 3, 4, 4, 9)
+    L = CountLP(a, b)
+    for (t0, t1) in [(0, 1), (1, 2), (2, 3), (0, 3)]:
+        for U in laminar_family(4):
+            v = np.zeros(L.nn)
+            for i in U:
+                v[L.ix(t1, i, 0, 0)] += 1; v[L.ix(t0, i, 0, 0)] -= 1
+            tv = true_val(v, n)
+            L.add_ge(v, tv - rng.integers(0, 2)); L.add_le(v, tv + rng.integers(0, 2))
+    for k in range(2):
+        obj = rng.normal(size=L.nn)
+        cr, ir = L.range(obj), L.irange(obj)
+        ok_cyc &= abs(cr[0] - ir[0]) < 1e-6 and abs(cr[1] - ir[1]) < 1e-6; n_cyc += 1
+check("E27 [V] finding 6: a 4-cycle of period pairs (chronological orientation mixed) with laminar families: LP = MILP", ok_cyc, f"{n_cyc} objectives")
+
+# Finding 7 (Lemma E7(d)): zero common-composition contrasts, electorate DiD loading .0075.
+X7 = np.array([*np.eye(3)] + [(np.eye(3)[i] + np.eye(3)[j]) / 2 for i, j in [(0, 1), (0, 2), (1, 2), (0, 2)]])
+K7 = np.array([[0, 0, 1], [0, 0, 1], [-1, -1, 0]]) / 10
+mc7 = X7 @ K7.T
+own7 = (X7 * mc7).sum(0) / X7.sum(0)
+quad7 = np.column_stack([X7[:, i] * X7[:, j] for i in range(3) for j in range(i, 3)])
+check("E7 [F] finding 7: every common-composition contrast for pair (1,2) is zero, yet the electorate DiD loads .0075 (full-rank quadratic design)",
+      np.allclose(mc7[:, 0], mc7[:, 1]) and np.isclose(own7[0] - own7[1], .0075) and np.linalg.matrix_rank(quad7) == 6)
+
+# Finding 8 (Prop. E8): pairwise FD sets do not stack across a shared election.
+def path_feasible(x, incs):
+    T = len(incs) + 1
+    rows = np.kron(np.eye(T), np.array([x, 1 - x]))
+    chg = np.kron(np.diff(np.eye(T), axis=0), np.eye(2))
+    rhs = np.r_[np.full(T, .5), np.tile([1 - x, -x], len(incs)) * np.repeat(incs, 2)]
+    return linprog(np.zeros(2 * T), A_eq=np.vstack([rows, chg]), b_eq=rhs, bounds=(0, 1)).success
+check("E8 [F] finding 8: each of two successive change pairs is feasible at x = .4, .5, .6, the three-election path is not",
+      all(path_feasible(x, [1.25]) and not path_feasible(x, [1.25, 1.25]) for x in (.4, .5, .6)))
+
+# Finding 9 (Thm E16(d)): PT refuted jointly across two post-periods though feasible at each separately.
+fe = [linprog(np.zeros(2), A_eq=[[1, 1]], b_eq=[1.2], A_ub=np.eye(2)[rs], b_ub=[.5] * len(rs), bounds=(.2, 1)).success
+      for rs in ([0], [1], [0, 1])]
+check("E16 [F] finding 9: comparison post rates s1 + s2 = 1.2; PT feasible at each post-period separately, refuted jointly", fe == [True, True, False])
+# Cor. E17(c): the sharp breakdown value (LP in M) is at least the Minkowski value min D - Lam (worked example, PT + CR).
+Lb, attb, bvb, eb, thb, Sb = causal_lp(aW, bW, 1, 2, int_rows=crP)
+Mv = Lb.add_var(0.0, None)
+eb = lambda j: np.eye(Lb.nvar())[j]
+Lb.add_le(Lb.pad(bvb) - eb(Mv), 0.0); Lb.add_ge(Lb.pad(bvb) + eb(Mv), 0.0); Lb.add_le(Lb.pad(attb), 0.0)
+Msharp = Lb.opt(eb(Mv), 1)[0]
+Mmink = LWc.range(did_vec(LWc, 0, 1, 0, 1, 2))[0]
+check("E17 [V] finding 9: sharp breakdown of 'ATT > 0' = min M s.t. joint feasibility and ATT <= 0 (one LP) >= Minkowski value",
+      Msharp is not None and Msharp >= Mmink - 1e-9, f"sharp {Msharp:.4f}, Minkowski {Mmink:.4f}")
+
+# Finding 10 (Prop. E19(c)): RM informative with the counts alone; two mixed precincts (99,1), (1,99).
+aM = np.array([[99, 1], [1, 99]]); yM = np.array([[50, 50], [50, 50], [70, 50]])
+bM = np.stack([np.column_stack([yM[t], aM.sum(1) - yM[t]]) for t in range(3)])
+mixed = merged_union(rm_branches(aM, bM, 1.0, 1, 2, [(0, 1)]))
+LMc, attM, *_ = causal_lp(aM, bM, 1, 2)
+noaM = LMc.range(attM)
+check("E19 [F] finding 10: counts alone, no pure precinct, RM(1): ATT in [.12, .28] (no-assumption [-.31, .71]); no pre-period model needed",
+      len(mixed) == 1 and np.allclose(mixed[0], (.12, .28)) and np.allclose(noaM, (-.31, .71)),
+      f"RM [{mixed[0][0]:.4f},{mixed[0][1]:.4f}]")
+
+# Finding 11 (G6): clean witness. Precincts (90,10), (10,90), baseline yes 100 and 0; a 50/50 split of the merged
+# baseline keeps the total but gives baseline gap [-.2, .2], excluding the true .8.
+a11 = np.array([[90, 10], [10, 90]])
+L11 = CountLP(a11, np.array([[[50, 50], [50, 50]]]))
+g11 = L11.range(rate_vec(L11, 0, 0, 0) - rate_vec(L11, 1, 0, 0))
+check("G6 [F] finding 11: a 50/50 split of a merged baseline gives gap [-.2, .2]; the true gap .8 is excluded",
+      np.allclose(g11, (-.2, .2)) and not (g11[0] <= .8 <= g11[1]))
+
+# Finding 12: an RM set with a hole although the count set is one polytope; the envelope would include -.50.
+obj12, br12 = np.array([2., -1.]), []
+for sg in (-1, 1):
+    rows = [[-sg, 1], [-sg, -1]]
+    f = [linprog(k * obj12, A_ub=rows, b_ub=[1.1, -1.1], bounds=[(-.2, .2), (0, 1)]) for k in (1, -1)]
+    br12.append((.5 + f[0].fun, .5 - f[1].fun))
+mu12 = merged_union(br12); env12 = union_range(br12)
+check("E18 [F] finding 12: sharp RM projection [-.90,-.70] U [-.30,0] with one polytope of tables; the envelope wrongly contains -.50",
+      len(mu12) == 2 and np.allclose(mu12, [(-.9, -.7), (-.3, 0)]) and env12[0] <= -.5 <= env12[1])
+check("E18 [V] finding 12: N21 and the worked-example RM sets are single intervals after merging branch intervals (no hole)",
+      all(len(merged_union(rm_branches(*args))) == 1 for args in
+          [(a21, b21, 1.0, 1, 2, [(0, 1)]), (aW, bW, 1.0, 1, 2, [(0, 1)], 0.0, 1, crP + crQ)]))
+# E3(c): consecutive differences with only election 0 uncertain and elections 1, 2 point-identified: a box.
+G3 = [(-.2, .3), (.1, .1), (.25, .25)]
+corners = [(g1 - g0, g2 - g1) for g0 in G3[0] for g1 in G3[1] for g2 in G3[2]]
+check("E3 [V] finding 12: consecutive DiDs are a box when no interior election is uncertain; base-relative (base 0) is a segment",
+      len({c[1] for c in corners}) == 1 and len({(g1 - g0, g2 - g0) for g0 in G3[0] for g1 in G3[1] for g2 in G3[2]}) == 2)
+
+
+# =====================================================================================
+# PT. Within-precinct parallel trends in expectation (Props E28-E30); ported from
+#     reviews/phase2e_independent_checks_pt.py. Expected rates are conditional means given the design;
+#     a precinct's aggregate law is a finite list of equally likely totals, and the feasible set of its
+#     expected group rates is the Aumann expectation (per-state Duncan-Davis ends averaged).
+# =====================================================================================
+def mean_pt_lp(size, vets, pre, post, comparison, lce=("change",), eps=0.0, eps_var=False, Lam=0.0):
+    vets = np.asarray(vets, float); size = np.broadcast_to(np.asarray(size, float), vets.shape)
+    ctl = size - vets; x = vets / size; p = len(x)
+    pre = np.asarray(pre, float).reshape(p, -1); post = np.asarray(post, float).reshape(p, -1)
+    sup = ctl > 0
+    # variables: v0, c0, v1, c1 (p each), theta_U (p), affine params 2 per (group, period) x 6, eps
+    nv = 5 * p + 12 + 1 + p                                       # + spillover S_i (WPT sensitivity)
+    V0, C0, V1, C1, TH = (np.arange(p) + k * p for k in range(5))
+    par = lambda g, per: 5 * p + 2 * (2 * per + g)                 # g 0 = V, 1 = C; per 0 pre, 1 post, 2 change
+    EPS = 5 * p + 12
+    SS = 5 * p + 13 + np.arange(p)
+    Aeq, beq, Aub, bub = [], [], [], []
+    bnds = [(0, 1)] * (4 * p) + [(0, 1) if not sup[i] else (0, 0) for i in range(p)] + [(None, None)] * 12
+    bnds += [(0, None) if eps_var else (eps, eps)]
+    bnds += [(-Lam, Lam) if (sup[i] and comparison == "within") else (0, 0) for i in range(p)]
+    for (tot, Vt, Ct) in ((pre, V0, C0), (post, V1, C1)):
+        lo = np.maximum(0, tot - ctl[:, None]).mean(1) / vets
+        hi = np.minimum(vets[:, None], tot).mean(1) / vets
+        for i in range(p):
+            bnds[Vt[i]] = (lo[i], hi[i])
+            if not sup[i]:
+                bnds[Ct[i]] = (0, 0)
+            v = np.zeros(nv); v[Vt[i]] = x[i]; v[Ct[i]] = 1 - x[i]; Aeq.append(v); beq.append(tot[i].mean() / size[i])
+    for per in lce:
+        k = {"pre": 0, "post": 1, "change": 2}[per]
+        for g, (G0, G1) in enumerate(((V0, V1), (C0, C1))):
+            for i in range(p):
+                if g == 1 and not sup[i]:
+                    continue
+                v = np.zeros(nv)
+                if k == 0: v[G0[i]] = 1
+                elif k == 1: v[G1[i]] = 1
+                else: v[G1[i]] = 1; v[G0[i]] = -1
+                v[par(g, k)] = -1; v[par(g, k) + 1] = -x[i]
+                if k == 0 and (eps > 0 or eps_var):            # baseline curvature allowance |dev| <= eps
+                    w = v.copy(); w[EPS] = -1; Aub.append(w); bub.append(0)
+                    w = -v.copy(); w[EPS] = -1; Aub.append(w); bub.append(0)
+                else:
+                    Aeq.append(v); beq.append(0)
+    wv = vets / vets.sum(); wc = ctl / ctl.sum()
+    obj = np.zeros(nv)
+    if comparison == "within":
+        for i in range(p):
+            if sup[i]:
+                obj[V1[i]] += wv[i]; obj[V0[i]] -= wv[i]; obj[C1[i]] -= wv[i]; obj[C0[i]] += wv[i]; obj[SS[i]] += wv[i]
+                v = np.zeros(nv); v[V0[i]] = 1; v[C1[i]] = 1; v[C0[i]] = -1; v[SS[i]] = -1   # 0 <= m_V0 + d_N - S_i <= 1
+                Aub += [v, -v]; bub += [1, 0]
+                v = np.zeros(nv); v[C1[i]] = 1; v[SS[i]] = -1                         # 0 <= m_Nt - S_i <= 1
+                Aub += [v, -v]; bub += [1, 0]
+            else:
+                obj[V1[i]] += wv[i]; obj[TH[i]] -= wv[i]
+    else:
+        obj[V1] += wv; obj[V0] -= wv; obj[C1] -= wc; obj[C0] += wc
+        v = np.zeros(nv); v[V0] = wv; v[C1] = wc; v[C0] -= wc
+        Aub += [v, -v]; bub += [1, 0]
+    return dict(obj=obj, Aeq=np.array(Aeq), beq=np.array(beq), Aub=np.array(Aub) if Aub else None,
+                bub=np.array(bub) if bub else None, bnds=bnds, EPS=EPS, nv=nv, sup=sup, wv=wv, V1=V1, TH=TH)
+
+
+def lp_range(P, obj=None):
+    obj = P["obj"] if obj is None else obj
+    out = []
+    for s in (1, -1):
+        r = linprog(s * obj, A_eq=P["Aeq"], b_eq=P["beq"], A_ub=P["Aub"], b_ub=P["bub"], bounds=P["bnds"], method="highs")
+        if r.status != 0:
+            return None
+        out.append(s * r.fun)
+    return tuple(100 * np.array(out))
+
+
+rare = (20000, [5000, 8000, 11000, 14000, 17000], [40, 12000, 12000, 12000, 12000],
+        [[50, 30], [9964, 9956], [8188, 8192], [6682, 6698], [5446, 5474]])
+ordinary = (1000, [100, 300, 500, 700, 900], [500] * 5, [[682, 650], [606, 590], [530, 530], [454, 470], [378, 410]])
+PT5 = {}
+for nm, data in (("rare", rare), ("ordinary", ordinary)):
+    for cmp in ("within", "pooled"):
+        PT5[(nm, cmp)] = lp_range(mean_pt_lp(*data, comparison=cmp))
+for k, v in PT5.items():
+    print(f"      PT  five precincts, {k[0]}, {k[1]} mean PT: [{v[0]:+.2f}, {v[1]:+.2f}]")
+exp5 = {("rare", "within"): (10.39, 12.25), ("rare", "pooled"): (-3.96, -2.22),
+        ("ordinary", "within"): (-67.33, 43.78), ("ordinary", "pooled"): (-80.56, 52.13)}
+check("E28 [V] five-precinct table reproduced (FD-LCE on changes): rare [+10.39,+12.25] within vs [-3.96,-2.22] pooled; ordinary [-67.33,+43.78] vs [-80.56,+52.13]",
+      all(np.allclose(PT5[k], exp5[k], atol=0.0051) for k in exp5))
+
+three = (800, [200, 400, 600], [4, 164, 324], [[204], [124], [4]])
+exp3 = {(): (-58.00, 27.33), ("change",): (-49.33, 7.33), ("pre", "change"): (2.67, 7.33), ("pre", "post"): (2.67, 7.33),
+        ("post", "change"): (2.67, 7.33), ("pre", "post", "change"): (2.67, 7.33)}
+got3 = {k: lp_range(mean_pt_lp(*three, comparison="within", lce=k)) for k in exp3}
+for k, v in got3.items():
+    print(f"      PT  three precincts, LCE on {' + '.join(k) or 'nothing'}: [{v[0]:+.2f}, {v[1]:+.2f}]")
+check("E30 [V] three-precinct check: no LCE [-58.00,27.33]; change only [-49.33,7.33]; any two of pre/post/change, or all three, [2.67,7.33]",
+      all(np.allclose(got3[k], exp3[k], atol=0.0051) for k in exp3))
+# baseline-curvature allowance eps: monotone, eps = 0 recovers two-election LCE, large eps recovers change-only;
+# breakdown eps* = min eps s.t. ATT <= 0 is one LP (eps a variable).
+epsr = [lp_range(mean_pt_lp(*three, comparison="within", lce=("pre", "change"), eps=e)) for e in (0.0, .001, 1 / 600, .005, .02, .05, .5, 1.0)]
+mono = all(epsr[j + 1][0] <= epsr[j][0] + 1e-7 and epsr[j + 1][1] >= epsr[j][1] - 1e-7 for j in range(len(epsr) - 1))
+Pb = mean_pt_lp(*three, comparison="within", lce=("pre", "change"), eps_var=True)
+cE = np.zeros(Pb["nv"]); cE[Pb["EPS"]] = 1
+rb = linprog(cE, A_eq=Pb["Aeq"], b_eq=Pb["beq"], A_ub=np.vstack([Pb["Aub"], Pb["obj"]]), b_ub=np.r_[Pb["bub"], 0.0],
+             bounds=Pb["bnds"], method="highs")
+eps_star = rb.fun
+at_star = lp_range(mean_pt_lp(*three, comparison="within", lce=("pre", "change"), eps=eps_star))
+check("E30 [I] baseline-curvature allowance: monotone in eps; positive for eps < 1/600, zero feasible at eps* = 1/600 (one LP); eps = 1/2 already gives change-only",
+      mono and np.allclose(epsr[0], exp3[("pre", "change")], atol=.0051) and np.allclose(epsr[-1], exp3[("change",)], atol=.0051) and np.allclose(epsr[-2], epsr[-1]) and epsr[1][0] > 1e-6
+      and abs(at_star[0]) < 1e-6, f"eps* = {100 * eps_star:.4f} points; at eps* [{at_star[0]:.2f},{at_star[1]:.2f}]")
+# unsupported precincts (no comparison voters): full veteran target, no-assumption bound on that part.
+four = (800, [200, 400, 600, 800], [4, 164, 324, 720], [[204], [124], [4], [80]])   # precinct 4: veterans only
+P4 = mean_pt_lp(*four, comparison="within", lce=("change",))
+full4 = lp_range(P4)
+objS = P4["obj"].copy(); objS[P4["V1"][3]] = 0; objS[P4["TH"][3]] = 0
+supS = lp_range(P4, objS)
+piU = P4["wv"][3]; cU = 100 * piU * 80 / 800
+check("E28 [V] unsupported precinct (all veterans): ATT interval = supported part + w_V B_V1 - [pi_U, 0], pi_U = share of veterans affected",
+      np.allclose(full4, (supS[0] + cU - 100 * piU, supS[1] + cU), atol=1e-6), f"pi_U = {piU:.3f}; [{full4[0]:.2f},{full4[1]:.2f}]")
+
+# The four-precinct example: realised descriptive targets D_W (within, veteran weights) and the pooled DiD, margins only.
+LD = CountLP(aW, bW)
+wvW = aW[:, 0] / aW[:, 0].sum(); wnW = aW[:, 1] / aW[:, 1].sum()
+DW = np.zeros(LD.nn)
+for i in range(4):
+    for r, sgn in ((0, 1), (1, -1)):
+        DW[LD.ix(2, i, r, 0)] += sgn * wvW[i] / aW[i, r]; DW[LD.ix(1, i, r, 0)] -= sgn * wvW[i] / aW[i, r]
+DWr = 100 * np.array(LD.range(DW)); DPr = 100 * np.array(LD.range(did_vec(LD, 0, 1, 0, 1, 2)))
+check("E28 [I] four-precinct example, margins only: D_W in [-93.87, +144.72], pooled DiD in [-40.75, +79.25]; precinct 4 weight 47.5% vs 2.5%",
+      np.allclose(DWr, (-93.87, 144.72), atol=.0051) and np.allclose(DPr, (-40.75, 79.25), atol=.0051)
+      and np.isclose(wvW[3], .475) and np.isclose(wnW[3], .025),
+      f"D_W [{DWr[0]:.2f},{DWr[1]:.2f}]")
+
+# Prop. E29: [L - r, U + r] covers the expected ATT; the realised-table value alone does not.
+pS = 30
+NS_ = rng.integers(60, 160, pS); xS = rng.uniform(.2, .8, pS); AV = np.round(NS_ * xS).astype(int); AN = NS_ - AV
+pV0 = rng.uniform(.2, .6, pS); pN0 = rng.uniform(.2, .6, pS); trend = rng.uniform(-.1, .1, pS); tau = .05
+pV1, pN1 = pV0 + trend + tau, pN0 + trend
+wS = AV / AV.sum()
+att_mean = np.sum(wS * ((pV1 - pV0) - (pN1 - pN0)))
+rS = np.sqrt(.5 * np.log(2 / .05) * np.sum((4 * wS) ** 2))
+neffS = 1 / np.sum(wS ** 2)                        # r = sqrt(8 log(2/alpha) / n_eff); 0.992 for 30 equal weights
+rP = np.sqrt(.5 * np.log(2 / .05) * np.sum(4 * wS ** 2 * (1 / AV + 1 / AN)))   # persons independent: range 2 w/A per person
+cov_pt, cov_int, cov_p = 0, 0, 0
+for rep in range(400):
+    yV = [rng.binomial(AV, q) for q in (pV0, pV1)]; yN = [rng.binomial(AN, q) for q in (pN0, pN1)]
+    dw = np.sum(wS * ((yV[1] - yV[0]) / AV - (yN[1] - yN[0]) / AN))       # all cells audited: L = U = D_W
+    cov_pt += abs(dw - att_mean) < 1e-12
+    cov_int += dw - rS <= att_mean <= dw + rS
+    cov_p += dw - rP <= att_mean <= dw + rP
+check("E29 [F] realised-table D_W (cells known, L = U) is not a confidence set for the expected ATT; [L - r, U + r] covers (Hoeffding: rho_i = 4 w_Vi, or person-level)",
+      cov_pt / 400 < .05 and cov_int / 400 >= .95 and cov_p / 400 >= .95
+      and np.isclose(rS, np.sqrt(8 * np.log(2 / .05) / neffS)) and round(np.sqrt(8 * np.log(40) / 30), 3) == 0.992,
+      f"point {cov_pt / 400:.3f}; n_eff = {neffS:.1f} (unequal weights); any within-precinct dependence r = {rS:.3f} (equal weights: 0.992), cover {cov_int / 400:.3f}; independent persons r = {rP:.3f}, cover {cov_p / 400:.3f}")
+
+
+# =====================================================================================
+# R2. Checks added after the independent review's round 2 on sections 5.8-5.9
+#     (reviews/PHASE2e_independent_review_round2_WPT.md).
+# =====================================================================================
+# A1 (E28(c), PPT witness): veteran baselines (.1, .9), comparison changes (-.3, +.3), equal weights.
+m0r, dNr, wr = np.array([.1, .9]), np.array([-.3, .3]), np.array([.5, .5])
+local = m0r + dNr; p0 = wr @ m0r + wr @ dNr
+check("E28 [F] round 2: under PPT the local imputation m_V0 + d_N = (-.2, 1.2) is not a rate; the pooled witness p0 = .5 in every precinct is valid",
+      np.allclose(local, (-.2, 1.2)) and np.isclose(p0, .5) and 0 <= p0 <= 1 and not np.all((local >= 0) & (local <= 1)))
+# A2 (E29(d), RM on increments): pre maximum .10, post gaps .10, .20 (relative to the base).
+bpost = np.array([0, .10, .20]); preA = .10
+inc_ok = all(abs(bpost[t] - bpost[t - 1]) <= preA + 1e-12 for t in (1, 2))
+lvl_ok = all(abs(bpost[t]) <= preA + 1e-12 for t in (1, 2))
+check("E29 [F] round 2: RM on increments |b_t - b_(t-1)| <= Mbar A holds (Mbar = 1), the cap on levels |b_t| <= Mbar A fails at the second post-election",
+      inc_ok and not lvl_ok)
+# A4 (spillover sensitivity under WPT): joint LP with S_i vs dilation of the zero-spillover interval by pi_S Lam.
+for LamS in (.01, .05):
+    jt = lp_range(mean_pt_lp(*three, comparison="within", lce=("change",), Lam=LamS))
+    z0 = lp_range(mean_pt_lp(*three, comparison="within", lce=("change",)))
+    dil = (z0[0] - 100 * LamS, z0[1] + 100 * LamS)          # pi_S = 1 here
+    print(f"      R2  spillover {LamS}: joint LP [{jt[0]:.4f},{jt[1]:.4f}] vs dilation [{dil[0]:.4f},{dil[1]:.4f}]")
+spill_rows = [(lp_range(mean_pt_lp(*three, comparison="within", lce=("change",), Lam=L_)),
+               lp_range(mean_pt_lp(*three, comparison="within", lce=("change",)))) for L_ in (.01, .05)]
+check("E28 [I] round 2: WPT spillover sensitivity by one joint LP in (fit, S_i) with local rate limits; reported beside the pi_S*Lam dilation (no sharpness claimed for the dilation)",
+      all(j is not None and j[0] <= z[0] + 1e-9 and j[1] >= z[1] - 1e-9 for j, z in spill_rows))
+
+# B10 (Prop. E34): one pre transition, two-group FD-LCE: pre increment q(x_i) = alpha + beta x_i (affine);
+# exact local RM |db_i| <= Mbar |q(x_i)|. Split-and-orientation enumeration (<= 2(|S|+1) LPs) equals
+# exhaustive enumeration of 2^|S| sign patterns on both extrema.
+def rm_affine(xs, lo, hi, base, w, Mbar, patterns):
+    pS = len(xs); nv_ = 2 + pS                      # alpha, beta, db_1..db_p
+    out = []
+    for sg in patterns:
+        A, b = [], []
+        for i in range(pS):
+            q = np.zeros(nv_); q[0] = 1; q[1] = xs[i]
+            A += [q, -q]; b += [hi[i], -lo[i]]                     # data: q(x_i) in [lo_i, hi_i]
+            A.append(-sg[i] * q); b.append(0.0)                    # sign pattern sg_i q(x_i) >= 0
+            e = np.zeros(nv_); e[2 + i] = 1
+            A += [e - Mbar * sg[i] * q, -e - Mbar * sg[i] * q]; b += [0.0, 0.0]   # |db_i| <= Mbar sg_i q_i
+            A += [e, -e]; b += [1 - base[i], base[i]]              # local rate limit: base_i + db_i in [0, 1]
+        obj = np.zeros(nv_); obj[2:] = -w                          # ATT part: -sum w_i db_i
+        r1 = linprog(obj, A_ub=A, b_ub=b, bounds=[(None, None)] * nv_, method="highs")
+        r2 = linprog(-obj, A_ub=A, b_ub=b, bounds=[(None, None)] * nv_, method="highs")
+        if r1.status == 0 and r2.status == 0:
+            out.append((r1.fun, -r2.fun))
+    return (min(o[0] for o in out), max(o[1] for o in out)) if out else None
+ok34, n34 = True, 0
+for rep in range(10):
+    pS = 6
+    xs = np.sort(rng.uniform(.1, .9, pS)); a_, b_ = rng.uniform(-.2, .2), rng.uniform(-.4, .4)
+    tru = a_ + b_ * xs; sl = rng.uniform(.01, .08, pS)
+    lo, hi = tru - sl, tru + sl
+    base = rng.uniform(.2, .8, pS); w = rng.dirichlet(np.ones(pS)); Mbar = rng.uniform(.5, 2)
+    split = [tuple(s_ * (1 if i < k else -1) for i in range(pS)) for k in range(pS + 1) for s_ in (1, -1)]
+    allp = list(itertools.product((1, -1), repeat=pS))
+    e1, e2 = rm_affine(xs, lo, hi, base, w, Mbar, split), rm_affine(xs, lo, hi, base, w, Mbar, allp)
+    ok34 &= e1 is not None and np.allclose(e1, e2, atol=1e-8); n34 += 1
+check("E34 [V] round 2: exact within-precinct RM with an affine pre-increment profile: split-and-orientation enumeration (<= 2(|S|+1) LPs) = exhaustive 2^|S| sign enumeration",
+      ok34, f"{n34} six-precinct cases, both extrema")
 
 print(f"\n{sum(results)}/{len(results)} PASS")

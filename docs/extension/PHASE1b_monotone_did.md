@@ -1,5 +1,7 @@
 # Phase 1 (second cycle): monotone ecological inference and difference-in-differences
 
+*Superseded (Nov 2026): the general DiD theory (any units, groups, outcomes, T ≥ 2 elections; descriptive and causal) is `PHASE2e_did_general.md` (2e), proof reviewed (`reviews/PHASE2e_proof_review.md`). Part B (DiD) of this proposal is kept for its history and the owner's decisions; corrections from 2e §11 are marked "(Corrected after 2e, Nov 2026)" below.*
+
 *A proposal for review, covering structure and assumptions only. Nothing here is a Phase-2 derivation. Status labels are used throughout:*
 
 *Naming (Nov 2026): the difference-in-differences rungs were called D0–D8. They are now Δ0–Δ8, so they no longer clash with Phase 2b's Propositions D0–D7 (district dummies), which the review response cites.*
@@ -221,7 +223,7 @@ $$\text{N1}(\delta_W\ge0)\ \supseteq\ \text{N2(each }m_r\uparrow)\ \supseteq\ \t
 | Δ3 | **Bounded change** $\lvert\Delta\kappa_c\rvert\le\delta$, or $\lvert\Delta w_1\rvert\le\delta$ (Manski–Pepper 2018 bounded variation; Rambachan–Roth 2023) | DiD = point ± (sensitivity)·δ, intersected with Δ0. Calibrating δ: RR "relative magnitudes" uses *identified* pre-trends, but pre-period $\Delta\kappa$ is not identified. Scaling δ by identified pre-period changes (e.g. $\Delta d_1$ between pre-periods) is only a *heuristic* |
 | Δ4 | **Monotone EI on changes** (no linearity at all): apply A1 to $Y=\Delta Y\in[-1,1]$ | $ER(\Delta T\sim X)-\text{DiD}=\delta^\Delta_W/\operatorname{Var}(X_N)$ (*checked*: V7c). Under CR of changes, **DiD lies between NM and ER on $\Delta T$**. The MOB for changes must use the two periods' polytopes jointly, not $[-1,1]$. Sign of $\delta^\Delta_W$ = sign of differential spillover; $\delta^\Delta_B$ = the DiD's own sign |
 | Δ5 | **Intersection across periods** (M1 with periods as groups, 2b Remark 6.2) | already *proved* in 2b. Tightens the levels; refutable through $\Delta d_1\neq0$ or emptiness |
-| Δ6 | **Parallel trends** for the causal claim, kept separate from EI. ATT of service = DiD if future veterans' counterfactual change equals non-veterans'. Bounded version: ATT ∈ DiD ⊕ [−M, M] | interplay with spillovers: a non-zero non-veteran change caused by returning veterans contaminates the control. Δ2's restriction (R1) rules out only the *differential* part. Placebo with two pre-periods: the placebo DiD is itself only partially identified, so it refutes PT only if its bound excludes 0 |
+| Δ6 | **Parallel trends** for the causal claim, kept separate from EI. ATT of service = DiD if future veterans' counterfactual change equals non-veterans'. Bounded version: ATT ∈ DiD ⊕ [−M, M]. *(Corrected after 2e, Nov 2026: also needs no anticipation and no spillover, ATT = DiD − b + S (2e Lemma E14); the ⊕ form is outer (2e Cor. E17).)* | interplay with spillovers: a non-zero non-veteran change caused by returning veterans contaminates the control. Δ2's restriction (R1) rules out only the *differential* part. Placebo with two pre-periods: the placebo DiD is itself only partially identified, so it refutes PT only if its bound excludes 0 |
 | Δ7 | **Composition change** (B4) | design choice needed from you |
 | Δ8 | **Within-person table** (veteran × pre-vote × post-vote) | for the **DiD of means**, it adds nothing beyond the two two-way tables that share the veteran margin. *Proved, sketch*: any such pair extends to a 3-way table by coupling $Y_0$ and $Y_1$ independently given $V$. It matters only for *transition* targets such as "share of veterans who switched to yes" |
 
@@ -257,7 +259,7 @@ Pre-war "veterans" are *future* veterans. Many were too young to vote before the
 * Counties appear in both periods, so the two periods' regressions are stacked, and each county is treated as **one unit observed twice**. Its two periods may be dependent. This is within-unit dependence, which P3-S1a allows; it is not clustering of different units.
 * Candidates from both periods enter one CLR intersection (P3.5: (a) and (b2) proved; the implemented CLR is algorithmic, Conjecture P3.5(b3)).
 * For Δ1, regress $\Delta T$ directly.
-* **Two targets.** The *model-implied* DiD has no unit-level allowance. The *actual-rate* DiD's allowance uses $\operatorname{Var}(e_1-e_0)\le(\sqrt{m_1(1-m_1)}+\sqrt{m_0(1-m_0)})^2$ (Bhatia–Davis per period plus Cauchy–Schwarz). That can be up to 4× the single-period allowance. I propose the model-implied DiD as the headline (Q8).
+* **Two targets.** The *model-implied* DiD has no unit-level allowance. The *actual-rate* DiD's allowance uses $\operatorname{Var}(e_1-e_0)\le(\sqrt{m_1(1-m_1)}+\sqrt{m_0(1-m_0)})^2$ (Bhatia–Davis per period plus Cauchy–Schwarz). That can be up to 4× the single-period allowance. I propose the model-implied DiD as the headline (Q8). *(Corrected after 2e, Nov 2026: the Bhatia–Davis form is not proved for a DiD; the proved allowance is Popoviciu's with $\rho_i=2(w_{ir}+w_{is})$ (2e Lemma E12).)*
 * **Sensitivity.** Breakdown values in δ (Δ3) and in M (Δ6).
 
 ---

@@ -565,6 +565,9 @@ report("N20 estimated margin widens the count-layer range", rl < 10 / 60 and ru 
        f"expected count 60 treated as exact: [{10/60:.3f},{50/60:.3f}]; true count in its 95% set "
        f"[{min(Vset)},{max(Vset)}]: [{rl:.3f},{ru:.3f}] (covers the actual rate with prob >= .95 under calibrated, independent matches)")
 
+# Note (after PHASE2e, Nov 2026): this check omits the rate limits theta in [0, 1]; with them the joint RM set
+# is the ATT's logical range [B^L_v1 - 1, B^U_v1] = [-0.75, 1.00], not [-2.35, 2.65] (2e Prop. E15, §5.5; verify_phase2e.py E18).
+# With one pre-period, 'max |D_t| (levels)' equals Rambachan-Roth's consecutive-difference form (2e Def. 5.2).
 # N21: relative-magnitude (Rambachan-Roth-style) causal bounds when pre-period trends are themselves
 # EI bounds. Two precincts (100 men each; 20 and 60 veterans), three elections t = -1, 0, 1 (post).
 # Latent veteran-yes totals s_t = y_1t + y_2t lie in the sum of the precincts' DD boxes. The gap

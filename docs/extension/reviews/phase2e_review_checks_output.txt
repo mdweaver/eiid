@@ -1,0 +1,32 @@
+PASS  W  Sec. 9.2 worked example: every printed interval reproduced by an independent LP
+      DiD (-0.407, 0.792); effect none (-0.568, 0.732); CR DiD (0.143, 0.27); PT (0.143, 0.27); dial .05 (0.093, 0.32); dial+spill (0.073, 0.34); RM margins (-0.568, 0.732); RM + CR (pre and post) (0.135, 0.278); MTR/ND/PS (0.0, 0.482); MTR/ND/PS + CR (0.0, 0.311)
+      pre DiD margins (-0.598, 0.603) (2e prints -0.60..0.60); pre DiD under CR on the pre change (0.004, 0.008) (2e: [0.004,0.008])
+      RM with CR on the PRE change only: (-0.416, 0.732) (the printed [0.135,0.278] needs CR on both changes)
+PASS  N21 numbers of 2e Sec. 5.5 (and NS) reproduced; RM with rate limits = no-assumption set [-0.75, 1.00]
+      pre (-1.229, 1.271), post (-1.083, 1.417), RM joint (-2.354, 2.646), endpoint-wise (-2.354, 2.688), with limits (-0.75, 1.0), none (-0.75, 1.0)
+PASS  E17 [CX] Cor. E17(b) (M = Lam = 0): stated conditions hold at n+ and n-, yet max ATT < max D
+      theta_PT(n+) = 1.10 (>= 0 as required, but > 1), theta_PT(n-) = 0.50 (<= 1); max D = -0.100, max ATT under PT = -0.150
+PASS  E17 [CX] same failure with counts: one 2x2 unit, one count row coupling the elections (3 y_0 - 2 y_1 = 140)
+      max D = -0.400 at theta_PT(n+) = 1.200; theta_PT(n-) = 0.933; sharp ATT set under PT (-0.933, -0.8)
+PASS  E17 [V] margins only (R = 2, named pair or rest in R = 3): stated condition => equality (no failure)
+PASS  E6 [CX] Prop. E6(b): Delta tau_H >= Delta tau_L and cap >= Dbar^-, yet the set is empty (Dbar^+ < 0)
+      Dbar range (-0.15, -0.15), cap = 0.767, lambda = 0.60; LP with both beliefs infeasible
+PASS  E3 [W] Prop. E3(c): corner (D_1 max, D_-1 min) infeasible although only the base gap has positive length
+      gap widths [0.0, 0.356, 0.0]
+PASS  E4/E5/E26 [V] brute force, 40 integer two-election 2x2 designs: E4(c) identities from 2c Def. 1; lattice of step kappa with DD ends; integer CR set = lattice points between NM and ER
+      38 designs; integer CR empty in 6
+PASS  E18 [V] L = 2: union of 4 branch LPs = grid brute force (consecutive-difference RM), with and without rate limits
+      LP (-0.873, 1.088) / grid (np.float64(-0.873), np.float64(1.088)); with limits LP (-0.385, 0.846) / grid (np.float64(-0.385), np.float64(0.846))
+PASS  E21 [V] Prop. E21(c), R = 3, Lam = 0.3 (spillover can exceed B^L_s): closed form = LP
+      120 cases
+PASS  E27 [V] GH over all row subsets: change-row matrices of the theorem's classes are TU
+      one pair: TU; path of 2 pairs: TU; two pairs sharing a base: TU; star of 3 pairs (degree 3): not TU; cycle of 3 pairs: TU
+PASS  E8 [V] Prop. E8(b),(d): per-composition sharp interval for Dm_v lies inside FD4's (L convex, U concave)
+PASS  E13 [V] Lemma E13: Var(E)/S_D^2 <= 1 under dependent laws, = 1 for the extreme law; tail <= alpha
+      ratio 0.318; extreme 0.973; tail 0.0005
+PASS  E25 [V] joint projection region covers with correlated estimates (lower end, upper end, kink); plug-in can under-cover
+      joint 0.997/0.998/1.000; plug-in 0.917/0.919/0.985
+PASS  E24 [V] union of branch intervals at the branch boundary covers >= .95
+      coverage 0.950
+
+15/15 PASS

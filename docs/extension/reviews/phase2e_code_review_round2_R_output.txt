@@ -1,0 +1,181 @@
+E30(c)
+no LCE                                   [-0.580000, 0.273333]
+change only                              [-0.493333, 0.073333]
+base+change                              [0.026667, 0.073333]
+base+post                                [0.026667, 0.073333]
+post+change                              [0.026667, 0.073333]
+eps = 1/2                                [-0.493333, 0.073333]
+epsilon* = 0.00166667
+E28 (points)
+  WPT [10.3879, 12.2545]  PPT [-3.9636, -2.2182]
+  WPT [-67.3333, 43.7778]  PPT [-80.5600, 52.1333]
+E35
+margins only, M = 0                      [-0.567500, 0.732237]
+audited, M = 0                           [0.052500, 0.352237]
+audited, M = 0.1                         [0.030965, 0.374035]
+M* = 0.243792
+D_W count set                            [-0.008728, 0.377237]
+audited, M = 0, lce = TRUE               [0.052500, 0.352237]
+CAUSAL (2e Def. 5.1): ATT_t = B_{r*,t} - B^(0)_{r*,t}, the effect on the treated group's realised rate
+  labels: IDENTIFICATION SET/BOUND (no sampling statement), DESCRIPTIVE (realised counts), CONFIDENCE INTERVAL/SET (sampling)
+  population: fixed population (2e (FP))
+  treated: vet; comparison: oth; outcome: yes; base election: base
+  trend assumption: realised within-precinct parallel trends with tolerance tau_i (RWPT-tau, Prop. E35), tau_i = 0 sqrt(1/a_iV + 1/a_iN), support a_iN >= 1
+  spillover onto the comparison group: |S_t| <= 0.05
+  no anticipation: assumed
+  descriptive basis: count rows known[1], known[2], known[3], known[4]
+  tolerance: tau_i = M sqrt(1/a_iV + 1/a_iN) with M = 0
+  note (R4-1): M is a tolerance that must hold in every supported precinct at once, not a confidence level
+  support: a_iN >= a_min = 1; pi_U = 0 (treated share in unsupported precincts, theta_i in [0,1], no assumption); n_eff = 2.614
+  local comparison counts a_iN (treated precincts): P1 190, P2 150, P3 50, P4 10
+  continuous tables (Prop. E35(c): the integer check is optional and not applied; whole-person ends may be narrower, Remark 7.1)
+
+Post-election post
+  [IDENTIFICATION SET, realised ATT, count layer (E35)] ATT: [0.010, 0.395]
+    breakdown of the sign (one LP, M a variable): M* = 0.04644
+  [DESCRIPTIVE, realised counts] D_W (E29), count layer: [-0.009, 0.377]
+
+  spillover: |S_i| <= 0.05 per supported precinct
+CAUSAL (2e Def. 5.1): ATT_t = B_{r*,t} - B^(0)_{r*,t}, the effect on the treated group's realised rate
+  labels: IDENTIFICATION SET/BOUND (no sampling statement), DESCRIPTIVE (realised counts), CONFIDENCE INTERVAL/SET (sampling)
+  population: fixed population (2e (FP))
+  treated: vet; comparison: oth; outcome: yes; base election: base
+  trend assumption: realised within-precinct parallel trends with tolerance tau_i (RWPT-tau, Prop. E35), tau_i = 0 sqrt(1/a_iV + 1/a_iN), support a_iN >= 20
+  spillover onto the comparison group: |S_t| <= 0 (no spillover, stated explicitly)
+  no anticipation: assumed
+  descriptive basis: count rows known[1], known[2], known[3], known[4]
+  tolerance: tau_i = M sqrt(1/a_iV + 1/a_iN) with M = 0
+  note (R4-1): M is a tolerance that must hold in every supported precinct at once, not a confidence level
+  support: a_iN >= a_min = 20; pi_U = 0.475 (treated share in unsupported precincts, theta_i in [0,1], no assumption); n_eff = 2.614
+  local comparison counts a_iN (treated precincts): P1 190, P2 150, P3 50, P4 10 (unsupported)
+  continuous tables (Prop. E35(c): the integer check is optional and not applied; whole-person ends may be narrower, Remark 7.1)
+
+Post-election post
+  [IDENTIFICATION SET, realised ATT, count layer (E35)] ATT: [-0.233, 0.542]
+    breakdown of the sign (one LP, M a variable): none (the set contains 0)
+  [DESCRIPTIVE, realised counts] D_W (E29), count layer: [0.181, 0.567]
+
+  spillover: |S_i| <= 0 per supported precinct (no spillover, stated explicitly)
+CAUSAL IN EXPECTATION (2e Def. 5.1, Sec. 5.8): the expected effect on the treated group's rate
+  labels: IDENTIFICATION SET/BOUND (no sampling statement), DESCRIPTIVE (realised counts), CONFIDENCE INTERVAL/SET (sampling)
+  population: fixed population (2e (FP))
+  treated: vet; comparison: oth; outcome: yes; base election: base
+  trend assumption: pooled parallel trends in expectation (PPT, Prop. E28)
+  spillover onto the comparison group: |S_t| <= 0 (no spillover, stated explicitly)
+  no anticipation: assumed
+  descriptive basis: count rows known[1], known[2], known[3], known[4]
+  estimand: ATT^mean_t = sum_i w_Vi (m_iVt - m^(0)_iVt), the expected programme effect on the same treated persons (2e Sec. 5.8)
+  mean model: expected rates taken to be the observed returns (known-law reading; with one realised election pair the law is not known: E29 is the confidence route); LCE on expected rates: none (Prop. E30)
+  count rows are not used by the mean model (they restrict realised counts); they enter the realised target D_W
+
+Post-election post
+  [IDENTIFICATION BOUND, mean model (E28/E30)] ATT^mean: [-0.408, 0.732]
+    breakdown of the sign, aggregate dial M (other settings fixed; one LP): none (the interval contains 0)
+    PPT witness: one common untreated rate p0 in every precinct with treated persons (0.84 at the lower end, 0 at the upper end)
+  [DESCRIPTIVE, realised counts] pooled DiD D_t: [-0.122, 0.478] (no confidence interval for PPT is implemented; E29 is for WPT)
+
+  spillover: zero mean spillover
+finding 5 (m = 3), dial M = 0            [-1.000000, 1.000000]
+  E16(b) whole-person witness at the LP ends: lower not verified (integer end open, Remark 7.1); upper not verified (integer end open, Remark 7.1)
+E17(c): outer 0.143250 sharp 0.143250; lower at 0.999 sharp 1.432e-04, at sharp -1.388e-17
+
+Label scan: printed lines with an interval [a, b] and no label tag on the line
+  trend edTrend 10: E19 implied M = Mbar * sup|consecutive pre DiD| = 0.2412 (sup A = 0.4825; DESCRIPTIVE pre DiD ranges [-0.417, 0.482])
+
+---- E30 printout ----
+CAUSAL IN EXPECTATION (2e Def. 5.1, Sec. 5.8): the expected effect on the treated group's rate
+  labels: IDENTIFICATION SET/BOUND (no sampling statement), DESCRIPTIVE (realised counts), CONFIDENCE INTERVAL/SET (sampling)
+  population: fixed population (2e (FP))
+  treated: v; comparison: o; outcome: yes; base election: b
+  trend assumption: within-precinct parallel trends in expectation (WPT, Prop. E28), support a_iN >= 1
+  spillover onto the comparison group: |S_t| <= 0 (no spillover, stated explicitly)
+  no anticipation: assumed
+  descriptive basis: count layer, margins only (Delta-0)
+  estimand: ATT^mean_t = sum_i w_Vi (m_iVt - m^(0)_iVt), the expected programme effect on the same treated persons (2e Sec. 5.8)
+  mean model: expected rates taken to be the observed returns (known-law reading; with one realised election pair the law is not known: E29 is the confidence route); LCE on expected rates: base + change (Prop. E30)
+  support: a_iN >= a_min = 1; pi_U = 0 (treated share in unsupported precincts, bounded with theta_i in [0,1]); n_eff = 1/sum w_Vi^2 = 2.571
+  local comparison counts a_iN (treated precincts): P1 600, P2 400, P3 200
+  E29 independence unit: precincts (independent across precincts given the design; any dependence within a precinct)
+  count rows are not used by the mean model (they restrict realised counts); they enter the realised target D_W
+
+Post-election p
+  [IDENTIFICATION BOUND, mean model (E28/E30)] ATT^mean: [0.027, 0.073]
+    breakdown of the sign, local dial M (other settings fixed; one LP): M* = 0.02667 (the sign holds strictly below M*; at M* zero first becomes feasible)
+    breakdown of the sign, baseline curvature epsilon (M fixed; one LP): epsilon* = 0.001667 (the sign holds strictly below epsilon*; at epsilon* zero first becomes feasible)
+    E28(e) FD-LCE projection: supported part = I_W + pi_S dkappa, I_W = -0.6833, pi_S = 1
+  [DESCRIPTIVE, realised counts] D_W (E29), count layer with the fit's rows: [-0.580, 0.807]
+  [CONFIDENCE INTERVAL, one observed election pair (E29(c))] ATT^mean: [-1.000, 1.000] at level 0.95 (r_alpha = 3.388; [L - pi_U - r, U + r], clipped to [-1, 1])
+    coverage >= 1 - 0.05 (identity rows only); E29 covers the realised-count route only: it does not make the identification bound above a confidence interval
+
+  spillover: zero mean spillover
+
+---- E29 persons printout (support / independence lines) ----
+  labels: IDENTIFICATION SET/BOUND (no sampling statement), DESCRIPTIVE (realised counts), CONFIDENCE INTERVAL/SET (sampling)
+  trend assumption: within-precinct parallel trends in expectation (WPT, Prop. E28), support a_iN >= 1
+  support: a_iN >= a_min = 1; pi_U = 0 (treated share in unsupported precincts, bounded with theta_i in [0,1]); n_eff = 1/sum w_Vi^2 = 2.571
+  E29 independence unit: persons (ballot pairs independent across persons; precincts with few comparison voters enter through 1/a_iN)
+  [IDENTIFICATION BOUND, mean model (E28/E30)] ATT^mean: [-0.493, 0.073]
+    E28(e) FD-LCE projection: supported part = I_W + pi_S dkappa, I_W = -0.6833, pi_S = 1
+  [CONFIDENCE INTERVAL, one observed election pair (E29(c))] ATT^mean: [-0.713, 0.940] at level 0.95 (r_alpha = 0.1333; [L - pi_U - r, U + r], clipped to [-1, 1])
+    coverage >= 1 - 0.05 (identity rows only); E29 covers the realised-count route only: it does not make the identification bound above a confidence interval
+
+---- E35 M=0 printout ----
+CAUSAL (2e Def. 5.1): ATT_t = B_{r*,t} - B^(0)_{r*,t}, the effect on the treated group's realised rate
+  labels: IDENTIFICATION SET/BOUND (no sampling statement), DESCRIPTIVE (realised counts), CONFIDENCE INTERVAL/SET (sampling)
+  population: fixed population (2e (FP))
+  treated: vet; comparison: oth; outcome: yes; base election: base
+  trend assumption: realised within-precinct parallel trends with tolerance tau_i (RWPT-tau, Prop. E35), tau_i = 0 sqrt(1/a_iV + 1/a_iN), support a_iN >= 1
+  spillover onto the comparison group: |S_t| <= 0 (no spillover, stated explicitly)
+  no anticipation: assumed
+  descriptive basis: count rows known[1], known[2], known[3], known[4]
+  tolerance: tau_i = M sqrt(1/a_iV + 1/a_iN) with M = 0
+  note (R4-1): M is a tolerance that must hold in every supported precinct at once, not a confidence level
+  support: a_iN >= a_min = 1; pi_U = 0 (treated share in unsupported precincts, theta_i in [0,1], no assumption); n_eff = 2.614
+  local comparison counts a_iN (treated precincts): P1 190, P2 150, P3 50, P4 10
+  continuous tables (Prop. E35(c): the integer check is optional and not applied; whole-person ends may be narrower, Remark 7.1)
+
+Post-election post
+  [IDENTIFICATION SET, realised ATT, count layer (E35)] ATT: [0.052, 0.352]
+    breakdown of the sign (one LP, M a variable): M* = 0.2438
+  [DESCRIPTIVE, realised counts] D_W (E29), count layer: [-0.009, 0.377]
+
+  spillover: |S_i| <= 0 per supported precinct (no spillover, stated explicitly)
+
+---- E35 + LCE printout ----
+CAUSAL (2e Def. 5.1): ATT_t = B_{r*,t} - B^(0)_{r*,t}, the effect on the treated group's realised rate
+  labels: IDENTIFICATION SET/BOUND (no sampling statement), DESCRIPTIVE (realised counts), CONFIDENCE INTERVAL/SET (sampling)
+  population: fixed population (2e (FP))
+  treated: vet; comparison: oth; outcome: yes; base election: base
+  trend assumption: realised within-precinct parallel trends with tolerance tau_i (RWPT-tau, Prop. E35), tau_i = 0 sqrt(1/a_iV + 1/a_iN), support a_iN >= 1
+  spillover onto the comparison group: |S_t| <= 0 (no spillover, stated explicitly)
+  no anticipation: assumed
+  descriptive basis: count rows known[1], known[2], known[3], known[4]
+  tolerance: tau_i = M sqrt(1/a_iV + 1/a_iN) with M = 0
+  note (R4-1): M is a tolerance that must hold in every supported precinct at once, not a confidence level
+  support: a_iN >= a_min = 1; pi_U = 0 (treated share in unsupported precincts, theta_i in [0,1], no assumption); n_eff = 2.614
+  local comparison counts a_iN (treated precincts): P1 190, P2 150, P3 50, P4 10
+  continuous tables (Prop. E35(c): the integer check is optional and not applied; whole-person ends may be narrower, Remark 7.1)
+
+Post-election post
+  [CONFIDENCE SET, realised ATT (E35 + E13)] ATT: [0.052, 0.352]
+    breakdown of the sign (one LP, M a variable): M* = 0.2438
+  [DESCRIPTIVE, realised counts] D_W (E29), count layer: [-0.009, 0.377]
+    E13 row: D_W^S(n) in the FD interval [-Inf, Inf] at level 0.95 (E12 allowance 3.472, rho_i = 4 w_Vi)
+    coverage >= 1 - 0.05 under FP, NA, RWPT-tau, |S_i| <= Lambda (identity rows only); the confidence level comes only from the LCE part
+
+  spillover: |S_i| <= 0 per supported precinct (no spillover, stated explicitly)
+
+---- E35 a_min = 20 (P4 unsupported) ----
+CAUSAL (2e Def. 5.1): ATT_t = B_{r*,t} - B^(0)_{r*,t}, the effect on the treated group's realised rate
+  trend assumption: realised within-precinct parallel trends with tolerance tau_i (RWPT-tau, Prop. E35), tau_i = 0 sqrt(1/a_iV + 1/a_iN), support a_iN >= 20
+  note (R4-1): M is a tolerance that must hold in every supported precinct at once, not a confidence level
+  support: a_iN >= a_min = 20; pi_U = 0.475 (treated share in unsupported precincts, theta_i in [0,1], no assumption); n_eff = 2.614
+  local comparison counts a_iN (treated precincts): P1 190, P2 150, P3 50, P4 10 (unsupported)
+  [IDENTIFICATION SET, realised ATT, count layer (E35)] ATT: [-0.233, 0.542]
+  spillover: |S_i| <= 0 per supported precinct (no spillover, stated explicitly)
+
+E29 with M > 0 / Lambda > 0 (D_W pinned by known comparison cells)
+M=0.00 Lambda=0.00  ID bound [NA, NA]  D_W [0.0877, 0.0877]  E29 CI [0.0642, 0.1112]
+M=0.00 Lambda=0.10  ID bound [NA, NA]  D_W [0.0877, 0.0877]  E29 CI [0.0642, 0.1112]
+M=0.20 Lambda=0.00  ID bound [NA, NA]  D_W [0.0877, 0.0877]  E29 CI [0.0642, 0.1112]
+M=0.20 Lambda=0.10  ID bound [NA, NA]  D_W [0.0877, 0.0877]  E29 CI [0.0642, 0.1112]

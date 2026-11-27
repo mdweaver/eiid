@@ -1,0 +1,11 @@
+  margins only M=0: [-0.5675  0.7322]  no-assumption: [-0.5675  0.7325]
+  audited: {0.0: array([0.0525, 0.3522]), 0.1: array([0.031, 0.374]), 0.2: array([0.0094, 0.3956])}  D_W count set: [-0.0087  0.3772]
+PASS R4.1 worked example reproduced by an independent LP (M = 0, 0.1; margins only; D_W set)
+PASS R4.2 breakdown M* by bisection on the lower end = 0.2438 (the note's one-LP value)  [0.24379]
+PASS R4.3 nested in M for each spillover bound Lam (and in Lam for each M), audited example
+PASS R4.4 LCE row on D_W^S is linear in n; at M=0, Lam=0 the cut ATT set equals the D_W cut (ATT = D_W)  [D_W<=.30: [-0.5675  0.3   ], D_W>=.10: [0.1    0.7322]]
+  K=10: P(RWPT-tau holds in every precinct) by M=1..4: [0.232, 0.965, 1.0, 1.0]
+  K=100: P(RWPT-tau holds in every precinct) by M=1..4: [0.0, 0.7335, 0.999, 1.0]
+PASS R4.5 (calibration, R4-1) with pure sampling noise and exact expected WPT, M = 1 fails in some precinct in most draws (K = 10) and in essentially all (K = 100); the M that holds everywhere grows with K  [K=10: M=1 0.232, M=2 0.965; K=100: M=1 0.000, M=2 0.734, M=3 0.999]
+
+5/5 PASS

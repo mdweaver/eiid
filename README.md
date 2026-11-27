@@ -1,4 +1,4 @@
-### Code Version 0.4.0
+### Code Version 0.5.0
 
 This repo includes the R package for replicating the results in:
 
@@ -11,6 +11,10 @@ The Dataverse archive also includes all of the data analyzed in the paper.
 For convenience, this repo only includes the standalone R package (eiPartialID) in the folder 'package' (which is similar to that in the Dataverse archive, with some minor differences to conform to CRAN policies). The package should be installed locally from source. An overview of usage is provided in the following HTML vignette, which can be viewed in your browser:
 
 [package/eiPartialID/vignettes/rendered_html_archive/2019_02_04/eiPartialID_usage_2019_02_04.html](package/eiPartialID/vignettes/rendered_html_archive/2019_02_04/eiPartialID_usage_2019_02_04.html)
+
+### New in 0.5.0: changes across elections and difference-in-differences (DiD)
+
+`eiChange()` bounds how each group's support changed across two or more elections in the same units: from the counts, from beliefs on changes, from comparisons between kinds of places, and from straight-line (LCE) models of levels or changes. `eiATT()` adds the causal layer and refuses a causal label unless the population, the comparison group (where used), the trend assumption and no anticipation are stated. Trend assumptions: none, a trend dial, relative magnitudes and smoothness on each election's increment (sets with holes are printed as pieces), monotone response with a spillover dial, and parallel trends either electorate-wide or **within each precinct** (no default). The within-precinct version targets the actual voters in the election by default (`within_pt()`, with a size-scaled local tolerance and its breakdown value); an expected-rate version is an option. A baseline-curvature setting (`lce_levels_change(epsilon)`) shows how far baseline voting can bend from a straight line before the effect interval reaches zero. Every printed interval is labelled as an identification bound, a descriptive bound or a confidence interval. Changing populations and uncertain margins are not handled; the theory lists them as open. Theory: `docs/extension/PHASE2e_did_general.md`; proof, independent and code reviews in `docs/extension/reviews/`. See `package/eiPartialID/NEWS.md`.
 
 ### New in 0.4.0: exact bounds on the actual counts (M-COUNT)
 

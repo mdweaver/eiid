@@ -16,7 +16,10 @@ eiATT(
   no_anticipation,
   pretrends = c("counts", "model"),
   alpha = 0.05,
-  rate_limits = TRUE
+  rate_limits = TRUE,
+  lce = NULL,
+  law = NULL,
+  independence = c("precincts", "persons")
 )
 }
 \arguments{
@@ -45,6 +48,15 @@ eiATT(
 \item{rate_limits}{\code{TRUE} (default) imposes \eqn{\theta_t \in [0,1]} and
 \eqn{B_{s^*ct} - S_t \in [0,1]} (the sharp set). \code{FALSE} drops them: an OUTER set,
 printed as such (used to reproduce NS N21's numbers; 2e N21 correction).}
+
+\item{lce}{LCE rows on expected rates for \code{within_pt()}/\code{pooled_pt()}
+(\code{\link{lce_mean}}); default none.}
+
+\item{law}{optional known aggregate law for the mean model: a list named by election, each a matrix
+with one row per unit of equally likely outcome counts (E28(c)); default: the observed returns.}
+
+\item{independence}{the independence unit of E29(b): \code{"precincts"} (any dependence within a
+precinct; default) or \code{"persons"}.}
 }
 \value{
 an object of class \code{"eiATT"}.
@@ -61,21 +73,43 @@ tables, and refutable (an empty set refutes the conjunction).
 \details{
 \strong{Labelling rule (Def. 5.1).} A causal label needs: the population (\code{"fixed"},
 or \code{"stayers"} with fixed group membership); the treated group; the comparison group
-when the trend assumption uses one; a trend assumption; a spillover assumption
-\eqn{|S_t| \le \Lambda} (\code{spillover = 0} stated explicitly if assumed); and no
-anticipation. If any is missing \code{eiATT()} stops. Descriptive information is printed
+when the trend assumption uses one; a trend assumption (there is no default, also not between
+electorate-wide and within-precinct parallel trends); a spillover assumption
+\eqn{|S_t| \le \Lambda} (\code{spillover = 0} stated explicitly if assumed) whenever the trend
+assumption uses a comparison group (MTR and ND alone need none); and no anticipation. If any is missing \code{eiATT()} stops. Descriptive information is printed
 separately and labelled DESCRIPTIVE.
 
 \strong{Forms.} \code{no_trend()}: Prop. E15 (always contains 0). \code{trend_dial(M)}:
 Cor. E17, with the outer form \eqn{D \oplus [-(M+\Lambda), M+\Lambda]}, the exact criterion
 of E17(b) for when the sharp ends equal the outer ends, and the breakdown value
-\eqn{M^* = \min D_t - \Lambda} for "ATT > 0" (E17(c)). \code{rel_mag(Mbar)}: Prop. E18, a
-union of 2L LPs over the joint set; the print always shows the implied
+\eqn{M^* = \min D_t - \Lambda} for "ATT > 0" (E17(c)) with the sharp breakdown value (one LP with
+M a variable). \code{rel_mag(Mbar)}: Prop. E18, a union of 2L LPs over the joint set, bounding each
+post-election's increment of the trend gap, so violations accumulate (the marginal outer set at
+horizon h is \eqn{D_h \oplus [-h\bar M\sup A - \Lambda, h\bar M\sup A + \Lambda]}); branch
+intervals are merged only where they overlap and holes are reported; the print always shows the implied
 \eqn{M = \bar M \sup_F A(n)} and the degeneration report of Prop. E19: whether the set
 equals the trend dial with that M, whether it equals the no-assumption set (no information),
-the vacuity criterion E19(b), and the margins-only artefact \eqn{\bar M w_{-1}/2} (E19(c2)).
+the vacuity criterion E19(b) (these two with one post-period only), and the margins-only artefact
+\eqn{\bar M w_{-1}/2} (E19(c2)).
 \code{smoothness(M)}: Def. 5.3, one LP. \code{mtr_nd_ps()}: Prop. E21 (with the
 spillover dial; closed form E21(c) shown under margins only).
+
+\strong{Parallel trends in expectation} (\code{within_pt()}, \code{pooled_pt()}; 2e Sec. 5.8-5.9).
+The estimand is the expected effect \eqn{ATT^{mean}_t}. Three kinds of interval are printed, each
+labelled: an IDENTIFICATION BOUND under the mean model (Props E28, E30: the LP over expected rates,
+with LCE rows from \code{lce}, the local dial of E33(a), the rate limits and, for WPT, unsupported
+precincts bounded with \eqn{\theta_i \in [0,1]}); the DESCRIPTIVE realised-count target \eqn{D_W}
+(E29, count layer with the fit's rows); and, for WPT, the CONFIDENCE INTERVAL of E29(c),
+\eqn{[L - \pi_U - r_\alpha, U + r_\alpha]} from one observed election pair (Hoeffding over the
+independence unit). E29 covers the realised-count route only; it never makes the identification
+bound a confidence interval. Without \code{law} the observed returns are taken as the expected
+rates (the known-law reading). Each sign conclusion has a one-LP breakdown value for the local dial
+\eqn{M} and, with baseline LCE, for the curvature allowance \eqn{\epsilon}, the other held fixed.
+\eqn{\pi_U}, \eqn{n_{eff} = 1/\sum_i w_{Vi}^2}, the local comparison counts and the independence
+unit are always printed. Deferred: E31, E32, E33(b)-(c), E34.
+
+\strong{Labels.} Every printed interval is labelled IDENTIFICATION SET/BOUND (no sampling
+statement), DESCRIPTIVE (realised counts) or CONFIDENCE INTERVAL/SET.
 
 \strong{Spillovers (Prop. E22).} Pre-periods carry no information on spillover onto the
 comparison group; \eqn{\Lambda} is its own dial and is always printed.
@@ -99,4 +133,6 @@ fit <- eiChange(list(early = d0, base = d1, post = d2), cbind(yes, no) ~ cbind(v
                 unit = "p", base = "base", row = "vet", col = "yes")
 eiATT(fit, treated = "vet", comparison = "oth", population = "fixed",
       trend = rel_mag(1), spillover = 0, no_anticipation = TRUE)
+eiATT(fit, treated = "vet", comparison = "oth", population = "fixed",
+      trend = within_pt(a_min = 1), spillover = 0, no_anticipation = TRUE)
 }

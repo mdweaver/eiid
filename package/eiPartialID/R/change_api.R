@@ -122,8 +122,12 @@
     dd <- .ec_range(P, empty, tg, integer, keep_x = FALSE)
     cf <- .ed_closed_ovr(P, tg, specs)
     cc <- .ed_closed_contrast(P, tg, specs, dd)
-    if (!is.null(cf) && integer_mode) rg <- .ed_e26_range(P, tg, cf)
-    else rg <- if (length(specs)) .ec_range(P, built, tg, integer) else dd
+    if (!is.null(cf) && integer_mode) {
+      rg <- .ed_e26_range(P, tg, cf)
+      # code review issue 11: the continuous LP itself, so that "closed form = LP" is a real cross-check here too
+      lpc <- .ec_range(P, if (length(specs)) built else empty, tg, "lp", keep_x = FALSE)
+      rg$lp <- c(lpc$lower, lpc$upper)
+    } else rg <- if (length(specs)) .ec_range(P, built, tg, integer) else dd
     bd <- if (isTRUE(binding) && length(specs)) .ec_binding(P, specs, built, tg, rg, integer) else c(NA, NA)
     st <- rg$status
     if (!isTRUE(rg$cont)) st <- "infeasible: the rows contradict the margins (continuous tables)"
@@ -392,7 +396,7 @@ print.eiChange <- function(x, digits = 3, ...) {
     }
   }
   out$integer_status <- tb$integer_status
-  cat("\nTarget  |  margins only (Delta-0, Prop. E3; exact LP)", if (has_rows) "  |  with the count rows", "\n", sep = "")
+  cat("\n[DESCRIPTIVE, realised counts] Target  |  margins only (Delta-0, Prop. E3; exact LP)", if (has_rows) "  |  with the count rows", "\n", sep = "")
   print(out, row.names = FALSE, right = FALSE)
   for (j in seq_len(nrow(tb))) {
     co <- x$closed[[j]]$ovr

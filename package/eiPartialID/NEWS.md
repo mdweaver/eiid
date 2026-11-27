@@ -45,6 +45,41 @@ units. Theory: `docs/extension/PHASE2e_did_general.md` (2e; proof reviewed).
   * `pretrends = "model"` (Prop. E25): one joint projection region for the stacked parameter,
     box variables with Lemma E12 radii for every actual quantity, the union bound; under FD
     alone the rate limits are dropped and the set is labelled OUTER.
+* Within-precinct and pooled parallel trends in expectation (2e Sec. 5.8-5.9; added after the
+  independent review): `trend = within_pt(a_min, M)` and `trend = pooled_pt(M)` in `eiATT()`,
+  with no default between them or against the realised `parallel_trends()`.
+  * Mean-model LP over expected rates (Props E28, E30): adding-up, the averaged Duncan-Davis ends
+    of the law (`law =`, default the observed returns), LCE rows on expected rates from
+    `lce = lce_mean(base, post, change, epsilon)` (any two imply the third; baseline-curvature
+    allowance epsilon), the rate limits m_iV0 + d_iN (+ b_it - S_i) in [0, 1] in every supported
+    precinct (aggregate only under PPT, whose witness is one common untreated rate), spillover
+    S_i optimised jointly (E28(f)), the local dial |b_it - b_i,t-1| <= M (E33(a)).
+  * Support threshold `a_min`; unsupported precincts bounded with theta_i in [0, 1]; pi_U,
+    n_eff = 1/sum w_Vi^2, the local comparison counts and the independence unit always printed.
+  * One-LP breakdown values of the sign for M (epsilon fixed) and for epsilon (M fixed).
+  * E28(e) FD-LCE projection (I_W + pi_S dkappa; I + s dkappa under PPT).
+  * E29: the realised target D_W from the count layer (with the fit's rows) and the Hoeffding
+    interval [L - pi_U - r_alpha, U + r_alpha] (`independence = "precincts"` or `"persons"`;
+    belief rows carry the P(n not in F) penalty).
+  * Reporting rule: every printed interval is labelled IDENTIFICATION SET/BOUND, DESCRIPTIVE
+    (realised counts) or CONFIDENCE INTERVAL/SET; E29 covers the realised-count route only and
+    the printout says that it does not make the identification bound a confidence interval.
+  * Deferred: E31, E32, E33(b)-(c), E34.
+* Theory changes after the independent review: `rel_mag()` bounds each election's increment of
+  the trend gap; the marginal outer set at horizon h is D_h (+) [-h Mbar sup A - Lambda, +];
+  RM branch intervals are merged only where they overlap and holes are printed; the system
+  always covers every post-period (one shared table, E16(d), E21(e)); the sharp E17(c)
+  breakdown LP; the E16(b) whole-person witness check at the LP ends; E8 is computed for one
+  pair only (pair-by-pair stacking would be outer).
+* Code-review fixes (`docs/extension/reviews/PHASE2e_code_review.md`): GLPK statuses (an
+  unbounded LP is infinite, a failure an error, never EMPTY); infeasible count layers with the
+  dial and RM; `post =` keeps later post-periods' constraints; E19(a)-(b) only with one
+  post-period; the allowance uses the representation of the model-implied form; numeric unit
+  selections refer to data rows; a character election variable needs `elections`; smoothness
+  with T = 2; model sign rows without `sign`; wording (bin_did under FD, the E26 path's LP
+  cross-check, the vignette's E19 sentence, E25 EMPTY and grouped-rung status).
+* Def. 5.1 item 3: a spillover allowance is required only when the trend assumption uses a
+  comparison group (MTR and ND alone need none).
 * Internal: `.ec_system()` accepts a problem-specific integer classifier (unused by
   `eiCounts()`); `.rxc_idlin()` takes a `change` flag (sum over columns of Delta H is 0).
   Existing outputs are unchanged.

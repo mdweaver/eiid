@@ -160,6 +160,9 @@ lce_periods <- function(rows = list(), model = c("M0", "M2", "M1"), group = NULL
 # model-implied form of an eiChange target; NULL with a reason when undefined
 .ed_model_target <- function(P, mb, tg) {
   if (identical(tg$kind, "did")) return(.ed_model_change(mb, tg$u, tg$t, tg$c, .ed_gapW(P, tg$S, tg$r, tg$s)))
+  if (identical(tg$kind, "bin_did"))       # code review issue 10
+    return(structure(list(), reason = paste("no model-implied version of a binned DiD is implemented: bin aggregates are",
+                                            "evaluated at row-specific weighted compositions, which E10's remark excludes")))
   if (mb$rung == "FD") return(structure(list(), reason = "FD leaves levels free: a level target has no model-implied value (2e Lemma E12(i))"))
   if (identical(tg$kind, "gap_at")) return(.ed_lce_lin(mb, tg$t, tg$c, .ed_gapW(P, tg$S, tg$r, tg$s)))
   if (identical(tg$kind, "rate_at")) return(.ed_lce_lin(mb, tg$t, tg$c, .ed_rateW(P, tg$S, tg$r)))
@@ -259,7 +262,7 @@ lce_periods <- function(rows = list(), model = c("M0", "M2", "M1"), group = NULL
         ver <- if (is.null(s$version)) "W1" else s$version
         r <- .ed_rowidx(P, if (is.null(s$row)) meta$r else s$row, "row")
         oth <- if (!is.null(s$other)) .ed_rowidx(P, s$other, "other") else NULL
-        sg <- .ed_sign_arg(s$sign, "fd sign row")
+        sg <- .ed_sign_arg(s[["sign"]], "fd sign row")
         f <- .ed_pad(mb, k, .rxc_assoc_form(st, sty, ver, r, c, oth))
         cons <- .ed_cons_add(cons, .ed_fscale(f, sg), "sign")
         labs <- c(labs, sprintf("model %s on changes %s %s on %s, %s (%s; E23(b))", sty, P$rows[r], if (sg > 0) ">= 0" else "<= 0", P$cols[c], pl, ver))
@@ -284,7 +287,7 @@ lce_periods <- function(rows = list(), model = c("M0", "M2", "M1"), group = NULL
     pl <- sprintf("%s -> %s", P$elections[u], P$elections[t])
     if (tp == "sign") {
       sty <- if (is.null(s$sign_type)) "dB" else s$sign_type
-      sg <- .ed_sign_arg(s$sign, "lce sign row")
+      sg <- .ed_sign_arg(s[["sign"]], "lce sign row")
       cons <- .ed_cons_add(cons, .ed_fscale(af(sty, ver), sg), "sign")
       labs <- c(labs, sprintf("model %s* on changes %s %s on %s, %s (%s; Prop. E11)", sty, P$rows[r], if (sg > 0) ">= 0" else "<= 0", P$cols[c], pl, ver))
     } else if (tp == "cr") {
@@ -329,6 +332,9 @@ lce_periods <- function(rows = list(), model = c("M0", "M2", "M1"), group = NULL
   rho
 }
 .ed_allowance <- function(P, reps, type, a_E) {
+  # code review issue 5: Lemma E12 bounds phi(n) - phi~ for the representation whose phi~ is targeted.
+  # The model-implied forms (.ed_model_target, .ed_gapW, E25) use representation 1, so the allowance does too.
+  reps <- reps[1]
   rhos <- lapply(reps, function(rp) .ed_rho(P, rp$terms))
   S <- vapply(rhos, function(r) 0.5 * sqrt(sum(r^2)), 0)
   j <- which.min(S); rho <- rhos[[j]]
@@ -476,6 +482,8 @@ lce_periods <- function(rows = list(), model = c("M0", "M2", "M1"), group = NULL
               if (m$rung == "FD") "first-difference LCE, 2e Sec. 3" else sprintf("per-period LCE (%s), Prop. E11", m$spec$model), 100 * (1 - m$alpha)))
   if (length(m$row_labels)) cat("  model rows (object = \"model\"):", paste(m$row_labels, collapse = "; "), "\n")
   cat("  validity rows: |Delta m(x)| <= 1 at the hull vertices (FD) or rates in [0, 1] (LCE)\n")
+  cat("  labels: plugin = the model set at the estimate (an estimate, not an interval); actual_target_interval = CONFIDENCE INTERVAL\n",
+      "  for the actual DiD (model interval + allowance); count_set = DESCRIPTIVE, realised counts; intersection = both combined (Thm E13)\n", sep = "")
   out <- data.frame(target = tb$target, plugin = .ec_fmt(tb$plugin_lower, tb$plugin_upper, digits),
                     actual_target_interval = .ec_fmt(tb$model_lower, tb$model_upper, digits),
                     count_set = .ec_fmt(tb$count_lower, tb$count_upper, digits),
@@ -487,6 +495,8 @@ lce_periods <- function(rows = list(), model = c("M0", "M2", "M1"), group = NULL
                                           m$spec$ci, m$spec$allowance, tb$allowance[j], tb$S_phi[j], tb$status[j]))
     ex <- if (j <= length(m$extra)) m$extra[[j]] else NULL
     if (!is.null(ex$e9)) cat(sprintf("  E9(a) closed form (plug-in): q_min = %.4g, model DiD in %s\n", ex$e9$q_min, .ec_fmt(ex$e9$interval[1], ex$e9$interval[2], digits)))
+    if (isTRUE(m$spec$sharp) && is.null(ex$e8) && m$rung == "FD")
+      cat("  E8 not computed: the plug-in sharp set is for one pair in 2 x 2 (pair-by-pair stacking over several pairs would be OUTER, E8(e))\n")
     if (!is.null(ex$e8)) cat(sprintf("  E8 sharp FD set at the empirical law (plug-in, %d support points; inference open, E23(c)): %s; FD4 outer: %s\n",
                                      ex$e8$n_support, .ec_fmt(ex$e8$sharp[1], ex$e8$sharp[2], digits), .ec_fmt(ex$e8$outer[1], ex$e8$outer[2], digits)))
     if (!is.null(ex$branches) && nrow(ex$branches) > 1) cat(sprintf("  %s: union of %d branch intervals (Prop. E24; no multiplicity correction)\n", tb$target[j], nrow(ex$branches)))
@@ -580,7 +590,7 @@ lce_periods <- function(rows = list(), model = c("M0", "M2", "M1"), group = NULL
     dl <- lapply(seq_len(P$T), function(e) if (e < b0) actual(paste0("sdpre", e)) else if (e == b0) zv(list()) else {
       k <- match(e, posts); if (is.na(k)) NULL else delta(k) })
     cc <- cons0
-    for (j in 2:(P$T - 1)) {
+    for (j in seq_len(max(0, P$T - 2)) + 1) {          # code review issue 8
       if (is.null(dl[[j - 1]]) || is.null(dl[[j]]) || is.null(dl[[j + 1]])) next
       s2 <- .ed_fsum(dl[[j + 1]], .ed_fscale(dl[[j]], -2), dl[[j - 1]])
       cc <- add(cc, .ed_fsum(.ed_fscale(s2, -1), zv(list(), trend$M)), "sd"); cc <- add(cc, .ed_fsum(s2, zv(list(), trend$M)), "sd")
@@ -602,13 +612,16 @@ lce_periods <- function(rows = list(), model = c("M0", "M2", "M1"), group = NULL
       ivs[[length(ivs) + 1]] <- iv; labs <- c(labs, paste(c(g$label, sy$label)[nzchar(c(g$label, sy$label))], collapse = "; "))
     }
     # an ATT of a rate lies in [-1, 1]: clipping the projection interval there is valid
-    pcs <- .rxc_union(lapply(ivs, function(v) if (any(is.na(v)) || v[1] > 1 || v[2] < -1) v else pmin(pmax(v, -1), 1)), tol = 0)
+    # an interval wholly outside [-1, 1] is a rejection at the stated level: EMPTY (code review issue 13(a))
+    ivc <- lapply(ivs, function(v) if (any(is.na(v)) || v[1] > 1 || v[2] < -1) c(NA_real_, NA_real_) else pmin(pmax(v, -1), 1))
+    pcs <- .rxc_union(ivc, tol = 0)
     res[[length(res) + 1]] <- list(post = P$elections[t], pieces = pcs, lower = if (is.null(pcs)) NA_real_ else min(pcs[, 1]),
                                    upper = if (is.null(pcs)) NA_real_ else max(pcs[, 2]),
                                    branches = data.frame(branch = labs, lower = vapply(ivs, `[`, 0, 1), upper = vapply(ivs, `[`, 0, 2)))
   }
   list(results = res, outer = !levels_ok, rung = mb$rung, radii = tq, alpha_proj = a_proj, alpha_q = a_q,
-       status = if (mb$grouped) "no coverage theorem under grouped rungs (R16 open)" else
+       status = if (mb$grouped && length(m$row_labels)) "no coverage theorem for model rows under grouped rungs (R16 open)" else
+         if (mb$grouped) "grouped rung without model rows: asymptotic guarantee only with few, large groups (P3 regime R1)" else
          sprintf("asymptotic: coverage >= 1 - %.3g - %d x %.3g (Prop. E25(a): one projection event for the stacked beta, union bound over the boxes)", a_proj, nq, a_q))
 }
 
@@ -621,7 +634,7 @@ lce_periods <- function(rows = list(), model = c("M0", "M2", "M1"), group = NULL
   cat("  inference:", m$status, "\n  (intervals clipped to [-1, 1], the logical range of an ATT of a rate)\n")
   if (m$outer) cat("  OUTER: under FD alone the levels are free, so the rate limits are dropped (Prop. E25 (H2))\n")
   for (e in m$results) {
-    cat(sprintf("\nPost-election %s\n  CAUSAL  ATT set%s: %s\n", e$post, if (m$outer) " (outer)" else "",
+    cat(sprintf("\nPost-election %s\n  [CONFIDENCE SET, realised ATT (Prop. E25)%s] ATT: %s\n", e$post, if (m$outer) ", OUTER" else "",
                 if (is.null(e$pieces)) "EMPTY (rejects the conjunction at the stated level)" else paste(apply(e$pieces, 1, f), collapse = " U ")))
     if (nrow(e$branches) > 1) cat(sprintf("  union of %d branch intervals (Prop. E24; never a selected branch)\n", nrow(e$branches)))
   }

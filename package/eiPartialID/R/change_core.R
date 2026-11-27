@@ -30,7 +30,10 @@
     ev <- data[[election]]
     if (is.null(ev)) stop("election variable '", election, "' not found in data")
     lev <- if (!is.null(elections)) as.character(elections) else if (is.factor(ev)) levels(droplevels(ev)) else
-      if (is.numeric(ev)) as.character(sort(unique(ev))) else unique(as.character(ev))
+      if (is.numeric(ev)) as.character(sort(unique(ev))) else
+      stop("the election variable '", election, "' is character: give the time order in 'elections' (or use a factor or a ",
+           "numeric variable). The order of first appearance is not used: time order matters for every pre-period quantity ",
+           "(code review issue 7)")
     if (any(!lev %in% as.character(ev))) stop("elections not found in the election variable: ", paste(setdiff(lev, as.character(ev)), collapse = ", "))
     dl <- lapply(lev, function(l) data[as.character(ev) == l, , drop = FALSE]); names(dl) <- lev
   } else if (is.list(data) && all(vapply(data, is.data.frame, TRUE))) {
@@ -122,9 +125,13 @@
   P$Bt <- lapply(inp$B, function(m) m[keep, , drop = FALSE])
   # one-election problems (same margins), sharing the stacked problem's number type and log:
   # used to parse within-election rows and to compute one-election thresholds exactly
+  # Built from the full aligned data so that numeric unit selections refer to data rows (of the first
+  # election's row order; later elections are realigned to it by label); .ec_problem drops N_i = 0 itself
+  # (code review issue 6)
   P$Pt <- lapply(seq_len(T), function(t) {
-    Q <- .ec_problem(P$A0, P$Bt[[t]], inp$rows, inp$cols, P$units0, integer_input = fp$integer,
-                     data = inp$data[[t]][keep, , drop = FALSE])
+    Q <- .ec_problem(inp$A[[1]], inp$B[[t]], inp$rows, inp$cols, inp$units, integer_input = fp$integer,
+                     data = inp$data[[t]])
+    if (Q$p != p0) stop("internal: per-election problem drops different units")
     Q$integer <- P$integer; Q$log <- P$log; Q$num <- P$num
     Q
   })

@@ -413,7 +413,8 @@ are printed and labelled separately:
   the same group, at every election) the elections stack into one count-layer
   problem, so the bounds are exact given the margins and the rows.
 * **Causal** (`eiATT()`): what did the treatment do to the treated group? That needs a
-  stated trend assumption on top of a descriptive set.
+  stated trend assumption on top of a descriptive set. Every printed interval says whether it
+  is an identification set, a descriptive (realised-count) set or a confidence interval.
 
 The example has four precincts of 200 men (10, 50, 150 and 190 veterans) and three
 elections: an early pre-war election, the last pre-war election (the base) and a
@@ -465,10 +466,13 @@ eiATT(ch_cr, treated = "vet", comparison = "oth", population = "fixed",
 
 Trend assumptions: `no_trend()` (the data alone never sign the effect),
 `parallel_trends()`, `trend_dial(M)`, `rel_mag(Mbar)` (relative magnitudes over the
-joint set of latent pre-trends), `smoothness(M)` and `mtr_nd_ps()`. Relative
-magnitudes help only when something narrows the pre-period DiD. On the margins alone
-they collapse to no information, and the printout says so, together with the implied
-M = Mbar · sup|pre-period DiD|:
+joint set of latent pre-trends; they bound each election's increment of the trend gap,
+so violations can accumulate over later post-elections), `smoothness(M)` and
+`mtr_nd_ps()`. Relative magnitudes help only when something narrows the pre-period
+DiD: on the margins alone they reduce to a trend dial whose M is at least
+Mbar times half the pre-period's Duncan–Davis width, and usually to no information.
+Here, on the margins alone, they give no information, and the printout says so,
+together with the implied M = Mbar · sup|pre-period DiD|:
 
 ```{r did-rm}
 eiATT(ch, treated = "vet", comparison = "oth", population = "fixed",
@@ -477,6 +481,30 @@ eiATT(ch, treated = "vet", comparison = "oth", population = "fixed",
 
 With reinforcement on both changes the same assumption gives 0.135 to 0.278
 (`eiATT(ch_cr, ...)`).
+
+**Which comparison? Electorate-wide or within each precinct.** `parallel_trends()` compares
+veterans with all other men in the electorate (realised tables, Thm E16). `within_pt()` compares
+each veteran with the non-veterans of their own precinct, in expected rates (Prop. E28);
+`pooled_pt()` is the electorate-wide comparison in expected rates. There is no default: the
+choice is part of the stated assumption. Under `within_pt()` a precinct's weight in the
+comparison trend is its share of veterans, so precinct 4 (190 veterans, 10 non-veterans) carries
+47.5% of it; precincts with fewer than `a_min` comparison persons are bounded with no assumption,
+and their share `pi_U` is always printed, together with `n_eff` and the local comparison counts.
+
+```{r did-wpt}
+eiATT(ch, treated = "vet", comparison = "oth", population = "fixed",
+      trend = within_pt(a_min = 1), spillover = 0, no_anticipation = TRUE,
+      lce = lce_mean(base = TRUE, change = TRUE))
+```
+
+The printout labels each interval. The IDENTIFICATION BOUND is the mean model's answer
+(here taking the observed returns as the expected rates, with LCE on expected rates at the base
+and on the changes; `epsilon` relaxes baseline linearity and `within_pt(M = )` relaxes WPT
+locally, each with a one-LP breakdown value). The DESCRIPTIVE line is the realised-count target
+D_W (the within-precinct DiD on the actual tables). The CONFIDENCE INTERVAL (Prop. E29) covers the
+expected effect from one observed election pair through D_W and a Hoeffding allowance over
+precincts; with four precincts it is the whole logical range. It covers the realised-count route
+only: it does not make the identification bound a confidence interval.
 
 **Model layer.** `eiChange(..., model = fd(...))` adds the first-difference LCE
 (rows R1, R2, R4, a bounded change, DiD-S, model signs on changes), and

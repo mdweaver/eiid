@@ -1,7 +1,7 @@
 # eiChange / eiATT: reproduce PHASE2e Sec. 9.2 (worked example), N21, and the counterexamples behind
 # proof-review issues 1, 2 and 12 (docs/extension/verify_phase2e_output.txt, check W, E17 [F],
-# E6 [F], E18). Values printed in 2e to 3 decimals; exact values are halves of 1e-3 in places,
-# hence the tolerance 6e-4.
+# E6 [F], E18). Values printed in 2e Sec. 9.2 to 4 decimals (half away from zero), hence the
+# tolerance 5e-5 (plus floating-point slack).
 
 w_data <- function() {
   aW <- cbind(c(10, 50, 150, 190), c(190, 150, 50, 10))
@@ -18,37 +18,40 @@ att <- function(f, tr, L = 0, ...) {
              no_anticipation = TRUE, ...)
   c(a$results[[1]]$lower, a$results[[1]]$upper)
 }
-near <- function(x, y) expect_true(all(abs(unname(x) - y) <= 6e-4), info = paste(format(x, digits = 6), collapse = ", "))
+near <- function(x, y) expect_true(all(abs(unname(x) - y) <= 5e-5 + 1e-9), info = paste(format(x, digits = 6), collapse = ", "))
 
 test_that("2e Sec. 9.2 worked example: every row of the ladder", {
   f0 <- w_fit(); fP <- w_fit(list(cr_change = crw("base", "post")))
   fB <- w_fit(list(cr_change = list(crw("base", "post"), crw("early", "base"))))
   # descriptive
   tb <- f0$table
-  near(c(tb$dd_lower[2], tb$dd_upper[2]), c(-0.407, 0.792))            # D_post, margins
-  near(c(tb$dd_lower[1], tb$dd_upper[1]), c(-0.603, 0.598))            # D_{-1} = -(D_pre): D_pre in [-0.598, 0.603]
-  near(c(fP$table$lower[2], fP$table$upper[2]), c(0.143, 0.270))       # CR on post changes
-  near(c(f0$closed[[2]]$ovr$ER, f0$closed[[2]]$ovr$NM), c(0.270, 0.143))
-  near(c(f0$closed[[1]]$ovr$ER, f0$closed[[1]]$ovr$NM), -c(0.008, 0.004))
+  near(c(tb$dd_lower[2], tb$dd_upper[2]), c(-0.4075, 0.7925))          # D_post, margins
+  near(c(tb$dd_lower[1], tb$dd_upper[1]), c(-0.6025, 0.5975))          # D_{-1} = -(D_pre): D_pre in [-0.5975, 0.6025]
+  near(c(fP$table$lower[2], fP$table$upper[2]), c(0.1433, 0.2703))     # CR on post changes
+  near(c(f0$closed[[2]]$ovr$ER, f0$closed[[2]]$ovr$NM), c(0.2703, 0.1433))
+  near(c(f0$closed[[1]]$ovr$ER, f0$closed[[1]]$ovr$NM), -c(0.0080, 0.0043))
   # causal
-  near(att(f0, no_trend()), c(-0.568, 0.732))
-  near(att(f0, parallel_trends()), c(-0.407, 0.732))
-  near(att(fP, parallel_trends()), c(0.143, 0.270))
-  near(att(fP, trend_dial(0.05)), c(0.093, 0.320))
-  near(att(fP, trend_dial(0.05), 0.02), c(0.073, 0.340))
-  near(att(f0, rel_mag(1)), c(-0.568, 0.732))
-  near(att(fP, rel_mag(1)), c(-0.405, 0.732))
-  near(att(fB, rel_mag(1)), c(0.135, 0.278))
-  near(att(f0, mtr_nd_ps()), c(0, 0.482))
-  near(att(fP, mtr_nd_ps()), c(0, 0.311))
+  near(att(f0, no_trend()), c(-0.5675, 0.7325))
+  near(att(f0, parallel_trends()), c(-0.4075, 0.7325))
+  near(att(fP, parallel_trends()), c(0.1433, 0.2703))
+  near(att(fP, trend_dial(0.05)), c(0.0933, 0.3203))
+  near(att(fP, trend_dial(0.05), 0.02), c(0.0733, 0.3403))
+  near(att(f0, rel_mag(1)), c(-0.5675, 0.7325))
+  near(att(fP, rel_mag(1)), c(-0.4050, 0.7325))
+  near(att(fB, rel_mag(1)), c(0.1352, 0.2783))
+  near(att(f0, mtr_nd_ps()), c(0, 0.4825))
+  near(att(fP, mtr_nd_ps()), c(0, 0.3114))
+  # the within-precinct comparison, descriptive: D_W (Prop. E29)
+  a <- eiATT(f0, treated = "vet", comparison = "oth", population = "fixed", trend = within_pt(), spillover = 0, no_anticipation = TRUE)
+  near(a$results[[1]]$dw$LU, c(-0.9387, 1.4472))
 })
 
 test_that("review issue 12: RM with CR on the pre-war change only vs on both changes", {
   fQ <- w_fit(list(cr_change = crw("early", "base")))
   fB <- w_fit(list(cr_change = list(crw("base", "post"), crw("early", "base"))))
-  near(att(fQ, rel_mag(1)), c(-0.416, 0.732))
-  near(att(fB, rel_mag(1)), c(0.135, 0.278))
-  near(c(fQ$table$lower[1], fQ$table$upper[1]), -c(0.008, 0.004))       # pre DiD pinned to [0.004, 0.008]
+  near(att(fQ, rel_mag(1)), c(-0.4155, 0.7325))
+  near(att(fB, rel_mag(1)), c(0.1352, 0.2783))
+  near(c(fQ$table$lower[1], fQ$table$upper[1]), -c(0.0080, 0.0043))     # pre DiD pinned to [0.0043, 0.0080]
 })
 
 n21 <- function(rows = NULL) {
@@ -83,10 +86,11 @@ test_that("N21 narrow variant: pre-period totals pinned to +/-2 around the Dunca
     list(row = "v", col = "yes", election = c("m1", "b")[t], lower = ctr - 2, upper = ctr + 2, units = c("A", "B"))
   })
   f <- n21(list(total = pins))
-  expect_equal(round(c(f$table$lower[1], f$table$upper[1]), 2), -c(0.10, -0.06))
+  expect_equal(c(f$table$lower[1], f$table$upper[1]), c(-5 / 48, 1 / 16), tolerance = 1e-9)   # pre DiD in [-1/16, 5/48]
   a <- att21(f, rate_limits = FALSE); a2 <- att21(f)
-  expect_equal(round(c(a$results[[1]]$lower, a$results[[1]]$upper), 2), c(-0.60, 0.90))
-  expect_equal(round(c(a2$results[[1]]$lower, a2$results[[1]]$upper), 3), c(-0.604, 0.896))
+  # 2e N21: [-29/48, 43/48] both without and with the rate limits (they do not bind here)
+  expect_equal(c(a$results[[1]]$lower, a$results[[1]]$upper), c(-29 / 48, 43 / 48), tolerance = 1e-9)
+  expect_equal(c(a2$results[[1]]$lower, a2$results[[1]]$upper), c(-29 / 48, 43 / 48), tolerance = 1e-9)
 })
 
 test_that("review issue 1: E17(b) exact criterion with a coupling row", {

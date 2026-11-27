@@ -267,7 +267,7 @@ cat("eiJoint vs interval criterion of E3(c): failures", badj, "of", nj, "\n")
 
 section("probe9")
 local({
-set.seed(8); mis <- 0; n <- 0
+set.seed(8); mis <- 0; n <- 0; nna <- 0
 for (k in 1:40) {
   p <- 3; N <- sample(30:60, p, TRUE); a1 <- round(N * runif(p, .2, .8))
   mk <- function(y) data.frame(u = paste0("U", 1:p), v = a1, o = N - a1, yes = y, no = N - y)
@@ -280,9 +280,10 @@ for (k in 1:40) {
   if (is.na(e$lower)) next
   n <- n + 1
   vu <- abs(e$upper - e$none$upper) < 1e-7; vl <- abs(e$lower - e$none$lower) < 1e-7
+  if (is.na(e$rm$vacuous_upper)) { nna <- nna + 1; next }   # round 2: not computed with several posts (issue 4 fix)
   if (vu != e$rm$vacuous_upper || vl != e$rm$vacuous_lower) { mis <- mis + 1; if (mis <= 3) cat("k", k, "set", e$lower, e$upper, "none", e$none$lower, e$none$upper, "criterion", e$rm$vacuous_lower, e$rm$vacuous_upper, "\n") }
 }
-cat("E19(b) criterion with two post-periods: mismatches", mis, "of", n, "\n")
+cat("E19(b) criterion with two post-periods: mismatches", mis, "of", n, "; not computed (NA):", nna, "\n")
 })
 
 section("probe10")

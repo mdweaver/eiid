@@ -339,3 +339,69 @@ python3.12 -I phase2e_code_review_oracle.py check /tmp/inst.json /tmp/res.json
 Rscript phase2e_code_review_probes.R LIB                                    # SKIP_PERF=1 to skip the 500-unit run
 Rscript phase2e_code_review_oldnew.R LIB_0.4.0 old.rds; Rscript phase2e_code_review_oldnew.R LIB new.rds   # then identical() per printout
 ```
+
+## Round 2 confirmation (claude/did-code @ a61687e)
+
+Scope: the fixes for issues 1–13 and 15 and for Def. 5.1 item 3; the theory changes from the independent review (rounds 2–4); and the new code in `R/att_wpt.R`. The round-1 oracle and probes were reused. Two schema edits mark where behaviour is now intentionally different: the E19(a) dial set and the E19(b) flag are NA when there are several post-periods (the issue 4 fix). New scripts: `phase2e_code_review_round2.{py,R}`. The `.py` script contains independent scipy LPs for E28(c), E30(c) and E35, written from the theory text only. Outputs are in `*_round2*.txt`.
+
+**Verdict: ready for release once R2-1 is fixed. R2-1 is a one-line change to a non-default path. Nothing else blocks.**
+
+### Reruns
+* **R CMD check:** 1 WARNING (this container's missing en_US locale, as in round 1) and 1 NOTE (eco, eiPack, ei.Datasets). Tests: 2,503 pass, 0 fail, 4 skip.
+* **Oracle:** 1,822 pass, 0 fail across all descriptive rungs and the causal sets. That includes RM with joint posts on increments, SD, the dial and MTR/ND/PS, plus §9.2, N21 and its narrow variant. The E19(a) dial-set check now covers only one-post designs (17 cases).
+* **Existing outputs are unchanged.** `eiBounds` (CLR and conservative), `eiCounts` and the cross-layer block print byte-identically to 0.4.0. The 0.4.0 test files are untouched.
+
+### Round-1 issues
+| # | Status | Evidence |
+|---|---|---|
+| 1 | **fixed** | `no_trend()`, `rate_limits = FALSE` gives (−∞, ∞); MTR only gives [0, ∞), labelled OUTER. It is never EMPTY. |
+| 2 | **fixed** | Infeasible rows with the dial or RM give NA/EMPTY. No crash. |
+| 3 | **fixed** | `post =` no longer changes ATT_p1 (0 of 60 designs; round 1: 31 of 60). |
+| 4 | **fixed** | E19(a)–(b) are computed only with one post-period (40 of 40 two-post designs give NA). The one-post flag agrees with the oracle (12 of 12). |
+| 5 | **fixed** | Allowance, `.ed_gapW` and E25 all use representation 1 (S_φ 0.1187). This is valid by Lemma E12. It can be slightly wider than the minimum over representations. |
+| 6 | **fixed** | Numeric unit selections refer to data rows (P1, not P2). |
+| 7 | **fixed** | A character election variable without `elections` is refused, with the reason. |
+| 8 | **fixed** | SD with T = 2 imposes nothing and gives the no-assumption set. |
+| 9 | **fixed** | `s[["sign"]]`: a sign row without `sign` defaults to ≥ 0. |
+| 10 | **fixed** | `bin_did` note now says that no model-implied binned DiD is implemented (E10 remark). |
+| 11 | **fixed** | The LP cross-check runs on the E26 path (test `issues 10, 11, 13`). |
+| 12 | **fixed** (nit) | Vignette: "a trend dial whose M is at least Mbar · half the DD width, and usually no information". "Reduce to" is still slightly strong, since E19(a) is an inclusion. |
+| 13 | **fixed** | E25: an interval wholly outside [−1, 1] is EMPTY. Grouped rungs get the "R16 open" status. |
+| 15 | **fixed** | `test-change-review-fixes.R` covers each item, plus E16(b) and the R = 3 brute force. |
+| Def. 5.1 item 3 | **fixed** | MTR+ND with no comparison group and no spillover is accepted. A comparison-based trend still requires spillover. |
+
+### Theory changes in code
+* **RM on increments with joint posts; E18(b) horizon.** The oracle's joint RM matches. Horizon example: the package gives ATT₂ ∈ [−.30, .30] and an endpoint-wise D₂ ± 2A = [−.30, .30], which contains the true −.30. ATT₁ is [−.15, .15]. Hand calculation agrees.
+* **Branch pieces never enveloped.** Finding 12 checked by hand: x ∈ [.1, .2] gives [2x − .5, 3x − .6] and x ∈ [−.2, −.1] gives [2x − .5, x − .6], so the set is [−.90, −.70] ∪ [−.30, 0]. The package prints exactly this, with "holes are part of the answer". `$lower`/`$upper` remain the envelope ends and `$pieces` holds the set (nit N4).
+* **One shared table across posts.** `.att_system` has one n and per-post (θ, S, b). The oracle's joint LP agrees.
+* **E17(c) sharp breakdown LP.** On the CR example the sharp value is 0.143250. The lower end is 1.4e−4 at 0.999 × M* and 0 at M*, so the value is minimal.
+* **E16(b) integer-witness flag.** On finding 5 (m = 3) the continuous set is [−1, 1] and the integer set is {0}. Both ends print "not verified (integer end open, Remark 7.1)", which is correct.
+
+### New code (`R/att_wpt.R`)
+Independent LPs (`round2.py`) agree with the package to 6 decimals:
+
+| Check | Theory | Independent LP | Package |
+|---|---|---|---|
+| E28 rare, WPT / PPT (points) | [10.39, 12.25] / [−3.96, −2.22] | [10.3879, 12.2545] / [−3.9636, −2.2182] | same |
+| E28 ordinary, WPT / PPT | [−67.33, 43.78] / [−80.56, 52.13] | [−67.3333, 43.7778] / [−80.5600, 52.1333] | same |
+| E30 no LCE / change / any two | [−29/50, 41/150] / [−37/75, 11/150] / [2/75, 11/150] | exact (all four "any two" variants) | exact |
+| E30 ε*; ε = ½ | 1/600; change-only set | 0.00166667; change-only set | 0.00166667; same |
+| E35 margins only, M = 0 | [−0.5675, 0.7322] | [−0.567500, 0.732237] | same |
+| E35 audited, M = 0 / 0.1 | [0.0525, 0.3522] / [0.0310, 0.3740] | [0.052500, 0.352237] / [0.030965, 0.374035] | same |
+| E35 M*; D_W count set | 0.2438; [−0.0087, 0.3772] | 0.243792; [−0.008728, 0.377237] | same |
+
+* **E29.** r_α, the persons variant Σ4w²(1/a_V + 1/a_N), and [L − π_U − r, U + r] clipped to [−1, 1] match (b)–(c). n_eff, π_U, the a_iN and the independence unit are printed. With a_min = 20, P4 is marked unsupported and π_U = .475.
+* **E35.** τ_i = M√(1/a_iV + 1/a_iN). A user-supplied τ equal to 0.1·c reproduces M = 0.1. M* comes from one LP, S_i is joint per precinct, the R4-1 note is printed, and the integer check is stated as not applied.
+* **LCE route.** `lce = TRUE` adds the row D_W^S(n) ∈ CI, with ρ_i = 4w_Vi (the Popoviciu allowance 3.472 = z·√(Σρ²/4) checks).
+* **Labels.** A scan of every printed interval over 12 configurations found none without an IDENTIFICATION, DESCRIPTIVE or CONFIDENCE tag. The E29 line says "it does not make the identification bound above a confidence interval". E35 + LCE prints "[CONFIDENCE SET, realised ATT (E35 + E13)]" with the coverage line.
+
+### New issues
+* **R2-1 (blocking; must fix).** The E29 confidence interval ignores the local dial and spillover. `.wpt_dw` computes [L − π_U − r, U + r] whatever `within_pt(target = "expected", M)` and `spillover` are. In the probe (D_W pinned by known cells) the printed CONFIDENCE INTERVAL is [0.0642, 0.1112] with "coverage ≥ 1 − 0.05" at M = 0, at M = 0.2 and at Λ = 0.1 alike. E29 is stated for exact WPT with Λ = 0. Under E33(a) the supported part moves by up to π_S·hM, by the triangle inequality as in E33(a)'s aggregated bound and E29(d)'s widening. Under E28(f) it moves by up to π_S·Λ. Fix: widen both ends by π_S(hM + Λ) and say so, or suppress the line when M > 0 or Λ > 0. The default E35 path is not affected.
+* **N1 (nit).** E35 + LCE with an empty LCE interval prints "refutes (FP) + NA + count rows + RWPT-tau + the spillover limit". The LCE row should be named too.
+* **N2 (nit).** The trend line prints "tau_i = 0 sqrt(…)" at M = 0.
+* **N3 (wording).** Under the known-law reading with noisy returns, the expected-WPT bound is often EMPTY, printed "refutes the mean model". Suggest adding "at the observed returns taken as the law" there.
+* **N4 (doc).** `?eiATT` should say that `$lower`/`$upper` are the envelope ends and that `$pieces` is the set.
+
+```
+Rscript phase2e_code_review_round2.R LIB ; python3.12 -I phase2e_code_review_round2.py
+```

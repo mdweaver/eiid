@@ -1,0 +1,147 @@
+
+===== probe1 =====
+P1 no_trend, rate_limits=FALSE: -Inf Inf 
+P1b MTR only, rate_limits=FALSE: 9.020562e-17 Inf 
+CAUSAL (2e Def. 5.1): ATT_t = B_{r*,t} - B^(0)_{r*,t}, the effect on the treated group's realised rate
+  labels: IDENTIFICATION SET/BOUND (no sampling statement), DESCRIPTIVE (realised counts), CONFIDENCE INTERVAL/SET (sampling)
+  population: fixed population (2e (FP))
+  treated: vet; comparison: none (not used by this trend assumption); outcome: yes; base election: base
+  trend assumption: MTR (Prop. E21)
+  spillover onto the comparison group: |S_t| <= 0 (no spillover, stated explicitly)
+  no anticipation: assumed
+  descriptive basis: count layer, margins only (Delta-0)
+  OUTER: the rate limits theta_t in [0,1], B_s,t - S_t in [0,1] are dropped (the sharp set imposes them; Thm E16)
+  inference: count layer, exact given the margins, rows and assumptions (no sampling inference);
+  continuous tables (integer causal ends open, Remark 7.1)
+
+Post-election post
+  [IDENTIFICATION SET, realised ATT, count layer (Thm E16), OUTER] ATT: [0.000, Inf]
+  [IDENTIFICATION SET, realised ATT, no trend assumption (Prop. E15)] ATT: [-0.568, 0.733]
+  [DESCRIPTIVE, realised counts] B_r* at post: [0.432, 0.733]
+  E16(b) whole-person witness at the LP ends: lower yes; upper not verified (integer end open, Remark 7.1)
+
+  Prop. E22: pre-periods carry no information on spillover onto the comparison group; Lambda is its own dial.
+P2 SD with T=2: -0.5675 0.7325 
+P2b RM with T=2: ERROR: rel_mag() needs at least one pre-period before the base election (2e Sec. 1.1: L >= 1) 
+P3 rate of P1 via row number with an N=0 unit first: rate vet -> yes at post [P1] 0 1  vs direct: rate vet -> yes at post [P1] 0 1 
+P3 by label: 0 1 
+P3c where-expression with N=0 unit: 0.5088235 0.6852941 
+P3d known with unit = 2 (data row 2 = P1): known cell vet -> yes in units {P1} = 10 at post 
+P4 shuffled order equal: TRUE 
+P4b long format equal: TRUE 
+P4c long format without 'elections' (character election variable): the election variable 'el' is character: give the time order in 'elections' (or use a factor or a numeric variable). The order of first appearance is not used: time order matters for every pre-period quantity (code review issue 7) 
+P5 N=0 dropped equal: TRUE 
+P6 status: infeasible: the rows contradict the margins (continuous tables) infeasible: the rows contradict the margins (continuous tables) 
+P6 dial NA 
+P6 rm NA 
+P6 none NA 
+P6 mtr NA 
+P7 corner targets: DiD vet vs oth on yes, base -> early DiD vet vs oth on yes, base -> post attainable: FALSE 
+P8 sd ATT_post with all posts: -0.5675 0.7325  with post = 'post': -0.5675 0.7325 
+P8 rm ATT_post with all posts: -0.528 0.7325  with post = 'post': -0.528 0.7325 
+P9 exact: integer-exact (MILP) integer-exact (E26 lattice) 
+P10 bin_did under FD: no model-implied version of a binned DiD is implemented: bin aggregates are evaluated at row-specific weighted compositions, which E10's remark excludes 
+
+===== probe2 =====
+designs where restricting post changes ATT_p1: 0 
+
+===== probe3 =====
+Q1 representations S_phi: 0.1187039 0.09755486  used S_phi: 0.1187039 
+Q1 model target form constant (rep 1 has 0): 0   rep-2 constant (outcome-based): -0.0801099 
+Q1 phi~(rep 1) = 0.13997, phi~(rep 2) = 0.14151, difference 0.00154; allowance used 0.33321
+Q1 MC coverage of the actual DiD by the actual-target interval (FD, R=3 rest): 1 
+
+===== probe4 =====
+H1 block 1 joint V block == own V: TRUE  beta: TRUE 
+H1 block 2 joint V block == own V: TRUE  beta: TRUE 
+H1 stacked V positive definite: min eigen 6.980232e-06 
+H1 overlapping pairs: fd(pairs): use consecutive elections. Overlapping or non-consecutive pairs make the stacke 
+H2/H3 FD dial : outer TRUE  nq 1  alpha_proj 0.045  alpha_q 0.005  sum 0.05  radii D1  set -0.3256  0.6201 
+H2/H3 FD rm : outer TRUE  nq 2  alpha_proj 0.045  alpha_q 0.0025  sum 0.05  radii D1,pre1  set -0.8793  1.0000 
+H2/H3 FD sd : outer TRUE  nq 2  alpha_proj 0.045  alpha_q 0.0025  sum 0.05  radii D1,sdpre1  set -0.8993  1.0000 
+H2/H3 LCE dial : outer FALSE  radii D1,thPT1,Bs1  set -1  1 
+H2/H3 LCE rm : outer FALSE  radii D1,pre1,thPT1,Bs1  set -1  1 
+MTR model: pretrends = "model" is for the trend dial, relative magnitudes and smoothness (P 
+none model: pretrends = "model" is for the trend dial, relative magnitudes and smoothness (P 
+grouped status: no coverage theorem for model rows on changes under grouped rungs (R16 open) 
+FD + sign + delta status: asymptotic guarantee (P3.5(b2)(ii) for the model DiD, Prop. E23(a)-(b); Lemma E12 allowance), pooled FD 
+                      target plugin_lower plugin_upper model_lower model_upper
+1 DiD v vs o on yes, b -> m1   -0.1004506  -0.05259401  -0.5240603   0.3916113
+2  DiD v vs o on yes, b -> p    0.1097451   0.14585379  -0.3331023   0.5680274
+       lower     upper
+1 -0.5240603 0.3916113
+2 -0.3331023 0.5680274
+$sharp
+[1] -0.4423286  0.7484293
+
+$outer
+[1] -0.4423286  0.7484293
+
+$n_support
+[1] 198
+
+$sharp
+[1] -0.9173455  0.8893296
+
+$outer
+[1] -0.9380458  0.9540986
+
+$n_support
+[1] 4
+
+
+===== probe7 =====
+FD sign row without 'sign': ok 
+LCE sign row without 'sign': ok 
+LCE sign row without sign_type and sign: ok 
+MTR+ND, no comparison, no spillover stated: accepted 
+trend = 'none' string: accepted 
+comparison = treated: 'versus' must be one other group, or "rest" 
+negative spillover: spillover must be one nonnegative number 
+  population: stayers with fixed group membership (G1-G4: the trend assumption is stated for the stayers)
+
+===== probe8 =====
+non-integer margins (x0.37) vs integer, LP sets equal: failures 0 of 15
+eiJoint vs interval criterion of E3(c): failures 0 of 300 
+
+===== probe9 =====
+E19(b) criterion with two post-periods: mismatches 0 of 40 ; not computed (NA): 40 
+
+===== probe10 =====
+DESCRIPTIVE: changes and DiD on the realised tables (2e Secs 2-4; count layer, exact given the margins and rows)
+Elections: a, b (base a); units: 150; population: fixed (2e (FP)); margins: integer counts; integer mode: lp
+
+[DESCRIPTIVE, realised counts] Target  |  margins only (Delta-0, Prop. E3; exact LP)  |  with the count rows
+ target                    margins_only    with_rows       integer_status 
+ DiD v vs o on yes, a -> b [-1.052, 1.138] [-0.476, 0.635] continuous only
+
+Count rows (object = "actual": beliefs or facts about the realised tables):
+  total[1]           total v -> yes over all units in [9104, 9104] at a [identity row]
+
+  No sampling inference: count-layer sets are exact given the margins and rows (2e Sec. 6).
+
+Model layer (first-difference LCE, 2e Sec. 3; DESCRIPTIVE about model-implied and, through the allowance, actual DiDs): level 95%
+  model rows (object = "model"): DiD-S (ordering of changes and composition-weighted spillover sign) v vs o at 2 compositions on yes, a -> b (Prop. E9) 
+  validity rows: |Delta m(x)| <= 1 at the hull vertices (FD) or rates in [0, 1] (LCE)
+  labels: plugin = the model set at the estimate (an estimate, not an interval); actual_target_interval = CONFIDENCE INTERVAL
+  for the actual DiD (model interval + allowance); count_set = DESCRIPTIVE, realised counts; intersection = both combined (Thm E13)
+ target                    plugin         actual_target_interval
+ DiD v vs o on yes, a -> b [0.025, 0.095] [-0.477, 0.600]       
+ count_set       intersection   
+ [-0.476, 0.635] [-0.476, 0.600]
+  DiD v vs o on yes, a -> b: projection interval + popoviciu allowance 0.4673 (Lemma E12; S = 0.1665); asymptotic guarantee (P3.5(b2)(ii) for the model DiD, Prop. E23(a)-(b); Lemma E12 allowance), pooled FD
+  E9(a) closed form (plug-in): q_min = 0.04668, model DiD in [0.025, 0.095]
+  plug-in: the model set at the estimate (not an interval). Cross-layer rule (Thm E13, 6a R27): count rows and model rows never share an LP.
+  the intersection covers the actual value at the model interval's level (identity rows only)
+  Causal statements: eiATT(fit, ...) with a stated population, comparison group, trend assumption,
+  spillover allowance and no anticipation (2e Def. 5.1).
+ intersection  
+ [0.024, 0.096]
+  DiD v vs o on yes, a -> b: projection interval + popoviciu allowance 0.4673 (Lemma E12; S = 0.1665); asymptotic guarantee (P3.5(b2)(ii) for the model DiD, Prop. E23(a)-(b); Lemma E12 allowance), pooled FD
+  E9(a) closed form (plug-in): q_min = 0.04668, model DiD in [0.025, 0.095]
+  plug-in: the model set at the estimate (not an interval). Cross-layer rule (Thm E13, 6a R27): count rows and model rows never share an LP.
+  coverage at least 1 - alpha - P(belief rows false), which is unknown; level 1 - alpha only if the belief rows are taken as certain
+  Causal statements: eiATT(fit, ...) with a stated population, comparison group, trend assumption,
+  spillover allowance and no anticipation (2e Def. 5.1).
+
+===== probe5: performance, 500 units x 3 elections =====

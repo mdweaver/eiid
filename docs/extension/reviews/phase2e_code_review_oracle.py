@@ -705,7 +705,8 @@ def check(inst, res):
                 tally("E17(a) outer", oc[0] >= o["D"][0] - ML - 1e-7 and oc[1] <= o["D"][1] + ML + 1e-7, "id %d E17(a)" % d["id"])
             if tr["kind"] == "rm" and "rm" in r and oc is not None:
                 tally("E19 supA", abs(o["supA"] - r["rm"]["supA"]) < 1e-7, "id %d supA %s %s" % (d["id"], o["supA"], r["rm"]["supA"]))
-                tally("E19(a) dial set", close(o["dial_implied"], r["rm"]["dial_set"], 1e-6), "id %d dial set %s %s" % (d["id"], o["dial_implied"], r["rm"]["dial_set"]))
+                if all(isinstance(v, (int, float)) for v in r["rm"]["dial_set"]):   # round 2: NA when K > 1 (issue 4 fix)
+                  tally("E19(a) dial set", close(o["dial_implied"], r["rm"]["dial_set"], 1e-6), "id %d dial set %s %s" % (d["id"], o["dial_implied"], r["rm"]["dial_set"]))
                 tally("E19(a) inclusion", oc[0] >= o["dial_implied"][0] - 1e-7 and oc[1] <= o["dial_implied"][1] + 1e-7, "id %d E19(a)" % d["id"])
                 if r["rm"].get("vac_upper") is not None and d["causal"].get("rate_limits", True):
                     vu = abs(oc[1] - o["none"][1]) < 1e-7; vl = abs(oc[0] - o["none"][0]) < 1e-7

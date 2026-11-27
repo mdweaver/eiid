@@ -384,7 +384,8 @@ mtr_nd_ps <- function(mtr = TRUE, nd = TRUE, ps = TRUE) {
 #'   printed as such (used to reproduce NS N21's numbers; 2e N21 correction).
 #' @param lce for \code{within_pt(target = "expected")}/\code{pooled_pt()}: LCE rows on expected rates
 #'   (\code{lce_mean()}); for the realised \code{within_pt()} (E35): \code{TRUE} adds the fit's model
-#'   layer through E13 (a row \eqn{D_W^S(n) \in CI}), giving a confidence set
+#'   layer through E13 (a row \eqn{D_W^S(n) \in CI}), giving a confidence set (with \code{\link{lce_levels_change}()}
+#'   the baseline-curvature allowance of Prop. E36 and its breakdown value \eqn{\epsilon^*})
 #'   (default none).
 #' @param law optional known aggregate law for the mean model: a list named by election, each a matrix
 #'   with one row per unit of equally likely outcome counts (E28(c)); default: the observed returns.

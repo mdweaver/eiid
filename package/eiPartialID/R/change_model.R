@@ -422,7 +422,8 @@ lce_periods <- function(rows = list(), model = c("M0", "M2", "M1"), group = NULL
 }
 
 .ed_model_block <- function(fit, spec, alpha) {
-  if (!inherits(spec, "edModel")) stop("'model' must be fd() or lce_periods()")
+  if (!inherits(spec, "edModel")) stop("'model' must be fd(), lce_periods() or lce_levels_change()")
+  if (identical(spec$rung, "LCEeps")) return(.lce_eps_block(fit, spec, alpha))
   if (!is.null(fit$P$margins) && fit$P$margins == "estimated")
     warning("model layer with margins stated as estimated (G7): R26 on changes is deferred; compositions are taken as exact", call. = FALSE)
   P <- fit$P; mb <- .ed_mb(P, spec)
@@ -479,7 +480,11 @@ lce_periods <- function(rows = list(), model = c("M0", "M2", "M1"), group = NULL
 .ed_print_model <- function(m, digits = 3) {
   tb <- m$table
   cat(sprintf("\nModel layer (%s; DESCRIPTIVE about model-implied and, through the allowance, actual DiDs): level %g%%\n",
-              if (m$rung == "FD") "first-difference LCE, 2e Sec. 3" else sprintf("per-period LCE (%s), Prop. E11", m$spec$model), 100 * (1 - m$alpha)))
+              if (m$rung == "FD") "first-difference LCE, 2e Sec. 3" else if (m$rung == "LCEeps")
+                sprintf("two-election LCE, change exact, base level within epsilon = %g of affine, Prop. E36", m$epsilon) else
+                sprintf("per-period LCE (%s), Prop. E11", m$spec$model), 100 * (1 - m$alpha)))
+  if (identical(m$rung, "LCEeps") && m$epsilon >= 0.5)
+    cat("  epsilon >= 1/2: the curvature rows are slack; this is change LCE plus the base-level link (inside fd(), Prop. E36(c))\n")
   if (length(m$row_labels)) cat("  model rows (object = \"model\"):", paste(m$row_labels, collapse = "; "), "\n")
   cat("  validity rows: |Delta m(x)| <= 1 at the hull vertices (FD) or rates in [0, 1] (LCE)\n")
   cat("  labels: plugin = the model set at the estimate (an estimate, not an interval); actual_target_interval = CONFIDENCE INTERVAL\n",
@@ -511,6 +516,7 @@ lce_periods <- function(rows = list(), model = c("M0", "M2", "M1"), group = NULL
 # ---------------------------------------------------------------------------
 .att_model <- function(fit, cs, trend, Lambda, alpha, tgt) {
   m <- fit$model
+  if (identical(m$rung, "LCEeps")) stop("lce_levels_change() is for eiATT(trend = within_pt(), lce = TRUE) (Props. E35-E36); pretrends = \"model\" uses fd() or lce_periods()")
   if (is.null(m)) stop("pretrends = \"model\" needs an eiChange fit with a model layer (model = fd() or lce_periods())")
   if (!trend$kind %in% c("dial", "rm", "sd"))
     stop("pretrends = \"model\" is for the trend dial, relative magnitudes and smoothness (Prop. E25)")

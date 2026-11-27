@@ -12,6 +12,13 @@ units. Theory: `docs/extension/PHASE2e_did_general.md` (2e; proof reviewed).
   interval, E12 allowance `rho_i = 4 w_Vi`) and the result is labelled a CONFIDENCE SET with its
   coverage assumptions. The printout notes that `M` is a tolerance holding in every precinct at
   once, not a confidence level. The expected-rate version is `within_pt(target = "expected")`.
+* New model layer `lce_levels_change(epsilon)` for `eiChange()` (Prop. E36): two groups and two
+  elections, change LCE exact and each group's base-level mean within `epsilon` of an affine
+  function, with the base-level regression entering through its defining identity. `epsilon = 0`
+  reproduces `lce_periods()`; `epsilon >= 1/2` is change LCE plus the link (inside `fd()`). With
+  `eiATT(trend = within_pt(), lce = TRUE)` its interval enters E35 by E13, and the printout adds
+  the breakdown value `epsilon*` of the sign at fixed `M` and `Lambda` (bisection on epsilon,
+  valid by E36(c)), labelled a sensitivity summary, not a test.
 * The E29 confidence interval of `within_pt(target = "expected")` is widened by
   `pi_S (h M + Lambda)` when the local dial `M` or the spillover limit is positive (E29(d)), and
   the printout states the widening. `eiATT()` documents that `$pieces` is the set and

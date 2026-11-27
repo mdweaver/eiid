@@ -392,7 +392,7 @@ lce_mean <- function(base = FALSE, post = FALSE, change = TRUE, epsilon = 0) {
 }
 
 # FD-LCE interval for the realised supported target D_W^S (E13 with E12's allowance, rho_i = 4 w_Vi)
-.rwpt_lce_ci <- function(fit, P, cs, des, k, alpha) {
+.rwpt_lce_ci <- function(fit, P, cs, des, k, alpha, eps = NULL) {
   m <- fit$model
   if (is.null(m)) stop("within_pt(): lce = TRUE needs an eiChange fit with a model layer (model = fd() or lce_periods()); LCE enters only by E13")
   t <- cs$posts[k]; b0 <- cs$base; r <- cs$r; cc <- cs$cc
@@ -404,6 +404,15 @@ lce_mean <- function(base = FALSE, post = FALSE, change = TRUE, epsilon = 0) {
     for (q in nrows) W[i, q] <- -w * as.double(P$A0[i, q]) / des$aN[i]
     terms <- c(terms, list(.ed_term(P, t, i, r, cc, w / des$aV[i]), .ed_term(P, b0, i, r, cc, -w / des$aV[i]),
                            .ed_term(P, t, i, nrows, cc, -w / des$aN[i]), .ed_term(P, b0, i, nrows, cc, w / des$aN[i])))
+  }
+  if (identical(m$rung, "LCEeps")) {                     # Prop. E36: CI_LCE(epsilon)
+    if (t != m$post) stop("lce_levels_change() models ", P$elections[b0], " -> ", P$elections[m$post], "; post-period ", P$elections[t], " has no model interval")
+    bd <- .lce_eps_build(P, m$spec, r, cc, b0, t)
+    f <- bd$change_form(W[, r], W[, setdiff(1:2, r)])
+    one <- function(e) { iv <- .lce_eps_interval(bd, e, f, alpha, terms, P); if (is.null(iv$model)) NULL else iv$model }
+    iv <- .lce_eps_interval(bd, if (is.null(eps)) m$epsilon else eps, f, alpha, terms, P)
+    return(list(pieces = iv$model, allowance = iv$allowance, rho = iv$rho, obj = .ec_obj(P, terms), rung = "E36 LCE",
+                epsilon = if (is.null(eps)) m$epsilon else eps, at_eps = one))
   }
   mb <- m$mb; spec <- m$spec
   f <- .ed_model_change(mb, b0, t, cc, W)
@@ -460,6 +469,28 @@ lce_mean <- function(base = FALSE, post = FALSE, change = TRUE, epsilon = 0) {
       v <- solve_all(0, Inf, list(side), numeric(P$nv), ox, -1)
       e$breakdown_M <- if (is.null(v)) Inf else v
     }
+    # E36(d): breakdown eps* of the sign at fixed M and Lambda, by bisection on epsilon (valid by E36(c)'s
+    # monotonicity of the projection interval); each step is CI_LCE(eps) and one E35 LP
+    e$breakdown_eps <- NA_real_
+    if (!is.null(lc$at_eps) && !e$empty && (e$lower > 0 || e$upper < 0)) {
+      pos <- e$lower > 0
+      holds <- function(ep) {
+        pc <- lc$at_eps(ep); if (is.null(pc)) return(TRUE)
+        best <- NULL
+        for (b in fb) {
+          lo <- lp$lower; hi <- lp$upper; lo[lp$iM] <- Mfix; hi[lp$iM] <- Mfix
+          s <- .att_lp(P, b$rows, c(lp$rows, list(list(n = lc$obj, x = numeric(lp$nx), lo = pc[1], hi = pc[2]))), lp$nx,
+                       list(lower = lo, upper = hi), a$n, a$x, if (pos) -1 else 1)
+          if (!is.null(s)) best <- if (is.null(best)) s$value else if (pos) min(best, s$value) else max(best, s$value)
+        }
+        is.null(best) || (if (pos) best > 1e-12 else best < -1e-12)
+      }
+      if (holds(0.5)) e$breakdown_eps <- Inf else {
+        lo_e <- lc$epsilon; hi_e <- 0.5
+        for (it in 1:40) { mid <- (lo_e + hi_e) / 2; if (holds(mid)) lo_e <- mid else hi_e <- mid; if (hi_e - lo_e < 1e-9) break }
+        e$breakdown_eps <- hi_e
+      }
+    }
     e$dw <- .wpt_dw(P, fb, cs, des, k, alpha, "precincts", roles)$LU
     res[[length(res) + 1]] <- e
   }
@@ -490,9 +521,14 @@ lce_mean <- function(base = FALSE, post = FALSE, change = TRUE, epsilon = 0) {
     if (!e$empty) cat(sprintf("    breakdown of the sign (one LP, M a variable): %s\n",
       if (is.na(e$breakdown_M)) "none (the set contains 0)" else if (!is.finite(e$breakdown_M)) "infinite (no table puts the ATT on the other side of 0)" else
         sprintf("M* = %.4g", e$breakdown_M)))
+    if (!e$empty && !is.null(e$breakdown_eps) && !is.na(e$breakdown_eps))
+      cat(sprintf("    breakdown of the sign in the baseline curvature (M and Lambda fixed; bisection, Prop. E36(d)): %s; a sensitivity summary, not a test\n",
+                  if (!is.finite(e$breakdown_eps)) "epsilon* > 1/2 (the sign survives change LCE with the link alone)" else sprintf("epsilon* = %.4g", e$breakdown_eps)))
     cat(sprintf("  [DESCRIPTIVE, realised counts] D_W (E29), count layer: %s\n", f(e$dw)))
     if (w$lce) {
       l <- e$lce
+      if (!is.null(l$epsilon)) cat(sprintf("    LCE model: two-election LCE, change exact, base level within epsilon = %g of affine (Prop. E36)%s\n", l$epsilon,
+                                           if (l$epsilon >= 0.5) "; epsilon >= 1/2: change LCE plus the base-level link" else ""))
       cat(sprintf("    E13 row: D_W^S(n) in the %s interval %s at level %g (E12 allowance %.4g, rho_i = 4 w_Vi)\n", l$rung,
                   if (is.null(l$pieces)) "EMPTY" else paste(apply(l$pieces, 1, f), collapse = " U "), 1 - w$alpha, l$allowance))
       cat(sprintf("    coverage >= %s under FP, NA, RWPT-tau, |S_i| <= Lambda%s; the confidence level comes only from the LCE part\n",

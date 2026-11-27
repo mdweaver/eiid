@@ -405,3 +405,6 @@ Independent LPs (`round2.py`) agree with the package to 6 decimals:
 ```
 Rscript phase2e_code_review_round2.R LIB ; python3.12 -I phase2e_code_review_round2.py
 ```
+
+**Final check (3312470..3ac51b7):** R2-1 is fixed (the E29 interval is widened by π_S(hM + Λ)), and so are N1–N4. For E36, the package and an independent LP (`phase2e_code_review_round3_e36.py`) agree: ε = 0 gives [0.0267, 0.0800], ε = ½ gives CI_LCE [−0.4933, 0.6867] and causal [−0.4933, 0.2733], and ε* = 1/600 (bisection 0.00166667). Nesting holds for ε ∈ {0, …, ½}. The ε* line reads "a sensitivity summary, not a test", and ε = 0 matches `lce_periods()` (developer's test, passes).
+R CMD check: 1 WARNING (container locale) and 1 NOTE (Suggests); tests: 2,524 pass, 0 fail, 4 skip. Existing outputs are byte-identical to 0.4.0. **Release-ready: yes; no blockers.**

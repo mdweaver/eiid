@@ -1,0 +1,35 @@
+check                         pass  fail
+A:cont                         249     0
+A:dd                           249     0
+A:int                          249     0
+B:cont                          72     0
+B:dd                            72     0
+B:int                           72     0
+C:cont                          80     0
+C:dd                            80     0
+C:int                           80     0
+D:cont                          84     0
+D:dd                            84     0
+E15                             87     0
+E15 closed form                 81     0
+E17(a) outer                    27     0
+E17(b) criterion                27     0
+E19 supA                        23     0
+E19(a) dial set                 17     0
+E19(a) inclusion                23     0
+E19(b) vacuity                  12     0
+E:causal                        66     0
+F:causal                        12     0
+I1:causal                        1     0
+I1:cont                          1     0
+I1:dd                            1     0
+I2:cont                          1     0
+I2:dd                            1     0
+N21:causal                       4     0
+N21:cont                         6     0
+N21:dd                           6     0
+W:causal                        11     0
+W:cont                          22     0
+W:dd                            22     0
+
+TOTAL: 1822 pass, 0 fail

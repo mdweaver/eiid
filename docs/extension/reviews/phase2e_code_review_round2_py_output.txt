@@ -1,0 +1,19 @@
+E30(c) three-precinct table (expected ATT), theory: no LCE [-29/50, 41/150]; change [-37/75, 11/150]; any two [2/75, 11/150]
+  no LCE       [-0.580000, 0.273333]  target [-0.580000, 0.273333]
+  change only  [-0.493333, 0.073333]  target [-0.493333, 0.073333]
+  base+change  [0.026667, 0.073333]  target [0.026667, 0.073333]
+  base+post    [0.026667, 0.073333]  target [0.026667, 0.073333]
+  post+change  [0.026667, 0.073333]  target [0.026667, 0.073333]
+  all three    [0.026667, 0.073333]  target [0.026667, 0.073333]
+  epsilon* (base+change) 0.00166667   target 1/600 = 0.00166667
+  eps = 1/600 - 1e-6 lower 1.600e-05 ; eps = 1/600 lower 5.551e-17
+  eps = 1/2   [-0.493333, 0.073333]  = change only [-0.493333, 0.073333]
+E35 worked example (realised WPT-tau, Sec. 9.2 data, base -> post)
+  margins only, M=0  [-0.567500, 0.732237]  theory [-0.5675, 0.7322]
+  audited, M=0       [0.052500, 0.352237]  theory [0.0525, 0.3522]
+  audited, M=0.1     [0.030965, 0.374035]  theory [0.0310, 0.3740]
+  audited, M*       0.243792   theory 0.2438
+  audited, D_W count set [-0.008728, 0.377237]  theory [-0.0087, 0.3772]
+E28 five-precinct table (points; theory: rare W [10.39, 12.25] P [-3.96, -2.22]; ordinary W [-67.33, 43.78] P [-80.56, 52.13])
+  rare      WPT [10.3879, 12.2545]  PPT [-3.9636, -2.2182]
+  ordinary  WPT [-67.3333, 43.7778]  PPT [-80.5600, 52.1333]

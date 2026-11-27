@@ -137,4 +137,14 @@ PASS  E35 [V] realised WPT: intervals nested in M; breakdown M* of 'ATT > 0' by 
 PASS  E35 [V] at M = 0 (exact realised WPT, no spillover, all precincts supported) the causal set lies in the count set of D_W; equal when the rate limits are slack  [ATT [0.0525,0.3522], D_W [-0.0087,0.3772]]
 PASS  E35 [I] margins only, realised WPT does not sign the effect even at M = 0 (each precinct's non-veteran change is free): close to the no-assumption set [-0.5675, 0.7325]  [[-0.5675,0.7322]]
 
-105/105 PASS
+[E36] baseline-curvature allowance on the realised route (E35 + E13)
+      E36  eps = 0.0: CI_LCE [0.0267, 0.0800];  realised ATT (E35, M = 0) [0.0267, 0.0800]
+      E36  eps = 0.001: CI_LCE [0.0107, 0.0960];  realised ATT (E35, M = 0) [0.0107, 0.0960]
+      E36  eps = 0.01: CI_LCE [-0.1333, 0.2400];  realised ATT (E35, M = 0) [-0.1333, 0.2400]
+      E36  eps = 0.5: CI_LCE [-0.4933, 0.6867];  realised ATT (E35, M = 0) [-0.4933, 0.2733]
+      E36  change-only with base-level link (-0.4933333333333326, 0.6866666666666672);  without link (fd) (-1.8000000000000003, 0.8666666666666667)
+      E36  eps* joint LP 0.001667, bisection 0.001667;  box h = 0.0002: 0.001361, 0.001361
+PASS  E36 [V] nested in eps; eps = 1/2 equals change-only with the base-level link and lies inside fd() without it  [eps=1/2 (-0.49333333333333057, 0.6866666666666672), change-only+link (-0.4933333333333326, 0.6866666666666672), fd (-1.8000000000000003, 0.8666666666666667)]
+PASS  E36 [V] breakdown eps* of 'ATT > 0' on the realised route: one LP (polyhedral projection) equals monotone bisection  [eps* 0.001667 vs 0.001667; h=0.0002: 0.001361 vs 0.001361]
+
+107/107 PASS

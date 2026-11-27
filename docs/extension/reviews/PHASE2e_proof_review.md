@@ -445,3 +445,39 @@ Scope: only the new material on `claude/did-theory-r3` at daecc5c, compared with
 E35(a)–(d), the worked example and the edits in §9.4, §10, PD §8 and §12 O-1 are **accepted**. There are no errors and no gaps, only R4-1 (guidance) and R4-2 (wording).
 
 **E35 may move to "P; proof reviewed": yes.** It does not need to wait for R4-1 or R4-2. The R11b row stays yes.
+
+## 9. Round 5: E36 (baseline-curvature allowance on the realised route)
+
+Scope: only the new material at bf25798, compared with b0e22db. That is Prop. E36, the R11b–c rows in §10 and PD §8, §12 O-2, and checks E36 ×2. `verify_phase2e.py` passes 107/107, with output identical to the committed file. My checks are in `phase2e_review_checks_r5.py` (output `phase2e_review_checks_r5_output.txt`), which pass 4/4. They use their own LP for CI_LCE(ε) and for E35, and find ε* by bisection and by a one-witness LP.
+
+### 9.1 Line-by-line
+
+- **(a) P3 form and validity for each fixed ε.** Correct.
+  - The link γ = P(x∘m_V0 + (1−x)∘m_N0) holds for the OLS target by the accounting identity, since each precinct's base rate has conditional mean x_i m_V0,i + (1−x_i) m_N0,i. It is an identity, not an assumption.
+  - The curvature rows ±(m − a − bx) + ε ≥ 0 have ε in the intercept as a constant. The change rows and the rate rows (including the post mean m + d ∈ [0, 1]) are linear in k with design coefficients.
+  - β has dimension 6 and does not depend on ε. The projection argument of P3.5(b2)(ii) needs only that the true (β, k) is feasible on the event that β lies in the region, whatever the dimension of k. P3.5(a) with per-composition variables is E23(c)'s FD4 case, which was reviewed in round 3.
+  - E12 applies unchanged, because D_W^S is a change target and its conditional mean is the model-implied D̃_W^S under exact change LCE.
+- **(b) The E13 combination.** Correct. It is a row in n alone, and the assumption list matches E35(d) after R4-2.
+- **(c) Endpoints and nesting.** Correct.
+  - At ε = 0 the system is `lce_periods()`.
+  - At ε ≥ 1/2, a_g = 1/2 and b_g = 0 make every curvature row slack, because m ∈ [0, 1]. What remains is change LCE plus the link. That lies inside `fd()`: [−0.4933, 0.6867] against [−1.80, 0.87].
+  - For (b2)(ii) the β region is free of ε, so the sets are nested; I confirmed this on a grid.
+  - For (a) the running union over ε′ ≤ ε contains CI(ε), so it is valid and nested by construction.
+- **(d) Breakdown ε\*.** Correct. The CI condition D_W^S(n) ∈ [D̃^L − t_E, D̃^U + t_E] is linear in all variables and in ε. A polyhedral region gives one LP. The ellipsoid gives one SOCP, and bisection is valid by (c). The two-witness formulation is correct but more than is needed (R5-1).
+- **(e) Joint (M, ε) region.** Correct. Both dials enter linearly, so the region is the projection of a convex set, and it is upward closed. Its lower boundary ε\*(M) is therefore convex and nonincreasing. On the example ε\*(M) falls linearly from 1/600 at M = 0 to 0 at M ≈ 0.17 and stays at 0 (R5.4).
+- **(f) Multiple-testing caveat.** Correct and needed. A data-chosen ε\* is a sensitivity summary, not a level-α test.
+- **Worked example.** Reproduced independently (R5.1, R5.2). The causal set is [0.0267, 0.0800] at ε = 0, [0.0107, 0.0960] at ε = .001 and [−0.1333, 0.2400] at ε = .01. At ε = 1/2 the CI is [−0.4933, 0.6867] and the causal set is [−0.4933, 0.2733]. ε\* = 1/600 by bisection and by LP, and the box h = 0.0002 gives 0.0013615.
+- **§10 and PD §8 R11b–c, §12 O-2.** These are consistent with E36. The "pending" markers are right until this round is merged.
+
+### 9.2 Issues
+
+| # | Severity | Where | Issue and fix |
+|---|---|---|---|
+| R5-1 | simplification (no result changes) | E36(d) | "Joint feasibility needs two model witnesses" is stronger than needed. The model's target set at fixed ε is an interval (a convex region and a linear target). So D ∈ [lo − t_E, hi + t_E] if and only if there is **one** witness (β, k) with \|D_W^S(n) − D̃(β, k)\| ≤ t_E. This halves the model block. R5.3 checks it at t_E = 0.02: the one-witness LP gives the same ε\* (0.0004167) as bisection on CI(ε) widened by t_E. Fix: replace "needs two witnesses" with "one witness suffices, within t_E (two witnesses are also correct)". |
+| R5-2 | wording | E36(e) | ε\*(M) is extended-valued. It is +∞ where no witness exists at any ε (for example, when the counts alone exclude the other sign) and 0 from some M on (here M ≈ 0.17). Say "convex and nonincreasing as an extended-valued function". |
+
+### 9.3 Verdict
+
+E36(a)–(f), the worked example, and the edits in §10, PD §8 and §12 O-2 are **accepted**. There are no errors and no gaps.
+
+**E36 may move to "P; proof reviewed": yes.** It does not need to wait for R5-1 or R5-2. The R11b and R11c rows stay yes.

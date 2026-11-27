@@ -1,0 +1,12 @@
+  eps=0: CI_LCE [0.0267 0.08  ]  causal [0.0267 0.08  ]
+  eps=0.001: CI_LCE [0.0107 0.096 ]  causal [0.0107 0.096 ]
+  eps=0.01: CI_LCE [-0.1333  0.24  ]  causal [-0.1333  0.24  ]
+  eps=0.5: CI_LCE [-0.4933  0.6867]  causal [-0.4933  0.2733]
+PASS R5.1 example reproduced: eps=0 [0.0267,0.0800]; .001 [0.0107,0.0960]; .01 [-0.1333,0.2400]; 1/2 CI [-0.4933,0.6867], causal [-0.4933,0.2733]
+PASS R5.2 eps* = 1/600 by bisection and by a one-witness LP; box h = 0.0002 gives 0.00136 by both  [0.0016667 0.0016667; box 0.0013615 0.0013615]
+PASS R5.3 (R5-1) with t_E = 0.02 a single witness |D_W - D~| <= t_E gives the same eps* as CI widened by t_E (two witnesses redundant)  [0.0004167 vs 0.0004167]
+  eps*(M): [0.001667 0.001423 0.001179 0.000935 0.000692 0.000448 0.000204 0.
+ 0.       0.       0.       0.       0.      ]
+PASS R5.4 eps*(M) nonincreasing and convex on a grid (E36(e))
+
+4/4 PASS
